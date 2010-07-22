@@ -14,9 +14,11 @@ pepper_SOURCES = \
 	utils.h utils.cpp
 
 AM_CXXFLAGS = \
-	-Wall -pipe -ansi
+	-Wall -pipe -ansi \
+	$(LUA_CFLAGS)
 AM_CPPFLAGS = 
-AM_LDFLAGS = 
+AM_LDFLAGS = \
+	$(LUA_LIBS)
 
 
 # Optional features

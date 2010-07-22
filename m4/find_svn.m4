@@ -3,7 +3,6 @@ dnl Search for Subversion libraries
 dnl (roughly based on find_apr.m4)
 dnl
 
-
 AC_DEFUN([FIND_SVN], [
 	svn_found="no"
 	svn_prefix=""
@@ -48,4 +47,3 @@ AC_DEFUN([FIND_SVN], [
 		SVN_PREFIX="$svn_prefix"
 	fi
 ])
-
