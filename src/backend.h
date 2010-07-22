@@ -11,16 +11,26 @@
 #define BACKEND_H_
 
 
+#include <string>
+
 class Options;
+class Revision;
 
 
 class Backend
 {
 	public:
+		virtual ~Backend();
+
 		static Backend *backendFor(const Options &options);
 
+		virtual Revision *revision(const std::string &id) = 0;
+
 	protected:
-		Backend(const std::string &url);
+		Backend(const Options &options);
+
+	protected:
+		const Options &m_opts;
 };
 
 

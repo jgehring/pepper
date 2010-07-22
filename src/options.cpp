@@ -42,12 +42,17 @@ std::string Options::error() const
 
 bool Options::helpRequested() const
 {
-	return !(m_options["help"].empty());
+	return m_options["help"] == "true";
 }
 
 bool Options::versionRequested() const
 {
-	return !(m_options["version"].empty());
+	return m_options["version"] == "true";
+}
+
+bool Options::useCache() const
+{
+	return m_options["cache"] == "true";
 }
 
 std::string Options::repoUrl() const
@@ -69,6 +74,8 @@ void Options::reset()
 	m_valid = true;
 	m_error.clear();
 	m_options.clear();
+
+	putopt("cache", "true");
 }
 
 // The actual parsing
@@ -79,6 +86,8 @@ void Options::parse(const std::vector<std::string> &args)
 			putopt("help", "true");
 		} else if (args[i] == "--version") {
 			putopt("version", "true");
+		} else if (args[i] == "--no-cache") {
+			putopt("cache", "false");
 		} else if (m_options["url"].empty()) {
 			m_options["url"] = args[i];
 		} else {

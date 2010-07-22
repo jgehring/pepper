@@ -34,6 +34,9 @@ class Options
 
 		bool helpRequested() const;
 		bool versionRequested() const;
+
+		bool useCache() const;
+
 		std::string repoUrl() const;
 		AuthData authData() const;
 

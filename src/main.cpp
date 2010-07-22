@@ -11,7 +11,9 @@
 #include <iostream>
 
 #include "main.h"
+
 #include "backend.h"
+#include "cache.h"
 #include "options.h"
 
 
@@ -36,11 +38,12 @@ static void printOption(const std::string &option, const std::string &text)
 // Prints program usage information
 static void printHelp()
 {
-	std::cout << "USAGE: " << PACKAGE_NAME << " [options] <repository>" << std::endl;
-	std::cout << std::endl;
+	std::cout << "USAGE: " << PACKAGE_NAME << " [options] <repository>" << std::endl << std::endl;
+
 	std::cout << "Valid options:" << std::endl;
 	printOption("-h, --help, -?", "Output basic usage information");
 	printOption("--version", "Output version information");
+	printOption("--no-cache", "Disable revision cache usage");
 
 	std::string backends;
 #ifdef USE_GIT
@@ -94,8 +97,9 @@ int main(int argc, char **argv)
 		std::cerr << "Error: No backend found for url: " << opts.repoUrl() << std::endl;
 		return EXIT_FAILURE;
 	}
-
-	// TODO
+	if (opts.useCache()) {
+		backend = new Cache(backend, opts);
+	}
 
 	return EXIT_SUCCESS;
 }
