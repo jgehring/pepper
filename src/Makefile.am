@@ -10,12 +10,15 @@ pepper_SOURCES = \
 	cache.h cache.cpp \
 	main.h main.cpp \
 	options.h options.cpp \
+	repository.h repository.cpp \
 	revision.h revision.cpp \
 	utils.h utils.cpp
 
 AM_CXXFLAGS = \
 	-Wall -pipe -ansi \
 	$(LUA_CFLAGS)
+INCLUDES = \
+	-I@top_srcdir@/src/lunar
 AM_CPPFLAGS = 
 AM_LDFLAGS = \
 	$(LUA_LIBS)

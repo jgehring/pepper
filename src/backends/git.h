@@ -20,6 +20,8 @@ class GitBackend : public Backend
 		GitBackend(const Options &options);
 		~GitBackend();
 
+		std::string name() const { return "git"; }
+
 		Revision *revision(const std::string &id);
 };
 

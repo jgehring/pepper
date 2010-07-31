@@ -23,6 +23,8 @@ class Cache : public Backend
 		Cache(Backend *backend, const Options &options);
 		~Cache();
 
+		std::string name() const { return m_backend->name(); }
+
 		Revision *revision(const std::string &id);
 
 	private:

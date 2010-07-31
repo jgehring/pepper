@@ -20,6 +20,8 @@ class SubversionBackend : public Backend
 		SubversionBackend(const Options &options);
 		~SubversionBackend();
 
+		std::string name() const { return "subversion"; }
+
 		Revision *revision(const std::string &id);
 };
 

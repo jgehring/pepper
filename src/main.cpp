@@ -15,6 +15,7 @@
 #include "backend.h"
 #include "cache.h"
 #include "options.h"
+#include "repository.h"
 
 
 // Utility function for printing a help screen option
@@ -92,6 +93,7 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
+	// Setup backend
 	Backend *backend = Backend::backendFor(opts);
 	if (backend == NULL) {
 		std::cerr << "Error: No backend found for url: " << opts.repoUrl() << std::endl;
@@ -100,6 +102,23 @@ int main(int argc, char **argv)
 	if (opts.useCache()) {
 		backend = new Cache(backend, opts);
 	}
+
+	// Setup lua context
+	lua_State *L = lua_open();
+	luaL_openlibs(L);
+
+	// Register binding classes
+//	Lunar<Report>::Register(L);
+	Lunar<Repository>::Register(L);
+
+	// Push current repository backend to the stack
+	Repository repo(backend);
+	Lunar<Repository>::push(L, &repo);
+	lua_setglobal(L, "repository");
+
+	luaL_dofile(L, "reports/test.lua");
+	lua_gc(L, LUA_GCCOLLECT, 0);  // collected garbage
+	lua_close(L);
 
 	return EXIT_SUCCESS;
 }

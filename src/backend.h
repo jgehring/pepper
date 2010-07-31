@@ -19,10 +19,13 @@ class Revision;
 
 class Backend
 {
+
 	public:
 		virtual ~Backend();
 
 		static Backend *backendFor(const Options &options);
+
+		virtual std::string name() const = 0;
 
 		virtual Revision *revision(const std::string &id) = 0;
 
