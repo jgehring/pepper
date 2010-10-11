@@ -8,6 +8,7 @@
 
 
 #include <sys/stat.h>
+#include <iostream>
 
 #include "options.h"
 
@@ -37,9 +38,32 @@ Backend::~Backend()
 // Allocates a backend for the given options
 Backend *Backend::backendFor(const Options &options)
 {
-	// Try to guess repository type by URL
-	std::string url = options.repoUrl();
+	std::string forced = options.forcedBackend();
+	if (!forced.empty()) {
+		return backendForName(forced, options);
+	}
+	return backendForUrl(options.repoUrl(), options);
+}
 
+// Allocates a backend of a specific repository type
+Backend *Backend::backendForName(const std::string &name, const Options &options)
+{
+#ifdef USE_SUBVERSION
+	if (name == "svn" || name == "subversion") {
+		return new SubversionBackend(options);
+	}
+#endif
+#ifdef USE_GIT
+	if (name == "git") {
+		return new GitBackend(options);
+	}
+#endif
+	return NULL;
+}
+
+// Tries to guess a backend by examining the repository URL
+Backend *Backend::backendForUrl(const std::string &url, const Options &options)
+{
 	// An actual url?
 #ifdef USE_SUBVERSION
 #endif

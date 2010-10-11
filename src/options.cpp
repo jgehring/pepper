@@ -55,6 +55,11 @@ bool Options::useCache() const
 	return m_options["cache"] == "true";
 }
 
+std::string Options::forcedBackend() const
+{
+	return m_options["forced_backend"];
+}
+
 std::string Options::repoUrl() const
 {
 	return m_options["url"];
@@ -88,6 +93,8 @@ void Options::parse(const std::vector<std::string> &args)
 			putopt("version", "true");
 		} else if (args[i] == "--no-cache") {
 			putopt("cache", "false");
+		} else if (!args[i].compare(0, 2, "--") && args[i].length() > 2) {
+			m_options["forced_backend"] = args[i].substr(2);
 		} else if (m_options["url"].empty()) {
 			m_options["url"] = args[i];
 		} else {

@@ -37,6 +37,7 @@ class Options
 
 		bool useCache() const;
 
+		std::string forcedBackend() const;
 		std::string repoUrl() const;
 		AuthData authData() const;
 

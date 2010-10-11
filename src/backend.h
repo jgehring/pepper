@@ -31,6 +31,10 @@ class Backend
 
 	protected:
 		const Options &m_opts;
+
+	private:
+		static Backend *backendForName(const std::string &name, const Options &options);
+		static Backend *backendForUrl(const std::string &url, const Options &options);
 };
 
 
