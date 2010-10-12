@@ -58,6 +58,14 @@ std::string int2str(int i)
 	return out.str();
 }
 
+// Converts an interger to a string
+std::string int2str(long int i)
+{
+	std::stringstream out;
+	out << i;
+	return out.str();
+}
+
 // Removes white-space characters at the beginning and end of a string
 void trim(std::string *str)
 {
