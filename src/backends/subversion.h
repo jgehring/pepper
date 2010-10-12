@@ -13,6 +13,8 @@
 
 #include "backend.h"
 
+class SvnConnection;
+
 
 class SubversionBackend : public Backend
 {
@@ -20,11 +22,16 @@ class SubversionBackend : public Backend
 		SubversionBackend(const Options &options);
 		~SubversionBackend();
 
-		std::string name() const { return "subversion"; }
+		void init();
 
-		Revision *revision(const std::string &id);
+		std::string name() const { return "subversion"; }
 		std::string head(const std::string &branch = std::string());
 		std::vector<std::string> branches();
+
+		Revision *revision(const std::string &id);
+
+	private:
+		SvnConnection *d;
 };
 
 
