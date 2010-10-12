@@ -40,8 +40,10 @@ AC_DEFUN([BACKENDS_CHECK], [
 				fi
 				subversion="no"
 			else
+				SVN_LIBS="-lsvn_ra-1 -lsvn_client-1"
 				AC_SUBST(SVN_CFLAGS)
 				AC_SUBST(SVN_LDFLAGS)
+				AC_SUBST(SVN_LIBS)
 				subversion="yes"
 			fi
 		fi

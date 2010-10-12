@@ -43,5 +43,6 @@ AM_CXXFLAGS += \
 	$(SVN_CFLAGS)
 AM_LDFLAGS += \
 	$(APR_LIBS) \
-	$(SVN_LDFLAGS) 
+	$(SVN_LDFLAGS) \
+	$(SVN_LIBS) 
 endif
