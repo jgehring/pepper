@@ -23,12 +23,13 @@ class Cache : public Backend
 		Cache(Backend *backend, const Options &options);
 		~Cache();
 
+		void init() { m_backend->init(); }
+
 		std::string name() const { return m_backend->name(); }
-
-		Revision *revision(const std::string &id);
-
 		std::string head(const std::string &branch = std::string()) { return m_backend->head(branch); }
 		std::vector<std::string> branches() { return m_backend->branches(); }
+
+		Revision *revision(const std::string &id);
 
 	private:
 		Backend *m_backend;

@@ -21,10 +21,10 @@ class GitBackend : public Backend
 		~GitBackend();
 
 		std::string name() const { return "git"; }
-
-		Revision *revision(const std::string &id);
 		std::string head(const std::string &branch = std::string());
 		std::vector<std::string> branches();
+
+		Revision *revision(const std::string &id);
 };
 
 

@@ -45,6 +45,12 @@ Backend *Backend::backendFor(const Options &options)
 	return backendForUrl(options.repoUrl(), options);
 }
 
+// Initializes the backend
+void Backend::init()
+{
+	// The default implementation does nothing
+}
+
 // Returns a const reference to the program options
 const Options &Backend::options() const
 {

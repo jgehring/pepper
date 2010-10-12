@@ -26,10 +26,13 @@ class Backend
 
 		static Backend *backendFor(const Options &options);
 
+		virtual void init();
+
 		virtual std::string name() const = 0;
-		virtual Revision *revision(const std::string &id) = 0;
 		virtual std::string head(const std::string &branch = std::string()) = 0;
 		virtual std::vector<std::string> branches() = 0;
+
+		virtual Revision *revision(const std::string &id) = 0;
 
 		const Options &options() const;
 

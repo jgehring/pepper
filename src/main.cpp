@@ -103,6 +103,13 @@ int main(int argc, char **argv)
 		backend = new Cache(backend, opts);
 	}
 
+	try {
+		backend->init();
+	} catch (const std::string &str) {
+		std::cerr << "Error initializing backend: " << str << std::endl;
+		return EXIT_FAILURE;
+	}
+
 	// Setup lua context
 	lua_State *L = lua_open();
 	luaL_openlibs(L);
