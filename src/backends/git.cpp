@@ -28,3 +28,17 @@ Revision *GitBackend::revision(const std::string &id)
 {
 	return NULL;
 }
+
+// Returns the HEAD revision for the current branch
+std::string GitBackend::head(const std::string &branch)
+{
+	return "HEAD";
+}
+
+// Returns a list of available branches
+std::vector<std::string> GitBackend::branches()
+{
+	std::vector<std::string> branches;
+	branches.push_back("master");
+	return branches;
+}

@@ -27,6 +27,9 @@ class Cache : public Backend
 
 		Revision *revision(const std::string &id);
 
+		std::string head(const std::string &branch = std::string()) { return m_backend->head(branch); }
+		std::vector<std::string> branches() { return m_backend->branches(); }
+
 	private:
 		Backend *m_backend;
 };

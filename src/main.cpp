@@ -114,7 +114,7 @@ int main(int argc, char **argv)
 	// Push current repository backend to the stack
 	Repository repo(backend);
 	Lunar<Repository>::push(L, &repo);
-	lua_setglobal(L, "repository");
+	lua_setglobal(L, "g_repository");
 
 	// Run a test report
 	if (luaL_dofile(L, "reports/test.lua") != 0) {

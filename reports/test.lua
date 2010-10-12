@@ -3,16 +3,20 @@
 
 	- Write a base class for all scripts, with methods to run callbacks on
 	  on all/selected/... revisions.
-
-	- Pass the repository backend as "Repository" to the script, so it can
-	  be examined
 --]]
 
 
 -- Lua Functions
-function Repository:show()
-	print("Repository with backend =", self:type())
+function print_repo(r)
+	print("Current repository:")
+	print("Url:", r:url())
+	print("Type:", r:type())
+	print("Head:", r:head())
+	print("Branches:")
+	for i,val in ipairs(r:branches()) do
+		print("", val)
+	end
 end
 
 -- Example
-repository:show()
+print_repo(g_repository)

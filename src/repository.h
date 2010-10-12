@@ -23,7 +23,10 @@ class Repository
 		Repository(lua_State *L);
 		~Repository();
 
+		int url(lua_State *L);
 		int type(lua_State *L);
+		int head(lua_State *L);
+		int branches(lua_State *L);
 
 	public:
 		static const char className[];

@@ -45,6 +45,12 @@ Backend *Backend::backendFor(const Options &options)
 	return backendForUrl(options.repoUrl(), options);
 }
 
+// Returns a const reference to the program options
+const Options &Backend::options() const
+{
+	return m_opts;
+}
+
 // Allocates a backend of a specific repository type
 Backend *Backend::backendForName(const std::string &name, const Options &options)
 {

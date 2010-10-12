@@ -8,6 +8,9 @@
 
 
 #include "backend.h"
+#include "options.h"
+
+#include "luahelpers.h"
 
 #include "repository.h"
 
@@ -15,7 +18,10 @@
 // Static variables for the lua bindings
 const char Repository::className[] = "Repository";
 Lunar<Repository>::RegType Repository::methods[] = {
+	LUNAR_DECLARE_METHOD(Repository, url),
 	LUNAR_DECLARE_METHOD(Repository, type),
+	LUNAR_DECLARE_METHOD(Repository, head),
+	LUNAR_DECLARE_METHOD(Repository, branches),
 	{0,0}
 };
 
@@ -40,9 +46,30 @@ Repository::~Repository()
 
 }
 
+// Returns the repository URL
+int Repository::url(lua_State *L)
+{
+	LuaHelpers::push(L, m_backend->options().repoUrl());
+	return 1;
+}
+
 // Returns the repository type, i.e. the name of the current backend
 int Repository::type(lua_State *L)
 {
-	lua_pushstring(L, m_backend->name().c_str());
+	LuaHelpers::push(L, m_backend->name());
+	return 1;
+}
+
+// Returns the current HEAD revision
+int Repository::head(lua_State *L)
+{
+	LuaHelpers::push(L, m_backend->head());
+	return 1;
+}
+
+// Returns a list of available branches (as a table)
+int Repository::branches(lua_State *L)
+{
+	LuaHelpers::push(L, m_backend->branches());
 	return 1;
 }
