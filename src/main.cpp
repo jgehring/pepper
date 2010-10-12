@@ -116,8 +116,13 @@ int main(int argc, char **argv)
 	Lunar<Repository>::push(L, &repo);
 	lua_setglobal(L, "repository");
 
-	luaL_dofile(L, "reports/test.lua");
-	lua_gc(L, LUA_GCCOLLECT, 0);  // collected garbage
+	// Run a test report
+	if (luaL_dofile(L, "reports/test.lua") != 0) {
+		std::cerr << "Error running report: " << lua_tostring(L, -1) << std::endl;
+	}
+
+	// Clean up
+	lua_gc(L, LUA_GCCOLLECT, 0);
 	lua_close(L);
 
 	return EXIT_SUCCESS;
