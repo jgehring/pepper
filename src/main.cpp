@@ -73,6 +73,12 @@ static void printVersion()
 // Program entry point
 int main(int argc, char **argv)
 {
+#ifdef WIN32
+	// On windows, we need to change the mode for stdout to binary to avoid
+	// newlines being automatically translated to CRLF.
+	_setmode(_fileno(stdout), _O_BINARY);
+#endif // WIN32
+
 	Options opts;
 	try {
 		opts.parse(argc, argv);
