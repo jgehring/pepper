@@ -36,9 +36,7 @@ inline int push(lua_State *L, const std::vector<std::string> &v) {
 }
 
 inline int pushError(lua_State *L, const std::string &e) {
-	lua_pushnil(L);
-	lua_pushstring(L, e.c_str());
-	return 2;
+	return luaL_error(L, e.c_str());
 }
 
 } // namespace LuaHelpers
