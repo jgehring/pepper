@@ -49,27 +49,35 @@ Repository::~Repository()
 // Returns the repository URL
 int Repository::url(lua_State *L)
 {
-	LuaHelpers::push(L, m_backend->options().repoUrl());
-	return 1;
+	return LuaHelpers::push(L, m_backend->options().repoUrl());
 }
 
 // Returns the repository type, i.e. the name of the current backend
 int Repository::type(lua_State *L)
 {
-	LuaHelpers::push(L, m_backend->name());
-	return 1;
+	return LuaHelpers::push(L, m_backend->name());
 }
 
 // Returns the current HEAD revision
 int Repository::head(lua_State *L)
 {
-	LuaHelpers::push(L, m_backend->head());
-	return 1;
+	std::string h;
+	try {
+		h = m_backend->head();
+	} catch (const std::string &err) {
+		return LuaHelpers::pushError(L, err);
+	}
+	return LuaHelpers::push(L, h);
 }
 
 // Returns a list of available branches (as a table)
 int Repository::branches(lua_State *L)
 {
-	LuaHelpers::push(L, m_backend->branches());
-	return 1;
+	std::vector<std::string> b;
+	try {
+		b = m_backend->branches();
+	} catch (const std::string &err) {
+		return LuaHelpers::pushError(L, err);
+	}
+	return LuaHelpers::push(L, b);
 }

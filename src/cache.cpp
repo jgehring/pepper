@@ -20,7 +20,7 @@ Cache::Cache(Backend *backend, const Options &options)
 // Destructor
 Cache::~Cache()
 {
-
+	delete m_backend;
 }
 
 // Returns the revision data for the given ID

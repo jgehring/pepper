@@ -11,9 +11,9 @@ function print_repo(r)
 	print("Current repository:")
 	print("Url:", r:url())
 	print("Type:", r:type())
-	print("Head:", r:head())
+	print("Head:", assert(r:head()))
 	print("Branches:")
-	for i,val in ipairs(r:branches()) do
+	for i,val in ipairs(assert(r:branches())) do
 		print("", val)
 	end
 end

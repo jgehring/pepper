@@ -209,9 +209,7 @@ std::string SubversionBackend::head(const std::string &branch)
 	svn_revnum_t rev;
 	svn_error_t *err = svn_ra_get_latest_revnum(d->ra, &rev, pool);
 	if (err != NULL) {
-		std::cerr << "Error: " << SvnConnection::strerr(err) << std::endl;
-		svn_pool_destroy(pool);
-		return std::string();
+		throw SvnConnection::strerr(err);
 	}
 	svn_pool_destroy(pool);
 	return Utils::int2str(rev);
@@ -230,9 +228,7 @@ std::vector<std::string> SubversionBackend::branches()
 	svn_dirent_t *dirent;
 	svn_error_t *err = svn_ra_stat(d->ra, "branches", SVN_INVALID_REVNUM, &dirent, pool);
 	if (err != NULL) {
-		std::cerr << "Error: " << SvnConnection::strerr(err) << std::endl;
-		svn_pool_destroy(pool);
-		return branches;
+		throw SvnConnection::strerr(err);
 	}
 
 	if (dirent == NULL || dirent->kind != svn_node_dir) {
@@ -245,9 +241,7 @@ std::vector<std::string> SubversionBackend::branches()
 	apr_hash_t *dirents = apr_hash_make(pool), *props = apr_hash_make(pool);
 	err = svn_ra_get_dir2(d->ra, &dirents, NULL, &props, "branches", SVN_INVALID_REVNUM, SVN_DIRENT_KIND, pool);
 	if (err != NULL) {
-		std::cerr << "Error: " << SvnConnection::strerr(err) << std::endl;
-		svn_pool_destroy(pool);
-		return branches;
+		throw SvnConnection::strerr(err);
 	}
 
 	branches.push_back("trunk");
