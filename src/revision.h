@@ -14,16 +14,24 @@
 #include <map>
 #include <string>
 
+#include "lunar.h"
+
 
 class Revision
 {
 	public:
 		Revision(const std::string &id);
+		Revision(lua_State *L);
 		~Revision();
 
-		std::string id() const;
-		std::string date() const;
-		std::string author() const;
+		// Lua bindings
+		int id(lua_State *L);
+		int date(lua_State *L);
+		int author(lua_State *L);
+
+	public:
+		static const char className[];
+		static Lunar<Revision>::RegType methods[];
 
 	private:
 		std::string m_id;

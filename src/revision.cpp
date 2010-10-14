@@ -7,6 +7,8 @@
  */
 
 
+#include "luahelpers.h"
+
 #include "revision.h"
 
 
@@ -21,9 +23,25 @@ static inline std::string mapget(const std::map<std::string, std::string> &map, 
 }
 
 
+// Static variables for the lua bindings
+const char Revision::className[] = "Revision";
+Lunar<Revision>::RegType Revision::methods[] = {
+	LUNAR_DECLARE_METHOD(Revision, id),
+	LUNAR_DECLARE_METHOD(Revision, date),
+	LUNAR_DECLARE_METHOD(Revision, author),
+	{0,0}
+};
+
+
 // Constructor
 Revision::Revision(const std::string &id)
 	: m_id(id)
+{
+
+}
+
+// Default constructor for lua
+Revision::Revision(lua_State *L)
 {
 
 }
@@ -34,18 +52,18 @@ Revision::~Revision()
 
 }
 
-// Queries
-std::string Revision::id() const
+// Returns the revision ID (e.g., the revision number)
+int Revision::id(lua_State *L)
 {
-	return m_id;
+	return LuaHelpers::push(L, m_id);
 }
 
-std::string Revision::date() const
+int Revision::date(lua_State *L)
 {
-	return mapget(m_data, "date");
+	return LuaHelpers::push(L, mapget(m_data, "date"));
 }
 
-std::string Revision::author() const
+int Revision::author(lua_State *L)
 {
-	return mapget(m_data, "author");
+	return LuaHelpers::push(L, mapget(m_data, "author"));
 }

@@ -16,6 +16,7 @@
 #include "cache.h"
 #include "options.h"
 #include "repository.h"
+#include "revision.h"
 
 
 // Utility function for printing a help screen option
@@ -125,8 +126,8 @@ int main(int argc, char **argv)
 	luaL_openlibs(L);
 
 	// Register binding classes
-//	Lunar<Report>::Register(L);
 	Lunar<Repository>::Register(L);
+	Lunar<Revision>::Register(L);
 
 	// Push current repository backend to the stack
 	Repository repo(backend);
