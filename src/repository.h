@@ -23,6 +23,9 @@ class Repository
 		Repository(lua_State *L);
 		~Repository();
 
+		Backend *backend() const;
+
+		// Lua bindings
 		int url(lua_State *L);
 		int type(lua_State *L);
 		int head(lua_State *L);

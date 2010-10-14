@@ -46,6 +46,13 @@ Repository::~Repository()
 
 }
 
+// Returns the backend
+Backend *Repository::backend() const
+{
+	return m_backend;
+}
+
+
 // Returns the repository URL
 int Repository::url(lua_State *L)
 {
