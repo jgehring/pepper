@@ -22,6 +22,7 @@ namespace Utils
 
 bool str2int(const std::string &str, int *i);
 bool str2int(const std::string &str, unsigned int *i);
+bool str2int(const std::string &str, long int *i);
 std::string int2str(int i);
 std::string int2str(long int i);
 

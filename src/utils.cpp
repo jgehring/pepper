@@ -29,8 +29,8 @@ static bool tstr2int(const std::string &str, T *i)
 	long val = strtol(str.c_str(), &end, 0);
 
 	if (errno == ERANGE || str.c_str() == end
-	    || val > std::numeric_limits<int>::max()
-	    || val < std::numeric_limits<int>::min()) {
+	    || val > std::numeric_limits<T>::max()
+	    || val < std::numeric_limits<T>::min()) {
 		return false;
 	}
 
@@ -48,6 +48,12 @@ bool str2int(const std::string &str, int *i)
 bool str2int(const std::string &str, unsigned int *i)
 {
 	return tstr2int<unsigned int>(str, i);
+}
+
+// Wrapper for strtol()
+bool str2int(const std::string &str, long *i)
+{
+	return tstr2int<long>(str, i);
 }
 
 // Converts an interger to a string
