@@ -24,6 +24,7 @@ class GitBackend : public Backend
 		std::string head(const std::string &branch = std::string());
 		std::vector<std::string> branches();
 
+		RevisionIterator *iterator(const std::string &branch = std::string());
 		Revision *revision(const std::string &id);
 };
 

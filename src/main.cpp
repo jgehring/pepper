@@ -15,6 +15,7 @@
 #include "backend.h"
 #include "cache.h"
 #include "options.h"
+#include "report.h"
 #include "repository.h"
 #include "revision.h"
 
@@ -124,6 +125,7 @@ int main(int argc, char **argv)
 	// Setup lua context
 	lua_State *L = lua_open();
 	luaL_openlibs(L);
+	Report::openLib(L);
 
 	// Register binding classes
 	Lunar<Repository>::Register(L);

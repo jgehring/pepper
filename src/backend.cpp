@@ -22,6 +22,35 @@
 #endif
 
 
+// Constructor
+Backend::RevisionIterator::RevisionIterator()
+	: m_index(0)
+{
+
+}
+
+// Destructor
+Backend::RevisionIterator::~RevisionIterator()
+{
+
+}
+
+// Returns whether the iterator is at its end, i.e. past the last revision
+bool Backend::RevisionIterator::atEnd() const
+{
+	return (m_index >= m_ids.size());
+}
+
+// Returns the next revision ID, or an empty string
+std::string Backend::RevisionIterator::next()
+{
+	if (atEnd()) {
+		return std::string();
+	}
+	return m_ids[m_index++];
+}
+
+
 // Protected constructor
 Backend::Backend(const Options &options)
 	: m_opts(options)

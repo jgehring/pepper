@@ -23,12 +23,6 @@ GitBackend::~GitBackend()
 
 }
 
-// Returns the revision data for the given ID
-Revision *GitBackend::revision(const std::string &id)
-{
-	return NULL;
-}
-
 // Returns the HEAD revision for the current branch
 std::string GitBackend::head(const std::string &branch)
 {
@@ -41,4 +35,18 @@ std::vector<std::string> GitBackend::branches()
 	std::vector<std::string> branches;
 	branches.push_back("master");
 	return branches;
+}
+
+// Returns a revision iterator for the given branch
+Backend::RevisionIterator *GitBackend::iterator(const std::string &branch)
+{
+	RevisionIterator *it = new RevisionIterator();
+	// TODO: Set branches
+	return it;
+}
+
+// Returns the revision data for the given ID
+Revision *GitBackend::revision(const std::string &id)
+{
+	return NULL;
 }

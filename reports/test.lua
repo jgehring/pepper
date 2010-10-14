@@ -18,5 +18,13 @@ function print_repo(r)
 	end
 end
 
+function print_revision(r)
+	print(r:id(), r:date())
+end
+
 -- Example
 print_repo(g_repository)
+
+-- Simple example: Print all revision of a given branch
+--report.map_branch(print_revision, g_repository, "trunk")
+report.map_branch(print_revision, g_repository, "trunk")

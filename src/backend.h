@@ -20,6 +20,21 @@ class Revision;
 
 class Backend
 {
+	public:
+		// Default implementation for a simple list of revision IDs
+		class RevisionIterator
+		{
+			public:
+				RevisionIterator();
+				virtual ~RevisionIterator();
+
+				virtual bool atEnd() const;
+				virtual std::string next();
+
+			protected:
+				std::vector<std::string> m_ids;
+				unsigned int m_index;
+		};
 
 	public:
 		virtual ~Backend();
@@ -32,6 +47,7 @@ class Backend
 		virtual std::string head(const std::string &branch = std::string()) = 0;
 		virtual std::vector<std::string> branches() = 0;
 
+		virtual RevisionIterator *iterator(const std::string &branch = std::string()) = 0;
 		virtual Revision *revision(const std::string &id) = 0;
 
 		const Options &options() const;

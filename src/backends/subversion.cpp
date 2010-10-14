@@ -22,6 +22,7 @@
 
 #include "main.h"
 #include "options.h"
+#include "revision.h"
 #include "utils.h"
 
 #include "backends/subversion.h"
@@ -160,11 +161,39 @@ public:
 };
 
 
+// Subversion callback for log messages
+static svn_error_t *logReceiver(void *baton, svn_log_entry_t *entry, apr_pool_t *pool) 
+{
+	std::vector<std::string> *dest = static_cast<std::vector<std::string> *>(baton);
+	dest->push_back(Utils::int2str(entry->revision));
+	return SVN_NO_ERROR;
+}
+
+// Constructor
+SubversionBackend::SubversionRevisionIterator::SubversionRevisionIterator(SvnConnection *c, const std::string &prefix, long int head)
+	: Backend::RevisionIterator()
+{
+	// Determine revisions
+	apr_pool_t *pool = svn_pool_create(c->pool);
+	apr_array_header_t *path = apr_array_make(pool, 1, sizeof (const char *));
+	APR_ARRAY_PUSH(path, const char *) = svn_path_canonicalize(prefix.empty() ? "." : prefix.c_str(), pool);
+	apr_array_header_t *props = apr_array_make(pool, 1, sizeof (const char *)); // Inentionally empty
+
+//	svn_error_t *err = svn_ra_get_log2(c->ra, path, 0, head, 0, FALSE, TRUE, FALSE, props, &logReceiver, &m_ids, pool);
+	svn_error_t *err = svn_ra_get_log2(c->ra, path, 0, head, 0, FALSE, FALSE /* otherwise, copy history will be ignored */, FALSE, props, &logReceiver, &m_ids, pool);
+	if (err != NULL) {
+		throw SvnConnection::strerr(err);
+	}
+
+	svn_pool_clear(pool);
+}
+
+
 // Constructor
 SubversionBackend::SubversionBackend(const Options &options)
-	: Backend(options)
+	: Backend(options), d(new SvnConnection())
 {
-	d = new SvnConnection();
+
 }
 
 // Destructor
@@ -193,13 +222,6 @@ void SubversionBackend::init()
 		url = std::string("file://") + url;
 	}
 	d->open(url, m_opts.authData());
-}
-
-// Returns the revision data for the given ID
-Revision *SubversionBackend::revision(const std::string &id)
-{
-	// TODO
-	return NULL;
 }
 
 // Returns the HEAD revision for the current branch
@@ -256,5 +278,44 @@ std::vector<std::string> SubversionBackend::branches()
 
 	// Let's be nice
 	std::sort(branches.begin()+1, branches.end());
+	svn_pool_clear(pool);
 	return branches;
+}
+
+// Returns a revision iterator for the given branch
+Backend::RevisionIterator *SubversionBackend::iterator(const std::string &branch)
+{
+	std::string prefix;
+	if (branch == "trunk") {
+		prefix = branch;
+	} else if (!branch.empty()) {
+		prefix = "branches/";
+		prefix += branch;
+	}
+
+	// Check if the branch exists
+	apr_pool_t *pool = svn_pool_create(d->pool);
+	svn_dirent_t *dirent;
+	svn_error_t *err = svn_ra_stat(d->ra, prefix.c_str(), SVN_INVALID_REVNUM, &dirent, pool);
+	if (err != NULL) {
+		throw SvnConnection::strerr(err);
+	}
+	if (dirent == NULL) {
+		if (prefix == "trunk") {
+			prefix.clear();
+		} else {
+			throw Utils::strprintf("No such branch: %s", branch.c_str());
+		}
+	}
+	svn_pool_destroy(pool);
+
+	long int headrev;
+	Utils::str2int(head(prefix), &headrev);
+	return new SubversionRevisionIterator(d, prefix, headrev);
+}
+
+// Returns the revision data for the given ID
+Revision *SubversionBackend::revision(const std::string &id)
+{
+	return new Revision(id);
 }

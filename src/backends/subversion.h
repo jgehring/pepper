@@ -14,10 +14,18 @@
 #include "backend.h"
 
 class SvnConnection;
+class SvnLogConnection;
 
 
 class SubversionBackend : public Backend
 {
+	public:
+		class SubversionRevisionIterator : public RevisionIterator
+		{
+			public:
+				SubversionRevisionIterator(SvnConnection *c, const std::string &prefix, long int head);
+		};
+
 	public:
 		SubversionBackend(const Options &options);
 		~SubversionBackend();
@@ -28,6 +36,7 @@ class SubversionBackend : public Backend
 		std::string head(const std::string &branch = std::string());
 		std::vector<std::string> branches();
 
+		RevisionIterator *iterator(const std::string &branch = std::string());
 		Revision *revision(const std::string &id);
 
 	private:
