@@ -105,9 +105,13 @@ int main(int argc, char **argv)
 		std::cerr << "Error: No backend found for url: " << opts.repoUrl() << std::endl;
 		return EXIT_FAILURE;
 	}
+
+	// TODO: Cache is not implemented yet
+#if 0
 	if (opts.useCache()) {
 		backend = new Cache(backend, opts);
 	}
+#endif
 
 	try {
 		backend->init();
