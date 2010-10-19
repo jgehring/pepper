@@ -20,8 +20,10 @@ const char Diffstat::className[] = "Diffstat";
 Lunar<Diffstat>::RegType Diffstat::methods[] = {
 	LUNAR_DECLARE_METHOD(Diffstat, files),
 	LUNAR_DECLARE_METHOD(Diffstat, stats),
-	LUNAR_DECLARE_METHOD(Diffstat, added),
-	LUNAR_DECLARE_METHOD(Diffstat, removed),
+	LUNAR_DECLARE_METHOD(Diffstat, linesAdded),
+	LUNAR_DECLARE_METHOD(Diffstat, bytesAdded),
+	LUNAR_DECLARE_METHOD(Diffstat, linesRemoved),
+	LUNAR_DECLARE_METHOD(Diffstat, bytesRemoved),
 	{0,0}
 };
 
@@ -69,7 +71,7 @@ int Diffstat::stats(lua_State *L)
 }
 
 // Returns the number of lines added to the given file
-int Diffstat::added(lua_State *L)
+int Diffstat::linesAdded(lua_State *L)
 {
 	std::string file = LuaHelpers::pop(L);
 	if (m_stats.find(file) != m_stats.end()) {
@@ -78,12 +80,32 @@ int Diffstat::added(lua_State *L)
 	return LuaHelpers::push(L, 0);
 }
 
+// Returns the number of bytes added to the given file
+int Diffstat::bytesAdded(lua_State *L)
+{
+	std::string file = LuaHelpers::pop(L);
+	if (m_stats.find(file) != m_stats.end()) {
+		return LuaHelpers::push(L, m_stats[file].cadd);
+	}
+	return LuaHelpers::push(L, 0);
+}
+
 // Returns the number of lines removed from the given file
-int Diffstat::removed(lua_State *L)
+int Diffstat::linesRemoved(lua_State *L)
 {
 	std::string file = LuaHelpers::pop(L);
 	if (m_stats.find(file) != m_stats.end()) {
 		return LuaHelpers::push(L, m_stats[file].ldel);
+	}
+	return LuaHelpers::push(L, 0);
+}
+
+// Returns the number of bytes removed from the given file
+int Diffstat::bytesRemoved(lua_State *L)
+{
+	std::string file = LuaHelpers::pop(L);
+	if (m_stats.find(file) != m_stats.end()) {
+		return LuaHelpers::push(L, m_stats[file].cdel);
 	}
 	return LuaHelpers::push(L, 0);
 }

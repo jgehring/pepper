@@ -1,8 +1,5 @@
 --[[
-	TODO for the lua bindings:
-
-	- Write a base class for all scripts, with methods to run callbacks on
-	  on all/selected/... revisions.
+	Sample report
 --]]
 
 
@@ -18,16 +15,32 @@ function print_repo(r)
 	end
 end
 
+
+loc = {}
+
 function print_revision(r)
-	print(r:id(), r:date())
+--	print(r:id(), r:date())
 	s = r:diffstat()
 	t = s:files()
-	for i,v in ipairs(t) do print("", v, s:added(v), s:removed(v)) end
+	l = 0
+	if not (next(loc) == nil) then
+		l = loc[#loc]
+	end
+	for i,v in ipairs(t) do
+		-- print("", v, s:linesAdded(v), s:linesRemoved(v)
+		l = l + s:linesAdded(v) - s:linesRemoved(v)
+	end
+	table.insert(loc, l)
 end
 
 -- Example
-print_repo(g_repository)
+--print_repo(g_repository)
 
--- Simple example: Print all revision of a given branch
---report.map_branch(print_revision, g_repository, "trunk")
+-- Simple example: Map a function to all revision of a given branch
 report.map_branch(print_revision, g_repository, "trunk")
+
+-- Generate graph with LOC
+print("# Revision LOC")
+for i,v in ipairs(loc) do
+	print((i-1) .. " " .. v)
+end

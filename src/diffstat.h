@@ -37,8 +37,10 @@ class Diffstat
 		// Lua bindings
 		int files(lua_State *L);
 		int stats(lua_State *L);
-		int added(lua_State *L);
-		int removed(lua_State *L);
+		int linesAdded(lua_State *L);
+		int bytesAdded(lua_State *L);
+		int linesRemoved(lua_State *L);
+		int bytesRemoved(lua_State *L);
 
 	public:
 		static const char className[];
