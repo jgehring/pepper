@@ -11,13 +11,15 @@
 #define REPORT_H_
 
 
+class Backend;
+
 struct lua_State;
 
 
 namespace Report
 {
 
-int openLib(lua_State *L);
+int run(const char *script, Backend *backend);
 
 } // namespace Report
 

@@ -7,11 +7,14 @@
  */
 
 
+#include <cstdlib>
+#include <iostream>
+
 #include "backend.h"
+#include "diffstat.h"
+#include "luahelpers.h"
 #include "repository.h"
 #include "revision.h"
-
-#include "luahelpers.h"
 
 
 namespace Report
@@ -66,11 +69,35 @@ static const struct luaL_reg report[] = {
 };
 
 
-// Registers the report library
-int openLib(lua_State *L)
+// Runs a scripted report using the given backend
+int run(const char *script, Backend *backend)
 {
+	// Setup lua context
+	lua_State *L = lua_open();
+	luaL_openlibs(L);
 	luaL_openlib(L, "report", report, 0);
-	return 1;
+
+	// Register binding classes
+	Lunar<Repository>::Register(L);
+	Lunar<Revision>::Register(L);
+	Lunar<Diffstat>::Register(L);
+
+	// Push current repository backend to the stack
+	Repository repo(backend);
+	Lunar<Repository>::push(L, &repo);
+	lua_setglobal(L, "g_repository");
+
+	// Run the script
+	int ret = EXIT_SUCCESS;
+	if (luaL_dofile(L, script) != 0) {
+		std::cerr << "Error running report: " << lua_tostring(L, -1) << std::endl;
+		ret = EXIT_FAILURE;
+	}
+
+	// Clean up
+	lua_gc(L, LUA_GCCOLLECT, 0);
+	lua_close(L);
+	return ret;
 }
 
 } // namespace Report

@@ -14,11 +14,8 @@
 
 #include "backend.h"
 #include "cache.h"
-#include "diffstat.h"
 #include "options.h"
 #include "report.h"
-#include "repository.h"
-#include "revision.h"
 
 
 // Utility function for printing a help screen option
@@ -123,30 +120,8 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	// Setup lua context
-	lua_State *L = lua_open();
-	luaL_openlibs(L);
-	Report::openLib(L);
-
-	// Register binding classes
-	Lunar<Repository>::Register(L);
-	Lunar<Revision>::Register(L);
-	Lunar<Diffstat>::Register(L);
-
-	// Push current repository backend to the stack
-	Repository repo(backend);
-	Lunar<Repository>::push(L, &repo);
-	lua_setglobal(L, "g_repository");
-
-	// Run a test report
-	if (luaL_dofile(L, "reports/test.lua") != 0) {
-		std::cerr << "Error running report: " << lua_tostring(L, -1) << std::endl;
-	}
-
-	// Clean up
-	lua_gc(L, LUA_GCCOLLECT, 0);
-	lua_close(L);
-
+	const char *script = "reports/test.lua";
+	int ret = Report::run(script, backend);
 	delete backend;
-	return EXIT_SUCCESS;
+	return ret;
 }
