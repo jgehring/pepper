@@ -20,6 +20,9 @@ end
 
 function print_revision(r)
 	print(r:id(), r:date())
+	s = r:diffstat()
+	t = s:files()
+	for i,v in ipairs(t) do print("", v, s:added(v), s:removed(v)) end
 end
 
 -- Example

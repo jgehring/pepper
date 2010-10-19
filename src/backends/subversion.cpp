@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <iostream>
+#include <fstream>
 
 #include <svn_client.h>
 #include <svn_cmdline.h>
@@ -33,7 +34,7 @@ class SvnConnection
 {
 public:
 	SvnConnection()
-		: pool(NULL), ctx(NULL), ra(NULL)
+		: pool(NULL), ctx(NULL), ra(NULL), url(NULL)
 	{
 	}
 
@@ -51,7 +52,7 @@ public:
 		init();
 
 		// Canoicalize the repository URL
-		const char *eurl = svn_path_uri_encode(svn_path_canonicalize(url.c_str(), pool), pool);
+		this->url = svn_path_uri_encode(svn_path_canonicalize(url.c_str(), pool), pool);
 
 		// Create the client context
 		svn_error_t *err;
@@ -71,7 +72,7 @@ public:
 		ctx->auth_baton = auth_baton;
 
 		/* Setup the RA session */
-		if ((err = svn_client_open_ra_session(&ra, eurl, ctx, pool))) {
+		if ((err = svn_client_open_ra_session(&ra, this->url, ctx, pool))) {
 			throw strerr(err);
 		}
 	}
@@ -158,6 +159,7 @@ public:
 	apr_pool_t *pool;
 	svn_client_ctx_t *ctx;
 	svn_ra_session_t *ra;
+	const char *url;
 };
 
 
@@ -282,6 +284,52 @@ std::vector<std::string> SubversionBackend::branches()
 	return branches;
 }
 
+// Returns a diffstat for the specified revision
+Diffstat SubversionBackend::diffstat(const std::string &id)
+{
+	// First, produce diff of previous revision and this one and save it in a
+	// temporary file
+	apr_pool_t *pool = svn_pool_create(d->pool);
+
+	svn_opt_revision_t rev1, rev2;
+	rev1.kind = rev2.kind = svn_opt_revision_number;
+	Utils::str2int(id, &(rev2.value.number));
+	if (rev2.value.number <= 0) {
+		svn_pool_destroy(pool);
+		return Diffstat();
+	}
+	rev1.value.number = rev2.value.number - 1;
+
+	apr_file_t *outfile = NULL, *errfile = NULL;
+	apr_file_open_stderr(&errfile, pool);
+
+	const char *tmpdir = NULL;
+	if (apr_temp_dir_get(&tmpdir, pool) != APR_SUCCESS) {
+		throw Utils::strprintf("Unable to determine temporary directory");
+	}
+	char *templ = apr_psprintf(pool, "%s/XXXXXX", tmpdir);
+	if (apr_file_mktemp(&outfile, templ, APR_CREATE | APR_READ | APR_WRITE | APR_EXCL, pool) != APR_SUCCESS) {
+		throw Utils::strprintf("Unable to create temporary file");
+	}
+
+	svn_error_t *err = svn_client_diff4(apr_array_make(pool, 0, 1), d->url, &rev1, d->url, &rev2, NULL, svn_depth_infinity, FALSE, FALSE, TRUE, APR_LOCALE_CHARSET, outfile, errfile, NULL, d->ctx, pool);
+	if (err != NULL) {
+		throw SvnConnection::strerr(err);
+	}
+
+	// Generate the diffstat
+
+	// TODO: Possible without closing the file?
+	apr_file_close(outfile);
+	std::ifstream in(templ, std::ifstream::in);
+	Diffstat stat(in);
+
+	in.close();
+	apr_file_remove(templ, pool);
+	svn_pool_destroy(pool);
+	return stat;
+}
+
 // Returns a revision iterator for the given branch
 Backend::RevisionIterator *SubversionBackend::iterator(const std::string &branch)
 {
@@ -317,5 +365,6 @@ Backend::RevisionIterator *SubversionBackend::iterator(const std::string &branch
 // Returns the revision data for the given ID
 Revision *SubversionBackend::revision(const std::string &id)
 {
-	return new Revision(id);
+	// TODO: Add meta data
+	return new Revision(id, diffstat(id));
 }

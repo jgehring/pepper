@@ -37,6 +37,13 @@ std::vector<std::string> GitBackend::branches()
 	return branches;
 }
 
+// Returns a diffstat for the specified revision
+Diffstat GitBackend::diffstat(const std::string &id)
+{
+	// TODO
+	return Diffstat();
+}
+
 // Returns a revision iterator for the given branch
 Backend::RevisionIterator *GitBackend::iterator(const std::string &branch)
 {

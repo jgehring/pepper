@@ -40,7 +40,12 @@ static int map_branch(lua_State *L)
 	}
 
 	while (!it->atEnd()) {
-		Revision *revision = backend->revision(it->next());
+		Revision *revision = NULL;
+		try {
+			revision = backend->revision(it->next());
+		} catch (const std::string &err) {
+			return LuaHelpers::pushError(L, err);
+		}
 
 		lua_rawgeti(L, LUA_REGISTRYINDEX, callback);
 		Lunar<Revision>::push(L, revision);

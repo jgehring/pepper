@@ -16,11 +16,13 @@
 
 #include "lunar.h"
 
+#include "diffstat.h"
+
 
 class Revision
 {
 	public:
-		Revision(const std::string &id);
+		Revision(const std::string &id, const Diffstat &diffstat);
 		Revision(lua_State *L);
 		~Revision();
 
@@ -28,6 +30,7 @@ class Revision
 		int id(lua_State *L);
 		int date(lua_State *L);
 		int author(lua_State *L);
+		int diffstat(lua_State *L);
 
 	public:
 		static const char className[];
@@ -36,6 +39,7 @@ class Revision
 	private:
 		std::string m_id;
 		std::map<std::string, std::string> m_data;
+		Diffstat m_diffstat;
 };
 
 

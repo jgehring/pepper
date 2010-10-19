@@ -25,6 +25,11 @@ inline int push(lua_State *L, int i) {
 	return 1;
 }
 
+inline int push(lua_State *L, long int i) {
+	lua_pushinteger(L, i);
+	return 1;
+}
+
 inline int push(lua_State *L, double i) {
 	lua_pushnumber(L, i);
 	return 1;
@@ -55,9 +60,36 @@ inline int push(lua_State *L, const std::vector<std::string> &v) {
 	return 1;
 }
 
+template <class T>
+inline int push(lua_State *L, T *i, bool gc = false)
+{
+	Lunar<T>::push(L, i, gc);
+	return 1;
+}
+
+template <typename T>
+inline int push(lua_State *L, const std::vector<T> &v)
+{
+	lua_createtable(L, v.size(), 0);
+	int table = lua_gettop(L);
+	int i = 1;
+	for (std::vector<std::string>::const_iterator &it = v.begin(); it != v.end(); ++it) {
+		push(L, *it);
+		lua_rawseti(L, table, i++);
+	}
+	return 1;
+
+}
+
 inline int pushError(lua_State *L, const std::string &e) {
 	return luaL_error(L, e.c_str());
 }
+
+
+inline const char *pop(lua_State *L, int index = -1) {
+	return luaL_checkstring(L, index);
+}
+
 
 template<typename T1>
 inline void call(lua_State *L, const T1 &arg1, int nresults) {

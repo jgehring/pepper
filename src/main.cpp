@@ -14,6 +14,7 @@
 
 #include "backend.h"
 #include "cache.h"
+#include "diffstat.h"
 #include "options.h"
 #include "report.h"
 #include "repository.h"
@@ -130,6 +131,7 @@ int main(int argc, char **argv)
 	// Register binding classes
 	Lunar<Repository>::Register(L);
 	Lunar<Revision>::Register(L);
+	Lunar<Diffstat>::Register(L);
 
 	// Push current repository backend to the stack
 	Repository repo(backend);
