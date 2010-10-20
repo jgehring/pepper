@@ -226,6 +226,20 @@ void SubversionBackend::init()
 	d->open(url, m_opts.authData());
 }
 
+// Returns a unique identifier for this repository
+std::string SubversionBackend::uuid()
+{
+	apr_pool_t *pool = svn_pool_create(d->pool);
+	const char *id;
+	svn_error_t *err = svn_ra_get_uuid2(d->ra, &id, pool);
+	if (err != NULL) {
+		throw SvnConnection::strerr(err);
+	}
+	std::string sid(id);
+	svn_pool_destroy(pool);
+	return sid;
+}
+
 // Returns the HEAD revision for the current branch
 std::string SubversionBackend::head(const std::string &branch)
 {

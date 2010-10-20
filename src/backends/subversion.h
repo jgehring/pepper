@@ -33,6 +33,8 @@ class SubversionBackend : public Backend
 		void init();
 
 		std::string name() const { return "subversion"; }
+
+		std::string uuid();
 		std::string head(const std::string &branch = std::string());
 		std::vector<std::string> branches();
 		Diffstat diffstat(const std::string &id);

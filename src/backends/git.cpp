@@ -23,6 +23,12 @@ GitBackend::~GitBackend()
 
 }
 
+// Returns a unique identifier for this repository
+std::string GitBackend::uuid()
+{
+	return std::string();
+}
+
 // Returns the HEAD revision for the current branch
 std::string GitBackend::head(const std::string &branch)
 {

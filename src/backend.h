@@ -46,6 +46,8 @@ class Backend
 		virtual void init();
 
 		virtual std::string name() const = 0;
+
+		virtual std::string uuid() = 0;
 		virtual std::string head(const std::string &branch = std::string()) = 0;
 		virtual std::vector<std::string> branches() = 0;
 		virtual Diffstat diffstat(const std::string &id) = 0;
