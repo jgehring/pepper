@@ -150,6 +150,10 @@ std::string strprintf(const char *format, ...)
 				os << va_arg(vl, int);
 				break;
 
+			case 'u':
+				os << va_arg(vl, unsigned);
+				break;
+
 			case 'c':
 				os << (unsigned char)va_arg(vl, int);
 				break;
