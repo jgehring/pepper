@@ -16,20 +16,65 @@
 
 #include "main.h"
 
+#ifdef HAVE_LIBZ
+ #include <zlib.h>
+#endif
+
 
 // Base class
 class BStream
 {
 	public:
-		BStream(FILE *f);
+#ifdef HAVE_LIBZ
+		typedef gzFile FilePtr;
+#else
+		typedef FILE *FilePtr;
+#endif
+
+	public:
+		BStream(FilePtr f);
 		~BStream();
 
 		inline bool ok() const { return m_file != NULL; }
-		inline bool eof() const { return feof(m_file); }
-		inline size_t tell() const { return ftell(m_file); }
-		inline bool seek(size_t offset) { return fseek(m_file, offset, SEEK_SET) == 0; }
+		inline bool eof() const {
+#ifdef HAVE_LIBZ
+			return gzeof(m_file);
+#else
+			return feof(m_file);
+#endif
+		}
+		inline size_t tell() const {
+#ifdef HAVE_LIBZ
+			return gztell(m_file);
+#else
+			return ftell(m_file);
+#endif
+		}
+		inline bool seek(size_t offset) {
+#ifdef HAVE_LIBZ
+			return gzseek(m_file, offset, SEEK_SET) >= 0;
+#else
+			return fseek(m_file, offset, SEEK_SET) == 0;
+#endif
+		}
 
 	protected:
+		// Raw data I/O
+		inline int read(void *ptr, size_t n) {
+#ifdef HAVE_LIBZ
+			return gzread(m_file, ptr, n);
+#else
+			return fread(ptr, 1, n, m_file);
+#endif
+		}
+		inline int write(const void *ptr, size_t n) {
+#ifdef HAVE_LIBZ
+			return gzwrite(m_file, ptr, n);
+#else
+			return fwrite(ptr, 1, n, m_file);
+#endif
+		}
+
 		// Byte swapping (from Qt)
 		inline uint32_t bswap(uint32_t source) {
 			return 0
@@ -52,7 +97,7 @@ class BStream
 		}
 
 	protected:
-		FILE *m_file;
+		FilePtr m_file;
 };
 
 // Output stream
@@ -60,7 +105,7 @@ class BOStream : public BStream
 {
 	public:
 		BOStream(const std::string &path, bool append = false);
-		BOStream(FILE *f) : BStream(f) { }
+		BOStream(FilePtr f) : BStream(f) { }
 
 		BOStream &operator<<(char c);
 		BOStream &operator<<(uint32_t i);
@@ -73,7 +118,7 @@ class BIStream : public BStream
 {
 	public:
 		BIStream(const std::string &path);
-		BIStream(FILE *f) : BStream(f) { }
+		BIStream(FilePtr f) : BStream(f) { }
 
 		BIStream &operator>>(char &c);
 		BIStream &operator>>(uint32_t &i);
@@ -84,7 +129,11 @@ class BIStream : public BStream
 
 // Inlined functions
 inline BOStream &BOStream::operator<<(char c) {
+#ifdef HAVE_LIBZ
+	gzputc(m_file, c);
+#else
 	fputc(c, m_file);
+#endif
 	return *this;
 }
 
@@ -92,7 +141,7 @@ inline BOStream &BOStream::operator<<(uint32_t i) {
 #ifndef WORDS_BIGENDIAN
 	i = bswap(i);
 #endif
-	fwrite((char *)&i, 4, 1, m_file);
+	write((char *)&i, 4);
 	return *this;
 }
 
@@ -100,23 +149,26 @@ inline BOStream &BOStream::operator<<(uint64_t i) {
 #ifndef WORDS_BIGENDIAN
 	i = bswap(i);
 #endif
-	fwrite((char *)&i, 8, 1, m_file);
+	write((char *)&i, 8);
 	return *this;
 }
 
 inline BOStream &BOStream::operator<<(const std::string &s) {
-	fwrite(s.data(), 1, s.length(), m_file);
-	fputc(0x00, m_file);
-	return *this;
+	write(s.data(), s.length());
+	return (*this << '\0');
 }
 
 inline BIStream &BIStream::operator>>(char &c) {
+#ifdef HAVE_LIBZ
+	c = (char)gzgetc(m_file);
+#else
 	c = (char)fgetc(m_file);
+#endif
 	return *this;
 }
 
 inline BIStream &BIStream::operator>>(uint32_t &i) {
-	fread((char *)&i, 4, 1, m_file);
+	read((char *)&i, 4);
 #ifndef WORDS_BIGENDIAN
 	i = bswap(i);
 #endif
@@ -124,7 +176,7 @@ inline BIStream &BIStream::operator>>(uint32_t &i) {
 }
 
 inline BIStream &BIStream::operator>>(uint64_t &i) {
-	fread((char *)&i, 8, 1, m_file);
+	read((char *)&i, 8);
 #ifndef WORDS_BIGENDIAN
 	i = bswap(i);
 #endif
@@ -136,7 +188,11 @@ inline BIStream &BIStream::operator>>(std::string &s) {
 	int c;
 	s.clear();
 	while (true) {
+#ifdef HAVE_LIBZ
+		c = gzgetc(m_file);
+#else
 		c = fgetc(m_file);
+#endif
 		switch (c) {
 			case 0: break;
 			case EOF: s.clear(); break;

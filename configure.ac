@@ -10,6 +10,7 @@ AC_CONFIG_HEADER([config.h])
 
 sinclude(m4/configure_backends.m4)
 sinclude(m4/find_lua.m4)
+sinclude(m4/ax_check_zlib.m4)
 
 
 #
@@ -52,6 +53,8 @@ if test "x$found_lua" != "xyes"; then
 fi
 AC_SUBST([LUA_CFLAGS])
 AC_SUBST([LUA_LIBS])
+
+CHECK_ZLIB()
 
 
 #
