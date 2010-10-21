@@ -7,6 +7,8 @@
  */
 
 
+#include <cstdlib>
+
 #include "utils.h"
 
 #include "options.h"
@@ -55,6 +57,11 @@ bool Options::useCache() const
 	return m_options["cache"] == "true";
 }
 
+std::string Options::cacheDir() const
+{
+	return m_options["cache_dir"];
+}
+
 std::string Options::forcedBackend() const
 {
 	return m_options["forced_backend"];
@@ -81,6 +88,9 @@ void Options::reset()
 	m_options.clear();
 
 	putopt("cache", "true");
+
+	// TODO: Where on Windows?
+	putopt("cache_dir", Utils::strprintf("%s/.%s/cache", getenv("HOME"), PACKAGE_NAME, "cache"));
 }
 
 // The actual parsing
@@ -104,7 +114,7 @@ void Options::parse(const std::vector<std::string> &args)
 }
 
 // Puts two strings to the option map
-void Options::putopt(const char *key, const char *value)
+void Options::putopt(const std::string &key, const std::string &value)
 {
 	m_options[key] = value;
 }

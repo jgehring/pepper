@@ -36,6 +36,7 @@ class Options
 		bool versionRequested() const;
 
 		bool useCache() const;
+		std::string cacheDir() const;
 
 		std::string forcedBackend() const;
 		std::string repoUrl() const;
@@ -44,7 +45,7 @@ class Options
 	private:
 		void reset();
 		void parse(const std::vector<std::string> &args);
-		void putopt(const char *key, const char *value);
+		void putopt(const std::string &key, const std::string &value);
 
 	private:
 		bool m_valid;
