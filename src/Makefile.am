@@ -7,6 +7,7 @@ bin_PROGRAMS = pepper
 
 pepper_SOURCES = \
 	backend.h backend.cpp \
+	bstream.h bstream.cpp \
 	cache.h cache.cpp \
 	diffstat.h diffstat.cpp \
 	luahelpers.h \
