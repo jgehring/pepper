@@ -15,6 +15,7 @@ pepper_SOURCES = \
 	report.h report.cpp \
 	repository.h repository.cpp \
 	revision.h revision.cpp \
+	sysutils.h sysutils.cpp \
 	utils.h utils.cpp
 
 AM_CXXFLAGS = \
