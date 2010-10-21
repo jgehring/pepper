@@ -14,7 +14,12 @@
 #include <map>
 #include <string>
 
+#include "main.h"
+
 #include "lunar.h"
+
+class BIStream;
+class BOStream;
 
 
 class Diffstat
@@ -22,8 +27,8 @@ class Diffstat
 	public:
 		struct Stat
 		{
-			long cadd, ladd;
-			long cdel, ldel;
+			uint64_t cadd, ladd;
+			uint64_t cdel, ldel;
 
 			Stat() : cadd(0), ladd(0), cdel(0), ldel(0) { }
 		};
@@ -33,6 +38,9 @@ class Diffstat
 		Diffstat(std::istream &in);
 		Diffstat(lua_State *L);
 		~Diffstat();
+
+		void write(BOStream &out) const;
+		bool load(BIStream &in);
 
 		// Lua bindings
 		int files(lua_State *L);

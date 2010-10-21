@@ -10,6 +10,7 @@
 #include <cstring>
 #include <iostream>
 
+#include "bstream.h"
 #include "luahelpers.h"
 
 #include "diffstat.h"
@@ -50,6 +51,35 @@ Diffstat::Diffstat(lua_State *L)
 Diffstat::~Diffstat()
 {
 
+}
+
+// Writes the stat to a binary stream
+void Diffstat::write(BOStream &out) const
+{
+	out << (uint32_t)m_stats.size();
+	for (std::map<std::string, Stat>::const_iterator it = m_stats.begin(); it != m_stats.end(); ++it) {
+		out << it->first.data();
+		out << it->second.cadd << it->second.ladd << it->second.cdel << it->second.ldel;
+	}
+}
+
+// Loads the stat from a binary stream
+bool Diffstat::load(BIStream &in)
+{
+	m_stats.clear();
+	uint32_t i = 0, n;
+	in >> n;
+	std::string buffer;
+	Stat stat;
+	while (i++ < n && !in.eof()) {
+		in >> buffer;
+		if (buffer.empty()) {
+			return false;
+		}
+		in >> stat.cadd >> stat.ladd >> stat.cdel >> stat.ldel;
+		m_stats[buffer] = stat;
+	}
+	return true;
 }
 
 // Returns the list of files that have been changed
@@ -125,10 +155,10 @@ void Diffstat::parse(std::istream &in)
 			file = str.substr(7);
 		} else if (!str.compare(0, 4, "====") || !str.compare(0, 4, "--- ") || !str.compare(0, 4, "+++ ")) {
 			continue;
-		} else if (!str.compare(0, 1, "-")) {
+		} else if (str[0] == '-') {
 			stat.cdel += str.length()-1;
 			++stat.ldel;
-		} else if (!str.compare(0, 1, "+")) {
+		} else if (str[0] == '+') {
 			stat.cadd += str.length()-1;
 			++stat.ladd;
 		}
