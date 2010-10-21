@@ -106,15 +106,11 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	// TODO: Cache is not implemented yet
-#if 0
-	if (opts.useCache()) {
-		backend = new Cache(backend, opts);
-	}
-#endif
-
 	try {
 		backend->init();
+		if (opts.useCache()) {
+			backend = new Cache(backend, opts);
+		}
 	} catch (const std::string &str) {
 		std::cerr << "Error initializing backend: " << str << std::endl;
 		return EXIT_FAILURE;
