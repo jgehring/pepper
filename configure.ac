@@ -22,6 +22,20 @@ AC_PROG_INSTALL()
 
 
 #
+# Checks for types
+#
+
+AC_TYPE_UINT64_T()
+
+
+#
+# Checks for system and compiler characteristics
+#
+
+AC_C_BIGENDIAN
+
+
+#
 # Checks for functions
 #
 
@@ -43,7 +57,6 @@ AC_SUBST([LUA_LIBS])
 #
 # Backend configuration
 #
-
 
 BACKENDS_CHECK()
 
