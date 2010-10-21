@@ -24,9 +24,13 @@
 #include "cache.h"
 
 
+#define MAX_CACHEFILE_SIZE 4194304
+
+
 // Constructor
 Cache::Cache(Backend *backend, const Options &options)
-	: Backend(options), m_backend(backend)
+	: Backend(options), m_backend(backend), m_iout(NULL), m_cout(NULL),
+	  m_cin(0), m_coindex(0), m_ciindex(0)
 {
 	load();
 }
@@ -35,6 +39,9 @@ Cache::Cache(Backend *backend, const Options &options)
 Cache::~Cache()
 {
 	delete m_backend;
+	delete m_iout;
+	delete m_cout;
+	delete m_cin;
 }
 
 // Returns a diffstat for the specified revision
@@ -67,28 +74,35 @@ void Cache::put(const std::string &id, const Diffstat &stat)
 {
 	// Add revision to cache
 	std::string dir = m_opts.cacheDir() + "/" + m_backend->uuid(), path;
-	uint32_t index = 0, offset = 0;
-	do {
-		// TODO: Avoid stats, i.e. keep stream open
-		path = Utils::strprintf("%s/cache.%u", dir.c_str(), index);
-		if (SysUtils::filesize(path) < 4194304/16) {
-			break;
-		}
-		++index;
-	} while (true);
+	if (m_cout == NULL) {
+		m_coindex = 0;
+		do {
+			path = Utils::strprintf("%s/cache.%u", dir.c_str(), m_coindex);
+			if (SysUtils::filesize(path) < MAX_CACHEFILE_SIZE) {
+				break;
+			}
+			++m_coindex;
+		} while (true);
 
-	BOStream out(path, true);
-	offset = out.tell();
-	stat.write(out);
+		delete m_cout; m_cout = NULL;
+		m_cout = new BOStream(path, true);
+	} else if (m_cout->tell() >= MAX_CACHEFILE_SIZE) {
+		delete m_cout;
+		path = Utils::strprintf("%s/cache.%u", dir.c_str(), ++m_coindex);
+		m_cout = new BOStream(path, true);
+	}
+
+	uint32_t offset = m_cout->tell();
+	stat.write(*m_cout);
 
 	// Add revision to index
-	BOStream iout(dir + "/index", true);
-	if (iout.tell() == 0) {
+	if (m_iout == NULL) {
+		m_iout = new BOStream(dir + "/index", true);
 		// Version number
-		iout << (uint32_t)1;
+		*m_iout << (uint32_t)1;
 	}
-	iout << id;
-	iout << index << offset;
+	*m_iout << id;
+	*m_iout << m_coindex << offset;
 }
 
 // Loads a diffstat from the cache
@@ -97,16 +111,20 @@ Diffstat Cache::get(const std::string &id)
 	std::string dir = m_opts.cacheDir() + "/" + m_backend->uuid();
 	std::pair<uint32_t, uint32_t> offset = m_index[id];
 	std::string path = Utils::strprintf("%s/cache.%u", dir.c_str(), offset.first);
-	BIStream in(path);
-	if (!in.ok()) {
-		throw Utils::strprintf("Unable to read from cache file: %s", path.c_str());
+	if (m_cin == NULL || offset.first != m_ciindex) {
+		delete m_cout; m_cout = NULL;
+		m_cin = new BIStream(path);
+		m_ciindex = offset.first;
+		if (!m_cin->ok()) {
+			throw Utils::strprintf("Unable to read from cache file: %s", path.c_str());
+		}
 	}
-	if (!in.seek(offset.second)) {
+	if (!m_cin->seek(offset.second)) {
 		throw Utils::strprintf("Unable to read from cache file: %s", path.c_str());
 	}
 
 	Diffstat stat;
-	if (!stat.load(in)) {
+	if (!stat.load(*m_cin)) {
 		throw Utils::strprintf("Unable to read from cache file: %s", path.c_str());
 	}
 	return stat;

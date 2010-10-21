@@ -13,6 +13,8 @@
 
 #include "backend.h"
 
+class BIStream;
+class BOStream;
 class Revision;
 
 
@@ -44,6 +46,9 @@ class Cache : public Backend
 
 	private:
 		Backend *m_backend;
+		BOStream *m_iout, *m_cout;
+		BIStream *m_cin;
+		uint32_t m_coindex, m_ciindex;
 
 		std::map<std::string, std::pair<uint32_t, uint32_t> > m_index;
 };
