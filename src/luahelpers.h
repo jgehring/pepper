@@ -14,6 +14,8 @@
 #include <string>
 #include <vector>
 
+#include "main.h"
+
 #include "lunar.h"
 
 
@@ -27,6 +29,11 @@ inline int push(lua_State *L, int i) {
 
 inline int push(lua_State *L, long int i) {
 	lua_pushinteger(L, i);
+	return 1;
+}
+
+inline int push(lua_State *L, uint64_t i) {
+	lua_pushnumber(L, i);
 	return 1;
 }
 
