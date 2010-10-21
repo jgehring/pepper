@@ -26,13 +26,26 @@ class Cache : public Backend
 		void init() { m_backend->init(); }
 
 		std::string name() const { return m_backend->name(); }
+
+		std::string uuid() { return m_backend->uuid(); }
+
 		std::string head(const std::string &branch = std::string()) { return m_backend->head(branch); }
 		std::vector<std::string> branches() { return m_backend->branches(); }
+		Diffstat diffstat(const std::string &id);
 
+		RevisionIterator *iterator(const std::string &branch = std::string()) { return m_backend->iterator(branch); }
 		Revision *revision(const std::string &id);
 
 	private:
+		bool lookup(const std::string &id);
+		void put(const std::string &id, const Diffstat &stat);
+		Diffstat get(const std::string &id);
+		void load();
+
+	private:
 		Backend *m_backend;
+
+		std::map<std::string, std::pair<uint32_t, uint32_t> > m_index;
 };
 
 
