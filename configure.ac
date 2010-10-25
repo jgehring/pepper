@@ -68,6 +68,18 @@ AM_CONDITIONAL([SVN_BACKEND], [test "x$subversion" = "xyes"])
 
 
 #
+# Debugging
+#
+
+AC_ARG_ENABLE([debug], [AS_HELP_STRING([--enable-debug], [Turn on debugging])], [debug="$enableval"], [debug="no"])
+if test "x$debug" = "xyes"; then
+	CXXFLAGS="-O0 -g -DDEBUG"
+else
+	CXXFLAGS="-O2 -DNDEBUG"
+fi
+
+
+#
 # Write Makefiles
 #
 
