@@ -1,6 +1,9 @@
 /*
  * Lunar - improved version of Luna for find binding C++-objects to Lua
  * From http://lua-users.org/wiki/CppBindingWithLunar
+ *
+ * Changes by Jonas Gehring <jonas.gehring@boolsoft.org>:
+ *   * An optional table argument has been added to Lunar::Register()
  */
 
 
@@ -24,7 +27,7 @@ template <typename T> class Lunar
 	typedef int (T::*mfp)(lua_State *L);
 	typedef struct { const char *name; mfp mfunc; } RegType;
 
-	static void Register(lua_State *L) {
+	static void Register(lua_State *L, const char *table = NULL) {
 		lua_newtable(L);
 		int methods = lua_gettop(L);
 
@@ -34,7 +37,19 @@ template <typename T> class Lunar
 		// store method table in globals so that
 		// scripts can add functions written in Lua.
 		lua_pushvalue(L, methods);
-		set(L, LUA_GLOBALSINDEX, T::className);
+		if (table == NULL) {
+			set(L, LUA_GLOBALSINDEX, T::className);
+		} else {
+			lua_pushstring(L, T::className);
+			lua_pushstring(L, table);
+			lua_gettable(L, LUA_GLOBALSINDEX); // No support for nested tables
+			if (lua_isnil(L, -1)) {
+				lua_pop(L, 1);
+				set(L, LUA_GLOBALSINDEX, T::className);
+			} else {
+				lua_settable(L, -1);
+			}
+		}
 
 		// hide metatable from Lua getmetatable()
 		lua_pushvalue(L, methods);
