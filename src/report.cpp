@@ -12,6 +12,7 @@
 
 #include "backend.h"
 #include "diffstat.h"
+#include "globals.h"
 #include "luahelpers.h"
 #include "repository.h"
 #include "revision.h"
@@ -55,6 +56,10 @@ static int map_branch(lua_State *L)
 		lua_call(L, 1, 1);
 		lua_pop(L, 1);
 
+		if (Globals::terminate) {
+			return LuaHelpers::pushError(L, "Terminated");
+		}
+
 		delete revision;
 	}
 
@@ -91,6 +96,10 @@ int run(const char *script, Backend *backend)
 	int ret = EXIT_SUCCESS;
 	if (luaL_dofile(L, script) != 0) {
 		std::cerr << "Error running report: " << lua_tostring(L, -1) << std::endl;
+		ret = EXIT_FAILURE;
+	}
+
+	if (Globals::terminate) {
 		ret = EXIT_FAILURE;
 	}
 

@@ -10,12 +10,39 @@
 #include <cstdlib>
 #include <iostream>
 
+#include <signal.h>
+
 #include "main.h"
 
 #include "backend.h"
 #include "cache.h"
+#include "globals.h"
 #include "options.h"
 #include "report.h"
+
+
+// Termination handler handlers
+static void terminationHandler(int signum)
+{
+	Globals::terminate = true;
+}
+
+// Installs the given signal handler thread
+static void installSignalHandler(void (*handler)(int))
+{
+	struct sigaction new_action, old_action;
+	new_action.sa_handler = handler;
+	sigemptyset(&new_action.sa_mask);
+	new_action.sa_flags = 0;
+
+	int signals[] = {SIGINT, SIGHUP, SIGTERM};
+	for (unsigned int i = 0; i < sizeof(signals)/sizeof(signals[0]); i++) {
+		sigaction(signals[i], NULL, &old_action);
+		if (old_action.sa_handler != SIG_IGN) {
+			sigaction(signals[i], &new_action, NULL);
+		}
+	}
+}
 
 
 // Utility function for printing a help screen option
@@ -116,8 +143,11 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
+	installSignalHandler(&terminationHandler);
+
 	const char *script = "reports/test.lua";
 	int ret = Report::run(script, backend);
+
 	delete backend;
 	return ret;
 }

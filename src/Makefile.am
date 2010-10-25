@@ -10,6 +10,7 @@ pepper_SOURCES = \
 	bstream.h bstream.cpp \
 	cache.h cache.cpp \
 	diffstat.h diffstat.cpp \
+	globals.h globals.cpp \
 	luahelpers.h \
 	main.h main.cpp \
 	options.h options.cpp \
