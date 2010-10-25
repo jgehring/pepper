@@ -35,20 +35,33 @@ static int map_branch(lua_State *L)
 	int callback = luaL_ref(L, LUA_REGISTRYINDEX);
 	lua_pop(L, 1);
 
+	bool verbose = true;
+	if (verbose) {
+		std::cerr << "Initializing iterator... " << std::flush;
+	}
+
 	Backend *backend = repository->backend();
 	Backend::RevisionIterator *it;
 	try {
 		it = backend->iterator(branch);
-	} catch (const std::string &err) {
-		return LuaHelpers::pushError(L, err);
+	} catch (const Pepper::Exception &ex) {
+		if (verbose) {
+			std::cerr << "failed" << std::endl;
+		}
+		return LuaHelpers::pushError(L, ex.what(), ex.where());
+	}
+
+	if (verbose) {
+		std::cerr << "done" << std::endl;
+		std::cerr << "Mapping revisions... " << std::flush;
 	}
 
 	while (!it->atEnd()) {
 		Revision *revision = NULL;
 		try {
 			revision = backend->revision(it->next());
-		} catch (const std::string &err) {
-			return LuaHelpers::pushError(L, err);
+		} catch (const Pepper::Exception &ex) {
+			return LuaHelpers::pushError(L, ex.what(), ex.where());
 		}
 
 		lua_rawgeti(L, LUA_REGISTRYINDEX, callback);
@@ -56,11 +69,21 @@ static int map_branch(lua_State *L)
 		lua_call(L, 1, 1);
 		lua_pop(L, 1);
 
+		if (verbose) {
+			std::cerr << "\r\e[0K";
+			std::cerr << "Mapping revisions... " << revision->idString() << std::flush;
+		}
+
 		if (Globals::terminate) {
 			return LuaHelpers::pushError(L, "Terminated");
 		}
 
 		delete revision;
+	}
+
+	if (verbose) {
+		std::cerr << "\r\e[0K";
+		std::cerr << "Mapping revisions... done" << std::endl;
 	}
 
 	delete it;

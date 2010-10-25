@@ -54,4 +54,40 @@
 #endif
 
 
+#include <exception>
+#include <string>
+#include <cstdio>
+
+namespace Pepper
+{
+
+class Exception : public std::exception
+{
+public:
+	 Exception(const std::string &str, const char *file = NULL, int line = 0) throw()
+		 : m_str(str)
+	 {
+		 if (file) snprintf(m_where, sizeof(m_where), "%s:%d", file, line);
+		 else m_where[0] = 0;
+	 }
+	 virtual ~Exception() throw() { }
+
+	 virtual const char *what() const throw() {
+		 return m_str.c_str();
+	 }
+	 const char *where() const throw() {
+		 return m_where;
+	 }
+
+private:
+	 std::string m_str;
+	 char m_where[512];
+};
+
+} // namespace Pepper
+
+// Generates an exception with where() information
+#define PEX(str) Pepper::Exception(str, __FILE__, __LINE__)
+
+
 #endif // MAIN_H_

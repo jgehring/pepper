@@ -121,16 +121,16 @@ Diffstat Cache::get(const std::string &id)
 		m_cin = new BIStream(path);
 		m_ciindex = offset.first;
 		if (!m_cin->ok()) {
-			throw Utils::strprintf("Unable to read from cache file: %s", path.c_str());
+			throw PEX(Utils::strprintf("Unable to read from cache file: %s", path.c_str()));
 		}
 	}
 	if (!m_cin->seek(offset.second)) {
-		throw Utils::strprintf("Unable to read from cache file: %s", path.c_str());
+		throw PEX(Utils::strprintf("Unable to read from cache file: %s", path.c_str()));
 	}
 
 	Diffstat stat;
 	if (!stat.load(*m_cin)) {
-		throw Utils::strprintf("Unable to read from cache file: %s", path.c_str());
+		throw PEX(Utils::strprintf("Unable to read from cache file: %s", path.c_str()));
 	}
 	return stat;
 }
@@ -145,7 +145,7 @@ void Cache::load()
 	if (stat(path.c_str(), &statbuf) == -1) {
 		// Create the cache directory
 		if (SysUtils::mkpath(path) < 0) {
-			throw Utils::strprintf("Unable to create cache directory: %s", path.c_str());
+			throw PEX(Utils::strprintf("Unable to create cache directory: %s", path.c_str()));
 		}
 		return;
 	}
@@ -158,7 +158,7 @@ void Cache::load()
 	uint32_t version;
 	in >> version;
 	if (version != 1) {
-		throw Utils::strprintf("Unkown cache version number %u", version);
+		throw PEX(Utils::strprintf("Unkown cache version number %u", version));
 	}
 
 	std::string buffer;

@@ -92,6 +92,13 @@ inline int pushError(lua_State *L, const std::string &e) {
 	return luaL_error(L, e.c_str());
 }
 
+inline int pushError(lua_State *L, const char *what, const char *where) {
+	std::string s(where);
+	s += ": ";
+	s += what;
+	return pushError(L, s);
+}
+
 
 inline const char *pop(lua_State *L, int index = -1) {
 	return luaL_checkstring(L, index);

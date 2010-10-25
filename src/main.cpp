@@ -109,8 +109,8 @@ int main(int argc, char **argv)
 	Options opts;
 	try {
 		opts.parse(argc, argv);
-	} catch (const std::string &str) {
-		std::cerr << "Error parsing arguments: " << str << std::endl;
+	} catch (const std::exception &ex) {
+		std::cerr << "Error parsing arguments: " << ex.what() << std::endl;
 		std::cerr << "Run with --help for usage information" << std::endl;
 		return EXIT_FAILURE;
 	}
@@ -138,8 +138,8 @@ int main(int argc, char **argv)
 		if (opts.useCache()) {
 			backend = new Cache(backend, opts);
 		}
-	} catch (const std::string &str) {
-		std::cerr << "Error initializing backend: " << str << std::endl;
+	} catch (const Pepper::Exception &ex) {
+		std::cerr << "Error initializing backend: " << ex.where() << ": " << ex.what() << std::endl;
 		return EXIT_FAILURE;
 	}
 

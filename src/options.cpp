@@ -108,7 +108,7 @@ void Options::parse(const std::vector<std::string> &args)
 		} else if (m_options["url"].empty()) {
 			m_options["url"] = args[i];
 		} else {
-			throw Utils::strprintf("Unkown argument %s", args[i].c_str());
+			throw PEX(Utils::strprintf("Unkown argument %s", args[i].c_str()));
 		}
 	}
 }

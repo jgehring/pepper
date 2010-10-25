@@ -57,23 +57,23 @@ public:
 		// Create the client context
 		svn_error_t *err;
 		if ((err = svn_client_create_context(&ctx, pool))) {
-			throw strerr(err);
+			throw PEX(strerr(err));
 		}
 		if ((err = svn_config_get_config(&(ctx->config), NULL, pool))) {
-			throw strerr(err);
+			throw PEX(strerr(err));
 		}
 
 		// Setup the authentication data
 		svn_auth_baton_t *auth_baton;
 		svn_config_t *config = hashget<svn_config_t *>(ctx->config, SVN_CONFIG_CATEGORY_CONFIG);
 		if ((err = svn_cmdline_setup_auth_baton(&auth_baton, /*(session->flags & SF_NON_INTERACTIVE)*/0, auth.username.c_str(), auth.password.c_str(), NULL, /*(session->flags & SF_NO_AUTH_CACHE)*/0, config, NULL, NULL, pool))) {
-			throw strerr(err);
+			throw PEX(strerr(err));
 		}
 		ctx->auth_baton = auth_baton;
 
 		/* Setup the RA session */
 		if ((err = svn_client_open_ra_session(&ra, this->url, ctx, pool))) {
-			throw strerr(err);
+			throw PEX(strerr(err));
 		}
 	}
 
@@ -139,13 +139,13 @@ private:
 	{
 		svn_error_t *err;
 		if ((err = svn_fs_initialize(pool))) {
-			throw strerr(err);
+			throw PEX(strerr(err));
 		}
 		if ((err = svn_ra_initialize(pool))) {
-			throw strerr(err);
+			throw PEX(strerr(err));
 		}
 		if ((err = svn_config_ensure(NULL, pool))) {
-			throw strerr(err);
+			throw PEX(strerr(err));
 		}
 	}
 
@@ -184,7 +184,7 @@ SubversionBackend::SubversionRevisionIterator::SubversionRevisionIterator(SvnCon
 //	svn_error_t *err = svn_ra_get_log2(c->ra, path, 0, head, 0, FALSE, TRUE, FALSE, props, &logReceiver, &m_ids, pool);
 	svn_error_t *err = svn_ra_get_log2(c->ra, path, 0, head, 0, FALSE, FALSE /* otherwise, copy history will be ignored */, FALSE, props, &logReceiver, &m_ids, pool);
 	if (err != NULL) {
-		throw SvnConnection::strerr(err);
+		throw PEX(SvnConnection::strerr(err));
 	}
 
 	svn_pool_clear(pool);
@@ -204,18 +204,18 @@ SubversionBackend::~SubversionBackend()
 	delete d;
 }
 
-// Opens the connection to the repository, possibly throwing an error description
+// Opens the connection to the repository
 void SubversionBackend::init()
 {
 	// Initialize the Subversion C library
 #ifndef WIN32
 	if (svn_cmdline_init(PACKAGE, stderr) != EXIT_SUCCESS) {
-		throw std::string("Failed to initialize Subversion library");
+		throw PEX("Failed to initialize Subversion library");
 	}
 	atexit(apr_terminate);
 #else // !WIN32
 	if (svn_cmdline_init(PACKAGE, NULL) != EXIT_SUCCESS) {
-		throw std::string("Failed to initialize Subversion library");
+		throw PEX("Failed to initialize Subversion library");
 	}
 #endif // !WIN32
 
@@ -233,7 +233,7 @@ std::string SubversionBackend::uuid()
 	const char *id;
 	svn_error_t *err = svn_ra_get_uuid2(d->ra, &id, pool);
 	if (err != NULL) {
-		throw SvnConnection::strerr(err);
+		throw PEX(SvnConnection::strerr(err));
 	}
 	std::string sid(id);
 	svn_pool_destroy(pool);
@@ -247,7 +247,7 @@ std::string SubversionBackend::head(const std::string &branch)
 	svn_revnum_t rev;
 	svn_error_t *err = svn_ra_get_latest_revnum(d->ra, &rev, pool);
 	if (err != NULL) {
-		throw SvnConnection::strerr(err);
+		throw PEX(SvnConnection::strerr(err));
 	}
 	svn_pool_destroy(pool);
 	return Utils::int2str(rev);
@@ -266,7 +266,7 @@ std::vector<std::string> SubversionBackend::branches()
 	svn_dirent_t *dirent;
 	svn_error_t *err = svn_ra_stat(d->ra, "branches", SVN_INVALID_REVNUM, &dirent, pool);
 	if (err != NULL) {
-		throw SvnConnection::strerr(err);
+		throw PEX(SvnConnection::strerr(err));
 	}
 
 	if (dirent == NULL || dirent->kind != svn_node_dir) {
@@ -279,7 +279,7 @@ std::vector<std::string> SubversionBackend::branches()
 	apr_hash_t *dirents = apr_hash_make(pool), *props = apr_hash_make(pool);
 	err = svn_ra_get_dir2(d->ra, &dirents, NULL, &props, "branches", SVN_INVALID_REVNUM, SVN_DIRENT_KIND, pool);
 	if (err != NULL) {
-		throw SvnConnection::strerr(err);
+		throw PEX(SvnConnection::strerr(err));
 	}
 
 	branches.push_back("trunk");
@@ -319,16 +319,16 @@ Diffstat SubversionBackend::diffstat(const std::string &id)
 
 	const char *tmpdir = NULL;
 	if (apr_temp_dir_get(&tmpdir, pool) != APR_SUCCESS) {
-		throw Utils::strprintf("Unable to determine temporary directory");
+		throw PEX("Unable to determine temporary directory");
 	}
 	char *templ = apr_psprintf(pool, "%s/XXXXXX", tmpdir);
 	if (apr_file_mktemp(&outfile, templ, APR_CREATE | APR_READ | APR_WRITE | APR_EXCL, pool) != APR_SUCCESS) {
-		throw Utils::strprintf("Unable to create temporary file");
+		throw PEX("Unable to create temporary file");
 	}
 
 	svn_error_t *err = svn_client_diff4(apr_array_make(pool, 0, 1), d->url, &rev1, d->url, &rev2, NULL, svn_depth_infinity, FALSE, FALSE, TRUE, APR_LOCALE_CHARSET, outfile, errfile, NULL, d->ctx, pool);
 	if (err != NULL) {
-		throw SvnConnection::strerr(err);
+		throw PEX(SvnConnection::strerr(err));
 	}
 
 	// Generate the diffstat
@@ -360,13 +360,13 @@ Backend::RevisionIterator *SubversionBackend::iterator(const std::string &branch
 	svn_dirent_t *dirent;
 	svn_error_t *err = svn_ra_stat(d->ra, prefix.c_str(), SVN_INVALID_REVNUM, &dirent, pool);
 	if (err != NULL) {
-		throw SvnConnection::strerr(err);
+		throw PEX(SvnConnection::strerr(err));
 	}
 	if (dirent == NULL) {
 		if (prefix == "trunk") {
 			prefix.clear();
 		} else {
-			throw Utils::strprintf("No such branch: %s", branch.c_str());
+			throw PEX(Utils::strprintf("No such branch: %s", branch.c_str()));
 		}
 	}
 	svn_pool_destroy(pool);
@@ -388,7 +388,7 @@ Revision *SubversionBackend::revision(const std::string &id)
 
 	svn_error_t *err = svn_ra_rev_proplist(d->ra, revnum, &props, pool);
 	if (err != NULL) {
-		throw SvnConnection::strerr(err);
+		throw PEX(SvnConnection::strerr(err));
 	}
 
 	svn_string_t *value;
@@ -400,7 +400,7 @@ Revision *SubversionBackend::revision(const std::string &id)
 	if ((value = static_cast<svn_string_t *>(apr_hash_get(props, "svn:date", APR_HASH_KEY_STRING)))) {
 		apr_time_t when;
 		if ((err = svn_time_from_cstring(&when, value->data, pool)) != NULL) {
-			throw SvnConnection::strerr(err);
+			throw PEX(SvnConnection::strerr(err));
 		}
 		date = apr_time_sec(when);
 	}
