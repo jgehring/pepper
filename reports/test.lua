@@ -36,8 +36,14 @@ end
 -- Example
 --print_repo(g_repository)
 
+-- Print all namespace members
+r = pepper
+for i,v in pairs(r) do
+	print(i,v)
+end
+
 -- Simple example: Map a function to all revision of a given branch
-report.map_branch(print_revision, g_repository, "trunk")
+pepper.report.map_branch(print_revision, g_repository, "trunk")
 
 -- Generate graph with LOC
 print("# Revision LOC")

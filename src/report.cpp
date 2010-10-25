@@ -80,12 +80,14 @@ int run(const char *script, Backend *backend)
 	// Setup lua context
 	lua_State *L = lua_open();
 	luaL_openlibs(L);
-	luaL_openlib(L, "report", report, 0);
+
+	// Register report functions
+	luaL_register(L, "pepper.report", report);
 
 	// Register binding classes
-	Lunar<Repository>::Register(L);
-	Lunar<Revision>::Register(L);
-	Lunar<Diffstat>::Register(L);
+	Lunar<Repository>::Register(L, "pepper");
+	Lunar<Revision>::Register(L, "pepper");
+	Lunar<Diffstat>::Register(L, "pepper");
 
 	// Push current repository backend to the stack
 	Repository repo(backend);
