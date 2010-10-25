@@ -31,6 +31,7 @@ Lunar<Revision>::RegType Revision::methods[] = {
 	LUNAR_DECLARE_METHOD(Revision, id),
 	LUNAR_DECLARE_METHOD(Revision, date),
 	LUNAR_DECLARE_METHOD(Revision, author),
+	LUNAR_DECLARE_METHOD(Revision, message),
 	LUNAR_DECLARE_METHOD(Revision, diffstat),
 	{0,0}
 };
@@ -38,7 +39,14 @@ Lunar<Revision>::RegType Revision::methods[] = {
 
 // Constructor
 Revision::Revision(const std::string &id, const Diffstat &diffstat)
-	: m_id(id), m_diffstat(diffstat)
+	: m_id(id), m_date(0), m_diffstat(diffstat)
+{
+
+}
+
+// Constructor
+Revision::Revision(const std::string &id, int64_t date, const std::string &author, const std::string &message, const Diffstat &diffstat)
+	: m_id(id), m_date(date), m_author(author), m_message(message), m_diffstat(diffstat)
 {
 
 }
@@ -56,21 +64,33 @@ Revision::~Revision()
 }
 
 // Returns the revision ID (e.g., the revision number)
+std::string Revision::idString() const
+{
+	return m_id;
+}
+
+// Returns the revision ID (e.g., the revision number)
 int Revision::id(lua_State *L)
 {
 	return LuaHelpers::push(L, m_id);
 }
 
-// Returns the revision date
+// Returns the revision date, in seconds
 int Revision::date(lua_State *L)
 {
-	return LuaHelpers::push(L, mapget(m_data, "date"));
+	return LuaHelpers::push(L, m_date);
 }
 
 // Returns the author of this revision
 int Revision::author(lua_State *L)
 {
-	return LuaHelpers::push(L, mapget(m_data, "author"));
+	return LuaHelpers::push(L, m_author);
+}
+
+// Returns the message of this revision
+int Revision::message(lua_State *L)
+{
+	return LuaHelpers::push(L, m_message);
 }
 
 // Returns a diffstat for this revision

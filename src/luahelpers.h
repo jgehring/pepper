@@ -27,7 +27,7 @@ inline int push(lua_State *L, int i) {
 	return 1;
 }
 
-inline int push(lua_State *L, long int i) {
+inline int push(lua_State *L, int64_t i) {
 	lua_pushinteger(L, i);
 	return 1;
 }

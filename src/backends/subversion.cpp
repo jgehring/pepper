@@ -18,7 +18,7 @@
 #include <svn_path.h>
 #include <svn_pools.h>
 #include <svn_ra.h>
-#include <svn_types.h>
+#include <svn_time.h>
 #include <svn_utf.h>
 
 #include "main.h"
@@ -179,7 +179,7 @@ SubversionBackend::SubversionRevisionIterator::SubversionRevisionIterator(SvnCon
 	apr_pool_t *pool = svn_pool_create(c->pool);
 	apr_array_header_t *path = apr_array_make(pool, 1, sizeof (const char *));
 	APR_ARRAY_PUSH(path, const char *) = svn_path_canonicalize(prefix.empty() ? "." : prefix.c_str(), pool);
-	apr_array_header_t *props = apr_array_make(pool, 1, sizeof (const char *)); // Inentionally empty
+	apr_array_header_t *props = apr_array_make(pool, 1, sizeof (const char *)); // Intentionally empty
 
 //	svn_error_t *err = svn_ra_get_log2(c->ra, path, 0, head, 0, FALSE, TRUE, FALSE, props, &logReceiver, &m_ids, pool);
 	svn_error_t *err = svn_ra_get_log2(c->ra, path, 0, head, 0, FALSE, FALSE /* otherwise, copy history will be ignored */, FALSE, props, &logReceiver, &m_ids, pool);
@@ -379,6 +379,35 @@ Backend::RevisionIterator *SubversionBackend::iterator(const std::string &branch
 // Returns the revision data for the given ID
 Revision *SubversionBackend::revision(const std::string &id)
 {
-	// TODO: Add meta data
-	return new Revision(id, diffstat(id));
+	std::map<std::string, std::string> data;
+
+	apr_pool_t *pool = svn_pool_create(d->pool);
+	apr_hash_t *props;
+	svn_revnum_t revnum;
+	Utils::str2int(id, &(revnum));
+
+	svn_error_t *err = svn_ra_rev_proplist(d->ra, revnum, &props, pool);
+	if (err != NULL) {
+		throw SvnConnection::strerr(err);
+	}
+
+	svn_string_t *value;
+	std::string author, message;
+	int64_t date = 0;
+	if ((value = static_cast<svn_string_t *>(apr_hash_get(props, "svn:author", APR_HASH_KEY_STRING)))) {
+		author = value->data;
+	}
+	if ((value = static_cast<svn_string_t *>(apr_hash_get(props, "svn:date", APR_HASH_KEY_STRING)))) {
+		apr_time_t when;
+		if ((err = svn_time_from_cstring(&when, value->data, pool)) != NULL) {
+			throw SvnConnection::strerr(err);
+		}
+		date = apr_time_sec(when);
+	}
+	if ((value = static_cast<svn_string_t *>(apr_hash_get(props, "svn:log", APR_HASH_KEY_STRING)))) {
+		message = value->data;
+	}
+
+	svn_pool_destroy(pool);
+	return new Revision(id, date, author, message, diffstat(id));
 }

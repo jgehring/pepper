@@ -14,6 +14,8 @@
 #include <map>
 #include <string>
 
+#include "main.h"
+
 #include "lunar.h"
 
 #include "diffstat.h"
@@ -22,14 +24,18 @@
 class Revision
 {
 	public:
-		Revision(const std::string &id, const Diffstat &diffstat);
+		__attribute__((deprecated)) Revision(const std::string &id, const Diffstat &diffstat);
+		Revision(const std::string &id, int64_t date, const std::string &author, const std::string &message, const Diffstat &diffstat);
 		Revision(lua_State *L);
 		~Revision();
+
+		std::string idString() const;
 
 		// Lua bindings
 		int id(lua_State *L);
 		int date(lua_State *L);
 		int author(lua_State *L);
+		int message(lua_State *L);
 		int diffstat(lua_State *L);
 
 	public:
@@ -38,7 +44,9 @@ class Revision
 
 	private:
 		std::string m_id;
-		std::map<std::string, std::string> m_data;
+		int64_t m_date;
+		std::string m_author;
+		std::string m_message;
 		Diffstat m_diffstat;
 };
 

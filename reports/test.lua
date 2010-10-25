@@ -19,7 +19,7 @@ end
 loc = {}
 
 function print_revision(r)
---	print(r:id(), r:date())
+--	print(r:id(), r:author(), os.date("%Y-%d-%m %X", r:date()))
 	s = r:diffstat()
 	t = s:files()
 	l = 0
