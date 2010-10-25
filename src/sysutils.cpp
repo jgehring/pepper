@@ -79,6 +79,13 @@ int mkpath(const std::string &path)
 	return mkdir(path);
 }
 
+// Checks if the given file (or directory) exists
+bool exists(const std::string &path)
+{
+	struct stat statbuf;
+	return (stat(path.c_str(), &statbuf) != -1);
+}
+
 // Returns the size of the given file
 size_t filesize(const std::string &path)
 {
