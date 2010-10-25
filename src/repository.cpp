@@ -16,7 +16,7 @@
 
 
 // Static variables for the lua bindings
-const char Repository::className[] = "Repository";
+const char Repository::className[] = "repository";
 Lunar<Repository>::RegType Repository::methods[] = {
 	LUNAR_DECLARE_METHOD(Repository, url),
 	LUNAR_DECLARE_METHOD(Repository, type),

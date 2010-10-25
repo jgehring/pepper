@@ -17,7 +17,7 @@
 
 
 // Static variables for the lua bindings
-const char Diffstat::className[] = "Diffstat";
+const char Diffstat::className[] = "diffstat";
 Lunar<Diffstat>::RegType Diffstat::methods[] = {
 	LUNAR_DECLARE_METHOD(Diffstat, files),
 	LUNAR_DECLARE_METHOD(Diffstat, stats),

@@ -26,7 +26,7 @@ static inline std::string mapget(const std::map<std::string, std::string> &map, 
 
 
 // Static variables for the lua bindings
-const char Revision::className[] = "Revision";
+const char Revision::className[] = "revision";
 Lunar<Revision>::RegType Revision::methods[] = {
 	LUNAR_DECLARE_METHOD(Revision, id),
 	LUNAR_DECLARE_METHOD(Revision, date),
