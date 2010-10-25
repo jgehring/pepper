@@ -78,6 +78,7 @@ void Cache::put(const std::string &id, const Diffstat &stat)
 		m_coindex = 0;
 		do {
 			path = Utils::strprintf("%s/cache.%u", dir.c_str(), m_coindex);
+			// TODO: For compressed files, the stat returns the actual data size
 			if (SysUtils::filesize(path) < MAX_CACHEFILE_SIZE) {
 				break;
 			}
@@ -97,9 +98,13 @@ void Cache::put(const std::string &id, const Diffstat &stat)
 
 	// Add revision to index
 	if (m_iout == NULL) {
-		m_iout = new BOStream(dir + "/index", true);
-		// Version number
-		*m_iout << (uint32_t)1;
+		if (SysUtils::exists(dir + "/index")) {
+			m_iout = new BOStream(dir + "/index", true);
+		} else {
+			m_iout = new BOStream(dir + "/index", false);
+			// Version number
+			*m_iout << (uint32_t)1;
+		}
 	}
 	*m_iout << id;
 	*m_iout << m_coindex << offset;
