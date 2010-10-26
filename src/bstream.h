@@ -110,6 +110,7 @@ class BOStream : public BStream
 		BOStream &operator<<(char c);
 		BOStream &operator<<(uint32_t i);
 		BOStream &operator<<(uint64_t i);
+		inline BOStream &operator<<(int64_t i) { return (*this << static_cast<uint64_t>(i)); }
 		BOStream &operator<<(const std::string &s);
 };
 
@@ -123,6 +124,7 @@ class BIStream : public BStream
 		BIStream &operator>>(char &c);
 		BIStream &operator>>(uint32_t &i);
 		BIStream &operator>>(uint64_t &i);
+		inline BIStream &operator>>(int64_t &i) { return (*this >> reinterpret_cast<uint64_t &>(i)); }
 		BIStream &operator>>(std::string &s);
 };
 
