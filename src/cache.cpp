@@ -24,7 +24,13 @@
 #include "cache.h"
 
 
-#define MAX_CACHEFILE_SIZE 4194304
+#ifdef HAVE_LIBZ
+ // There's no way to tell the size of the compressed data with the standard
+ // gz*() functions. Thus, simply use a larger maximum size for the uncompressed data.
+ #define MAX_CACHEFILE_SIZE 41943040
+#else
+ #define MAX_CACHEFILE_SIZE 4194304
+#endif
 
 
 // Constructor
