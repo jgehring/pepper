@@ -88,6 +88,11 @@ inline int push(lua_State *L, const std::vector<T> &v)
 
 }
 
+inline int pushNil(lua_State *L) {
+	lua_pushnil(L);
+	return 0;
+}
+
 inline int pushError(lua_State *L, const std::string &e) {
 	return luaL_error(L, e.c_str());
 }
