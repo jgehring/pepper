@@ -16,7 +16,7 @@
 
 #include "main.h"
 
-#include "lunar.h"
+#include "lunar/lunar.h"
 
 
 namespace LuaHelpers

@@ -11,20 +11,25 @@ pepper_SOURCES = \
 	cache.h cache.cpp \
 	diffstat.h diffstat.cpp \
 	globals.h globals.cpp \
-	luahelpers.h \
 	main.h main.cpp \
 	options.h options.cpp \
-	report.h report.cpp \
 	repository.h repository.cpp \
 	revision.h revision.cpp \
 	sysutils.h sysutils.cpp \
-	utils.h utils.cpp
+	utils.h utils.cpp \
+	\
+	lua/luadiffstat.h \
+	lua/luahelpers.h \
+	lua/luarepository.h \
+	lua/luarevision.h \
+	lua/lunar/lunar.h \
+	lua/report.h lua/report.cpp
 
 AM_CXXFLAGS = \
 	-Wall -pipe -ansi \
 	$(LUA_CFLAGS)
 INCLUDES = \
-	-I@top_srcdir@/src/lunar
+	-I@top_srcdir@/src/lua
 AM_CPPFLAGS = 
 AM_LDFLAGS = \
 	$(LUA_LIBS)

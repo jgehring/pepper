@@ -13,9 +13,13 @@
 #include "backend.h"
 #include "diffstat.h"
 #include "globals.h"
-#include "luahelpers.h"
 #include "repository.h"
 #include "revision.h"
+
+#include "lua/luadiffstat.h"
+#include "lua/luahelpers.h"
+#include "lua/luarepository.h"
+#include "lua/luarevision.h"
 
 
 namespace Report
@@ -29,7 +33,7 @@ static int map_branch(lua_State *L)
 	}
 
 	luaL_checktype(L, -3, LUA_TFUNCTION);
-	Repository *repository = Lunar<Repository>::check(L, -2);
+	LuaRepository *repository = Lunar<LuaRepository>::check(L, -2);
 	std::string branch = luaL_checkstring(L, -1);
 	lua_pop(L, 2);
 	int callback = luaL_ref(L, LUA_REGISTRYINDEX);
@@ -40,7 +44,7 @@ static int map_branch(lua_State *L)
 		std::cerr << "Initializing iterator... " << std::flush;
 	}
 
-	Backend *backend = repository->backend();
+	Backend *backend = repository->object()->backend();
 	Backend::RevisionIterator *it;
 	try {
 		it = backend->iterator(branch);
@@ -109,13 +113,14 @@ int run(const char *script, Backend *backend)
 	luaL_register(L, "pepper.report", report);
 
 	// Register binding classes
-	Lunar<Repository>::Register(L, "pepper");
+	Lunar<LuaRepository>::Register(L, "pepper");
 	Lunar<LuaRevision>::Register(L, "pepper");
-	Lunar<Diffstat>::Register(L, "pepper");
+	Lunar<LuaDiffstat>::Register(L, "pepper");
 
 	// Push current repository backend to the stack
 	Repository repo(backend);
-	Lunar<Repository>::push(L, &repo);
+	LuaRepository luarepo(&repo);
+	Lunar<LuaRepository>::push(L, &luarepo);
 	lua_setglobal(L, "g_repository");
 
 	// Run the script

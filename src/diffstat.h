@@ -16,14 +16,14 @@
 
 #include "main.h"
 
-#include "lunar.h"
-
 class BIStream;
 class BOStream;
 
 
 class Diffstat
 {
+	friend class LuaDiffstat;
+
 	public:
 		struct Stat
 		{
@@ -36,23 +36,10 @@ class Diffstat
 	public:
 		Diffstat();
 		Diffstat(std::istream &in);
-		Diffstat(lua_State *L);
 		~Diffstat();
 
 		void write(BOStream &out) const;
 		bool load(BIStream &in);
-
-		// Lua bindings
-		int files(lua_State *L);
-		int stats(lua_State *L);
-		int linesAdded(lua_State *L);
-		int bytesAdded(lua_State *L);
-		int linesRemoved(lua_State *L);
-		int bytesRemoved(lua_State *L);
-
-	public:
-		static const char className[];
-		static Lunar<Diffstat>::RegType methods[];
 
 	private:
 		void parse(std::istream &in);
