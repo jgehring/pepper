@@ -36,18 +36,20 @@ template <typename T> class Lunar
 
 		// store method table in globals so that
 		// scripts can add functions written in Lua.
-		lua_pushvalue(L, methods);
 		if (table == NULL) {
+			lua_pushvalue(L, methods);
 			set(L, LUA_GLOBALSINDEX, T::className);
 		} else {
-			lua_pushstring(L, T::className);
 			lua_pushstring(L, table);
-			lua_gettable(L, LUA_GLOBALSINDEX); // No support for nested tables
-			if (lua_isnil(L, -1)) {
+			lua_gettable(L, LUA_GLOBALSINDEX);
+			if (lua_isnil(L, -1)) { // Don't create the table, but fail silently
 				lua_pop(L, 1);
+				lua_pushvalue(L, methods);
 				set(L, LUA_GLOBALSINDEX, T::className);
 			} else {
-				lua_settable(L, -1);
+				lua_pushstring(L, T::className);
+				lua_pushvalue(L, methods);
+				lua_settable(L, -3);
 			}
 		}
 
