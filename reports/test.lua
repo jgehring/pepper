@@ -19,7 +19,7 @@ end
 loc = {}
 
 function print_revision(r)
---	print(r:id(), r:author(), os.date("%Y-%d-%m %X", r:date()))
+	print(r:id(), r:author(), os.date("%Y-%d-%m %X", r:date()))
 	s = r:diffstat()
 	t = s:files()
 	l = 0
@@ -34,7 +34,7 @@ function print_revision(r)
 end
 
 -- Example
---print_repo(g_repository)
+print_repo(pepper.report.repository())
 
 -- Print all namespace members
 r = pepper
@@ -43,7 +43,7 @@ for i,v in pairs(r) do
 end
 
 -- Simple example: Map a function to all revision of a given branch
-pepper.report.map_branch(print_revision, g_repository, "trunk")
+pepper.report.map_branch(print_revision, "trunk")
 
 -- Generate graph with LOC
 print("# Revision LOC")

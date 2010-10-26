@@ -25,17 +25,27 @@
 namespace Report
 {
 
+// Global variables
+static Repository *repo;
+static LuaRepository *luarepo;
+
+
+// Returns the current repository
+static int repository(lua_State *L)
+{
+	return LuaHelpers::push(L, luarepo);
+}
+
 // Maps a lua function on all revisions of a given branch
 static int map_branch(lua_State *L)
 {
-	if (lua_gettop(L) != 3) {
-		return luaL_error(L, "Invalid number of arguments (3 expected)");
+	if (lua_gettop(L) != 2) {
+		return luaL_error(L, "Invalid number of arguments (2 expected)");
 	}
 
-	luaL_checktype(L, -3, LUA_TFUNCTION);
-	LuaRepository *repository = Lunar<LuaRepository>::check(L, -2);
+	luaL_checktype(L, -2, LUA_TFUNCTION);
 	std::string branch = luaL_checkstring(L, -1);
-	lua_pop(L, 2);
+	lua_pop(L, 1);
 	int callback = luaL_ref(L, LUA_REGISTRYINDEX);
 	lua_pop(L, 1);
 
@@ -44,7 +54,7 @@ static int map_branch(lua_State *L)
 		std::cerr << "Initializing iterator... " << std::flush;
 	}
 
-	Backend *backend = repository->object()->backend();
+	Backend *backend = repo->backend();
 	Backend::RevisionIterator *it;
 	try {
 		it = backend->iterator(branch);
@@ -70,7 +80,7 @@ static int map_branch(lua_State *L)
 		LuaRevision luarev(revision);
 
 		lua_rawgeti(L, LUA_REGISTRYINDEX, callback);
-		Lunar<LuaRevision>::push(L, &luarev);
+		LuaHelpers::push(L, &luarev);
 		lua_call(L, 1, 1);
 		lua_pop(L, 1);
 
@@ -97,6 +107,7 @@ static int map_branch(lua_State *L)
 
 // Function table of the report library
 static const struct luaL_reg report[] = {
+	{"repository", repository},
 	{"map_branch", map_branch},
 	{NULL, NULL}
 };
@@ -117,11 +128,9 @@ int run(const char *script, Backend *backend)
 	Lunar<LuaRevision>::Register(L, "pepper");
 	Lunar<LuaDiffstat>::Register(L, "pepper");
 
-	// Push current repository backend to the stack
-	Repository repo(backend);
-	LuaRepository luarepo(&repo);
-	Lunar<LuaRepository>::push(L, &luarepo);
-	lua_setglobal(L, "g_repository");
+	// Set the current repository
+	Report::repo = new Repository(backend);
+	Report::luarepo = new LuaRepository(repo);
 
 	// Run the script
 	int ret = EXIT_SUCCESS;
@@ -137,6 +146,8 @@ int run(const char *script, Backend *backend)
 	// Clean up
 	lua_gc(L, LUA_GCCOLLECT, 0);
 	lua_close(L);
+	delete Report::repo;
+	delete Report::luarepo;
 	return ret;
 }
 
