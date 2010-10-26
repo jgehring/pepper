@@ -63,15 +63,16 @@ static int map_branch(lua_State *L)
 		} catch (const Pepper::Exception &ex) {
 			return LuaHelpers::pushError(L, ex.what(), ex.where());
 		}
+		LuaRevision luarev(revision);
 
 		lua_rawgeti(L, LUA_REGISTRYINDEX, callback);
-		Lunar<Revision>::push(L, revision);
+		Lunar<LuaRevision>::push(L, &luarev);
 		lua_call(L, 1, 1);
 		lua_pop(L, 1);
 
 		if (verbose) {
 			std::cerr << "\r\e[0K";
-			std::cerr << "Mapping revisions... " << revision->idString() << std::flush;
+			std::cerr << "Mapping revisions... " << revision->id() << std::flush;
 		}
 
 		if (Globals::terminate) {
@@ -109,7 +110,7 @@ int run(const char *script, Backend *backend)
 
 	// Register binding classes
 	Lunar<Repository>::Register(L, "pepper");
-	Lunar<Revision>::Register(L, "pepper");
+	Lunar<LuaRevision>::Register(L, "pepper");
 	Lunar<Diffstat>::Register(L, "pepper");
 
 	// Push current repository backend to the stack

@@ -10,6 +10,7 @@
 #include <iostream>
 
 #include "luahelpers.h"
+#include "bstream.h"
 
 #include "revision.h"
 
@@ -25,21 +26,9 @@ static inline std::string mapget(const std::map<std::string, std::string> &map, 
 }
 
 
-// Static variables for the lua bindings
-const char Revision::className[] = "revision";
-Lunar<Revision>::RegType Revision::methods[] = {
-	LUNAR_DECLARE_METHOD(Revision, id),
-	LUNAR_DECLARE_METHOD(Revision, date),
-	LUNAR_DECLARE_METHOD(Revision, author),
-	LUNAR_DECLARE_METHOD(Revision, message),
-	LUNAR_DECLARE_METHOD(Revision, diffstat),
-	{0,0}
-};
-
-
 // Constructor
-Revision::Revision(const std::string &id, const Diffstat &diffstat)
-	: m_id(id), m_date(0), m_diffstat(diffstat)
+Revision::Revision(const std::string &id)
+	: m_id(id), m_date(0)
 {
 
 }
@@ -51,12 +40,6 @@ Revision::Revision(const std::string &id, int64_t date, const std::string &autho
 
 }
 
-// Default constructor for lua
-Revision::Revision(lua_State *L)
-{
-
-}
-
 // Destructor
 Revision::~Revision()
 {
@@ -64,37 +47,83 @@ Revision::~Revision()
 }
 
 // Returns the revision ID (e.g., the revision number)
-std::string Revision::idString() const
+std::string Revision::id() const
 {
 	return m_id;
 }
 
-// Returns the revision ID (e.g., the revision number)
-int Revision::id(lua_State *L)
+// Returns the diffstat object
+Diffstat Revision::diffstat() const
 {
-	return LuaHelpers::push(L, m_id);
+	return m_diffstat;
+}
+
+// Writes the revision to a binary stream (not writing the ID)
+void Revision::write(BOStream &out) const
+{
+	out << m_date << m_author << m_message;
+	m_diffstat.write(out);
+}
+
+// Loads the revision from a binary stream (not changing the ID)
+bool Revision::load(BIStream &in)
+{
+	in >> m_date >> m_author >> m_message;
+	return m_diffstat.load(in);
+}
+
+
+// Static variables for the lua bindings
+const char LuaRevision::className[] = "revision";
+Lunar<LuaRevision>::RegType LuaRevision::methods[] = {
+	LUNAR_DECLARE_METHOD(LuaRevision, id),
+	LUNAR_DECLARE_METHOD(LuaRevision, date),
+	LUNAR_DECLARE_METHOD(LuaRevision, author),
+	LUNAR_DECLARE_METHOD(LuaRevision, message),
+	LUNAR_DECLARE_METHOD(LuaRevision, diffstat),
+	{0,0}
+};
+
+// Constructor
+LuaRevision::LuaRevision(Revision *r)
+	: r(r)
+{
+
+}
+
+// Default constructor for lua
+LuaRevision::LuaRevision(lua_State *L)
+	: r(NULL)
+{
+
+}
+
+// Returns the revision ID (e.g., the revision number)
+int LuaRevision::id(lua_State *L)
+{
+	return (r ? LuaHelpers::push(L, r->m_id) : LuaHelpers::pushNil(L));
 }
 
 // Returns the revision date, in seconds
-int Revision::date(lua_State *L)
+int LuaRevision::date(lua_State *L)
 {
-	return LuaHelpers::push(L, m_date);
+	return (r ? LuaHelpers::push(L, r->m_date) : LuaHelpers::pushNil(L));
 }
 
 // Returns the author of this revision
-int Revision::author(lua_State *L)
+int LuaRevision::author(lua_State *L)
 {
-	return LuaHelpers::push(L, m_author);
+	return (r ? LuaHelpers::push(L, r->m_author) : LuaHelpers::pushNil(L));
 }
 
 // Returns the message of this revision
-int Revision::message(lua_State *L)
+int LuaRevision::message(lua_State *L)
 {
-	return LuaHelpers::push(L, m_message);
+	return (r ? LuaHelpers::push(L, r->m_message) : LuaHelpers::pushNil(L));
 }
 
 // Returns a diffstat for this revision
-int Revision::diffstat(lua_State *L)
+int LuaRevision::diffstat(lua_State *L)
 {
-	return LuaHelpers::push(L, &m_diffstat);
+	return (r ? LuaHelpers::push(L, &r->m_diffstat) : LuaHelpers::pushNil(L));
 }
