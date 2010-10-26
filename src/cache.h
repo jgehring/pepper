@@ -12,10 +12,10 @@
 
 
 #include "backend.h"
+#include "revision.h"
 
 class BIStream;
 class BOStream;
-class Revision;
 
 
 // This cache should be transparent and inherits the wrapped class
@@ -40,8 +40,8 @@ class Cache : public Backend
 
 	private:
 		bool lookup(const std::string &id);
-		void put(const std::string &id, const Diffstat &stat);
-		Diffstat get(const std::string &id);
+		void put(const std::string &id, const Revision &rev);
+		Revision *get(const std::string &id);
 		void load();
 
 	private:

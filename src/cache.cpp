@@ -54,19 +54,26 @@ Cache::~Cache()
 Diffstat Cache::diffstat(const std::string &id)
 {
 	if (!lookup(id)) {
-		Diffstat stat = m_backend->diffstat(id);
-		put(id, stat);
-		return stat;
+		return m_backend->diffstat(id);
 	}
 
-	return get(id);
+	Revision *r = get(id);
+	Diffstat stat = r->diffstat();
+	delete r;
+	return stat;
 }
 
 // Returns the revision data for the given ID
 Revision *Cache::revision(const std::string &id)
 {
+	if (!lookup(id)) {
+		Revision *r = m_backend->revision(id);
+		put(id, *r);
+		return r;
+	}
+
 	// TODO: Add meta data
-	return new Revision(id, diffstat(id));
+	return get(id);
 }
 
 // Checks if the diffstat of the given revision is already cached
@@ -75,8 +82,8 @@ bool Cache::lookup(const std::string &id)
 	return (m_index.find(id) != m_index.end());
 }
 
-// Adds the diffstat of the given revision to the cache
-void Cache::put(const std::string &id, const Diffstat &stat)
+// Adds the revision of the given revision to the cache
+void Cache::put(const std::string &id, const Revision &rev)
 {
 	// Add revision to cache
 	std::string dir = m_opts.cacheDir() + "/" + m_backend->uuid(), path;
@@ -100,7 +107,7 @@ void Cache::put(const std::string &id, const Diffstat &stat)
 	}
 
 	uint32_t offset = m_cout->tell();
-	stat.write(*m_cout);
+	rev.write(*m_cout);
 
 	// Add revision to index
 	if (m_iout == NULL) {
@@ -116,8 +123,8 @@ void Cache::put(const std::string &id, const Diffstat &stat)
 	*m_iout << m_coindex << offset;
 }
 
-// Loads a diffstat from the cache
-Diffstat Cache::get(const std::string &id)
+// Loads a revision from the cache
+Revision *Cache::get(const std::string &id)
 {
 	std::string dir = m_opts.cacheDir() + "/" + m_backend->uuid();
 	std::pair<uint32_t, uint32_t> offset = m_index[id];
@@ -134,11 +141,11 @@ Diffstat Cache::get(const std::string &id)
 		throw PEX(Utils::strprintf("Unable to read from cache file: %s", path.c_str()));
 	}
 
-	Diffstat stat;
-	if (!stat.load(*m_cin)) {
+	Revision *rev = new Revision(id);
+	if (!rev->load(*m_cin)) {
 		throw PEX(Utils::strprintf("Unable to read from cache file: %s", path.c_str()));
 	}
-	return stat;
+	return rev;
 }
 
 // Loads the index file of the cache
