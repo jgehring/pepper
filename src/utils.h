@@ -17,7 +17,7 @@
 #include "main.h"
 
 
-namespace Utils
+namespace utils
 {
 
 bool str2int(const std::string &str, int *i);
@@ -32,7 +32,7 @@ std::vector<std::string> split(const std::string &str, const std::string &token)
 
 std::string strprintf(const char *format, ...);
 
-} // namespace Utils
+} // namespace utils
 
 
 #endif // UTILS_H_

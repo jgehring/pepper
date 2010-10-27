@@ -18,7 +18,7 @@
 #include "diffstat.h"
 #include "options.h"
 #include "revision.h"
-#include "sysutils.h"
+#include "fs.h"
 #include "utils.h"
 
 #include "cache.h"
@@ -90,9 +90,9 @@ void Cache::put(const std::string &id, const Revision &rev)
 	if (m_cout == NULL) {
 		m_coindex = 0;
 		do {
-			path = Utils::strprintf("%s/cache.%u", dir.c_str(), m_coindex);
+			path = utils::strprintf("%s/cache.%u", dir.c_str(), m_coindex);
 			// TODO: For compressed files, the stat returns the actual data size
-			if (SysUtils::filesize(path) < MAX_CACHEFILE_SIZE) {
+			if (sys::fs::filesize(path) < MAX_CACHEFILE_SIZE) {
 				break;
 			}
 			++m_coindex;
@@ -102,7 +102,7 @@ void Cache::put(const std::string &id, const Revision &rev)
 		m_cout = new BOStream(path, true);
 	} else if (m_cout->tell() >= MAX_CACHEFILE_SIZE) {
 		delete m_cout;
-		path = Utils::strprintf("%s/cache.%u", dir.c_str(), ++m_coindex);
+		path = utils::strprintf("%s/cache.%u", dir.c_str(), ++m_coindex);
 		m_cout = new BOStream(path, true);
 	}
 
@@ -111,7 +111,7 @@ void Cache::put(const std::string &id, const Revision &rev)
 
 	// Add revision to index
 	if (m_iout == NULL) {
-		if (SysUtils::exists(dir + "/index")) {
+		if (sys::fs::exists(dir + "/index")) {
 			m_iout = new BOStream(dir + "/index", true);
 		} else {
 			m_iout = new BOStream(dir + "/index", false);
@@ -128,22 +128,22 @@ Revision *Cache::get(const std::string &id)
 {
 	std::string dir = m_opts.cacheDir() + "/" + m_backend->uuid();
 	std::pair<uint32_t, uint32_t> offset = m_index[id];
-	std::string path = Utils::strprintf("%s/cache.%u", dir.c_str(), offset.first);
+	std::string path = utils::strprintf("%s/cache.%u", dir.c_str(), offset.first);
 	if (m_cin == NULL || offset.first != m_ciindex) {
 		delete m_cout; m_cout = NULL;
 		m_cin = new BIStream(path);
 		m_ciindex = offset.first;
 		if (!m_cin->ok()) {
-			throw PEX(Utils::strprintf("Unable to read from cache file: %s", path.c_str()));
+			throw PEX(utils::strprintf("Unable to read from cache file: %s", path.c_str()));
 		}
 	}
 	if (!m_cin->seek(offset.second)) {
-		throw PEX(Utils::strprintf("Unable to read from cache file: %s", path.c_str()));
+		throw PEX(utils::strprintf("Unable to read from cache file: %s", path.c_str()));
 	}
 
 	Revision *rev = new Revision(id);
 	if (!rev->load(*m_cin)) {
-		throw PEX(Utils::strprintf("Unable to read from cache file: %s", path.c_str()));
+		throw PEX(utils::strprintf("Unable to read from cache file: %s", path.c_str()));
 	}
 	return rev;
 }
@@ -157,8 +157,8 @@ void Cache::load()
 	struct stat statbuf;
 	if (stat(path.c_str(), &statbuf) == -1) {
 		// Create the cache directory
-		if (SysUtils::mkpath(path) < 0) {
-			throw PEX(Utils::strprintf("Unable to create cache directory: %s", path.c_str()));
+		if (sys::fs::mkpath(path) < 0) {
+			throw PEX(utils::strprintf("Unable to create cache directory: %s", path.c_str()));
 		}
 		return;
 	}
@@ -171,7 +171,7 @@ void Cache::load()
 	uint32_t version;
 	in >> version;
 	if (version != 1) {
-		throw PEX(Utils::strprintf("Unkown cache version number %u", version));
+		throw PEX(utils::strprintf("Unkown cache version number %u", version));
 	}
 
 	std::string buffer;

@@ -15,8 +15,9 @@ pepper_SOURCES = \
 	options.h options.cpp \
 	repository.h repository.cpp \
 	revision.h revision.cpp \
-	sysutils.h sysutils.cpp \
 	utils.h utils.cpp \
+	\
+	sys/fs.h sys/fs.cpp \
 	\
 	lua/luadiffstat.h \
 	lua/luahelpers.h \
@@ -32,8 +33,9 @@ AM_CXXFLAGS = \
 	-Wall -pipe -ansi -pedantic \
 	$(LUA_CFLAGS)
 INCLUDES = \
+	-I@top_srcdir@/src/3rdparty \
 	-I@top_srcdir@/src/lua \
-	-I@top_srcdir@/src/3rdparty
+	-I@top_srcdir@/src/sys
 AM_CPPFLAGS = 
 AM_LDFLAGS = \
 	$(LUA_LIBS)

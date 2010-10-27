@@ -90,7 +90,7 @@ void Options::reset()
 	putopt("cache", "true");
 
 	// TODO: Where on Windows?
-	putopt("cache_dir", Utils::strprintf("%s/.%s/cache", getenv("HOME"), PACKAGE_NAME, "cache"));
+	putopt("cache_dir", utils::strprintf("%s/.%s/cache", getenv("HOME"), PACKAGE_NAME, "cache"));
 }
 
 // The actual parsing
@@ -108,7 +108,7 @@ void Options::parse(const std::vector<std::string> &args)
 		} else if (m_options["url"].empty()) {
 			m_options["url"] = args[i];
 		} else {
-			throw PEX(Utils::strprintf("Unkown argument %s", args[i].c_str()));
+			throw PEX(utils::strprintf("Unkown argument %s", args[i].c_str()));
 		}
 	}
 }

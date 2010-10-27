@@ -18,7 +18,7 @@
 #include "utils.h"
 
 
-namespace Utils
+namespace utils
 {
 
 // Wrapper for strtol()
@@ -188,4 +188,4 @@ std::string strprintf(const char *format, ...)
 	return os.str();
 }
 
-} // namespace Utils
+} // namespace utils

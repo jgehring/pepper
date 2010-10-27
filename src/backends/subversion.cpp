@@ -167,7 +167,7 @@ public:
 static svn_error_t *logReceiver(void *baton, svn_log_entry_t *entry, apr_pool_t *pool) 
 {
 	std::vector<std::string> *dest = static_cast<std::vector<std::string> *>(baton);
-	dest->push_back(Utils::int2str(entry->revision));
+	dest->push_back(utils::int2str(entry->revision));
 	return SVN_NO_ERROR;
 }
 
@@ -250,7 +250,7 @@ std::string SubversionBackend::head(const std::string &branch)
 		throw PEX(SvnConnection::strerr(err));
 	}
 	svn_pool_destroy(pool);
-	return Utils::int2str(rev);
+	return utils::int2str(rev);
 }
 
 // Returns a list of available branches
@@ -307,7 +307,7 @@ Diffstat SubversionBackend::diffstat(const std::string &id)
 
 	svn_opt_revision_t rev1, rev2;
 	rev1.kind = rev2.kind = svn_opt_revision_number;
-	Utils::str2int(id, &(rev2.value.number));
+	utils::str2int(id, &(rev2.value.number));
 	if (rev2.value.number <= 0) {
 		svn_pool_destroy(pool);
 		return Diffstat();
@@ -366,13 +366,13 @@ Backend::RevisionIterator *SubversionBackend::iterator(const std::string &branch
 		if (prefix == "trunk") {
 			prefix.clear();
 		} else {
-			throw PEX(Utils::strprintf("No such branch: %s", branch.c_str()));
+			throw PEX(utils::strprintf("No such branch: %s", branch.c_str()));
 		}
 	}
 	svn_pool_destroy(pool);
 
 	long int headrev;
-	Utils::str2int(head(prefix), &headrev);
+	utils::str2int(head(prefix), &headrev);
 	return new SubversionRevisionIterator(d, prefix, headrev);
 }
 
@@ -384,7 +384,7 @@ Revision *SubversionBackend::revision(const std::string &id)
 	apr_pool_t *pool = svn_pool_create(d->pool);
 	apr_hash_t *props;
 	svn_revnum_t revnum;
-	Utils::str2int(id, &(revnum));
+	utils::str2int(id, &(revnum));
 
 	svn_error_t *err = svn_ra_rev_proplist(d->ra, revnum, &props, pool);
 	if (err != NULL) {
