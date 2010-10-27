@@ -105,8 +105,20 @@ inline int pushError(lua_State *L, const char *what, const char *where) {
 }
 
 
-inline const char *pop(lua_State *L, int index = -1) {
+inline const char *check(lua_State *L, int index = -1) {
 	return luaL_checkstring(L, index);
+}
+
+inline std::vector<double> pop(lua_State *L) {
+	std::vector<double> t;
+	luaL_checktype(L, -1, LUA_TTABLE);
+	lua_pushnil(L);
+	while (lua_next(L, -2) != 0) {
+		t.push_back(lua_tonumber(L, -1));
+		lua_pop(L, 1);
+	}
+	lua_pop(L, 1);
+	return t;
 }
 
 

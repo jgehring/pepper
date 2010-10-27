@@ -23,8 +23,6 @@ class LuaRevision
 		LuaRevision(Revision *rev) : w(rev), m_stat(&rev->m_diffstat) { }
 		LuaRevision(lua_State *L) : w(NULL), m_stat(L) { }
 
-		Revision *object() const { return w; }
-
 		int id(lua_State *L) {
 			return (w ? LuaHelpers::push(L, w->m_id) : LuaHelpers::pushNil(L));
 
@@ -51,8 +49,10 @@ class LuaRevision
 		static const char className[];
 		static Lunar<LuaRevision>::RegType methods[];
 
-	private:
+	public:
 		Revision *w;
+
+	private:
 		LuaDiffstat m_stat;
 };
 

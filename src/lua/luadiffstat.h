@@ -23,8 +23,6 @@ class LuaDiffstat
 		LuaDiffstat(Diffstat *stat) : w(stat) { }
 		LuaDiffstat(lua_State *L) : w(NULL) { }
 
-		Diffstat *object() const { return w; }
-
 		int files(lua_State *L) {
 			if (w == NULL) return LuaHelpers::pushNil(L);
 			std::vector<std::string> v(w->m_stats.size());
@@ -41,7 +39,7 @@ class LuaDiffstat
 		}
 
 		int linesAdded(lua_State *L) {
-			std::string file = LuaHelpers::pop(L);
+			std::string file = LuaHelpers::check(L);
 			if (w == NULL) return LuaHelpers::pushNil(L);
 			if (w->m_stats.find(file) != w->m_stats.end()) {
 				return LuaHelpers::push(L, w->m_stats[file].ladd);
@@ -50,7 +48,7 @@ class LuaDiffstat
 		}
 
 		int bytesAdded(lua_State *L) {
-			std::string file = LuaHelpers::pop(L);
+			std::string file = LuaHelpers::check(L);
 			if (w == NULL) return LuaHelpers::pushNil(L);
 			if (w->m_stats.find(file) != w->m_stats.end()) {
 				return LuaHelpers::push(L, w->m_stats[file].cadd);
@@ -59,7 +57,7 @@ class LuaDiffstat
 		}
 
 		int linesRemoved(lua_State *L) {
-			std::string file = LuaHelpers::pop(L);
+			std::string file = LuaHelpers::check(L);
 			if (w == NULL) return LuaHelpers::pushNil(L);
 			if (w->m_stats.find(file) != w->m_stats.end()) {
 				return LuaHelpers::push(L, w->m_stats[file].ldel);
@@ -68,7 +66,7 @@ class LuaDiffstat
 		}
 
 		int bytesRemoved(lua_State *L) {
-			std::string file = LuaHelpers::pop(L);
+			std::string file = LuaHelpers::check(L);
 			if (w == NULL) return LuaHelpers::pushNil(L);
 			if (w->m_stats.find(file) != w->m_stats.end()) {
 				return LuaHelpers::push(L, w->m_stats[file].cdel);

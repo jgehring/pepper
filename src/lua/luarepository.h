@@ -22,8 +22,6 @@ class LuaRepository
 		LuaRepository(Repository *repo) : w(repo) { }
 		LuaRepository(lua_State *L) : w(NULL) { }
 
-		Repository *object() const { return w; }
-
 		int url(lua_State *L) {
 			return (w ? LuaHelpers::push(L, w->m_backend->options().repoUrl()) : LuaHelpers::pushNil(L));
 		}
