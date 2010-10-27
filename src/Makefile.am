@@ -18,6 +18,7 @@ pepper_SOURCES = \
 	utils.h utils.cpp \
 	\
 	sys/fs.h sys/fs.cpp \
+	sys/thread.h sys/thread.cpp \
 	\
 	lua/luadiffstat.h \
 	lua/luahelpers.h \
