@@ -26,7 +26,7 @@ pepper_SOURCES = \
 	lua/report.h lua/report.cpp
 
 AM_CXXFLAGS = \
-	-Wall -pipe -ansi \
+	-Wall -pipe -ansi -pedantic \
 	$(LUA_CFLAGS)
 INCLUDES = \
 	-I@top_srcdir@/src/lua

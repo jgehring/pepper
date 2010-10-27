@@ -85,15 +85,10 @@ class BStream
 
 		}
 		inline uint64_t bswap(uint64_t source) {
-			return 0
-				| ((source & 0x00000000000000ffLL) << 56) 
-				| ((source & 0x000000000000ff00LL) << 40) 
-				| ((source & 0x0000000000ff0000LL) << 24) 
-				| ((source & 0x00000000ff000000LL) << 8)
-				| ((source & 0x000000ff00000000LL) >> 8)
-				| ((source & 0x0000ff0000000000LL) >> 24) 
-				| ((source & 0x00ff000000000000LL) >> 40) 
-				| ((source & 0xff00000000000000LL) >> 56);
+			char *t = (char *)&source;
+			std::swap(t[0], t[7]), std::swap(t[1], t[6]);
+			std::swap(t[2], t[5]), std::swap(t[3], t[4]);
+			return source;
 		}
 
 	protected:
