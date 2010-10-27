@@ -22,15 +22,18 @@ pepper_SOURCES = \
 	lua/luahelpers.h \
 	lua/luarepository.h \
 	lua/luarevision.h \
-	lua/lunar/lunar.h \
+	lua/plot.h lua/plot.cpp \
 	lua/report.h lua/report.cpp \
-	lua/plot.h lua/plot.cpp
+	\
+	3rdparty/gnuplot-cpp/gnuplot_i.h \
+	3rdparty/lunar/lunar.h
 
 AM_CXXFLAGS = \
 	-Wall -pipe -ansi -pedantic \
 	$(LUA_CFLAGS)
 INCLUDES = \
-	-I@top_srcdir@/src/lua
+	-I@top_srcdir@/src/lua \
+	-I@top_srcdir@/src/3rdparty
 AM_CPPFLAGS = 
 AM_LDFLAGS = \
 	$(LUA_LIBS)
