@@ -23,7 +23,8 @@ pepper_SOURCES = \
 	lua/luarepository.h \
 	lua/luarevision.h \
 	lua/lunar/lunar.h \
-	lua/report.h lua/report.cpp
+	lua/report.h lua/report.cpp \
+	lua/plot.h lua/plot.cpp
 
 AM_CXXFLAGS = \
 	-Wall -pipe -ansi -pedantic \

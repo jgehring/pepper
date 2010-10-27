@@ -145,7 +145,8 @@ int main(int argc, char **argv)
 
 	installSignalHandler(&terminationHandler);
 
-	const char *script = "reports/test.lua";
+//	const char *script = "reports/test.lua";
+	const char *script = "reports/loc.lua";
 	int ret = Report::run(script, backend);
 
 	delete backend;

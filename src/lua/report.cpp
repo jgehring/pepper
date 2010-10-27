@@ -16,10 +16,12 @@
 #include "repository.h"
 #include "revision.h"
 
-#include "lua/luadiffstat.h"
-#include "lua/luahelpers.h"
-#include "lua/luarepository.h"
-#include "lua/luarevision.h"
+#include "luadiffstat.h"
+#include "luahelpers.h"
+#include "luarepository.h"
+#include "luarevision.h"
+#include "plot.h"
+#include "report.h"
 
 
 namespace Report
@@ -44,7 +46,7 @@ static int map_branch(lua_State *L)
 	}
 
 	luaL_checktype(L, -2, LUA_TFUNCTION);
-	std::string branch = luaL_checkstring(L, -1);
+	std::string branch = LuaHelpers::check(L);
 	lua_pop(L, 1);
 	int callback = luaL_ref(L, LUA_REGISTRYINDEX);
 	lua_pop(L, 1);
@@ -127,6 +129,7 @@ int run(const char *script, Backend *backend)
 	Lunar<LuaRepository>::Register(L, "pepper");
 	Lunar<LuaRevision>::Register(L, "pepper");
 	Lunar<LuaDiffstat>::Register(L, "pepper");
+	Lunar<Plot>::Register(L, "pepper");
 
 	// Set the current repository
 	Report::repo = new Repository(backend);
