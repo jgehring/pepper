@@ -60,6 +60,7 @@ static int map_branch(lua_State *L)
 	Backend::RevisionIterator *it;
 	try {
 		it = backend->iterator(branch);
+		backend->prepare(it);
 	} catch (const Pepper::Exception &ex) {
 		if (verbose) {
 			std::cerr << "failed" << std::endl;
@@ -103,6 +104,11 @@ static int map_branch(lua_State *L)
 		std::cerr << "Mapping revisions... done" << std::endl;
 	}
 
+	try {
+		backend->finalize();
+	} catch (const Pepper::Exception &ex) {
+		return LuaHelpers::pushError(L, ex.what(), ex.where());
+	}
 	delete it;
 	return 0;
 }

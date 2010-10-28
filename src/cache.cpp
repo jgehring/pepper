@@ -63,6 +63,22 @@ Diffstat Cache::diffstat(const std::string &id)
 	return stat;
 }
 
+// Prepare the actual backend for uncached revisions
+void Cache::prepare(RevisionIterator *it)
+{
+	std::vector<std::string> ids;
+	while (!it->atEnd()) {
+		std::string id = it->next();
+		if (!lookup(id)) {
+			ids.push_back(id);
+		}
+	}
+	it->reset();
+
+	RevisionIterator uncached(ids);
+	m_backend->prepare(&uncached);
+}
+
 // Returns the revision data for the given ID
 Revision *Cache::revision(const std::string &id)
 {

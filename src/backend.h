@@ -27,9 +27,10 @@ class Backend
 		class RevisionIterator
 		{
 			public:
-				RevisionIterator();
+				RevisionIterator(const std::vector<std::string> &ids = std::vector<std::string>());
 				virtual ~RevisionIterator();
 
+				virtual void reset();
 				virtual bool atEnd() const;
 				virtual std::string next();
 
@@ -53,7 +54,9 @@ class Backend
 		virtual Diffstat diffstat(const std::string &id) = 0;
 
 		virtual RevisionIterator *iterator(const std::string &branch = std::string()) = 0;
+		virtual void prepare(RevisionIterator *it);
 		virtual Revision *revision(const std::string &id) = 0;
+		virtual void finalize();
 
 		const Options &options() const;
 

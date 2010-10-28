@@ -23,8 +23,8 @@
 
 
 // Constructor
-Backend::RevisionIterator::RevisionIterator()
-	: m_index(0)
+Backend::RevisionIterator::RevisionIterator(const std::vector<std::string> &ids)
+	: m_ids(ids), m_index(0)
 {
 
 }
@@ -33,6 +33,12 @@ Backend::RevisionIterator::RevisionIterator()
 Backend::RevisionIterator::~RevisionIterator()
 {
 
+}
+
+// Resets the iterator, back to the first revision
+void Backend::RevisionIterator::reset()
+{
+	m_index = 0;
 }
 
 // Returns whether the iterator is at its end, i.e. past the last revision
@@ -76,6 +82,18 @@ Backend *Backend::backendFor(const Options &options)
 
 // Initializes the backend
 void Backend::init()
+{
+	// The default implementation does nothing
+}
+
+// Prepares the backend for processing the given revision iterator
+void Backend::prepare(RevisionIterator *)
+{
+	// The default implementation does nothing
+}
+
+// Cleans up the backend after iteration has finished
+void Backend::finalize()
 {
 	// The default implementation does nothing
 }

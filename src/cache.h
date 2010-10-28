@@ -36,7 +36,9 @@ class Cache : public Backend
 		Diffstat diffstat(const std::string &id);
 
 		RevisionIterator *iterator(const std::string &branch = std::string()) { return m_backend->iterator(branch); }
+		void prepare(RevisionIterator *it);
 		Revision *revision(const std::string &id);
+		void finalize() { m_backend->finalize(); }
 
 	private:
 		bool lookup(const std::string &id);
