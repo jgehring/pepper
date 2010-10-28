@@ -14,7 +14,7 @@
 #include "backend.h"
 
 class SvnConnection;
-class SvnLogConnection;
+class SvnDiffstatScheduler;
 
 
 class SubversionBackend : public Backend
@@ -40,10 +40,13 @@ class SubversionBackend : public Backend
 		Diffstat diffstat(const std::string &id);
 
 		RevisionIterator *iterator(const std::string &branch = std::string());
+		void prepare(RevisionIterator *it);
 		Revision *revision(const std::string &id);
+		void finalize();
 
 	private:
 		SvnConnection *d;
+		SvnDiffstatScheduler *m_sched;
 };
 
 

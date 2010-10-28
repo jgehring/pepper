@@ -3,12 +3,11 @@
  * Copyright (C) 2010 Jonas Gehring
  *
  * file: diffstat.cpp
- * Diffstat object
+ * Diffstat object and parser
  */
 
 
 #include <cstring>
-#include <iostream>
 
 #include "bstream.h"
 
@@ -20,12 +19,6 @@
 Diffstat::Diffstat()
 {
 
-}
-
-// Constructor
-Diffstat::Diffstat(std::istream &in)
-{
-	parse(in);
 }
 
 // Destructor
@@ -66,15 +59,35 @@ bool Diffstat::load(BIStream &in)
 // Parses output generated from diff
 void Diffstat::parse(std::istream &in)
 {
+}
+
+
+// Constructor
+DiffParser::DiffParser(std::istream &in)
+	: m_in(in)
+{
+
+}
+
+// Returns the internal diffstat object
+Diffstat DiffParser::stat() const
+{
+	return m_stat;
+}
+
+// Static diff parsing function
+Diffstat DiffParser::parse(std::istream &in)
+{
 	std::string str, file;
-	Stat stat;
+	Diffstat ds;
+	Diffstat::Stat stat;
 	while (in.good()) {
 		std::getline(in, str);
 		if (!str.compare(0, 7, "Index: ")) {
 			if (!file.empty()) {
-				m_stats[file] = stat;
+				ds.m_stats[file] = stat;
 			}
-			stat = Stat();
+			stat = Diffstat::Stat();
 			file = str.substr(7);
 		} else if (!str.compare(0, 4, "====") || !str.compare(0, 4, "--- ") || !str.compare(0, 4, "+++ ")) {
 			continue;
@@ -87,6 +100,13 @@ void Diffstat::parse(std::istream &in)
 		}
 	}
 	if (!file.empty()) {
-		m_stats[file] = stat;
+		ds.m_stats[file] = stat;
 	}
+	return ds;
+}
+
+// Main thread function
+void DiffParser::run()
+{
+	m_stat = parse(m_in);
 }

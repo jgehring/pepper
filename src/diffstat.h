@@ -3,7 +3,7 @@
  * Copyright (C) 2010 Jonas Gehring
  *
  * file: diffstat.h
- * Diffstat object (interface)
+ * Diffstat object and parser (interface)
  */
 
 
@@ -11,10 +11,12 @@
 #define DIFFSTAT_H_
 
 
+#include <iostream>
 #include <map>
 #include <string>
 
 #include "main.h"
+#include "thread.h"
 
 class BIStream;
 class BOStream;
@@ -22,6 +24,7 @@ class BOStream;
 
 class Diffstat
 {
+	friend class DiffParser;
 	friend class LuaDiffstat;
 
 	public:
@@ -35,7 +38,6 @@ class Diffstat
 
 	public:
 		Diffstat();
-		Diffstat(std::istream &in);
 		~Diffstat();
 
 		void write(BOStream &out) const;
@@ -46,6 +48,24 @@ class Diffstat
 
 	private:
 		std::map<std::string, Stat> m_stats;
+};
+
+
+class DiffParser : public sys::thread::Thread
+{
+	public:
+		DiffParser(std::istream &in);
+
+		Diffstat stat() const;
+
+		static Diffstat parse(std::istream &in);
+
+	protected:
+		void run();
+
+	private:
+		std::istream &m_in;
+		Diffstat m_stat;
 };
 
 
