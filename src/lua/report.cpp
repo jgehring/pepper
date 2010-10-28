@@ -88,7 +88,7 @@ static int map_branch(lua_State *L)
 		lua_pop(L, 1);
 
 		if (verbose) {
-			std::cerr << "\r\e[0K";
+			std::cerr << "\r\033[0K";
 			std::cerr << "Mapping revisions... " << revision->id() << std::flush;
 		}
 
@@ -100,7 +100,7 @@ static int map_branch(lua_State *L)
 	}
 
 	if (verbose) {
-		std::cerr << "\r\e[0K";
+		std::cerr << "\r\033[0K";
 		std::cerr << "Mapping revisions... done" << std::endl;
 	}
 
