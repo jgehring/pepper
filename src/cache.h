@@ -32,6 +32,7 @@ class Cache : public Backend
 		std::string uuid() { return m_backend->uuid(); }
 
 		std::string head(const std::string &branch = std::string()) { return m_backend->head(branch); }
+		std::string mainBranch() { return m_backend->mainBranch(); }
 		std::vector<std::string> branches() { return m_backend->branches(); }
 		Diffstat diffstat(const std::string &id);
 

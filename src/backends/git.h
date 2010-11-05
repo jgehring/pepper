@@ -24,6 +24,7 @@ class GitBackend : public Backend
 
 		std::string uuid();
 		std::string head(const std::string &branch = std::string());
+		std::string mainBranch();
 		std::vector<std::string> branches();
 		Diffstat diffstat(const std::string &id);
 

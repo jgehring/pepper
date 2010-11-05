@@ -26,7 +26,7 @@ function main()
 	messages = {}
 
 	-- Gather data
-	branch = pepper.report.option("-b,--branch", "trunk")
+	branch = pepper.report.option("-b,--branch", pepper.report.repository():main_branch())
 	pepper.report.map_branch(callback, branch)
 
 	-- Sort commit dictionary by name

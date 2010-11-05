@@ -41,6 +41,11 @@ class LuaRepository
 			return LuaHelpers::push(L, h);
 		}
 
+		int main_branch(lua_State *L) {
+			if (w == NULL) return LuaHelpers::pushNil(L);
+			return LuaHelpers::push(L, w->m_backend->mainBranch());
+		}
+
 		int branches(lua_State *L) {
 			if (w == NULL) return LuaHelpers::pushNil(L);
 			std::vector<std::string> b;
@@ -66,6 +71,7 @@ Lunar<LuaRepository>::RegType LuaRepository::methods[] = {
 	LUNAR_DECLARE_METHOD(LuaRepository, url),
 	LUNAR_DECLARE_METHOD(LuaRepository, type),
 	LUNAR_DECLARE_METHOD(LuaRepository, head),
+	LUNAR_DECLARE_METHOD(LuaRepository, main_branch),
 	LUNAR_DECLARE_METHOD(LuaRepository, branches),
 	{0,0}
 };

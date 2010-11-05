@@ -35,6 +35,12 @@ std::string GitBackend::head(const std::string &branch)
 	return "HEAD";
 }
 
+// Returns the standard branch (i.e., master)
+std::string GitBackend::mainBranch()
+{
+	return "master";
+}
+
 // Returns a list of available branches
 std::vector<std::string> GitBackend::branches()
 {

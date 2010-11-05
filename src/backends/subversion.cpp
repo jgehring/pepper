@@ -121,6 +121,12 @@ std::string SubversionBackend::head(const std::string &branch)
 	return utils::int2str(rev);
 }
 
+// Returns the standard branch (i.e., trunk)
+std::string SubversionBackend::mainBranch()
+{
+	return "trunk";
+}
+
 // Returns a list of available branches
 std::vector<std::string> SubversionBackend::branches()
 {
