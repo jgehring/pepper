@@ -56,7 +56,7 @@ static int print_option(lua_State *L)
 // Returns a script option (or the default value)
 static int option(lua_State *L)
 {
-	if (lua_gettop(L) != 2) {
+	if (lua_gettop(L) != 1 && lua_gettop(L) != 2) {
 		return luaL_error(L, "Invalid number of arguments (1 or 2 expected)");
 	}
 
