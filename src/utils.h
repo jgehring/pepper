@@ -29,10 +29,13 @@ std::string int2str(long int i);
 void trim(std::string *str);
 std::string trim(const std::string &str);
 std::vector<std::string> split(const std::string &str, const std::string &token, bool trim = false);
+std::string join(const std::vector<std::string> &v, const std::string &c = std::string());
 
 std::string strprintf(const char *format, ...);
 
 void printOption(const std::string &option, const std::string &text);
+
+std::string exec(const std::string &cmd);
 
 } // namespace utils
 

@@ -8,8 +8,10 @@
 
 
 #include <cstring>
+#include <vector>
 
 #include "bstream.h"
+#include "utils.h"
 
 #include "diffstat.h"
 
@@ -89,6 +91,13 @@ Diffstat DiffParser::parse(std::istream &in)
 			}
 			stat = Diffstat::Stat();
 			file = str.substr(7);
+		} else if (!str.compare(0, 11, "diff --git ")) {
+			if (!file.empty()) {
+				ds.m_stats[file] = stat;
+			}
+			stat = Diffstat::Stat();
+			std::vector<std::string> files = utils::split(str.substr(11), " b/");
+			file = files[0].substr(2);
 		} else if (!str.compare(0, 4, "====") || !str.compare(0, 4, "--- ") || !str.compare(0, 4, "+++ ")) {
 			continue;
 		} else if (str[0] == '-') {

@@ -20,6 +20,8 @@ class GitBackend : public Backend
 		GitBackend(const Options &options);
 		~GitBackend();
 
+		void init();
+
 		std::string name() const { return "git"; }
 
 		std::string uuid();

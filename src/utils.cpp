@@ -9,6 +9,7 @@
 
 #include <cerrno>
 #include <cstdarg>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
@@ -126,6 +127,19 @@ std::vector<std::string> split(const std::string &str, const std::string &token,
 	return parts;
 }
 
+// Joins several strings
+std::string join(const std::vector<std::string> &v, const std::string &c)
+{
+	std::string res;
+	for (int i = 0; i < v.size(); i++) {
+		res += v[i];
+		if (i < v.size()-1) {
+			res += c;
+		}
+	}
+	return res;
+}
+
 // sprintf for std::string
 std::string strprintf(const char *format, ...)
 {
@@ -203,6 +217,26 @@ void printOption(const std::string &option, const std::string &text)
 		}
 	}
 	std::cout << text << std::endl;
+}
+
+// Runs the specified command and returns the output
+std::string exec(const std::string &cmd)
+{
+	FILE *pipe = popen(cmd.c_str(), "r");
+	if (!pipe) {
+		throw PEX(strprintf("Unable to open pipe for command %s", cmd.c_str()));
+	}
+
+	char buffer[128];
+	std::string result;
+	while (!feof(pipe)) {
+		if (fgets(buffer, 128, pipe) != NULL) {
+			result += buffer;
+		}
+	}
+
+	pclose(pipe);
+	return result;
 }
 
 } // namespace utils
