@@ -101,10 +101,10 @@ Diffstat DiffParser::parse(std::istream &in)
 		} else if (!str.compare(0, 4, "====") || !str.compare(0, 4, "--- ") || !str.compare(0, 4, "+++ ")) {
 			continue;
 		} else if (str[0] == '-') {
-			stat.cdel += str.length()-1;
+			stat.cdel += str.length();
 			++stat.ldel;
 		} else if (str[0] == '+') {
-			stat.cadd += str.length()-1;
+			stat.cadd += str.length();
 			++stat.ladd;
 		}
 	}
