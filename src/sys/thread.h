@@ -39,6 +39,20 @@ class Mutex
 };
 
 
+class MutexLocker
+{
+	public:
+		MutexLocker(Mutex *mutex);
+		~MutexLocker();
+
+		void relock();
+		void unlock();
+
+	private:
+		Mutex *m_mutex;
+};
+
+
 class Thread
 {
 	public:

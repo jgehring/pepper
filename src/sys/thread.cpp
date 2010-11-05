@@ -46,6 +46,32 @@ void Mutex::unlock()
 
 
 // Constructor
+MutexLocker::MutexLocker(Mutex *mutex)
+	: m_mutex(mutex)
+{
+	m_mutex->lock();
+}
+
+// Destructor
+MutexLocker::~MutexLocker()
+{
+	m_mutex->unlock();
+}
+
+// Re-locks the mutex
+void MutexLocker::relock()
+{
+	m_mutex->lock();
+}
+
+// Unlocks the mutex
+void MutexLocker::unlock()
+{
+	m_mutex->unlock();
+}
+
+
+// Constructor
 Thread::Thread()
 	: m_running(false), m_abort(false)
 {
