@@ -33,6 +33,8 @@ class Options
 		std::string error() const;
 
 		bool helpRequested() const;
+		bool backendHelpRequested() const;
+		bool scriptHelpRequested() const;
 		bool versionRequested() const;
 
 		bool useCache() const;
@@ -41,6 +43,9 @@ class Options
 		std::string forcedBackend() const;
 		std::string repoUrl() const;
 		AuthData authData() const;
+
+		std::string script() const;
+		std::map<std::string, std::string> scriptOptions() const;
 
 	private:
 		void reset();
@@ -51,6 +56,7 @@ class Options
 		bool m_valid;
 		std::string m_error;
 		mutable std::map<std::string, std::string> m_options;
+		mutable std::map<std::string, std::string> m_backendOptions, m_scriptOptions;
 };
 
 

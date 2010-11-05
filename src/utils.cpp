@@ -99,21 +99,21 @@ std::string trim(const std::string &str)
 }
 
 // Split a string using the given token
-std::vector<std::string> split(const std::string &str, const std::string &token)
+std::vector<std::string> split(const std::string &str, const std::string &token, bool trim)
 {
 	std::vector<std::string> parts;
 	size_t index = 0;
 
 	if (token.length() == 0) {
 		for (size_t i = 0; i < str.length(); i++) {
-			parts.push_back(str.substr(i, 1));
+			parts.push_back(trim ? utils::trim(str.substr(i, 1)) : str.substr(i, 1));
 		}
 		return parts;
 	}
 
 	while (index < str.length()) {
 		size_t pos = str.find(token, index);
-		parts.push_back(str.substr(index, pos - index));
+		parts.push_back(trim ? utils::trim(str.substr(index, pos - index)) : str.substr(index, pos - index));
 		if (pos == std::string::npos) {
 			break;
 		}
@@ -186,6 +186,23 @@ std::string strprintf(const char *format, ...)
 
 	va_end(vl);
 	return os.str();
+}
+
+// Pretty-prints a help screen option
+void printOption(const std::string &option, const std::string &text)
+{
+	std::cout << "  " << option;
+	if (option.length() < 30) {
+		for (int i = option.length(); i < 32; i++) {
+			std::cout << " ";
+		}
+	} else {
+		std::cout << std::endl;
+		for (int i = 0; i < 34; i++) {
+			std::cout << " ";
+		}
+	}
+	std::cout << text << std::endl;
 }
 
 } // namespace utils

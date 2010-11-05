@@ -1,17 +1,16 @@
 --[[
-	Generate LOC and BOC graphs
+-- Generate LOC and BOC graphs
 --]]
 
 
-require("luaplot.dotlineplot")
-require("luaplot.pnghandler")
+-- Print usage information
+function print_help()
+	print("Report options for 'shortlog':")
+	pepper.report.print_option("-b, --branch", "Select branch")
+end
 
 
-loc = {}
-boc = {}
-dates = {}
-lines = 0
-bytes = 0
+-- Revision callback function
 function count(r)
 	s = r:diffstat()
 	t = s:files()
@@ -19,22 +18,36 @@ function count(r)
 		lines = lines + s:linesAdded(v) - s:linesRemoved(v)
 		bytes = bytes + s:bytesAdded(v) - s:bytesRemoved(v)
 	end
+	if r:date() == 0 then
+		return
+	end
 	-- TODO: Use dictionaries instead of arrays
 	table.insert(loc, lines)
 	table.insert(boc, bytes)
 	table.insert(dates, r:date())
+--	print(bytes, lines, r:date(), r:id())
 end
 
--- Gather data
-pepper.report.map_branch(count, "trunk")
+-- Main report function
+function main()
+	loc = {}
+	boc = {}
+	dates = {}
+	lines = 0
+	bytes = 0
 
--- Generate graphs
-local p = pepper.plot:new()
-p:set_title("Lines of Code (trunk)")
-p:set_output("loc.svg")
-p:plotty(dates, loc)
+	-- Gather data
+	branch = pepper.report.option("-b,--branch", "trunk")
+	pepper.report.map_branch(count, branch)
 
-local p2 = pepper.plot:new()
-p2:set_title("Bytes of Code (trunk)")
-p2:set_output("boc.svg")
-p2:plotty(dates, boc)
+	-- Generate graphs
+	local p = pepper.plot:new()
+	p:set_title("Lines of Code (trunk)")
+	p:set_output("loc.svg")
+	p:plotty(dates, loc)
+
+	local p2 = pepper.plot:new()
+	p2:set_title("Bytes of Code (trunk)")
+	p2:set_output("boc.svg")
+	p2:plotty(dates, boc)
+end

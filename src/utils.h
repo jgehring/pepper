@@ -28,9 +28,11 @@ std::string int2str(long int i);
 
 void trim(std::string *str);
 std::string trim(const std::string &str);
-std::vector<std::string> split(const std::string &str, const std::string &token);
+std::vector<std::string> split(const std::string &str, const std::string &token, bool trim = false);
 
 std::string strprintf(const char *format, ...);
+
+void printOption(const std::string &option, const std::string &text);
 
 } // namespace utils
 

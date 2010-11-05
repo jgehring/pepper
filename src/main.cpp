@@ -19,6 +19,7 @@
 #include "globals.h"
 #include "options.h"
 #include "report.h"
+#include "utils.h"
 
 
 // Termination handler handlers
@@ -45,33 +46,15 @@ static void installSignalHandler(void (*handler)(int))
 }
 
 
-// Utility function for printing a help screen option
-static void printOption(const std::string &option, const std::string &text)
-{
-	std::cout << "  " << option;
-	if (option.length() < 30) {
-		for (int i = option.length(); i < 32; i++) {
-			std::cout << " ";
-		}
-	} else {
-		std::cout << std::endl;
-		for (int i = 0; i < 34; i++) {
-			std::cout << " ";
-		}
-	}
-
-	std::cout << text << std::endl;
-}
-
 // Prints program usage information
-static void printHelp()
+static void printHelp(const Options &opts)
 {
-	std::cout << "USAGE: " << PACKAGE_NAME << " [options] <repository>" << std::endl << std::endl;
+	std::cout << "USAGE: " << PACKAGE_NAME << " [opts.] [backend] [backend opts.] <script> [script opts.] <repository>" << std::endl << std::endl;
 
-	std::cout << "Valid options:" << std::endl;
-	printOption("-h, --help, -?", "Output basic usage information");
-	printOption("--version", "Output version information");
-	printOption("--no-cache", "Disable revision cache usage");
+	std::cout << "Main options:" << std::endl;
+	utils::printOption("-h, --help, -?", "Print basic usage information");
+	utils::printOption("--version", "Print version information");
+	utils::printOption("--no-cache", "Disable revision cache usage");
 
 	std::string backends;
 #ifdef USE_GIT
@@ -82,7 +65,30 @@ static void printHelp()
 #endif
 	if (!backends.empty()) {
 		backends.resize(backends.length()-2);
-		printOption(backends, "Force specific backend to be used");
+		utils::printOption(backends, "Force specific backend to be used");
+	}
+
+	std::cout << std::endl;
+	if (opts.backendHelpRequested()) {
+		Backend *backend = Backend::backendFor(opts);
+		if (backend == NULL) {
+			std::cout << "Error: Unkown backend " << opts.forcedBackend() << std::endl;
+		} else {
+			std::cout << "Options for the " << backend->name() << " backend:" << std::endl;
+			// TODO
+//			backend->printHelp();
+		}
+		delete backend;
+	} else if (opts.scriptHelpRequested()) {
+		try {
+			Report::printHelp(opts.script());
+		} catch (const Pepper::Exception &ex) {
+			std::cerr << ex.where() << ": " << ex.what() << std::endl;
+			return;
+		}
+	} else {
+		std::cout << "Pass -h, --help or -? as a backend or script option to get more" << std::endl;
+		std::cout << "specific help." << std::endl;
 	}
 
 	std::cout << std::endl;
@@ -116,13 +122,13 @@ int main(int argc, char **argv)
 	}
 
 	if (opts.helpRequested()) {
-		printHelp();
+		printHelp(opts);
 		return EXIT_SUCCESS;
 	} else if (opts.versionRequested()) {
 		printVersion();
 		return EXIT_SUCCESS;
 	} else if (opts.repoUrl().empty()) {
-		printHelp();
+		printHelp(opts);
 		return EXIT_FAILURE;
 	}
 
@@ -145,10 +151,7 @@ int main(int argc, char **argv)
 
 	installSignalHandler(&terminationHandler);
 
-//	const char *script = "reports/test.lua";
-	const char *script = "reports/loc.lua";
-	int ret = Report::run(script, backend);
-
+	int ret = Report::run(opts.script(), backend);
 	delete backend;
 	return ret;
 }

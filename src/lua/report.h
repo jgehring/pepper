@@ -11,6 +11,9 @@
 #define REPORT_H_
 
 
+#include <string>
+
+
 class Backend;
 
 struct lua_State;
@@ -19,7 +22,9 @@ struct lua_State;
 namespace Report
 {
 
-int run(const char *script, Backend *backend);
+int run(const std::string &script, Backend *backend);
+
+void printHelp(const std::string &script);
 
 } // namespace Report
 
