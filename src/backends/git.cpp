@@ -78,7 +78,7 @@ std::vector<std::string> GitBackend::branches()
 // Returns a diffstat for the specified revision
 Diffstat GitBackend::diffstat(const std::string &id)
 {
-	std::string out = utils::exec(std::string("git diff -U0 --no-renames -a ")+id+"^!");
+	std::string out = utils::exec(std::string("git diff-tree -U0 -a --no-renames --root ")+id);
 	std::istringstream in(out);
 	return DiffParser::parse(in);
 }
