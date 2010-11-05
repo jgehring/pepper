@@ -7,9 +7,11 @@
  */
 
 
+#include <cerrno>
 #include <cstdlib>
 
 #include "utils.h"
+#include "sys/fs.h"
 
 #include "options.h"
 
@@ -109,10 +111,10 @@ void Options::reset()
 	m_backendOptions.clear();
 	m_scriptOptions.clear();
 
-	putopt("cache", "true");
+	m_options["cache"] = "true";
 
 	// TODO: Where on Windows?
-	putopt("cache_dir", utils::strprintf("%s/.%s/cache", getenv("HOME"), PACKAGE_NAME, "cache"));
+	m_options["cache_dir"] = utils::strprintf("%s/.%s/cache", getenv("HOME"), PACKAGE_NAME, "cache");
 }
 
 // The actual parsing
@@ -123,16 +125,16 @@ void Options::parse(const std::vector<std::string> &args)
 	std::string key;
 	for (size_t i = 0; i < args.size(); i++) {
 		if (args[i] == "-?" || args[i] == "-h" || args[i] == "--help") {
-			putopt("help", "true");
+			m_options["help"] = "true";
 			if (mode == BACKEND) {
-				putopt("backend_help", "true");
+				m_options["backend_help"] = "true";
 			} else if (mode == SCRIPT) {
-				putopt("script_help", "true");
+				m_options["script_help"] = "true";
 			}
 		} else if (args[i] == "--version") {
-			putopt("version", "true");
+			m_options["version"] = "true";
 		} else if (args[i] == "--no-cache") {
-			putopt("cache", "false");
+			m_options["cache"] = "false";
 		} else if (mode == MAIN && !args[i].compare(0, 2, "--") && args[i].length() > 2) {
 			m_options["forced_backend"] = args[i].substr(2);
 			mode = BACKEND;
@@ -147,15 +149,30 @@ void Options::parse(const std::vector<std::string> &args)
 			m_options["script"] = args[i];
 			mode = SCRIPT;
 		} else if (m_options["url"].empty()) {
-			m_options["url"] = args[i];
+			m_options["url"] = makeAbsolute(args[i]);
 		} else {
 			throw PEX(utils::strprintf("Unkown argument %s", args[i].c_str()));
 		}
 	}
 }
 
-// Puts two strings to the option map
-void Options::putopt(const std::string &key, const std::string &value)
+// Converts a possibly relative path to an absolute one
+std::string Options::makeAbsolute(const std::string &path)
 {
-	m_options[key] = value;
+	// Check for a URL scheme
+	if (path.empty() || path.find("://") != std::string::npos) {
+		return path;
+	}
+
+	// Make path absolute
+	std::string abspath(path);
+	if (abspath[0] != '/') {
+		char cwd[FILENAME_MAX];
+		if (!getcwd(cwd, sizeof(cwd))) {
+			throw PEX(utils::strprintf("Unable to determine current directory (%d)", errno));
+		}
+		abspath = std::string(cwd) + "/" + path;
+	}
+
+	return sys::fs::canonicalize(abspath);
 }

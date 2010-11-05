@@ -6,8 +6,10 @@
  * File system utility functions
  */
 
+
 #include <cstdlib>
 #include <cstdio>
+#include <climits>
 
 #include <sys/stat.h>
 
@@ -58,6 +60,17 @@ std::string dirname(const std::string &path)
 		return path.substr(0, 1);
 	}
 	return std::string(".");
+}
+
+// Canonicalizes the given file path
+std::string canonicalize(const std::string &path)
+{
+	// NOTE: glibc-only
+	char cpath[PATH_MAX];
+	if (realpath(path.c_str(), cpath) == NULL) {
+		return std::string();
+	}
+	return std::string(cpath);
 }
 
 // Wrapper for mkdir()

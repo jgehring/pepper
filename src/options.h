@@ -50,7 +50,7 @@ class Options
 	private:
 		void reset();
 		void parse(const std::vector<std::string> &args);
-		void putopt(const std::string &key, const std::string &value);
+		std::string makeAbsolute(const std::string &path);
 
 	private:
 		bool m_valid;
