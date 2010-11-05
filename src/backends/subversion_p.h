@@ -201,12 +201,66 @@ public:
 };
 
 
+// Revision queue
+class SvnRevisionQueue
+{
+public:
+	SvnRevisionQueue(const std::vector<std::string> &ids)
+	{
+		int64_t r;
+		for (unsigned int i = 0; i < ids.size(); i++) {
+			utils::str2int(ids[i], &r);
+			m_revisions.push_back(r);
+		}
+		std::sort(m_revisions.begin(), m_revisions.end());
+		m_it = m_revisions.begin();
+	}
+
+	// Returns the next revision number, or -1 if there are no more revisions
+	int64_t next()
+	{
+		sys::thread::MutexLocker locker(&m_mutex);
+		int64_t rev = -1;
+		if (m_it != m_revisions.end()) {
+			rev = (*m_it);
+			++m_it;
+		}
+		return rev;
+	}
+
+	// Called when a diffstat has been fetched successfully
+	void done(int64_t rev, const Diffstat &stat)
+	{
+		sys::thread::MutexLocker locker(&m_mutex);
+		m_stats[rev] = stat;
+	}
+
+	// Blocks the caller until the diffstat is available and returns it
+	Diffstat get(int64_t rev)
+	{
+		sys::thread::MutexLocker locker(&m_mutex);
+		while (m_stats.find(rev) == m_stats.end()) {
+			locker.unlock();
+			sys::thread::Thread::msleep(100);
+			locker.relock();
+		}
+		return m_stats[rev];
+	}
+
+private:
+	sys::thread::Mutex m_mutex;
+	std::vector<int64_t> m_revisions;
+	std::vector<int64_t>::const_iterator m_it;
+	std::map<int64_t, Diffstat> m_stats;
+};
+
+
 // Diffstat generator thread
 class SvnDiffstatGenerator : public sys::thread::Thread
 {
 public:
 	SvnDiffstatGenerator(const std::string &url, const Options::AuthData &auth)
-		: stat(NULL), d(new SvnConnection())
+		: d(new SvnConnection()), m_queue(NULL)
 	{
 		m_url = url, m_auth = auth;
 		d->open(m_url, m_auth);
@@ -217,60 +271,58 @@ public:
 		delete d;
 	}
 
-	void start(const std::string &id, Diffstat *stat)
+	void start(SvnRevisionQueue *queue)
 	{
-		this->id = id;
-		this->stat = stat;
+		m_queue = queue;
 		sys::thread::Thread::start();
 	}
 
 protected:
 	void run()
 	{
-		// First, produce diff of previous revision and this one and save it in a
-		// temporary file
 		apr_pool_t *pool = svn_pool_create(d->pool);
-
 		svn_opt_revision_t rev1, rev2;
 		rev1.kind = rev2.kind = svn_opt_revision_number;
-		utils::str2int(id, &(rev2.value.number));
-		if (rev2.value.number <= 0) {
-			svn_pool_destroy(pool);
-			return;
+
+		int64_t rev;
+		while ((rev = m_queue->next()) >= 0) {
+			rev2.value.number = rev;
+			rev1.value.number = rev2.value.number - 1;
+			if (rev2.value.number <= 0) {
+				m_queue->done(rev, Diffstat());
+				continue;
+			}
+
+			apr_file_t *infile = NULL, *outfile = NULL, *errfile = NULL;
+			apr_file_open_stderr(&errfile, pool);
+			if (apr_file_pipe_create_ex(&infile, &outfile, APR_FULL_BLOCK, pool) != APR_SUCCESS) {
+				throw PEX("Unable to create pipe");
+			}
+
+			AprStreambuf buf(infile);
+			std::istream in(&buf);
+			DiffParser parser(in);
+			parser.start();
+
+			svn_error_t *err = svn_client_diff4(apr_array_make(pool, 0, 1), d->url, &rev1, d->url, &rev2, NULL, svn_depth_infinity, FALSE, FALSE, TRUE, APR_LOCALE_CHARSET, outfile, errfile, NULL, d->ctx, pool);
+			if (err != NULL) {
+				throw PEX(SvnConnection::strerr(err));
+			}
+
+			apr_file_close(outfile);
+			parser.wait();
+			m_queue->done(rev, parser.stat());
+			apr_file_close(infile);
+			svn_pool_clear(pool);
 		}
-		rev1.value.number = rev2.value.number - 1;
-
-		apr_file_t *infile = NULL, *outfile = NULL, *errfile = NULL;
-		apr_file_open_stderr(&errfile, pool);
-		if (apr_file_pipe_create_ex(&infile, &outfile, APR_FULL_BLOCK, pool) != APR_SUCCESS) {
-			throw PEX("Unable to create pipe");
-		}
-
-		AprStreambuf buf(infile);
-		std::istream in(&buf);
-		DiffParser parser(in);
-		parser.start();
-
-		svn_error_t *err = svn_client_diff4(apr_array_make(pool, 0, 1), d->url, &rev1, d->url, &rev2, NULL, svn_depth_infinity, FALSE, FALSE, TRUE, APR_LOCALE_CHARSET, outfile, errfile, NULL, d->ctx, pool);
-		if (err != NULL) {
-			throw PEX(SvnConnection::strerr(err));
-		}
-
-		apr_file_close(outfile);
-		parser.wait();
-		*stat = parser.stat();
-		apr_file_close(infile);
 		svn_pool_destroy(pool);
 	}
 
-public:
-	std::string id;
-	Diffstat *stat;
-	
 private:
+	SvnConnection *d;
 	std::string m_url;
 	Options::AuthData m_auth;
-	SvnConnection *d;
+	SvnRevisionQueue *m_queue;
 };
 
 
@@ -279,18 +331,10 @@ class SvnDiffstatScheduler : public sys::thread::Thread
 {
 public:
 	SvnDiffstatScheduler(const std::string &url, const Options::AuthData &auth, const std::vector<std::string> &ids, int n = 25)
+		: m_queue(ids)
 	{
-		if ((size_t)n > ids.size()) {
-			n = ids.size();
-		}
 		for (int i = 0; i < n; i++) {
 			m_gen.push_back(new SvnDiffstatGenerator(url, auth));
-		}
-		int64_t r;
-		for (unsigned int i = 0; i < ids.size(); i++) {
-			utils::str2int(ids[i], &r);
-			m_stats[r] = Diffstat();
-			m_fetched[ids[i]] = false;
 		}
 	}
 
@@ -303,53 +347,27 @@ public:
 
 	Diffstat stat(const std::string &id)
 	{
-		m_mutex.lock();
-		while (!m_fetched[id]) {
-			m_mutex.unlock();
-			msleep(50);
-			m_mutex.lock();
+		int64_t rev;
+		if (!utils::str2int(id, &rev)) {
+			throw PEX(utils::strprintf("Invalid revision number: %s", id.c_str()));
 		}
-		int64_t r;
-		utils::str2int(id, &r);
-		Diffstat s = m_stats[r];
-		m_mutex.unlock();
-		return s;
+		return m_queue.get(rev);
 	}
 
 protected:
 	void run()
 	{
-		// TODO: Not efficient
-		unsigned int j = 0;
-		for (std::map<int64_t, Diffstat>::iterator it = m_stats.begin(); it != m_stats.end(); ++it) {
-			m_gen[j]->wait();
-			if (m_gen[j]->stat != NULL) {
-				m_mutex.lock();
-				m_fetched[m_gen[j]->id] = true;
-				m_gen[j]->stat = NULL;
-				m_mutex.unlock();
-			}
-			m_gen[j]->start(utils::int2str(it->first), &(it->second));
-			j = (j+1) % m_gen.size();
+		for (unsigned int i = 0; i < m_gen.size(); i++) {
+			m_gen[i]->start(&m_queue);
 		}
 		for (unsigned int i = 0; i < m_gen.size(); i++) {
 			m_gen[i]->wait();
-			if (m_gen[i]->stat != NULL) {
-				m_mutex.lock();
-				m_fetched[m_gen[i]->id] = true;
-				m_gen[i]->stat = NULL;
-				m_mutex.unlock();
-			}
 		}
 	}
 
 private:
 	std::vector<SvnDiffstatGenerator *> m_gen;
-	std::map<int64_t, Diffstat> m_stats;
-	std::map<std::string, bool> m_fetched;
-	std::string m_url;
-	Options::AuthData m_auth;
-	sys::thread::Mutex m_mutex;
+	SvnRevisionQueue m_queue;
 };
 
 
