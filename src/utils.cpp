@@ -131,7 +131,7 @@ std::vector<std::string> split(const std::string &str, const std::string &token,
 std::string join(const std::vector<std::string> &v, const std::string &c)
 {
 	std::string res;
-	for (int i = 0; i < v.size(); i++) {
+	for (unsigned int i = 0; i < v.size(); i++) {
 		res += v[i];
 		if (i < v.size()-1) {
 			res += c;
