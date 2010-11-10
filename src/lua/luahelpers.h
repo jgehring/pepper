@@ -22,6 +22,30 @@
 namespace LuaHelpers
 {
 
+inline void stackdump(lua_State *L, std::ostream &out) {
+	int top = lua_gettop(L);
+	out << "Stack size: " << top << std::endl;
+	for (int i = top; i >= 1; i--) {
+		out << "  -" << (top-i+1) << " ";
+		int t = lua_type(L, i);
+		switch (t) {
+			case LUA_TSTRING:
+				out << "string: '" << lua_tostring(L, i) << "'";
+				break;
+			case LUA_TBOOLEAN:
+				out << "boolean: " << (lua_toboolean(L, i) ? "true" : "false");
+				break;
+			case LUA_TNUMBER:
+				out << "number: " << lua_tonumber(L, i);
+				break;
+			default:
+				out << lua_typename(L, t);
+				break;
+		}
+		out << std::endl;
+	}
+}
+
 inline int push(lua_State *L, int i) {
 	lua_pushinteger(L, i);
 	return 1;
