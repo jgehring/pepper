@@ -87,7 +87,7 @@ static int map_branch(lua_State *L)
 	int callback = luaL_ref(L, LUA_REGISTRYINDEX);
 	lua_pop(L, 1);
 
-	bool verbose = true;
+	bool verbose = (repo->backend()->options().verbosity() >= 0);
 	if (verbose) {
 		std::cerr << "Initializing iterator... " << std::flush;
 	}

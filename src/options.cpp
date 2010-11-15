@@ -34,16 +34,6 @@ void Options::parse(int argc, char **argv)
 }
 
 // Queries
-bool Options::valid() const
-{
-	return m_valid;
-}
-
-std::string Options::error() const
-{
-	return m_error;
-}
-
 bool Options::helpRequested() const
 {
 	return m_options["help"] == "true";
@@ -62,6 +52,11 @@ bool Options::scriptHelpRequested() const
 bool Options::versionRequested() const
 {
 	return m_options["version"] == "true";
+}
+
+int Options::verbosity() const
+{
+	return m_verbosity;
 }
 
 bool Options::useCache() const
@@ -105,13 +100,12 @@ std::map<std::string, std::string> Options::scriptOptions() const
 // Resets the options to default values
 void Options::reset()
 {
-	m_valid = true;
-	m_error.clear();
 	m_options.clear();
 	m_backendOptions.clear();
 	m_scriptOptions.clear();
 
 	m_options["cache"] = "true";
+	m_verbosity = 0;
 
 	// TODO: Where on Windows?
 	m_options["cache_dir"] = utils::strprintf("%s/.%s/cache", getenv("HOME"), PACKAGE_NAME, "cache");
@@ -135,6 +129,10 @@ void Options::parse(const std::vector<std::string> &args)
 			m_options["version"] = "true";
 		} else if (args[i] == "--no-cache") {
 			m_options["cache"] = "false";
+		} else if (args[i] == "-v" || args[i] == "--verbose") {
+			++m_verbosity;
+		} else if (args[i] == "-q" || args[i] == "--quiet") {
+			m_verbosity = -1;
 		} else if (mode == MAIN && !args[i].compare(0, 2, "--") && args[i].length() > 2) {
 			m_options["forced_backend"] = args[i].substr(2);
 			mode = BACKEND;
