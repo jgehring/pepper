@@ -31,6 +31,7 @@ RevisionIterator::RevisionIterator(const std::string &branch, Backend *backend)
 	: m_backend(backend), m_index(0), m_atEnd(false)
 {
 	m_logIterator = backend->iterator(branch);
+	m_logIterator->start();
 }
 
 // Destructor
