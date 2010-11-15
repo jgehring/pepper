@@ -205,27 +205,23 @@ public:
 class SvnRevisionQueue
 {
 public:
-	SvnRevisionQueue(const std::vector<std::string> &ids)
+	SvnRevisionQueue()
+		: m_index(0), m_finished(false)
 	{
-		int64_t r;
-		for (unsigned int i = 0; i < ids.size(); i++) {
-			utils::str2int(ids[i], &r);
-			m_revisions.push_back(r);
-		}
-		std::sort(m_revisions.begin(), m_revisions.end());
-		m_it = m_revisions.begin();
+
 	}
 
 	// Returns the next revision number, or -1 if there are no more revisions
 	int64_t next()
 	{
 		sys::thread::MutexLocker locker(&m_mutex);
-		int64_t rev = -1;
-		if (m_it != m_revisions.end()) {
-			rev = (*m_it);
-			++m_it;
+		if (m_index >= m_revisions.size() && !m_finished) {
+			locker.unlock();
+			sys::thread::Thread::msleep(100);
+			locker.relock();
 		}
-		return rev;
+
+		return (m_index < m_revisions.size() ? m_revisions[m_index++] : -1);
 	}
 
 	// Called when a diffstat has been fetched successfully
@@ -247,11 +243,30 @@ public:
 		return m_stats[rev];
 	}
 
+	// Puts the given revisions in the scheduling queue
+	void put(const std::vector<std::string> &ids)
+	{
+		sys::thread::MutexLocker locker(&m_mutex);
+		int64_t r;
+		for (unsigned int i = 0; i < ids.size(); i++) {
+			utils::str2int(ids[i], &r);
+			m_revisions.push_back(r);
+		}
+	}
+
+	// Stops waiting for more revisions
+	void finish()
+	{
+		sys::thread::MutexLocker locker(&m_mutex);
+		m_finished = true;
+	}
+
 private:
 	sys::thread::Mutex m_mutex;
 	std::vector<int64_t> m_revisions;
-	std::vector<int64_t>::const_iterator m_it;
+	std::vector<int64_t>::size_type m_index;
 	std::map<int64_t, Diffstat> m_stats;
+	bool m_finished;
 };
 
 
@@ -329,9 +344,11 @@ private:
 // Diffstat scheduler
 class SvnDiffstatScheduler : public sys::thread::Thread
 {
+	friend class SvnDiffstatGenerator;
+
 public:
-	SvnDiffstatScheduler(const std::string &url, const Options::AuthData &auth, const std::vector<std::string> &ids, int n = 25)
-		: m_queue(ids)
+	SvnDiffstatScheduler(const std::string &url, const Options::AuthData &auth, int n = 25)
+		: sys::thread::Thread()
 	{
 		for (int i = 0; i < n; i++) {
 			m_gen.push_back(new SvnDiffstatGenerator(url, auth));
@@ -345,6 +362,18 @@ public:
 		}
 	}
 
+	void finish()
+	{
+		m_queue.finish();
+	}
+
+	// Adds new revisions for fetching
+	void add(const std::vector<std::string> &ids)
+	{
+		m_queue.put(ids);
+	}
+
+	// Blocks the caller until the diffstat is available and returns it
 	Diffstat stat(const std::string &id)
 	{
 		int64_t rev;
@@ -361,7 +390,9 @@ protected:
 			m_gen[i]->start(&m_queue);
 		}
 		for (unsigned int i = 0; i < m_gen.size(); i++) {
-			m_gen[i]->wait();
+			if (m_gen[i]->running()) {
+				m_gen[i]->wait();
+			}
 		}
 	}
 

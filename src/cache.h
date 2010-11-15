@@ -36,8 +36,8 @@ class Cache : public Backend
 		std::vector<std::string> branches() { return m_backend->branches(); }
 		Diffstat diffstat(const std::string &id);
 
-		RevisionIterator *iterator(const std::string &branch = std::string()) { return m_backend->iterator(branch); }
-		void prepare(RevisionIterator *it);
+		LogIterator *iterator(const std::string &branch = std::string()) { return m_backend->iterator(branch); }
+		void prefetch(const std::vector<std::string> &ids);
 		Revision *revision(const std::string &id);
 		void finalize() { m_backend->finalize(); }
 

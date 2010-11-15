@@ -105,7 +105,11 @@ void Options::reset()
 	m_scriptOptions.clear();
 
 	m_options["cache"] = "true";
+#ifdef DEBUG
+	m_verbosity = 1;
+#else
 	m_verbosity = 0;
+#endif
 
 	// TODO: Where on Windows?
 	m_options["cache_dir"] = utils::strprintf("%s/.%s/cache", getenv("HOME"), PACKAGE_NAME, "cache");

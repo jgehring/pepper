@@ -30,7 +30,7 @@ class GitBackend : public Backend
 		std::vector<std::string> branches();
 		Diffstat diffstat(const std::string &id);
 
-		RevisionIterator *iterator(const std::string &branch = std::string());
+		LogIterator *iterator(const std::string &branch = std::string());
 		Revision *revision(const std::string &id);
 };
 

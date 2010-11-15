@@ -15,6 +15,7 @@ pepper_SOURCES = \
 	options.h options.cpp \
 	repository.h repository.cpp \
 	revision.h revision.cpp \
+	revisioniterator.h revisioniterator.cpp \
 	utils.h utils.cpp \
 	\
 	sys/fs.h sys/fs.cpp \

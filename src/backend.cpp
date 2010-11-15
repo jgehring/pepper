@@ -23,37 +23,32 @@
 
 
 // Constructor
-Backend::RevisionIterator::RevisionIterator(const std::vector<std::string> &ids)
-	: m_ids(ids), m_index(0)
+Backend::LogIterator::LogIterator(const std::vector<std::string> &ids)
+	: m_ids(ids), m_atEnd(false)
 {
 
 }
 
 // Destructor
-Backend::RevisionIterator::~RevisionIterator()
+Backend::LogIterator::~LogIterator()
 {
 
 }
 
-// Resets the iterator, back to the first revision
-void Backend::RevisionIterator::reset()
+// Returns the next revision IDs, or an empty vector
+std::vector<std::string> Backend::LogIterator::nextIds()
 {
-	m_index = 0;
-}
-
-// Returns whether the iterator is at its end, i.e. past the last revision
-bool Backend::RevisionIterator::atEnd() const
-{
-	return (m_index >= m_ids.size());
-}
-
-// Returns the next revision ID, or an empty string
-std::string Backend::RevisionIterator::next()
-{
-	if (atEnd()) {
-		return std::string();
+	if (m_atEnd) {
+		return std::vector<std::string>();
 	}
-	return m_ids[m_index++];
+	m_atEnd = true;
+	return m_ids;
+}
+
+// Main thread loop
+void Backend::LogIterator::run()
+{
+	// Do nothing here
 }
 
 
@@ -86,8 +81,8 @@ void Backend::init()
 	// The default implementation does nothing
 }
 
-// Prepares the backend for processing the given revision iterator
-void Backend::prepare(RevisionIterator *)
+// Gives the backend the possibility to pre-fetch the given revisions
+void Backend::prefetch(const std::vector<std::string> &)
 {
 	// The default implementation does nothing
 }

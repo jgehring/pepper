@@ -40,8 +40,8 @@ static svn_error_t *logReceiver(void *baton, svn_log_entry_t *entry, apr_pool_t 
 }
 
 // Constructor
-SubversionBackend::SubversionRevisionIterator::SubversionRevisionIterator(SvnConnection *c, const std::string &prefix, long int head)
-	: Backend::RevisionIterator()
+SubversionBackend::SubversionLogIterator::SubversionLogIterator(SvnConnection *c, const std::string &prefix, long int head)
+	: Backend::LogIterator()
 {
 	// Determine revisions
 	apr_pool_t *pool = svn_pool_create(c->pool);
@@ -215,8 +215,8 @@ Diffstat SubversionBackend::diffstat(const std::string &id)
 	return parser.stat();
 }
 
-// Returns a revision iterator for the given branch
-Backend::RevisionIterator *SubversionBackend::iterator(const std::string &branch)
+// Returns a log iterator for the given branch
+Backend::LogIterator *SubversionBackend::iterator(const std::string &branch)
 {
 	std::string prefix;
 	if (branch == "trunk") {
@@ -244,26 +244,27 @@ Backend::RevisionIterator *SubversionBackend::iterator(const std::string &branch
 
 	long int headrev;
 	utils::str2int(head(prefix), &headrev);
-	return new SubversionRevisionIterator(d, prefix, headrev);
+	return new SubversionLogIterator(d, prefix, headrev);
 }
 
-// Prepares the diffstat scheduler for the given iterator
-void SubversionBackend::prepare(RevisionIterator *it)
+// Adds the given revision IDs to the diffstat scheduler
+void SubversionBackend::prefetch(const std::vector<std::string> &ids)
 {
-	// Spawn a thread for fetching diffstats in the background
-	std::vector<std::string> ids;
-	while (!it->atEnd()) {
-		ids.push_back(it->next());
+	if (ids.empty()) {
+		return;
 	}
-	it->reset();
-	m_sched = new SvnDiffstatScheduler(d->url, m_opts.authData(), ids, 10);
-	m_sched->start();
+	if (m_sched == NULL) {
+		m_sched = new SvnDiffstatScheduler(d->url, m_opts.authData(), 10);
+		m_sched->start();
+	}
+	m_sched->add(ids);
 }
 
 // Handle cleanup of diffstat scheduler
 void SubversionBackend::finalize()
 {
 	if (m_sched) {
+		m_sched->finish();
 		m_sched->wait();
 		delete m_sched;
 		m_sched = NULL;

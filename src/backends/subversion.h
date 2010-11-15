@@ -20,10 +20,10 @@ class SvnDiffstatScheduler;
 class SubversionBackend : public Backend
 {
 	public:
-		class SubversionRevisionIterator : public RevisionIterator
+		class SubversionLogIterator : public LogIterator
 		{
 			public:
-				SubversionRevisionIterator(SvnConnection *c, const std::string &prefix, long int head);
+				SubversionLogIterator(SvnConnection *c, const std::string &prefix, long int head);
 		};
 
 	public:
@@ -40,8 +40,8 @@ class SubversionBackend : public Backend
 		std::vector<std::string> branches();
 		Diffstat diffstat(const std::string &id);
 
-		RevisionIterator *iterator(const std::string &branch = std::string());
-		void prepare(RevisionIterator *it);
+		LogIterator *iterator(const std::string &branch = std::string());
+		void prefetch(const std::vector<std::string> &ids);
 		Revision *revision(const std::string &id);
 		void finalize();
 

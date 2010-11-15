@@ -95,6 +95,12 @@ void Thread::wait()
 	}
 }
 
+// Returns whether the thread is currently running
+bool Thread::running() const
+{
+	return m_running;
+}
+
 // Sets the abort flag
 void Thread::abort()
 {

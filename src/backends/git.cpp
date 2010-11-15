@@ -84,7 +84,7 @@ Diffstat GitBackend::diffstat(const std::string &id)
 }
 
 // Returns a revision iterator for the given branch
-Backend::RevisionIterator *GitBackend::iterator(const std::string &branch)
+Backend::LogIterator *GitBackend::iterator(const std::string &branch)
 {
 	std::string out = utils::exec(std::string("git log --format=\"%H\" ")+branch);
 	std::vector<std::string> revisions = utils::split(out, "\n");
@@ -92,7 +92,7 @@ Backend::RevisionIterator *GitBackend::iterator(const std::string &branch)
 		revisions.pop_back();
 	}
 	std::reverse(revisions.begin(), revisions.end());
-	return new RevisionIterator(revisions);
+	return new LogIterator(revisions);
 }
 
 // Returns the revision data for the given ID

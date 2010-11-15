@@ -62,6 +62,7 @@ class Thread
 		void start();
 		void abort();
 		void wait();
+		bool running() const;
 
 		static void msleep(int msecs);
 

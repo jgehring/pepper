@@ -15,6 +15,7 @@
 #include "globals.h"
 #include "repository.h"
 #include "revision.h"
+#include "revisioniterator.h"
 
 #include "luadiffstat.h"
 #include "luahelpers.h"
@@ -94,10 +95,9 @@ static int map_branch(lua_State *L)
 	}
 
 	Backend *backend = repo->backend();
-	Backend::RevisionIterator *it;
+	RevisionIterator *it;
 	try {
-		it = backend->iterator(branch);
-		backend->prepare(it);
+		it = new RevisionIterator(branch, backend);
 	} catch (const Pepper::Exception &ex) {
 		if (verbose) {
 			std::cerr << "failed" << std::endl;

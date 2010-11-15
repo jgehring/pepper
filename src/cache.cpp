@@ -63,20 +63,17 @@ Diffstat Cache::diffstat(const std::string &id)
 	return stat;
 }
 
-// Prepare the actual backend for uncached revisions
-void Cache::prepare(RevisionIterator *it)
+// Tells the wrapped backend to pre-fetch revisions that are not cached yet
+void Cache::prefetch(const std::vector<std::string> &ids)
 {
-	std::vector<std::string> ids;
-	while (!it->atEnd()) {
-		std::string id = it->next();
-		if (!lookup(id)) {
-			ids.push_back(id);
+	std::vector<std::string> missing;
+	for (unsigned int i = 0; i < ids.size(); i++) {
+		if (!lookup(ids[i])) {
+			missing.push_back(ids[i]);
 		}
 	}
-	it->reset();
 
-	RevisionIterator uncached(ids);
-	m_backend->prepare(&uncached);
+	m_backend->prefetch(missing);
 }
 
 // Returns the revision data for the given ID
@@ -169,7 +166,8 @@ void Cache::load()
 {
 	m_index.clear();
 
-	std::string path = m_opts.cacheDir() + "/" + m_backend->uuid();
+	std::string uuid = m_backend->uuid();
+	std::string path = m_opts.cacheDir() + "/" + uuid;
 	struct stat statbuf;
 	if (stat(path.c_str(), &statbuf) == -1) {
 		// Create the cache directory
@@ -199,5 +197,9 @@ void Cache::load()
 		}
 		in >> pos.first >> pos.second;
 		m_index[buffer] = pos;
+	}
+
+	if (m_opts.verbosity() > 0) {
+		std::cout << "Cache: " << m_index.size() << " cached revisions for '" << uuid << '\'' << std::endl;
 	}
 }

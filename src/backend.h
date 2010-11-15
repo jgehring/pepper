@@ -16,6 +16,8 @@
 
 #include "diffstat.h"
 
+#include "sys/thread.h"
+
 class Options;
 class Revision;
 
@@ -23,20 +25,22 @@ class Revision;
 class Backend
 {
 	public:
-		// Default implementation for a simple list of revision IDs
-		class RevisionIterator
+		// Offers access to the repository history
+		// The default implementation supports iterating through a pre-fetched vector
+		class LogIterator : public sys::thread::Thread
 		{
 			public:
-				RevisionIterator(const std::vector<std::string> &ids = std::vector<std::string>());
-				virtual ~RevisionIterator();
+				LogIterator(const std::vector<std::string> &ids = std::vector<std::string>());
+				virtual ~LogIterator();
 
-				virtual void reset();
-				virtual bool atEnd() const;
-				virtual std::string next();
+				virtual std::vector<std::string> nextIds();
+
+			protected:
+				virtual void run();
 
 			protected:
 				std::vector<std::string> m_ids;
-				unsigned int m_index;
+				bool m_atEnd;
 		};
 
 	public:
@@ -54,8 +58,8 @@ class Backend
 		virtual std::vector<std::string> branches() = 0;
 		virtual Diffstat diffstat(const std::string &id) = 0;
 
-		virtual RevisionIterator *iterator(const std::string &branch = std::string()) = 0;
-		virtual void prepare(RevisionIterator *it);
+		virtual LogIterator *iterator(const std::string &branch = std::string()) = 0;
+		virtual void prefetch(const std::vector<std::string> &ids);
 		virtual Revision *revision(const std::string &id) = 0;
 		virtual void finalize();
 
