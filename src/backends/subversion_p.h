@@ -277,8 +277,8 @@ public:
 	SvnDiffstatGenerator(const std::string &url, const Options::AuthData &auth)
 		: d(new SvnConnection()), m_queue(NULL)
 	{
-		m_url = url, m_auth = auth;
-		d->open(m_url, m_auth);
+		m_auth = auth;
+		d->open(url, m_auth);
 	}
 
 	~SvnDiffstatGenerator()
@@ -335,7 +335,6 @@ protected:
 
 private:
 	SvnConnection *d;
-	std::string m_url;
 	Options::AuthData m_auth;
 	SvnRevisionQueue *m_queue;
 };

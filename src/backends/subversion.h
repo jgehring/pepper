@@ -20,10 +20,23 @@ class SvnDiffstatScheduler;
 class SubversionBackend : public Backend
 {
 	public:
-		class SubversionLogIterator : public LogIterator
+		class SvnLogIterator : public LogIterator
 		{
 			public:
-				SubversionLogIterator(SvnConnection *c, const std::string &prefix, long int head);
+				SvnLogIterator(const std::string &url, const std::string &prefix, const Options::AuthData &auth, long int head);
+
+				std::vector<std::string> nextIds();
+
+			protected:
+				void run();
+
+			private:
+				SvnConnection *d;
+				std::string m_prefix;
+				int64_t m_head;
+				sys::thread::Mutex m_mutex;
+				std::vector<std::string>::size_type m_index;
+				bool m_finished;
 		};
 
 	public:
