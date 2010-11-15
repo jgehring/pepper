@@ -105,11 +105,7 @@ static int map_branch(lua_State *L)
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
 	}
 
-	if (verbose) {
-		std::cerr << "done" << std::endl;
-		std::cerr << "Mapping revisions... " << std::flush;
-	}
-
+	bool first = true;
 	while (!it->atEnd()) {
 		Revision *revision = NULL;
 		try {
@@ -125,6 +121,10 @@ static int map_branch(lua_State *L)
 		lua_pop(L, 1);
 
 		if (verbose) {
+			if (first) {
+				std::cerr << "done" << std::endl;
+				first = false;
+			}
 			std::cerr << "\r\033[0K";
 			std::cerr << "Mapping revisions... " << revision->id() << std::flush;
 		}
