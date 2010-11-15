@@ -45,7 +45,7 @@ Plot::~Plot()
 // Writes a Gnuplot command
 int Plot::cmd(lua_State *L)
 {
-	g->cmd(LuaHelpers::check(L));
+	g->cmd(LuaHelpers::pops(L));
 	return 0;
 }
 
@@ -54,10 +54,10 @@ int Plot::set_output(lua_State *L)
 {
 	std::string file, terminal;
 	if (lua_gettop(L) == 2) {
-		terminal = LuaHelpers::check(L, -1);
-		file = LuaHelpers::check(L, -2);
+		terminal = LuaHelpers::pops(L);
+		file = LuaHelpers::pops(L);
 	} else {
-		file = LuaHelpers::check(L, -1);
+		file = LuaHelpers::pops(L);
 		// Determine terminal type from extension
 		terminal = file.substr(file.find_last_of(".")+1);
 		if (terminal.empty() || terminal == "ps") {
@@ -71,7 +71,7 @@ int Plot::set_output(lua_State *L)
 // Sets the plot title
 int Plot::set_title(lua_State *L)
 {
-	g->set_title(LuaHelpers::check(L));
+	g->set_title(LuaHelpers::pops(L));
 	return 0;
 }
 
@@ -79,8 +79,8 @@ int Plot::set_title(lua_State *L)
 int Plot::plotxy(lua_State *L)
 {
 	std::vector<double> keys, values;
-	values = LuaHelpers::pop(L);
-	keys = LuaHelpers::pop(L);
+	values = LuaHelpers::popvd(L);
+	keys = LuaHelpers::popvd(L);
 
 	try {
 		g->plot_xy(keys, values);
@@ -94,8 +94,8 @@ int Plot::plotxy(lua_State *L)
 int Plot::plotty(lua_State *L)
 {
 	std::vector<double> keys, values;
-	values = LuaHelpers::pop(L);
-	keys = LuaHelpers::pop(L);
+	values = LuaHelpers::popvd(L);
+	keys = LuaHelpers::popvd(L);
 
 	// Run plot
 	try {

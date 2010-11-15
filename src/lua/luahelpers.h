@@ -11,6 +11,7 @@
 #define LUAHELPERS_H_
 
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -129,20 +130,51 @@ inline int pushError(lua_State *L, const char *what, const char *where) {
 }
 
 
-inline const char *check(lua_State *L, int index = -1) {
+inline int topi(lua_State *L, int index = -1) {
+	return luaL_checkinteger(L, index);
+}
+
+inline double topd(lua_State *L, int index = -1) {
+	return luaL_checknumber(L, index);
+}
+
+inline std::string tops(lua_State *L, int index = -1) {
 	return luaL_checkstring(L, index);
 }
 
-inline std::vector<double> pop(lua_State *L) {
+inline int popi(lua_State *L) {
+	int i = topi(L, -1); lua_pop(L, 1); return i;
+}
+
+inline double popd(lua_State *L) {
+	double d = topd(L, -1); lua_pop(L, 1); return d;
+}
+
+inline std::string pops(lua_State *L) {
+	std::string s = tops(L, -1); lua_pop(L, 1); return s;
+}
+
+inline std::vector<double> popvd(lua_State *L) {
 	std::vector<double> t;
 	luaL_checktype(L, -1, LUA_TTABLE);
 	lua_pushnil(L);
 	while (lua_next(L, -2) != 0) {
-		t.push_back(lua_tonumber(L, -1));
-		lua_pop(L, 1);
+		t.push_back(popd(L));
 	}
 	lua_pop(L, 1);
 	return t;
+}
+
+inline std::map<std::string, std::vector<double> > popmvd(lua_State *L) {
+	std::map<std::string, std::vector<double> > m;
+	luaL_checktype(L, -1, LUA_TTABLE);
+	lua_pushnil(L);
+	while (lua_next(L, -2) != 0) {
+		std::string key = tops(L, -2);
+		m[key] = popvd(L);
+	}
+	lua_pop(L, 1);
+	return m;
 }
 
 

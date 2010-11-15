@@ -49,7 +49,8 @@ static int print_option(lua_State *L)
 	if (lua_gettop(L) != 2) {
 		return luaL_error(L, "Invalid number of arguments (2 expected)");
 	}
-	utils::printOption(LuaHelpers::check(L, -2), LuaHelpers::check(L, -1));
+	utils::printOption(LuaHelpers::tops(L, -2), LuaHelpers::tops(L, -1));
+	lua_pop(L, 2);
 	return 0;
 }
 
@@ -62,8 +63,8 @@ static int option(lua_State *L)
 
 	int narg = lua_gettop(L);
 
-	std::vector<std::string> keys = utils::split(LuaHelpers::check(L, (narg == 1 ? -1 : -2)), ",", true);
-	std::string value = (narg == 2 ? LuaHelpers::check(L, -1) : std::string());
+	std::vector<std::string> keys = utils::split(LuaHelpers::tops(L, (narg == 1 ? -1 : -2)), ",", true);
+	std::string value = (narg == 2 ? LuaHelpers::tops(L, -1) : std::string());
 
 	for (unsigned int i = 0; i < keys.size(); i++) {
 		if (options.find(keys[i]) != options.end()) {
@@ -71,6 +72,7 @@ static int option(lua_State *L)
 			break;
 		}
 	}
+	lua_pop(L, narg);
 	return LuaHelpers::push(L, value);
 }
 
@@ -82,8 +84,7 @@ static int map_branch(lua_State *L)
 	}
 
 	luaL_checktype(L, -2, LUA_TFUNCTION);
-	std::string branch = LuaHelpers::check(L);
-	lua_pop(L, 1);
+	std::string branch = LuaHelpers::pops(L);
 	int callback = luaL_ref(L, LUA_REGISTRYINDEX);
 	lua_pop(L, 1);
 
