@@ -27,6 +27,7 @@ class Plot
 		int set_title(lua_State *L);
 		int plotxy(lua_State *L);
 		int plotty(lua_State *L);
+		int flush(lua_State *L);
 
 	public:
 		static const char className[];

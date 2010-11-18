@@ -26,6 +26,7 @@ Lunar<Plot>::RegType Plot::methods[] = {
 	LUNAR_DECLARE_METHOD(Plot, set_title),
 	LUNAR_DECLARE_METHOD(Plot, plotxy),
 	LUNAR_DECLARE_METHOD(Plot, plotty),
+	LUNAR_DECLARE_METHOD(Plot, flush),
 	{0,0}
 };
 
@@ -107,9 +108,17 @@ int Plot::plotty(lua_State *L)
 		g->cmd("set xtics rotate by -45");
 		g->cmd("set grid ytics");
 		g->plot_xy(keys, values);
-		g->replot();
+//		g->replot();
 	} catch (GnuplotException ex) {
 		return LuaHelpers::pushError(L, ex.what());
     }
+	return 0;
+}
+
+// Closes and reopens the Gnuplot connection
+int Plot::flush(lua_State *L)
+{
+	delete g;
+	g = new Gnuplot("lines");
 	return 0;
 }
