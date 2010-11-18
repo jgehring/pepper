@@ -56,7 +56,7 @@ static int print_option(lua_State *L)
 }
 
 // Returns a script option (or the default value)
-static int option(lua_State *L)
+static int getopt(lua_State *L)
 {
 	if (lua_gettop(L) != 1 && lua_gettop(L) != 2) {
 		return luaL_error(L, "Invalid number of arguments (1 or 2 expected)");
@@ -153,15 +153,14 @@ static int map_branch(lua_State *L)
 // Function table of the report library
 static const struct luaL_reg report[] = {
 	{"repository", repository},
-	{"print_option", print_option},
-	{"option", option},
+	{"getopt", getopt},
 	{"map_branch", map_branch},
 	{NULL, NULL}
 };
 
 
-// Runs a scripted report using the given backend
-int run(const std::string &script, Backend *backend)
+// Sets up the lua context
+lua_State *setupLua()
 {
 	// Setup lua context
 	lua_State *L = lua_open();
@@ -175,6 +174,18 @@ int run(const std::string &script, Backend *backend)
 	Lunar<LuaRevision>::Register(L, "pepper");
 	Lunar<LuaDiffstat>::Register(L, "pepper");
 	Lunar<Plot>::Register(L, "pepper");
+
+	// Setup meta table
+	luaL_newmetatable(L, "meta");
+	lua_setglobal(L, "meta");
+
+	return L;
+}
+
+// Runs a scripted report using the given backend
+int run(const std::string &script, Backend *backend)
+{
+	lua_State *L = setupLua();
 
 	// Setup global variables
 	Report::repo = new Repository(backend);
@@ -207,32 +218,57 @@ int run(const std::string &script, Backend *backend)
 	return ret;
 }
 
-// Opens a script and calls the "print_help()" function
+// Opens a script, calls the "options()" function and pretty-prints some help
 void printHelp(const std::string &script)
 {
-	// Setup lua context
-	lua_State *L = lua_open();
-	luaL_openlibs(L);
-
-	// Register report functions
-	luaL_register(L, "pepper.report", report);
-
-	// Register binding classes
-	Lunar<LuaRepository>::Register(L, "pepper");
-	Lunar<LuaRevision>::Register(L, "pepper");
-	Lunar<LuaDiffstat>::Register(L, "pepper");
-	Lunar<Plot>::Register(L, "pepper");
+	lua_State *L = setupLua();
 
 	// Open the script
 	if (luaL_dofile(L, script.c_str()) != 0) {
 		throw PEX(utils::strprintf("Error opening report: %s", lua_tostring(L, -1)));
 	}
 
-	// Call the help function
-	lua_getglobal(L, "print_help");
-	if (lua_pcall(L, 0, 1, 0) != 0) {
-		throw PEX(utils::strprintf("Error running report: %s", lua_tostring(L, -1)));
+	lua_getglobal(L, "meta");
+
+	// Retrieve the report name
+	std::string name = script;
+	lua_getfield(L, -1, "name");
+	if (lua_type(L, -1) == LUA_TSTRING) {
+		name = LuaHelpers::pops(L);
 	}
+
+	// Check for possible options
+	lua_getfield(L, -1, "options");
+	if (lua_type(L, -1) == LUA_TTABLE) {
+		// Pop the arguments from the stack
+		std::vector<std::string> switches, text;
+		luaL_checktype(L, -1, LUA_TTABLE);
+		lua_pushnil(L);
+		while (lua_next(L, -2) != 0) {
+			luaL_checktype(L, -1, LUA_TTABLE);
+			lua_pushnil(L);
+			int i = 0;
+			while (lua_next(L, -2) != 0) {
+				if (i == 0) {
+					switches.push_back(luaL_checkstring(L, -1));
+				} else if (i == 1) {
+					text.push_back(luaL_checkstring(L, -1));
+				}
+				++i;
+				lua_pop(L, 1);
+			}
+			lua_pop(L, 1);
+		}
+		lua_pop(L, 1);
+
+		std::cout << "Options for report '" << name << "':" << std::endl;
+		for (unsigned int i = 0; i < std::min(switches.size(), text.size()); i++) {
+			utils::printOption(switches[i], text[i]);
+		}
+	} else {
+		std::cout << "No options for report '" << name << "':" << std::endl;
+	}
+	lua_pop(L, 1);
 
 	lua_gc(L, LUA_GCCOLLECT, 0);
 	lua_close(L);

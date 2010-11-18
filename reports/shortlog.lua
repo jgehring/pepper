@@ -3,11 +3,9 @@
 --]]
 
 
--- Print usage information
-function print_help()
-	print("Report options for 'shortlog':")
-	pepper.report.print_option("-b, --branch", "Select branch")
-end
+-- Script meta-data
+meta.name = "shortlog"
+meta.options = {{"-b, --branch", "Select branch"}}
 
 
 -- Revision callback function
@@ -26,7 +24,7 @@ function main()
 	messages = {}
 
 	-- Gather data
-	branch = pepper.report.option("-b,--branch", pepper.report.repository():main_branch())
+	branch = pepper.report.getopt("-b,--branch", pepper.report.repository():main_branch())
 	pepper.report.map_branch(callback, branch)
 
 	-- Sort commit dictionary by name
