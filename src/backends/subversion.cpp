@@ -121,6 +121,7 @@ void SubversionBackend::SvnLogIterator::run()
 	}
 
 	m_finished = true;
+	m_cond.wakeAll();
 	svn_pool_destroy(pool);
 }
 
