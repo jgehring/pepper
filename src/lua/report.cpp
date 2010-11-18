@@ -9,6 +9,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <memory>
 
 #include "backend.h"
 #include "diffstat.h"
@@ -42,17 +43,6 @@ static std::map<std::string, std::string> options;
 static int repository(lua_State *L)
 {
 	return LuaHelpers::push(L, luarepo);
-}
-
-// Pretty-prints a command-line option
-static int print_option(lua_State *L)
-{
-	if (lua_gettop(L) != 2) {
-		return luaL_error(L, "Invalid number of arguments (2 expected)");
-	}
-	utils::printOption(LuaHelpers::tops(L, -2), LuaHelpers::tops(L, -1));
-	lua_pop(L, 2);
-	return 0;
 }
 
 // Returns a script option (or the default value)
@@ -159,6 +149,71 @@ static const struct luaL_reg report[] = {
 };
 
 
+// Custom fclose() handler for lua file handles
+static int utils_fclose(lua_State *L)
+{
+	FILE **p = (FILE **)lua_touserdata(L, 1);
+	int rc = fclose(*p);
+	if (rc == 0) *p = NULL;
+	return 1;
+}
+
+// Generates a temporary file, and returns a file handle as well as the file name
+static int utils_mkstemp(lua_State *L)
+{
+	std::string templ;
+	if (lua_gettop(L) > 0) {
+		templ = LuaHelpers::pops(L);
+	} else {
+		templ = "/tmp/pepperXXXXXX";
+	}
+
+	std::auto_ptr<char> buf(new char[templ.length()]);
+	templ.copy(buf.get(), templ.length());
+	int fd = mkstemp(buf.get());
+
+	FILE **pf = (FILE **)lua_newuserdata(L, sizeof *pf);
+	*pf = 0;
+	luaL_getmetatable(L, LUA_FILEHANDLE);
+	lua_setmetatable(L, -2);
+
+	// Register custom __close() function
+	// (From lua posix module by Luiz Henrique de Figueiredo)
+	lua_getfield(L, LUA_REGISTRYINDEX, "PEPPER_UTILS_FILE");
+	if (lua_isnil(L, -1)) {
+		lua_pop(L, 1);
+		lua_newtable(L);
+		lua_pushvalue(L, -1);
+		lua_pushcfunction(L, utils_fclose);
+		lua_setfield(L, -2, "__close");
+		lua_setfield(L, LUA_REGISTRYINDEX, "PEPPER_UTILS_FILE");
+	}
+	lua_setfenv(L, -2);
+
+	*pf = fdopen(fd, "r+w");
+	LuaHelpers::push(L, (const char *)buf.get());
+	return 2;
+}
+
+// Removes a file
+static int utils_unlink(lua_State *L)
+{
+	if (lua_gettop(L) != 1) {
+		return luaL_error(L, "Invalid number of arguments (1 expected)");
+	}
+	unlink(LuaHelpers::tops(L).c_str());
+	return 0;
+}
+
+// Function table of the utils library
+static const struct luaL_reg utils[] = {
+	// TODO: Error handling for all functions
+	{"mkstemp", utils_mkstemp},
+	{"unlink", utils_unlink},
+	{NULL, NULL}
+};
+
+
 // Sets up the lua context
 lua_State *setupLua()
 {
@@ -168,6 +223,7 @@ lua_State *setupLua()
 
 	// Register report functions
 	luaL_register(L, "pepper.report", report);
+	luaL_register(L, "pepper.utils", utils);
 
 	// Register binding classes
 	Lunar<LuaRepository>::Register(L, "pepper");
