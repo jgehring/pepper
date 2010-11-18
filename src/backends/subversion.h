@@ -35,6 +35,7 @@ class SubversionBackend : public Backend
 				std::string m_prefix;
 				int64_t m_head;
 				sys::thread::Mutex m_mutex;
+				sys::thread::WaitCondition m_cond;
 				std::vector<std::string>::size_type m_index;
 				bool m_finished;
 		};

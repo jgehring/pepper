@@ -41,23 +41,23 @@ SubversionBackend::SvnLogIterator::SvnLogIterator(const std::string &url, const 
 // Returns the next revision IDs, or an empty vector
 std::vector<std::string> SubversionBackend::SvnLogIterator::nextIds()
 {
-	sys::thread::MutexLocker locker(&m_mutex);
+	m_mutex.lock();
 	while (m_index >= m_ids.size() && !m_finished) {
-		locker.unlock();
-		sys::thread::Thread::msleep(50);
-		locker.relock();
+		m_cond.wait(&m_mutex);
 	}
 
 	std::vector<std::string> next;
 	while (m_index < m_ids.size()) {
 		next.push_back(m_ids[m_index++]);
 	}
+	m_mutex.unlock();
 	return next;
 }
 
 struct logReceiverBaton
 {
 	sys::thread::Mutex *mutex;
+	sys::thread::WaitCondition *cond;
 	std::vector<std::string> temp;
 	std::vector<std::string> *ids;
 };
@@ -74,6 +74,7 @@ static svn_error_t *logReceiver(void *baton, svn_log_entry_t *entry, apr_pool_t 
 			b->ids->push_back(b->temp[i]);
 		}
 		b->temp.clear();
+		b->cond->wakeAll();
 		b->mutex->unlock();
 	}
 	return SVN_NO_ERROR;
@@ -96,6 +97,7 @@ void SubversionBackend::SvnLogIterator::run()
 
 	logReceiverBaton baton;
 	baton.mutex = &m_mutex;
+	baton.cond = &m_cond;
 	baton.ids = &m_ids;
 
 	// Determine revisions, but not at once
