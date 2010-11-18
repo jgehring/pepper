@@ -11,6 +11,7 @@
 #define LUAHELPERS_H_
 
 
+#include <iostream>
 #include <map>
 #include <string>
 #include <vector>
@@ -23,7 +24,7 @@
 namespace LuaHelpers
 {
 
-inline void stackdump(lua_State *L, std::ostream &out) {
+inline void stackdump(lua_State *L, std::ostream &out = std::cout) {
 	int top = lua_gettop(L);
 	out << "Stack size: " << top << std::endl;
 	for (int i = top; i >= 1; i--) {
