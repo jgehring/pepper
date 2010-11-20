@@ -100,12 +100,19 @@ Backend::LogIterator *MercurialBackend::iterator(const std::string &branch)
 // Returns the revision data for the given ID
 Revision *MercurialBackend::revision(const std::string &id)
 {
-	std::string meta = utils::exec(hgcmd()+" log -r "+id+" --template=\"{date|isodatesec}\n{author}\n{desc}\"");
+	std::string meta = utils::exec(hgcmd()+" log -r "+id+" --template=\"{date|hgdate}\n{author|person}\n{desc}\"");
 	std::vector<std::string> lines = utils::split(meta, "\n");
 	int64_t date;
 	std::string author;
 	if (!lines.empty()) {
-		date = utils::ptime(lines[0], "%Y-%m-%d %H:%M:%S %z");
+		// Date is given as seconds and timezone offset from UTC
+		std::vector<std::string> parts = utils::split(lines[0], " ");
+		if (parts.size() > 1) {
+			int64_t offset;
+			utils::str2int(parts[0], &date);
+			utils::str2int(parts[1], &offset);
+			date += offset;
+		}
 		lines.erase(lines.begin());
 	}
 	if (!lines.empty()) {
