@@ -28,6 +28,7 @@ int mkdir(const std::string &path);
 int mkpath(const std::string &path);
 
 bool exists(const std::string &path);
+bool dirExists(const std::string &path);
 size_t filesize(const std::string &path);
 
 } // namespace fs

@@ -100,6 +100,13 @@ bool exists(const std::string &path)
 	return (stat(path.c_str(), &statbuf) != -1);
 }
 
+// Checks if the given directory exists
+bool dirExists(const std::string &path)
+{
+	struct stat statbuf;
+	return (stat(path.c_str(), &statbuf) == 0 && S_ISDIR(statbuf.st_mode));
+}
+
 // Returns the size of the given file
 size_t filesize(const std::string &path)
 {
