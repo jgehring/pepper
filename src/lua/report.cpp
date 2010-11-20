@@ -8,6 +8,7 @@
 
 
 #include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <memory>
 
@@ -168,9 +169,8 @@ static int utils_mkstemp(lua_State *L)
 		templ = "/tmp/pepperXXXXXX";
 	}
 
-	std::auto_ptr<char> buf(new char[templ.length()]);
-	templ.copy(buf.get(), templ.length());
-	int fd = mkstemp(buf.get());
+	char *buf = strdup(templ.c_str());
+	int fd = mkstemp(buf);
 
 	FILE **pf = (FILE **)lua_newuserdata(L, sizeof *pf);
 	*pf = 0;
@@ -191,7 +191,8 @@ static int utils_mkstemp(lua_State *L)
 	lua_setfenv(L, -2);
 
 	*pf = fdopen(fd, "r+w");
-	LuaHelpers::push(L, (const char *)buf.get());
+	LuaHelpers::push(L, (const char *)buf);
+	free(buf);
 	return 2;
 }
 
