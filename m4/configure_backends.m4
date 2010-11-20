@@ -7,6 +7,7 @@ sinclude(m4/find_apr.m4)
 sinclude(m4/find_svn.m4)
 
 AC_ARG_ENABLE([git], [AS_HELP_STRING([--enable-git], [Include the git backend (default is yes)])], [git="$enableval"], [git="yes"])
+AC_ARG_ENABLE([mercurial], [AS_HELP_STRING([--enable-mercurial], [Include the mercurial backend (default is yes)])], [mercurial="$enableval"], [mercurial="yes"])
 AC_ARG_ENABLE([svn], [AS_HELP_STRING([--enable-svn], [Include the subversion backend (default is autodetect)])], [subversion="$enableval"], [subversion="auto"])
 
 dnl Run checks for the backends
@@ -56,6 +57,7 @@ AC_DEFUN([BACKENDS_REPORT], [
 	echo
 	echo "    Enabled SCM backends:"
 	if test "x$git" = "xyes"; then echo "      * git"; fi
+	if test "x$mercurial" = "xyes"; then echo "      * mercurial"; fi
 	if test "x$subversion" = "xyes"; then echo "      * Subversion"; fi
 	echo
 ])

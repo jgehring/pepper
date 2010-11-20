@@ -17,6 +17,9 @@
 #ifdef USE_GIT
  #include "backends/git.h"
 #endif
+#ifdef USE_MERCURIAL
+ #include "backends/mercurial.h"
+#endif
 #ifdef USE_SUBVERSION
  #include "backends/subversion.h"
 #endif
@@ -112,6 +115,11 @@ Backend *Backend::backendForName(const std::string &name, const Options &options
 		return new GitBackend(options);
 	}
 #endif
+#ifdef USE_MERCURIAL
+	if (name == "mercurial") {
+		return new MercurialBackend(options);
+	}
+#endif
 	return NULL;
 }
 
@@ -126,6 +134,11 @@ Backend *Backend::backendForUrl(const std::string &url, const Options &options)
 #ifdef USE_GIT
 	if (GitBackend::handles(url)) {
 		return new GitBackend(options);
+	}
+#endif
+#ifdef USE_MERCURIAL
+	if (sys::fs::dirExists(url+"/.hg")) {
+		return new MercurialBackend(options);
 	}
 #endif
 

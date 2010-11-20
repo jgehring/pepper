@@ -52,6 +52,13 @@ AM_CPPFLAGS += \
 	-DUSE_GIT
 endif
 
+if MERCURIAL_BACKEND
+pepper_SOURCES += \
+	backends/mercurial.h backends/mercurial.cpp
+AM_CPPFLAGS += \
+	-DUSE_MERCURIAL
+endif
+
 if SVN_BACKEND
 pepper_SOURCES += \
 	backends/subversion.h backends/subversion.cpp

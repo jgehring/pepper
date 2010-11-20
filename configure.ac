@@ -67,6 +67,7 @@ CHECK_ZLIB()
 BACKENDS_CHECK()
 
 AM_CONDITIONAL([GIT_BACKEND], [test "x$git" = "xyes"])
+AM_CONDITIONAL([MERCURIAL_BACKEND], [test "x$mercurial" = "xyes"])
 AM_CONDITIONAL([SVN_BACKEND], [test "x$subversion" = "xyes"])
 
 
