@@ -24,6 +24,7 @@ class SubversionBackend : public Backend
 		{
 			public:
 				SvnLogIterator(const std::string &url, const std::string &prefix, const Options::AuthData &auth, long int head);
+				~SvnLogIterator();
 
 				std::vector<std::string> nextIds();
 

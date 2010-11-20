@@ -38,6 +38,12 @@ SubversionBackend::SvnLogIterator::SvnLogIterator(const std::string &url, const 
 	d->open(url, auth);
 }
 
+// Desctructor
+SubversionBackend::SvnLogIterator::~SvnLogIterator()
+{
+	delete d;
+}
+
 // Returns the next revision IDs, or an empty vector
 std::vector<std::string> SubversionBackend::SvnLogIterator::nextIds()
 {
