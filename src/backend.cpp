@@ -11,7 +11,6 @@
 #include <cstring>
 
 #include "options.h"
-#include "sys/fs.h"
 
 #include "backend.h"
 
@@ -119,19 +118,13 @@ Backend *Backend::backendForName(const std::string &name, const Options &options
 // Tries to guess a backend by examining the repository URL
 Backend *Backend::backendForUrl(const std::string &url, const Options &options)
 {
-	// An actual url?
 #ifdef USE_SUBVERSION
-	const char *schemes[] = {"svn://", "svn+ssh://", "http://", "https://", "file://"};
-	for (int i = 0; i < sizeof(schemes)/sizeof(schemes[0]); i++) {
-		if (url.compare(0, strlen(schemes[i]), schemes[i]) == 0) {
-			return new SubversionBackend(options);
-		}
+	if (SubversionBackend::handles(url)) {
+		return new SubversionBackend(options);
 	}
 #endif
-
-	// A local path?
 #ifdef USE_GIT
-	if (sys::fs::dirExists(url+"/.git")) {
+	if (GitBackend::handles(url)) {
 		return new GitBackend(options);
 	}
 #endif

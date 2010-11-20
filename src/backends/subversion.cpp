@@ -167,6 +167,18 @@ void SubversionBackend::init()
 	d->open(url, m_opts.authData());
 }
 
+// Returns true if this backend is able to access the given repository
+bool SubversionBackend::handles(const std::string &url)
+{
+	const char *schemes[] = {"svn://", "svn+ssh://", "http://", "https://", "file://"};
+	for (unsigned int i = 0; i < sizeof(schemes)/sizeof(schemes[0]); i++) {
+		if (url.compare(0, strlen(schemes[i]), schemes[i]) == 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
 // Returns a unique identifier for this repository
 std::string SubversionBackend::uuid()
 {
