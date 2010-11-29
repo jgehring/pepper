@@ -16,7 +16,8 @@
 #include <string>
 
 #include "main.h"
-#include "thread.h"
+
+#include "syslib/parallel.h"
 
 class BIStream;
 class BOStream;
@@ -51,7 +52,7 @@ class Diffstat
 };
 
 
-class DiffParser : public sys::thread::Thread
+class DiffParser : public sys::parallel::Thread
 {
 	public:
 		DiffParser(std::istream &in);

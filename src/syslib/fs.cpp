@@ -2,7 +2,7 @@
  * pepper - SCM statistics report generator
  * Copyright (C) 2010 Jonas Gehring
  *
- * file: sys/fs.cpp
+ * file: syslib/fs.cpp
  * File system utility functions
  */
 

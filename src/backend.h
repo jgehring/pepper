@@ -16,7 +16,7 @@
 
 #include "diffstat.h"
 
-#include "sys/thread.h"
+#include "syslib/parallel.h"
 
 class Options;
 class Revision;
@@ -27,7 +27,7 @@ class Backend
 	public:
 		// Offers access to the repository history
 		// The default implementation supports iterating through a pre-fetched vector
-		class LogIterator : public sys::thread::Thread
+		class LogIterator : public sys::parallel::Thread
 		{
 			public:
 				LogIterator(const std::vector<std::string> &ids = std::vector<std::string>());

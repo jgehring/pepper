@@ -66,7 +66,7 @@ void Diffstat::parse(std::istream &in)
 
 // Constructor
 DiffParser::DiffParser(std::istream &in)
-	: m_in(in)
+	: sys::parallel::Thread(), m_in(in)
 {
 
 }

@@ -19,8 +19,8 @@ pepper_SOURCES = \
 	revisioniterator.h revisioniterator.cpp \
 	utils.h utils.cpp \
 	\
-	sys/fs.h sys/fs.cpp \
-	sys/thread.h sys/thread.cpp \
+	syslib/fs.h syslib/fs.cpp \
+	syslib/parallel.h syslib/parallel.cpp \
 	\
 	lua/luadiffstat.h \
 	lua/luahelpers.h \
@@ -38,7 +38,7 @@ AM_CXXFLAGS = \
 INCLUDES = \
 	-I@top_srcdir@/src/3rdparty \
 	-I@top_srcdir@/src/lua \
-	-I@top_srcdir@/src/sys
+	-I@top_srcdir@/src/syslib
 AM_CPPFLAGS = 
 AM_LDFLAGS = \
 	$(LUA_LIBS)

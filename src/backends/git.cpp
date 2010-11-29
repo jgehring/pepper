@@ -13,15 +13,16 @@
 #include "jobqueue.h"
 #include "options.h"
 #include "revision.h"
-#include "sys/fs.h"
-#include "sys/thread.h"
 #include "utils.h"
+
+#include "syslib/fs.h"
+#include "syslib/parallel.h"
 
 #include "backends/git.h"
 
 
 // Diffstat fetching worker thread
-class GitDiffstatThread : public sys::thread::Thread
+class GitDiffstatThread : public sys::parallel::Thread
 {
 public:
 	GitDiffstatThread(JobQueue<std::string, Diffstat> *queue)

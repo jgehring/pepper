@@ -15,7 +15,7 @@
 #include <queue>
 #include <vector>
 
-#include "sys/thread.h"
+#include "syslib/parallel.h"
 
 
 template <typename Arg, typename Result>
@@ -92,8 +92,8 @@ class JobQueue
 		}
 
 	private:
-		sys::thread::Mutex m_mutex;
-		sys::thread::WaitCondition m_argWait, m_resultWait;
+		sys::parallel::Mutex m_mutex;
+		sys::parallel::WaitCondition m_argWait, m_resultWait;
 		std::queue<Arg> m_queue;
 		std::map<Arg, Result> m_results;
 		std::map<Arg, int> m_status;

@@ -11,6 +11,9 @@
 #define SUBVERSION_BACKEND_P_H
 
 
+using namespace sys::parallel;
+
+
 extern apr_pool_t *global_pool;
 
 
@@ -214,10 +217,10 @@ public:
 	// Returns the next revision number, or -1 if there are no more revisions
 	int64_t next()
 	{
-		sys::thread::MutexLocker locker(&m_mutex);
+		MutexLocker locker(&m_mutex);
 		if (m_index >= m_revisions.size() && !m_finished) {
 			locker.unlock();
-			sys::thread::Thread::msleep(100);
+			Thread::msleep(100);
 			locker.relock();
 		}
 
@@ -227,17 +230,17 @@ public:
 	// Called when a diffstat has been fetched successfully
 	void done(int64_t rev, const Diffstat &stat)
 	{
-		sys::thread::MutexLocker locker(&m_mutex);
+		MutexLocker locker(&m_mutex);
 		m_stats[rev] = stat;
 	}
 
 	// Blocks the caller until the diffstat is available and returns it
 	Diffstat get(int64_t rev)
 	{
-		sys::thread::MutexLocker locker(&m_mutex);
+		MutexLocker locker(&m_mutex);
 		while (m_stats.find(rev) == m_stats.end()) {
 			locker.unlock();
-			sys::thread::Thread::msleep(100);
+			Thread::msleep(100);
 			locker.relock();
 		}
 		return m_stats[rev];
@@ -246,7 +249,7 @@ public:
 	// Puts the given revisions in the scheduling queue
 	void put(const std::vector<std::string> &ids)
 	{
-		sys::thread::MutexLocker locker(&m_mutex);
+		MutexLocker locker(&m_mutex);
 		int64_t r;
 		for (unsigned int i = 0; i < ids.size(); i++) {
 			utils::str2int(ids[i], &r);
@@ -257,12 +260,12 @@ public:
 	// Stops waiting for more revisions
 	void finish()
 	{
-		sys::thread::MutexLocker locker(&m_mutex);
+		MutexLocker locker(&m_mutex);
 		m_finished = true;
 	}
 
 private:
-	sys::thread::Mutex m_mutex;
+	Mutex m_mutex;
 	std::vector<int64_t> m_revisions;
 	std::vector<int64_t>::size_type m_index;
 	std::map<int64_t, Diffstat> m_stats;
@@ -271,7 +274,7 @@ private:
 
 
 // Diffstat generator thread
-class SvnDiffstatGenerator : public sys::thread::Thread
+class SvnDiffstatGenerator : public Thread
 {
 public:
 	SvnDiffstatGenerator(const std::string &url, const Options::AuthData &auth)
@@ -289,7 +292,7 @@ public:
 	void start(SvnRevisionQueue *queue)
 	{
 		m_queue = queue;
-		sys::thread::Thread::start();
+		Thread::start();
 	}
 
 protected:
@@ -341,13 +344,13 @@ private:
 
 
 // Diffstat scheduler
-class SvnDiffstatScheduler : public sys::thread::Thread
+class SvnDiffstatScheduler : public Thread
 {
 	friend class SvnDiffstatGenerator;
 
 public:
 	SvnDiffstatScheduler(const std::string &url, const Options::AuthData &auth, int n = 25)
-		: sys::thread::Thread()
+		: Thread()
 	{
 		for (int i = 0; i < n; i++) {
 			m_gen.push_back(new SvnDiffstatGenerator(url, auth));

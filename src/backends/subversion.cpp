@@ -24,8 +24,9 @@
 #include "main.h"
 #include "options.h"
 #include "revision.h"
-#include "thread.h"
 #include "utils.h"
+
+#include "syslib/parallel.h"
 
 #include "backends/subversion.h"
 #include "backends/subversion_p.h"
@@ -62,8 +63,8 @@ std::vector<std::string> SubversionBackend::SvnLogIterator::nextIds()
 
 struct logReceiverBaton
 {
-	sys::thread::Mutex *mutex;
-	sys::thread::WaitCondition *cond;
+	Mutex *mutex;
+	WaitCondition *cond;
 	std::vector<std::string> temp;
 	std::vector<std::string> *ids;
 };
@@ -89,7 +90,7 @@ static svn_error_t *logReceiver(void *baton, svn_log_entry_t *entry, apr_pool_t 
 // Main thread function
 void SubversionBackend::SvnLogIterator::run()
 {
-	sys::thread::MutexLocker locker(&m_mutex);
+	MutexLocker locker(&m_mutex);
 
 	apr_pool_t *pool = svn_pool_create(d->pool);
 	apr_pool_t *subpool = svn_pool_create(pool);

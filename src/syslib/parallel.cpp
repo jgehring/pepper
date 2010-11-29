@@ -2,7 +2,7 @@
  * pepper - SCM statistics report generator
  * Copyright (C) 2010 Jonas Gehring
  *
- * file: sys/thread.cpp
+ * file: syslib/parallel.cpp
  * POSIX thread classes and utilities
  */
 
@@ -11,13 +11,13 @@
 
 #include <sys/time.h>
 
-#include "thread.h"
+#include "parallel.h"
 
 
 namespace sys 
 {
 
-namespace thread
+namespace parallel
 {
 
 // Constructor
@@ -245,6 +245,6 @@ void Semaphore::release(int n)
 	pthread_mutex_unlock(&m_mutex);
 }
 
-} // namespace thread
+} // namespace parallel
 
 } // namespace sys

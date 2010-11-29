@@ -2,7 +2,7 @@
  * pepper - SCM statistics report generator
  * Copyright (C) 2010 Jonas Gehring
  *
- * file: sys/thread.h
+ * file: syslib/parallel.h
  * POSIX thread classes and utilities (interface)
  */
 
@@ -20,7 +20,7 @@
 namespace sys
 {
 
-namespace thread
+namespace parallel
 {
 
 class Mutex
@@ -114,7 +114,7 @@ class Semaphore
 		pthread_cond_t m_cond;
 };
 
-} // namespace thread
+} // namespace parallel
 
 } // namespace sys
 
