@@ -12,6 +12,8 @@
 
 #include "options.h"
 
+#include "syslib/fs.h"
+
 #include "backend.h"
 
 #ifdef USE_GIT

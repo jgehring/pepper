@@ -12,7 +12,8 @@
 
 #include "options.h"
 #include "revision.h"
-#include "sys/fs.h"
+
+#include "syslib/fs.h"
 
 #include "utils.h"
 
