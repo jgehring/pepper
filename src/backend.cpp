@@ -24,7 +24,7 @@
 
 // Constructor
 Backend::LogIterator::LogIterator(const std::vector<std::string> &ids)
-	: m_ids(ids), m_atEnd(false)
+	: sys::thread::Thread(), m_ids(ids), m_atEnd(false)
 {
 
 }
