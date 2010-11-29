@@ -37,6 +37,7 @@ RevisionIterator::RevisionIterator(const std::string &branch, Backend *backend)
 // Destructor
 RevisionIterator::~RevisionIterator()
 {
+	m_logIterator->wait();
 	delete m_logIterator;
 }
 
