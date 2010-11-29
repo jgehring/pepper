@@ -220,7 +220,7 @@ void printOption(const std::string &option, const std::string &text)
 }
 
 // Runs the specified command and returns the output
-std::string exec(const std::string &cmd)
+std::string exec(const std::string &cmd, int *ret)
 {
 	FILE *pipe = popen(cmd.c_str(), "r");
 	if (!pipe) {
@@ -235,7 +235,10 @@ std::string exec(const std::string &cmd)
 		}
 	}
 
-	pclose(pipe);
+	int r = pclose(pipe);
+	if (ret != NULL) {
+		*ret = r;
+	}
 	return result;
 }
 

@@ -35,7 +35,7 @@ std::string strprintf(const char *format, ...);
 
 void printOption(const std::string &option, const std::string &text);
 
-std::string exec(const std::string &cmd);
+std::string exec(const std::string &cmd, int *ret = NULL);
 
 } // namespace utils
 

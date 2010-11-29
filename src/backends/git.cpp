@@ -79,7 +79,11 @@ std::string GitBackend::mainBranch()
 // Returns a list of available branches
 std::vector<std::string> GitBackend::branches()
 {
-	std::string out = utils::exec("git branch");
+	int ret;
+	std::string out = utils::exec("git branch", &ret);
+	if (ret != 0) {
+		throw PEX(utils::strprintf("Unable to retreive the list of branches (%d)", ret));
+	}
 	std::vector<std::string> branches = utils::split(out, "\n");
 	for (unsigned int i = 0; i < branches.size(); i++) {
 		branches[i] = branches[i].substr(2);
@@ -98,7 +102,11 @@ Diffstat GitBackend::diffstat(const std::string &id)
 // Returns a revision iterator for the given branch
 Backend::LogIterator *GitBackend::iterator(const std::string &branch)
 {
-	std::string out = utils::exec(std::string("git log --format=\"%H\" ")+branch);
+	int ret;
+	std::string out = utils::exec(std::string("git log --format=\"%H\" ")+branch, &ret);
+	if (ret != 0) {
+		throw PEX(utils::strprintf("Unable to retreive log for branch '%s' (%d)", branch.c_str(), ret));
+	}
 	std::vector<std::string> revisions = utils::split(out, "\n");
 	if (!revisions.empty()) {
 		revisions.pop_back();
@@ -110,7 +118,11 @@ Backend::LogIterator *GitBackend::iterator(const std::string &branch)
 // Returns the revision data for the given ID
 Revision *GitBackend::revision(const std::string &id)
 {
-	std::string meta = utils::exec(std::string("git log -1 --format=\"%ct\n%aN\n%B\" ")+id);
+	int ret;
+	std::string meta = utils::exec(std::string("git log -1 --format=\"%ct\n%aN\n%B\" ")+id, &ret);
+	if (ret != 0) {
+		throw PEX(utils::strprintf("Unable to retreive meta-data for revision '%s' (%d)", id.c_str(), ret));
+	}
 	std::vector<std::string> lines = utils::split(meta, "\n");
 	int64_t date;
 	std::string author;
