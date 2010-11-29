@@ -10,18 +10,102 @@
 #include <algorithm>
 #include <sstream>
 
+#include "jobqueue.h"
 #include "options.h"
 #include "revision.h"
 #include "sys/fs.h"
-
+#include "sys/thread.h"
 #include "utils.h"
 
 #include "backends/git.h"
 
 
+// Diffstat fetching worker thread
+class GitDiffstatThread : public sys::thread::Thread
+{
+public:
+	GitDiffstatThread(JobQueue<std::string, Diffstat> *queue)
+		: m_queue(queue)
+	{
+	}
+
+protected:
+	void run()
+	{
+		std::string revision;
+		while (m_queue->getArg(&revision)) {
+			int ret;
+			std::string out = utils::exec(std::string("git diff-tree -U0 -a --no-renames --root ")+revision, &ret);
+			if (ret != 0) {
+				m_queue->failed(revision);
+				continue;
+			}
+			std::istringstream in(out);
+			m_queue->done(revision, DiffParser::parse(in));
+		}
+	}
+
+private:
+	JobQueue<std::string, Diffstat> *m_queue;
+};
+
+
+// Handles the prefetching of diffstats
+class GitDiffstatPrefetcher
+{
+public:
+	GitDiffstatPrefetcher(int n = 4)
+	{
+		for (int i = 0; i < n; i++) {
+			GitDiffstatThread * thread = new GitDiffstatThread(&m_queue);
+			thread->start();
+			m_threads.push_back(thread);
+		}
+	}
+
+	~GitDiffstatPrefetcher()
+	{
+		for (unsigned int i = 0; i < m_threads.size(); i++) {
+			delete m_threads[i];
+		}
+	}
+
+	void stop()
+	{
+		m_queue.stop();
+	}
+
+	void wait()
+	{
+		for (unsigned int i = 0; i < m_threads.size(); i++) {
+			m_threads[i]->wait();
+		}
+	}
+
+	void prefetch(const std::vector<std::string> &revisions)
+	{
+		m_queue.put(revisions);
+	}
+
+	bool get(const std::string &revision, Diffstat *dest)
+	{
+		return m_queue.getResult(revision, dest);
+	}
+
+	bool willFetch(const std::string &revision)
+	{
+		return m_queue.hasArg(revision);
+	}
+
+private:
+	JobQueue<std::string, Diffstat> m_queue;
+	std::vector<GitDiffstatThread *> m_threads;
+};
+
+
 // Constructor
 GitBackend::GitBackend(const Options &options)
-	: Backend(options)
+	: Backend(options), m_prefetcher(NULL)
 {
 
 }
@@ -29,7 +113,11 @@ GitBackend::GitBackend(const Options &options)
 // Destructor
 GitBackend::~GitBackend()
 {
-
+	if (m_prefetcher) {
+		m_prefetcher->stop();
+		m_prefetcher->wait();
+		delete m_prefetcher;
+	}
 }
 
 // Initializes the backend
@@ -70,9 +158,20 @@ std::string GitBackend::head(const std::string &branch)
 	return "HEAD";
 }
 
-// Returns the standard branch (i.e., master)
+// Returns the currently checked out branch
 std::string GitBackend::mainBranch()
 {
+	int ret;
+	std::string out = utils::exec("git branch --color=never", &ret);
+	if (ret != 0) {
+		throw PEX(utils::strprintf("Unable to retreive the list of branches (%d)", ret));
+	}
+	std::vector<std::string> branches = utils::split(out, "\n");
+	for (unsigned int i = 0; i < branches.size(); i++) {
+		if (!branches[i].empty() && branches[i][0] == '*') {
+			return branches[i].substr(2);
+		}
+	}
 	return "master";
 }
 
@@ -94,7 +193,20 @@ std::vector<std::string> GitBackend::branches()
 // Returns a diffstat for the specified revision
 Diffstat GitBackend::diffstat(const std::string &id)
 {
-	std::string out = utils::exec(std::string("git diff-tree -U0 -a --no-renames --root ")+id);
+	// Maybe it's prefetched
+	if (m_prefetcher && m_prefetcher->willFetch(id)) {
+		Diffstat stat;
+		if (!m_prefetcher->get(id, &stat)) {
+			throw PEX(utils::strprintf("Failed to retrieve diffstat for revision %s", id.c_str()));
+		}
+		return stat;
+	}
+
+	int ret;
+	std::string out = utils::exec(std::string("git diff-tree -U0 -a --no-renames --root ")+id, &ret);
+	if (ret != 0) {
+		throw PEX(utils::strprintf("Failed to retrieve diffstat for revision %s (%d)", id.c_str(), ret));
+	}
 	std::istringstream in(out);
 	return DiffParser::parse(in);
 }
@@ -113,6 +225,15 @@ Backend::LogIterator *GitBackend::iterator(const std::string &branch)
 	}
 	std::reverse(revisions.begin(), revisions.end());
 	return new LogIterator(revisions);
+}
+
+// Starts prefetching the given revision IDs
+void GitBackend::prefetch(const std::vector<std::string> &ids)
+{
+	if (m_prefetcher == NULL) {
+		m_prefetcher = new GitDiffstatPrefetcher();
+	}
+	m_prefetcher->prefetch(ids);
 }
 
 // Returns the revision data for the given ID
