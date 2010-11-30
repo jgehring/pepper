@@ -7,6 +7,8 @@
  */
 
 
+#include "Python.h"
+
 #include <algorithm>
 #include <sstream>
 
@@ -24,13 +26,13 @@
 MercurialBackend::MercurialBackend(const Options &options)
 	: Backend(options)
 {
-
+	Py_Initialize();
 }
 
 // Destructor
 MercurialBackend::~MercurialBackend()
 {
-
+	Py_Finalize();
 }
 
 // Initializes the backend
@@ -40,6 +42,14 @@ void MercurialBackend::init()
 	if (!sys::fs::dirExists(repo + "/.hg")) {
 		throw PEX(utils::strprintf("Not a mercurial repository: %s", repo.c_str()));
 	}
+
+	PyRun_SimpleString(utils::strprintf("\
+import sys \n\
+from cStringIO import StringIO \n\
+from mercurial import ui,hg,commands \n\
+myui = ui.ui() \n\
+myui.quiet = True \n\
+repo = hg.repository(myui, '%s') \n\n", repo.c_str()).c_str());
 }
 
 // Returns a unique identifier for this repository
@@ -75,7 +85,11 @@ std::vector<std::string> MercurialBackend::branches()
 // Returns a diffstat for the specified revision
 Diffstat MercurialBackend::diffstat(const std::string &id)
 {
+#if 1
+	std::string out = hgcmd("diff", utils::strprintf("git=True, change=\"%s\"", id.c_str()));
+#else
 	std::string out = utils::exec(hgcmd()+" diff --git --change "+id);
+#endif
 	std::istringstream in(out);
 	return DiffParser::parse(in);
 }
@@ -83,7 +97,11 @@ Diffstat MercurialBackend::diffstat(const std::string &id)
 // Returns a revision iterator for the given branch
 Backend::LogIterator *MercurialBackend::iterator(const std::string &branch)
 {
+#if 1
+	std::string out = hgcmd("log", utils::strprintf("date=None, rev=None, user=None, quiet=None, branch=[\"%s\"]", branch.c_str()));
+#else
 	std::string out = utils::exec(hgcmd()+" log --quiet --branch "+branch);
+#endif
 	std::vector<std::string> revisions = utils::split(out, "\n");
 	if (!revisions.empty()) {
 		revisions.pop_back();
@@ -101,7 +119,11 @@ Backend::LogIterator *MercurialBackend::iterator(const std::string &branch)
 // Returns the revision data for the given ID
 Revision *MercurialBackend::revision(const std::string &id)
 {
+#if 1
+	std::string meta = hgcmd("log", utils::strprintf("rev=[\"%s\"], date=None, user=None, template=\"{date|hgdate}\\n{author|person}\\n{desc}\"", id.c_str()));
+#else
 	std::string meta = utils::exec(hgcmd()+" log -r "+id+" --template=\"{date|hgdate}\n{author|person}\n{desc}\"");
+#endif
 	std::vector<std::string> lines = utils::split(meta, "\n");
 	int64_t date;
 	std::string author;
@@ -128,4 +150,19 @@ Revision *MercurialBackend::revision(const std::string &id)
 std::string MercurialBackend::hgcmd() const
 {
 	return std::string("hg --noninteractive --repository ") + m_opts.repoUrl();
+}
+
+// Returns the Python code for a hg command
+std::string MercurialBackend::hgcmd(const std::string &cmd, const std::string &args) const
+{
+	PyObject *pModule = PyImport_AddModule("__main__"); 
+//	std::cout << utils::strprintf("\
+//sys.stdout = stdout = StringIO()\n\
+//res = commands.%s(myui, repo, %s)\n", cmd.c_str(), args.c_str()).c_str() << std::endl;
+	PyRun_SimpleString(utils::strprintf("\
+sys.stdout = stdout = StringIO()\n\
+res = commands.%s(myui, repo, %s)\n", cmd.c_str(), args.c_str()).c_str());
+	PyObject *object = PyObject_GetAttrString(pModule, "stdout");
+	PyObject *output = PyObject_CallMethod(object, "getvalue", NULL);
+	return std::string(PyString_AsString(output));
 }

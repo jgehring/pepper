@@ -33,7 +33,7 @@ pepper_SOURCES = \
 	3rdparty/lunar/lunar.h
 
 AM_CXXFLAGS = \
-	-Wall -pipe -ansi -pedantic \
+	-Wall -pipe -ansi \
 	$(LUA_CFLAGS)
 INCLUDES = \
 	-I@top_srcdir@/src/3rdparty \
@@ -57,6 +57,10 @@ pepper_SOURCES += \
 	backends/mercurial.h backends/mercurial.cpp
 AM_CPPFLAGS += \
 	-DUSE_MERCURIAL
+AM_CXXFLAGS += \
+	$(PYTHON_CPPFLAGS)
+AM_LDFLAGS += \
+	$(PYTHON_LDFLAGS)
 endif
 
 if SVN_BACKEND

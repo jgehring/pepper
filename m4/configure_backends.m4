@@ -5,6 +5,7 @@ dnl
 
 sinclude(m4/find_apr.m4)
 sinclude(m4/find_svn.m4)
+sinclude(m4/ax_python_devel.m4)
 
 AC_ARG_ENABLE([git], [AS_HELP_STRING([--enable-git], [Include the git backend (default is yes)])], [git="$enableval"], [git="yes"])
 AC_ARG_ENABLE([mercurial], [AS_HELP_STRING([--enable-mercurial], [Include the mercurial backend (default is yes)])], [mercurial="$enableval"], [mercurial="yes"])
@@ -48,6 +49,20 @@ AC_DEFUN([BACKENDS_CHECK], [
 				subversion="yes"
 			fi
 		fi
+	fi
+
+	if test "x$mercurial" != "xno"; then
+		AX_PYTHON_DEVEL([>= 2.1])
+
+		# Inspiration from Stephan Peijnik
+		# http://blog.sp.or.at/2008/08/31/autoconf-and-python-checking-for-modules/
+		AC_MSG_CHECKING(for Python module mercurial)
+		VERSION=`$PYTHON -c "from mercurial import __version__; print __version__.version" 2> /dev/null`
+		if test "x$?" != "x0"; then
+			AC_MSG_RESULT(not found)
+			AC_MSG_ERROR([The mercurial Python module could not be located.])
+		fi
+        AC_MSG_RESULT([found $VERSION])
 	fi
 ])
 
