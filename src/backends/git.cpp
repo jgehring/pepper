@@ -163,7 +163,7 @@ std::string GitBackend::head(const std::string &branch)
 std::string GitBackend::mainBranch()
 {
 	int ret;
-	std::string out = utils::exec("git branch --color=never", &ret);
+	std::string out = utils::exec("git branch", &ret);
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retreive the list of branches (%d)", ret));
 	}
@@ -216,7 +216,7 @@ Diffstat GitBackend::diffstat(const std::string &id)
 Backend::LogIterator *GitBackend::iterator(const std::string &branch)
 {
 	int ret;
-	std::string out = utils::exec(std::string("git log --format=\"%H\" ")+branch, &ret);
+	std::string out = utils::exec(std::string("git log --pretty=format:\"%H\" ")+branch, &ret);
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retreive log for branch '%s' (%d)", branch.c_str(), ret));
 	}
@@ -241,7 +241,7 @@ void GitBackend::prefetch(const std::vector<std::string> &ids)
 Revision *GitBackend::revision(const std::string &id)
 {
 	int ret;
-	std::string meta = utils::exec(std::string("git log -1 --format=\"%ct\n%aN\n%B\" ")+id, &ret);
+	std::string meta = utils::exec(std::string("git log -1 --pretty=format:\"%ct\n%aN\n%B\" ")+id, &ret);
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retreive meta-data for revision '%s' (%d)", id.c_str(), ret));
 	}
