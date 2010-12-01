@@ -11,6 +11,12 @@
 #define UTILS_H_
 
 
+#include <cerrno>
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
+#include <limits>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -20,13 +26,31 @@
 namespace utils
 {
 
-bool str2int(const std::string &str, int32_t *i);
-bool str2int(const std::string &str, uint32_t *i);
-bool str2int(const std::string &str, int64_t *i);
-bool str2int(const std::string &str, long int *i);
-std::string int2str(int32_t i);
-std::string int2str(int64_t i);
-std::string int2str(long int i);
+// Wrapper for strtol()
+template <typename T>
+static bool str2int(const std::string &str, T *i)
+{
+	char *end;
+	T val = strtoll(str.c_str(), &end, 0);
+
+	if (errno == ERANGE || str.c_str() == end
+	    || val > std::numeric_limits<T>::max()
+	    || val < std::numeric_limits<T>::min()) {
+		return false;
+	}
+
+	*i = (T)val;
+	return true;
+}
+
+// Converts an interger to a string
+template <typename T>
+std::string int2str(T i)
+{
+	std::stringstream out;
+	out << i;
+	return out.str();
+}
 
 int64_t ptime(const std::string &str, const std::string &format);
 

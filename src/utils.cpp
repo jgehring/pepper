@@ -7,14 +7,7 @@
  */
 
 
-#include <cerrno>
-#include <cstdarg>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
 #include <iostream>
-#include <limits>
-#include <sstream>
 
 #include <sys/time.h>
 
@@ -23,71 +16,6 @@
 
 namespace utils
 {
-
-// Wrapper for strtol()
-template<typename T>
-static bool tstr2int(const std::string &str, T *i)
-{
-	char *end;
-	T val = strtoll(str.c_str(), &end, 0);
-
-	if (errno == ERANGE || str.c_str() == end
-	    || val > std::numeric_limits<T>::max()
-	    || val < std::numeric_limits<T>::min()) {
-		return false;
-	}
-
-	*i = (T)val;
-	return true;
-}
-
-// Wrapper for strtol()
-bool str2int(const std::string &str, int32_t *i)
-{
-	return tstr2int<int32_t>(str, i);
-}
-
-// Wrapper for strtol()
-bool str2int(const std::string &str, uint32_t *i)
-{
-	return tstr2int<uint32_t>(str, i);
-}
-
-// Wrapper for strtol()
-bool str2int(const std::string &str, int64_t *i)
-{
-	return tstr2int<int64_t>(str, i);
-}
-
-// Wrapper for strtol()
-bool str2int(const std::string &str, long int *i)
-{
-	return tstr2int<long int>(str, i);
-}
-
-// Converts an interger to a string
-std::string int2str(int32_t i)
-{
-	std::stringstream out;
-	out << i;
-	return out.str();
-}
-
-// Converts an interger to a string
-std::string int2str(int64_t i)
-{
-	std::stringstream out;
-	out << i;
-	return out.str();
-}
-
-// Converts an interger to a string
-std::string int2str(long int i)
-{
-	std::stringstream out;
-	out << i;
-	return out.str();
-}
 
 // Wrapper for strptime()
 int64_t ptime(const std::string &str, const std::string &format)
