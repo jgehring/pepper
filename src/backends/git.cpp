@@ -139,7 +139,7 @@ bool GitBackend::handles(const std::string &url)
 {
 	if (sys::fs::dirExists(url+"/.git")) {
 		return true;
-	} else if (sys::fs::dirExists(url) && url.compare(url.length() - 5, 5, "/.git")) {
+	} else if (sys::fs::dirExists(url) && !url.compare(url.length() - 5, 5, "/.git")) {
 		// Bare repository
 		return true;
 	}
