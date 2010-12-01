@@ -26,6 +26,7 @@
 #include "revision.h"
 #include "utils.h"
 
+#include "syslib/fs.h"
 #include "syslib/parallel.h"
 
 #include "backends/subversion.h"
@@ -176,6 +177,10 @@ bool SubversionBackend::handles(const std::string &url)
 		if (url.compare(0, strlen(schemes[i]), schemes[i]) == 0) {
 			return true;
 		}
+	}
+	// Local repository without the 'file://' prefix
+	if (sys::fs::dirExists(url) && sys::fs::dirExists(url+"/locks") && sys::fs::exists(url+"/db/uuid")) {
+		return true;
 	}
 	return false;
 }
