@@ -149,8 +149,42 @@ bool GitBackend::handles(const std::string &url)
 // Returns a unique identifier for this repository
 std::string GitBackend::uuid()
 {
-	// TODO
-	return utils::join(utils::split(m_opts.repoUrl(), "/"), "_");
+	// Use the SHA1 of the first commit of the master branch as the UUID.
+	// Let's try to find the "master" branch
+	int ret;
+	std::string out = utils::exec("git branch -a", &ret);
+	if (ret != 0) {
+		throw PEX(utils::strprintf("Unable to retreive the list of branches (%d)", ret));
+	}
+	std::vector<std::string> branches = utils::split(out, "\n");
+	std::string branch;
+	for (unsigned int i = 0; i < branches.size(); i++) {
+		if (branches[i].empty()) {
+			continue;
+		}
+		if (branches[i][0] == '*') {
+			branch = branches[i]; // Fallback branch: current one
+		}
+		branches[i] = branches[i].substr(2);
+	}
+
+	if (std::search_n(branches.begin(), branches.end(), 1, "master") != branches.end()) {
+		branch = "master";
+	}
+	if (std::search_n(branches.begin(), branches.end(), 1, "remotes/origin/master") != branches.end()) {
+		branch = "remotes/origin/master";
+	}
+
+	if (branch.empty()) {
+		return std::string();
+	}
+
+	// Get ID of first commit of the root branch
+	std::string id = utils::exec(std::string("git rev-list --reverse -1 ")+branch, &ret);
+	if (ret != 0) {
+		throw PEX(utils::strprintf("Unable to determine the root commit for branch '%s' (%d)", branch.c_str(), ret));
+	}
+	return utils::trim(id);
 }
 
 // Returns the HEAD revision for the current branch
@@ -186,6 +220,11 @@ std::vector<std::string> GitBackend::branches()
 	}
 	std::vector<std::string> branches = utils::split(out, "\n");
 	for (unsigned int i = 0; i < branches.size(); i++) {
+		if (branches[i].empty()) {
+			branches.erase(branches.begin()+i);
+			--i;
+			continue;
+		}
 		branches[i] = branches[i].substr(2);
 	}
 	return branches;
@@ -216,7 +255,7 @@ Diffstat GitBackend::diffstat(const std::string &id)
 Backend::LogIterator *GitBackend::iterator(const std::string &branch)
 {
 	int ret;
-	std::string out = utils::exec(std::string("git log --pretty=format:\"%H\" ")+branch, &ret);
+	std::string out = utils::exec(std::string("git rev-list ")+branch, &ret);
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retreive log for branch '%s' (%d)", branch.c_str(), ret));
 	}
