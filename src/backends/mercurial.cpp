@@ -52,6 +52,12 @@ myui.quiet = True \n\
 repo = hg.repository(myui, '%s') \n\n", repo.c_str()).c_str());
 }
 
+// Returns true if this backend is able to access the given repository
+bool MercurialBackend::handles(const std::string &url)
+{
+	return sys::fs::dirExists(url+"/.hg");
+}
+
 // Returns a unique identifier for this repository
 std::string MercurialBackend::uuid()
 {
@@ -156,13 +162,17 @@ std::string MercurialBackend::hgcmd() const
 std::string MercurialBackend::hgcmd(const std::string &cmd, const std::string &args) const
 {
 	PyObject *pModule = PyImport_AddModule("__main__"); 
-//	std::cout << utils::strprintf("\
-//sys.stdout = stdout = StringIO()\n\
-//res = commands.%s(myui, repo, %s)\n", cmd.c_str(), args.c_str()).c_str() << std::endl;
+/*
+	std::cout << utils::strprintf("\
+sys.stdout = stdout = StringIO()\n\
+res = commands.%s(myui, repo, %s)\n", cmd.c_str(), args.c_str()).c_str() << std::endl;
+*/
 	PyRun_SimpleString(utils::strprintf("\
 sys.stdout = stdout = StringIO()\n\
 res = commands.%s(myui, repo, %s)\n", cmd.c_str(), args.c_str()).c_str());
 	PyObject *object = PyObject_GetAttrString(pModule, "stdout");
-	PyObject *output = PyObject_CallMethod(object, "getvalue", NULL);
+	char *method = strdup("getvalue");
+	PyObject *output = PyObject_CallMethod(object, method, NULL);
+	free(method);
 	return std::string(PyString_AsString(output));
 }

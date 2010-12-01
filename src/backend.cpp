@@ -139,7 +139,7 @@ Backend *Backend::backendForUrl(const std::string &url, const Options &options)
 	}
 #endif
 #ifdef USE_MERCURIAL
-	if (sys::fs::dirExists(url+"/.hg")) {
+	if (MercurialBackend::handles(url)) {
 		return new MercurialBackend(options);
 	}
 #endif
