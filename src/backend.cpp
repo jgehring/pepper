@@ -118,7 +118,7 @@ Backend *Backend::backendForName(const std::string &name, const Options &options
 	}
 #endif
 #ifdef USE_MERCURIAL
-	if (name == "mercurial") {
+	if (name == "hg" || name == "mercurial") {
 		return new MercurialBackend(options);
 	}
 #endif
