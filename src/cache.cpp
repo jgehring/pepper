@@ -99,7 +99,7 @@ bool Cache::lookup(const std::string &id)
 void Cache::put(const std::string &id, const Revision &rev)
 {
 	// Add revision to cache
-	std::string dir = m_opts.cacheDir() + "/" + m_backend->uuid(), path;
+	std::string dir = m_opts.cacheDir() + "/" + uuid(), path;
 	if (m_cout == NULL) {
 		m_coindex = 0;
 		do {
@@ -139,7 +139,7 @@ void Cache::put(const std::string &id, const Revision &rev)
 // Loads a revision from the cache
 Revision *Cache::get(const std::string &id)
 {
-	std::string dir = m_opts.cacheDir() + "/" + m_backend->uuid();
+	std::string dir = m_opts.cacheDir() + "/" + uuid();
 	std::pair<uint32_t, uint32_t> offset = m_index[id];
 	std::string path = utils::strprintf("%s/cache.%u", dir.c_str(), offset.first);
 	if (m_cin == NULL || offset.first != m_ciindex) {
@@ -166,8 +166,7 @@ void Cache::load()
 {
 	m_index.clear();
 
-	std::string uuid = m_backend->uuid();
-	std::string path = m_opts.cacheDir() + "/" + uuid;
+	std::string path = m_opts.cacheDir() + "/" + uuid();
 	struct stat statbuf;
 	if (stat(path.c_str(), &statbuf) == -1) {
 		// Create the cache directory
@@ -200,6 +199,6 @@ void Cache::load()
 	}
 
 	if (m_opts.verbosity() > 0) {
-		std::cout << "Cache: " << m_index.size() << " cached revisions for '" << uuid << '\'' << std::endl;
+		std::cout << "Cache: " << m_index.size() << " cached revisions for '" << uuid() << '\'' << std::endl;
 	}
 }

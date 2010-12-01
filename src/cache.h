@@ -29,7 +29,7 @@ class Cache : public Backend
 
 		std::string name() const { return m_backend->name(); }
 
-		std::string uuid() { return m_backend->uuid(); }
+		std::string uuid() { if (m_uuid.empty()) m_uuid = m_backend->uuid(); return m_uuid;}
 
 		std::string head(const std::string &branch = std::string()) { return m_backend->head(branch); }
 		std::string mainBranch() { return m_backend->mainBranch(); }
@@ -49,6 +49,7 @@ class Cache : public Backend
 
 	private:
 		Backend *m_backend;
+		std::string m_uuid; // Cached backend UUID
 		BOStream *m_iout, *m_cout;
 		BIStream *m_cin;
 		uint32_t m_coindex, m_ciindex;
