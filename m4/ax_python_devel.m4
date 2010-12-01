@@ -70,6 +70,8 @@
 
 AU_ALIAS([AC_PYTHON_DEVEL], [AX_PYTHON_DEVEL])
 AC_DEFUN([AX_PYTHON_DEVEL],[
+	python_found="yes"
+
 	#
 	# Allow the use of a (user set) custom python version
 	#
@@ -80,8 +82,9 @@ AC_DEFUN([AX_PYTHON_DEVEL],[
 
 	AC_PATH_PROG([PYTHON],[python[$PYTHON_VERSION]])
 	if test -z "$PYTHON"; then
-	   AC_MSG_ERROR([Cannot find python$PYTHON_VERSION in your system path])
-	   PYTHON_VERSION=""
+		python_found="no"
+		AC_MSG_WARN([Cannot find python$PYTHON_VERSION in your system path])
+		PYTHON_VERSION=""
 	fi
 
 	#
@@ -94,7 +97,8 @@ AC_DEFUN([AX_PYTHON_DEVEL],[
 	if test "$ac_supports_python_ver" != "True"; then
 		if test -z "$PYTHON_NOVERSIONCHECK"; then
 			AC_MSG_RESULT([no])
-			AC_MSG_FAILURE([
+			python_found="no"
+			AC_MSG_WARN([
 This version of the AC@&t@_PYTHON_DEVEL macro
 doesn't work properly with versions of Python before
 2.1.0. You may need to re-run configure, setting the
@@ -122,11 +126,7 @@ to something else than an empty string.
 		   AC_MSG_RESULT([yes])
 		else
 			AC_MSG_RESULT([no])
-			AC_MSG_ERROR([this package requires Python $1.
-If you have it installed, but it isn't the default Python
-interpreter in your system path, please pass the PYTHON_VERSION
-variable to configure. See ``configure --help'' for reference.
-])
+			python_found="no"
 			PYTHON_VERSION=""
 		fi
 	fi
@@ -140,7 +140,8 @@ variable to configure. See ``configure --help'' for reference.
 		AC_MSG_RESULT([yes])
 	else
 		AC_MSG_RESULT([no])
-		AC_MSG_ERROR([cannot import Python module "distutils".
+		python_found="no"
+		AC_MSG_WARN([cannot import Python module "distutils".
 Please check your Python installation. The error was:
 $ac_distutils_result])
 		PYTHON_VERSION=""
@@ -239,7 +240,8 @@ EOD`
 		fi
 
 		if test -z "PYTHON_LDFLAGS"; then
-			AC_MSG_ERROR([
+			python_found="no"
+			AC_MSG_WARN([
   Cannot determine location of your Python DSO. Please check it was installed with
   dynamic libraries enabled, or try setting PYTHON_LDFLAGS by hand.
 			])

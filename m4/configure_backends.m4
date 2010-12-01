@@ -8,7 +8,7 @@ sinclude(m4/find_svn.m4)
 sinclude(m4/ax_python_devel.m4)
 
 AC_ARG_ENABLE([git], [AS_HELP_STRING([--enable-git], [Include the git backend (default is yes)])], [git="$enableval"], [git="yes"])
-AC_ARG_ENABLE([mercurial], [AS_HELP_STRING([--enable-mercurial], [Include the mercurial backend (default is yes)])], [mercurial="$enableval"], [mercurial="yes"])
+AC_ARG_ENABLE([mercurial], [AS_HELP_STRING([--enable-mercurial], [Include the mercurial backend (default is autodetect)])], [mercurial="$enableval"], [mercurial="auto"])
 AC_ARG_ENABLE([svn], [AS_HELP_STRING([--enable-svn], [Include the subversion backend (default is autodetect)])], [subversion="$enableval"], [subversion="auto"])
 
 dnl Run checks for the backends
@@ -52,17 +52,28 @@ AC_DEFUN([BACKENDS_CHECK], [
 	fi
 
 	if test "x$mercurial" != "xno"; then
-		AX_PYTHON_DEVEL([>= 2.1])
-
-		# Inspiration from Stephan Peijnik
-		# http://blog.sp.or.at/2008/08/31/autoconf-and-python-checking-for-modules/
-		AC_MSG_CHECKING(for Python module mercurial)
-		VERSION=`$PYTHON -c "from mercurial import __version__; print __version__.version" 2> /dev/null`
-		if test "x$?" != "x0"; then
-			AC_MSG_RESULT(not found)
-			AC_MSG_ERROR([The mercurial Python module could not be located.])
+		AX_PYTHON_DEVEL([>= '2.1'])
+		if test "x$python_found" != "xyes"; then
+			if test "x$mercurial" != "xauto"; then
+				AC_MSG_ERROR([Python could not be located. Please use the PYTHON_VERSION variable.])
+			fi
+			mercurial="no"
+		else
+			# Inspiration from Stephan Peijnik
+			# http://blog.sp.or.at/2008/08/31/autoconf-and-python-checking-for-modules/
+			AC_MSG_CHECKING(for mercurial Python module)
+			VERSION=`$PYTHON -c "from mercurial import __version__; print __version__.version" 2> /dev/null`
+			if test "x$?" != "x0"; then
+				AC_MSG_RESULT(not found)
+				if test "x$mercurial" != "xauto"; then
+					AC_MSG_ERROR([The mercurial Python module could not be located.])
+				fi
+				mercurial="no"
+			else
+				mercurial="yes"
+				AC_MSG_RESULT([found $VERSION])
+			fi
 		fi
-        AC_MSG_RESULT([found $VERSION])
 	fi
 ])
 
