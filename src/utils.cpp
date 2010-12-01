@@ -29,7 +29,7 @@ template<typename T>
 static bool tstr2int(const std::string &str, T *i)
 {
 	char *end;
-	long val = strtol(str.c_str(), &end, 0);
+	T val = strtoll(str.c_str(), &end, 0);
 
 	if (errno == ERANGE || str.c_str() == end
 	    || val > std::numeric_limits<T>::max()
@@ -42,25 +42,39 @@ static bool tstr2int(const std::string &str, T *i)
 }
 
 // Wrapper for strtol()
-bool str2int(const std::string &str, int *i)
+bool str2int(const std::string &str, int32_t *i)
 {
-	return tstr2int<int>(str, i);
+	return tstr2int<int32_t>(str, i);
 }
 
 // Wrapper for strtol()
-bool str2int(const std::string &str, unsigned int *i)
+bool str2int(const std::string &str, uint32_t *i)
 {
-	return tstr2int<unsigned int>(str, i);
+	return tstr2int<uint32_t>(str, i);
 }
 
 // Wrapper for strtol()
-bool str2int(const std::string &str, long *i)
+bool str2int(const std::string &str, int64_t *i)
 {
-	return tstr2int<long>(str, i);
+	return tstr2int<int64_t>(str, i);
+}
+
+// Wrapper for strtol()
+bool str2int(const std::string &str, long int *i)
+{
+	return tstr2int<long int>(str, i);
 }
 
 // Converts an interger to a string
-std::string int2str(int i)
+std::string int2str(int32_t i)
+{
+	std::stringstream out;
+	out << i;
+	return out.str();
+}
+
+// Converts an interger to a string
+std::string int2str(int64_t i)
 {
 	std::stringstream out;
 	out << i;

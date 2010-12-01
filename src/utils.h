@@ -20,10 +20,12 @@
 namespace utils
 {
 
-bool str2int(const std::string &str, int *i);
-bool str2int(const std::string &str, unsigned int *i);
+bool str2int(const std::string &str, int32_t *i);
+bool str2int(const std::string &str, uint32_t *i);
+bool str2int(const std::string &str, int64_t *i);
 bool str2int(const std::string &str, long int *i);
-std::string int2str(int i);
+std::string int2str(int32_t i);
+std::string int2str(int64_t i);
 std::string int2str(long int i);
 
 int64_t ptime(const std::string &str, const std::string &format);

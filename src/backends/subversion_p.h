@@ -313,7 +313,7 @@ protected:
 
 			apr_file_t *infile = NULL, *outfile = NULL, *errfile = NULL;
 			apr_file_open_stderr(&errfile, pool);
-			if (apr_file_pipe_create_ex(&infile, &outfile, APR_FULL_BLOCK, pool) != APR_SUCCESS) {
+			if (apr_file_pipe_create(&infile, &outfile, pool) != APR_SUCCESS) {
 				throw PEX("Unable to create pipe");
 			}
 

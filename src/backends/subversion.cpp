@@ -7,10 +7,13 @@
  */
 
 
+#define __STDC_CONSTANT_MACROS // For INT64_C
+
 #include <algorithm>
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
+#include <iostream>
 
 #include <svn_client.h>
 #include <svn_cmdline.h>
@@ -34,7 +37,7 @@
 
 
 // Constructor
-SubversionBackend::SvnLogIterator::SvnLogIterator(const std::string &url, const std::string &prefix, const Options::AuthData &auth, int64_t head)
+SubversionBackend::SvnLogIterator::SvnLogIterator(const std::string &url, const std::string &prefix, const Options::AuthData &auth, svn_revnum_t head)
 	: Backend::LogIterator(), d(new SvnConnection()), m_prefix(prefix), m_head(head), m_index(0), m_finished(false)
 {
 	d->open(url, auth);
@@ -209,7 +212,7 @@ std::string SubversionBackend::head(const std::string &branch)
 		throw PEX(SvnConnection::strerr(err));
 	}
 	svn_pool_destroy(pool);
-	return utils::int2str(rev);
+	return utils::int2str((long int)rev);
 }
 
 // Returns the standard branch (i.e., trunk)
@@ -276,7 +279,7 @@ Diffstat SubversionBackend::diffstat(const std::string &id)
 
 	svn_opt_revision_t rev1, rev2;
 	rev1.kind = rev2.kind = svn_opt_revision_number;
-	utils::str2int(id, &(rev2.value.number));
+	utils::str2int(id, (long int *)&(rev2.value.number));
 	if (rev2.value.number <= 0) {
 		svn_pool_destroy(pool);
 		return Diffstat();
@@ -285,7 +288,7 @@ Diffstat SubversionBackend::diffstat(const std::string &id)
 
 	apr_file_t *infile = NULL, *outfile = NULL, *errfile = NULL;
 	apr_file_open_stderr(&errfile, pool);
-	if (apr_file_pipe_create_ex(&infile, &outfile, APR_FULL_BLOCK, pool) != APR_SUCCESS) {
+	if (apr_file_pipe_create(&infile, &outfile, pool) != APR_SUCCESS) {
 		throw PEX("Unable to create pipe");
 	}
 
