@@ -11,72 +11,45 @@
 #define BSTREAM_H_
 
 
-#include <cstdio>
+#include <cstring>
 #include <string>
+#include <vector>
+#include <iostream>
 
 #include "main.h"
 
-#ifdef HAVE_LIBZ
- #include <zlib.h>
-#endif
 
-
-// Base class
+// Base class for all streams
 class BStream
 {
 	public:
-#ifdef HAVE_LIBZ
-		typedef gzFile FilePtr;
-#else
-		typedef FILE *FilePtr;
-#endif
+		// Abstract base class for raw streams
+		class RawStream
+		{
+			public:
+				RawStream() { }
+				virtual ~RawStream() { }
 
-	public:
-		BStream(FilePtr f);
-		~BStream();
+				virtual bool ok() const = 0;
+				virtual bool eof() const = 0;
+				virtual size_t tell() const = 0;
+				virtual bool seek(size_t offset) = 0;
+				virtual int read(void *ptr, size_t n) = 0;
+				virtual int write(const void *ptr, size_t n) = 0;
+		};
 
-		inline bool ok() const { return m_file != NULL; }
-		inline bool eof() const {
-#ifdef HAVE_LIBZ
-			return gzeof(m_file);
-#else
-			return feof(m_file);
-#endif
-		}
-		inline size_t tell() const {
-#ifdef HAVE_LIBZ
-			return gztell(m_file);
-#else
-			return ftell(m_file);
-#endif
-		}
-		inline bool seek(size_t offset) {
-#ifdef HAVE_LIBZ
-			return gzseek(m_file, offset, SEEK_SET) >= 0;
-#else
-			return fseek(m_file, offset, SEEK_SET) == 0;
-#endif
-		}
+		BStream(RawStream *stream) : m_stream(stream) { }
+		virtual ~BStream() { delete m_stream; }
 
-	protected:
-		// Raw data I/O
-		inline int read(void *ptr, size_t n) {
-#ifdef HAVE_LIBZ
-			return gzread(m_file, ptr, n);
-#else
-			return fread(ptr, 1, n, m_file);
-#endif
-		}
-		inline int write(const void *ptr, size_t n) {
-#ifdef HAVE_LIBZ
-			return gzwrite(m_file, ptr, n);
-#else
-			return fwrite(ptr, 1, n, m_file);
-#endif
-		}
+		inline bool ok() const { return m_stream != NULL && m_stream->ok(); }
+		inline bool eof() const { return m_stream == NULL || m_stream->eof(); }
+		inline size_t tell() const { return (m_stream ? m_stream->tell() : 0); }
+		inline bool seek(size_t offset) { return (m_stream ? m_stream->seek(offset) : false); }
+		inline int read(void *ptr, size_t n) { return (m_stream ? m_stream->read(ptr, n) : 0); }
+		inline int write(const void *ptr, size_t n) { return (m_stream ? m_stream->write(ptr, n) : 0); }
 
 		// Byte swapping (from Qt)
-		inline uint32_t bswap(uint32_t source) {
+		static inline uint32_t bswap(uint32_t source) {
 			return 0
 				| ((source & 0x000000ff) << 24) 
 				| ((source & 0x0000ff00) << 8)
@@ -84,7 +57,7 @@ class BStream
 				| ((source & 0xff000000) >> 24);
 
 		}
-		inline uint64_t bswap(uint64_t source) {
+		static inline uint64_t bswap(uint64_t source) {
 			char *t = (char *)&source;
 			std::swap(t[0], t[7]), std::swap(t[1], t[6]);
 			std::swap(t[2], t[5]), std::swap(t[3], t[4]);
@@ -92,21 +65,7 @@ class BStream
 		}
 
 	protected:
-		FilePtr m_file;
-};
-
-// Output stream
-class BOStream : public BStream
-{
-	public:
-		BOStream(const std::string &path, bool append = false);
-		BOStream(FilePtr f) : BStream(f) { }
-
-		BOStream &operator<<(char c);
-		BOStream &operator<<(uint32_t i);
-		BOStream &operator<<(uint64_t i);
-		inline BOStream &operator<<(int64_t i) { return (*this << static_cast<uint64_t>(i)); }
-		BOStream &operator<<(const std::string &s);
+		RawStream *m_stream;
 };
 
 // Input stream
@@ -114,23 +73,90 @@ class BIStream : public BStream
 {
 	public:
 		BIStream(const std::string &path);
-		BIStream(FilePtr f) : BStream(f) { }
+		BIStream(FILE *f);
 
 		BIStream &operator>>(char &c);
 		BIStream &operator>>(uint32_t &i);
 		BIStream &operator>>(uint64_t &i);
 		inline BIStream &operator>>(int64_t &i) { return (*this >> reinterpret_cast<uint64_t &>(i)); }
 		BIStream &operator>>(std::string &s);
+		template<typename T> BIStream &operator>>(std::vector<T> &v) {
+			uint32_t size;
+			(*this) >> size;
+			v.clear(); v.resize(size);
+			for (uint32_t i = 0; i < size; i++) {
+				(*this) >> v[i];
+			}
+			return *this;
+		}
+
+	protected:
+		BIStream(RawStream *stream);
 };
+
+// Output stream
+class BOStream : public BStream
+{
+	public:
+		BOStream(const std::string &path, bool append = false);
+		BOStream(FILE *f);
+
+		BOStream &operator<<(char c);
+		BOStream &operator<<(uint32_t i);
+		BOStream &operator<<(uint64_t i);
+		inline BOStream &operator<<(int64_t i) { return (*this << static_cast<uint64_t>(i)); }
+		BOStream &operator<<(const std::string &s);
+		template<typename T> BOStream &operator<<(const std::vector<T> &v) {
+			(*this) << (uint32_t)v.size();
+			for (uint32_t i = 0; i < v.size(); i++) {
+				(*this) << v[i];
+			}
+			return *this;
+		}
+
+	protected:
+		BOStream(RawStream *stream);
+};
+
+// Memory input stream
+class MIStream : public BIStream
+{
+	public:
+		MIStream(const char *data, size_t n);
+		MIStream(const std::vector<char> &data);
+};
+
+// Memory output stream
+class MOStream : public BOStream
+{
+	public:
+		MOStream();
+
+		std::vector<char> data() const;
+};
+
+#ifdef HAVE_LIBZ
+
+// Compressed input stream
+class GZIStream : public BIStream
+{
+	public:
+		GZIStream(const std::string &path);
+};
+
+// Compressed output stream
+class GZOStream : public BOStream
+{
+	public:
+		GZOStream(const std::string &path, bool append = false);
+};
+
+#endif // HAVE_LIBZ
 
 
 // Inlined functions
 inline BOStream &BOStream::operator<<(char c) {
-#ifdef HAVE_LIBZ
-	gzputc(m_file, c);
-#else
-	fputc(c, m_file);
-#endif
+	write((char *)&c, 1);
 	return *this;
 }
 
@@ -156,11 +182,7 @@ inline BOStream &BOStream::operator<<(const std::string &s) {
 }
 
 inline BIStream &BIStream::operator>>(char &c) {
-#ifdef HAVE_LIBZ
-	c = (char)gzgetc(m_file);
-#else
-	c = (char)fgetc(m_file);
-#endif
+	read((char *)&c, 1);
 	return *this;
 }
 
@@ -182,17 +204,12 @@ inline BIStream &BIStream::operator>>(uint64_t &i) {
 
 inline BIStream &BIStream::operator>>(std::string &s) {
 	char buffer[120], *bptr = buffer;
-	int c;
+	char c;
 	s.clear();
-	while (true) {
-#ifdef HAVE_LIBZ
-		c = gzgetc(m_file);
-#else
-		c = fgetc(m_file);
-#endif
+	while (!eof()) {
+		(*this) >> c;
 		switch (c) {
 			case 0: break;
-			case EOF: s.clear(); break;
 			default: {
 				*bptr = c;
 				if (bptr-buffer == sizeof(buffer)) {
@@ -205,6 +222,9 @@ inline BIStream &BIStream::operator>>(std::string &s) {
 			}
 		}
 		break;
+	}
+	if (eof()) {
+		s.clear();
 	}
 
 	s.append(buffer, bptr-buffer);

@@ -24,13 +24,7 @@
 #include "cache.h"
 
 
-#ifdef HAVE_LIBZ
- // There's no way to tell the size of the compressed data with the standard
- // gz*() functions. Thus, simply use a larger maximum size for the uncompressed data.
- #define MAX_CACHEFILE_SIZE 41943040
-#else
- #define MAX_CACHEFILE_SIZE 4194304
-#endif
+#define MAX_CACHEFILE_SIZE 4194304
 
 
 // Constructor
@@ -120,14 +114,16 @@ void Cache::put(const std::string &id, const Revision &rev)
 	}
 
 	uint32_t offset = m_cout->tell();
-	rev.write(*m_cout);
+	MOStream rout;
+	rev.write(rout);
+	*m_cout << utils::compress(rout.data());
 
 	// Add revision to index
 	if (m_iout == NULL) {
 		if (sys::fs::exists(dir + "/index")) {
-			m_iout = new BOStream(dir + "/index", true);
+			m_iout = new GZOStream(dir + "/index", true);
 		} else {
-			m_iout = new BOStream(dir + "/index", false);
+			m_iout = new GZOStream(dir + "/index", false);
 			// Version number
 			*m_iout << (uint32_t)1;
 		}
@@ -155,7 +151,14 @@ Revision *Cache::get(const std::string &id)
 	}
 
 	Revision *rev = new Revision(id);
-	if (!rev->load(*m_cin)) {
+	std::vector<char> data;
+	*m_cin >> data;
+	data = utils::uncompress(data);
+	if (data.empty()) {
+		throw PEX(utils::strprintf("Unable to read from cache file: %s", path.c_str()));
+	}
+	MIStream rin(data);
+	if (!rev->load(rin)) {
 		throw PEX(utils::strprintf("Unable to read from cache file: %s", path.c_str()));
 	}
 	return rev;
@@ -176,7 +179,7 @@ void Cache::load()
 		return;
 	}
 
-	BIStream in(path+"/index");
+	GZIStream in(path+"/index");
 	if (!in.ok()) {
 		return;
 	}
