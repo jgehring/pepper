@@ -33,7 +33,7 @@ pepper_SOURCES = \
 	3rdparty/lunar/lunar.h
 
 AM_CXXFLAGS = \
-	-Wall -pipe -ansi \
+	-Wall -W -pipe -ansi \
 	$(LUA_CFLAGS)
 INCLUDES = \
 	-I@top_srcdir@/src/3rdparty \
