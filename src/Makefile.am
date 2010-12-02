@@ -26,12 +26,9 @@ pepper_SOURCES = \
 	lua/luahelpers.h \
 	lua/luarepository.h \
 	lua/luarevision.h \
-	lua/plot.h lua/plot.cpp \
 	lua/report.h lua/report.cpp \
 	\
-	3rdparty/gnuplot-cpp/gnuplot_i.h \
-	3rdparty/lunar/lunar.h \
-	3rdparty/popen-noshell/popen_noshell.h 3rdparty/popen-noshell/popen_noshell.c
+	3rdparty/lunar/lunar.h
 
 AM_CXXFLAGS = \
 	-Wall -W -pipe \
@@ -78,4 +75,21 @@ AM_LDFLAGS += \
 	$(SVN_LIBS) 
 endif
 
+if POPEN_NOSHELL
+pepper_SOURCES += \
+	3rdparty/popen-noshell/popen_noshell.h 3rdparty/popen-noshell/popen_noshell.c
+AM_CPPFLAGS += \
+	-DUSE_POPEN_NOSHELL
+endif
+
+if GNUPLOT
+pepper_SOURCES += \
+	lua/plot.h lua/plot.cpp \
+	3rdparty/gnuplot-cpp/gnuplot_i.h
+AM_CPPFLAGS += \
+	-DUSE_GNUPLOT
+endif
+
+
+# Last but not least, the CFLAGS
 AM_CFLAGS = $(AM_CXXFLAGS)

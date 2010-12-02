@@ -8,9 +8,13 @@ AC_INIT(pepper, alpha, jonas.gehring@boolsoft.org)
 AM_INIT_AUTOMAKE()
 AC_CONFIG_HEADER([config.h])
 
+# Custom arguments that should be listed first
+AC_ARG_ENABLE([debug], [AS_HELP_STRING([--enable-debug], [Turn on debugging])], [debug="$enableval"], [debug="no"])
+
 sinclude(m4/ax_check_zlib.m4)
 sinclude(m4/ax_pthread.m4)
 sinclude(m4/configure_backends.m4)
+sinclude(m4/configure_features.m4)
 sinclude(m4/find_lua.m4)
 
 
@@ -24,17 +28,44 @@ AC_PROG_INSTALL()
 
 
 #
-# Checks for types
+# Feature configuration
 #
 
-AC_TYPE_UINT64_T()
+FEATURES_CHECK()
+
+AM_CONDITIONAL([POPEN_NOSHELL], [test "x$popen_noshell" = "xyes"])
+AM_CONDITIONAL([GNUPLOT], [test "x$gnuplot" = "xyes"])
 
 
 #
 # Checks for system and compiler characteristics
 #
 
-AC_C_BIGENDIAN
+AC_C_BIGENDIAN()
+
+
+#
+# Checks for types
+#
+
+AC_TYPE_UINT64_T()
+
+if test "x$popen_noshell" == "xyes"; then
+	AC_TYPE_PID_T()
+	AC_TYPE_SIZE_T()
+fi
+
+
+#
+# Checks for headers
+#
+
+AC_CHECK_HEADERS([sys/time.h])
+AC_HEADER_STDBOOL()
+
+if test "x$popen_noshell" == "xyes"; then
+	AC_CHECK_HEADERS([fcntl.h])
+fi
 
 
 #
@@ -42,6 +73,15 @@ AC_C_BIGENDIAN
 #
 
 AC_FUNC_MALLOC()
+AC_FUNC_MKTIME()
+AC_CHECK_FUNCS([atexit getcwd gettimeofday memmove mkdir realpath setenv strtol])
+
+if test "x$popen_noshell" == "xyes"; then
+	AC_CHECK_FUNCS([strdup dup2 memset])
+	AC_FUNC_ALLOCA()
+	AC_FUNC_REALLOC()
+	AC_FUNC_FORK()
+fi
 
 
 #
@@ -75,7 +115,6 @@ AM_CONDITIONAL([SVN_BACKEND], [test "x$subversion" = "xyes"])
 # Debugging
 #
 
-AC_ARG_ENABLE([debug], [AS_HELP_STRING([--enable-debug], [Turn on debugging])], [debug="$enableval"], [debug="no"])
 if test "x$debug" = "xyes"; then
 	CXXFLAGS="-O0 -g -DDEBUG"
 	CFLAGS="-O0 -g -DDEBUG"
@@ -104,4 +143,6 @@ AC_OUTPUT()
 #
 
 BACKENDS_REPORT()
+FEATURES_REPORT()
+echo
 echo "Configuration finished, please run make now."

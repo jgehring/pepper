@@ -12,17 +12,17 @@
 
 #include <sys/time.h>
 
-#include "popen-noshell/popen_noshell.h"
-
 #include "main.h"
 
 #ifdef HAVE_LIBZ
  #include <zlib.h>
 #endif
 
-#include "utils.h"
+#ifdef USE_POPEN_NOSHELL
+ #include "popen-noshell/popen_noshell.h"
+#endif
 
-#define USE_POPEN_NOSHELL
+#include "utils.h"
 
 
 namespace utils

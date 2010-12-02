@@ -23,7 +23,9 @@
 #include "luahelpers.h"
 #include "luarepository.h"
 #include "luarevision.h"
-#include "plot.h"
+#ifdef USE_GNUPLOT
+ #include "plot.h"
+#endif
 
 #include "options.h"
 #include "utils.h"
@@ -230,7 +232,9 @@ lua_State *setupLua()
 	Lunar<LuaRepository>::Register(L, "pepper");
 	Lunar<LuaRevision>::Register(L, "pepper");
 	Lunar<LuaDiffstat>::Register(L, "pepper");
+#ifdef USE_GNUPLOT
 	Lunar<Plot>::Register(L, "pepper");
+#endif
 
 	// Setup meta table
 	luaL_newmetatable(L, "meta");

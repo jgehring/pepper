@@ -496,7 +496,6 @@ FILE *popen_noshell_compat(const char *command, const char *type, struct popen_n
 	char *to_free;
 
 	argv = popen_noshell_split_command_to_argv(command, &to_free);
-	printf("%s\n", command);
 	if (!argv) {
 		if (to_free) free(to_free);
 		return NULL;

@@ -7,9 +7,9 @@ sinclude(m4/find_apr.m4)
 sinclude(m4/find_svn.m4)
 sinclude(m4/ax_python_devel.m4)
 
-AC_ARG_ENABLE([git], [AS_HELP_STRING([--enable-git], [Include the git backend (default is yes)])], [git="$enableval"], [git="yes"])
-AC_ARG_ENABLE([mercurial], [AS_HELP_STRING([--enable-mercurial], [Include the mercurial backend (default is autodetect)])], [mercurial="$enableval"], [mercurial="auto"])
-AC_ARG_ENABLE([svn], [AS_HELP_STRING([--enable-svn], [Include the subversion backend (default is autodetect)])], [subversion="$enableval"], [subversion="auto"])
+AC_ARG_ENABLE([git], [AS_HELP_STRING([--disable-git], [Don't include the git backend])], [git="$enableval"], [git="yes"])
+AC_ARG_ENABLE([mercurial], [AS_HELP_STRING([--disable-mercurial], [Don't include the mercurial backend (default is autodetect)])], [mercurial="$enableval"], [mercurial="auto"])
+AC_ARG_ENABLE([svn], [AS_HELP_STRING([--disable-svn], [Don't include the subversion backend (default is autodetect)])], [subversion="$enableval"], [subversion="auto"])
 
 dnl Run checks for the backends
 AC_DEFUN([BACKENDS_CHECK], [
@@ -85,5 +85,4 @@ AC_DEFUN([BACKENDS_REPORT], [
 	if test "x$git" = "xyes"; then echo "      * git"; fi
 	if test "x$mercurial" = "xyes"; then echo "      * mercurial"; fi
 	if test "x$subversion" = "xyes"; then echo "      * Subversion"; fi
-	echo
 ])
