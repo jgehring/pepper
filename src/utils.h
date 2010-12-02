@@ -65,6 +65,9 @@ void printOption(const std::string &option, const std::string &text);
 
 std::string exec(const std::string &cmd, int *ret = NULL);
 
+std::vector<char> compress(const std::vector<char> &data, int level = 9);
+std::vector<char> uncompress(const std::vector<char> &data);
+
 } // namespace utils
 
 

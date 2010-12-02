@@ -7,9 +7,16 @@
  */
 
 
+#include <cstring>
 #include <iostream>
 
 #include <sys/time.h>
+
+#include "main.h"
+
+#ifdef HAVE_LIBZ
+ #include <zlib.h>
+#endif
 
 #include "utils.h"
 
@@ -194,6 +201,69 @@ std::string exec(const std::string &cmd, int *ret)
 		*ret = r;
 	}
 	return result;
+}
+
+inline uint32_t bswap(uint32_t source) {
+	return 0
+		| ((source & 0x000000ff) << 24) 
+		| ((source & 0x0000ff00) << 8)
+		| ((source & 0x00ff0000) >> 8)
+		| ((source & 0xff000000) >> 24);
+}
+
+// Compresses the input data using zlib (or NULL)
+std::vector<char> compress(const std::vector<char> &data, int level)
+{
+#ifdef HAVE_LIBZ
+	unsigned long dlen = compressBound(data.size());
+	std::vector<char> dest(dlen+4);
+
+	// First four bytes: original data length
+	uint32_t len = data.size();
+#ifndef WORDS_BIGENDIAN
+	len = bswap(len);
+#endif
+	memcpy((char *)&dest[0], (char *)&len, 4);
+
+	int ret = ::compress2((unsigned char *)&dest[4], &dlen, reinterpret_cast<const unsigned char *>(&data[0]), data.size(), level);
+	if (ret != Z_OK) {
+		throw PEX(strprintf("Data compression failed (%d)", ret));
+	}
+	dest.resize(dlen+4);
+	return dest;
+#else
+	return data;
+#endif
+}
+
+// Decompresses the input data using zlib (or NULL)
+std::vector<char> uncompress(const std::vector<char> &data)
+{
+#ifdef HAVE_LIBZ
+	if (data.size() <= 4) {
+		return std::vector<char>();
+	}
+
+	// Read original data size
+	uint32_t dlen = 0;
+	memcpy((char *)&dlen, (char *)&data[0], 4);
+#ifndef WORDS_BIGENDIAN
+	dlen = bswap(dlen);
+#endif
+	if (dlen == 0) {
+		return std::vector<char>();
+	}
+
+	std::vector<char> dest(dlen);
+	unsigned long ldlen = dlen;
+	int ret = ::uncompress((unsigned char *)&dest[0], &ldlen, (const unsigned char *)&data[4], data.size()-4);
+	if (ret != Z_OK) {
+		throw PEX(strprintf("Corrupted data (%d)", ret));
+	}
+	return dest;
+#else
+	return data;
+#endif
 }
 
 } // namespace utils
