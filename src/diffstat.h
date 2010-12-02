@@ -35,6 +35,10 @@ class Diffstat
 			uint64_t cdel, ldel;
 
 			Stat() : cadd(0), ladd(0), cdel(0), ldel(0) { }
+
+			inline bool empty() const {
+				return (cadd == 0 && ladd == 0 && cdel == 0 && ldel == 0);
+			}
 		};
 
 	public:

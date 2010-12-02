@@ -78,38 +78,81 @@ Diffstat DiffParser::stat() const
 	return m_stat;
 }
 
-// Static diff parsing function
+// Static diff parsing function for unified diffs
 Diffstat DiffParser::parse(std::istream &in)
 {
 	std::string str, file;
 	Diffstat ds;
 	Diffstat::Stat stat;
+	int chunk[2] = {0, 0};
 	while (in.good()) {
 		std::getline(in, str);
-		if (!str.compare(0, 7, "Index: ")) {
-			if (!file.empty()) {
+		if (!str.compare(0, 4, "--- ") && chunk[0] <= 0 && chunk[0] <= 0) {
+			if (!file.empty() && !stat.empty()) {
 				ds.m_stats[file] = stat;
+				file = std::string();
 			}
 			stat = Diffstat::Stat();
-			file = str.substr(7);
-		} else if (!str.compare(0, 11, "diff --git ")) {
-			if (!file.empty()) {
+			std::vector<std::string> header = utils::split(str.substr(4), "\t");
+			if (header.empty()) {
+				throw PEX(std::string("EMPTY HEADER: ")+str);
+			}
+			if (header[0] != "/dev/null") {
+				file = header[0];
+				if (!file.compare(0, 2, "a/")) {
+					file = file.substr(2);
+				}
+			}
+		} else if (!str.compare(0, 4, "+++ ") && chunk[0] <= 0 && chunk[1] <= 0) {
+			if (!file.empty() && !stat.empty()) {
 				ds.m_stats[file] = stat;
+				file = std::string();
 			}
 			stat = Diffstat::Stat();
-			std::vector<std::string> files = utils::split(str.substr(11), " b/");
-			file = files[0].substr(2);
-		} else if (!str.compare(0, 4, "====") || !str.compare(0, 4, "--- ") || !str.compare(0, 4, "+++ ")) {
-			continue;
+			std::vector<std::string> header = utils::split(str.substr(4), "\t");
+			if (header.empty()) {
+				throw PEX(std::string("EMPTY HEADER: ")+str);
+			}
+			if (header[0] != "/dev/null") {
+				file = header[0];
+				if (!file.compare(0, 2, "b/")) {
+					file = file.substr(2);
+				}
+			}
+		} else if (!str.compare(0, 2, "@@")) {
+			std::vector<std::string> header = utils::split(str.substr(2), "@@", true);
+			if (header.empty()) {
+				throw PEX(std::string("EMPTY HEADER: ")+str);
+			}
+			std::vector<std::string> ranges = utils::split(header[0], " ", true);
+			if (ranges.size() < 2 || ranges[0].empty() || ranges[1].empty()) {
+				throw PEX(std::string("EMPTY HEADER: ")+str);
+			}
+			size_t pos;
+			if ((pos = ranges[0].find(',')) != std::string::npos) {
+				utils::str2int(ranges[0].substr(pos+1), &chunk[(ranges[0][0] == '-' ? 0 : 1)]);
+			} else {
+				chunk[(ranges[0][0] == '-' ? 0 : 1)] = 1;
+			}
+			if ((pos = ranges[1].find(',')) != std::string::npos) {
+				utils::str2int(ranges[1].substr(pos+1), &chunk[(ranges[1][0] == '-' ? 0 : 1)]);
+			} else {
+				chunk[(ranges[1][0] == '-' ? 0 : 1)] = 1;
+			}
 		} else if (str[0] == '-') {
 			stat.cdel += str.length();
 			++stat.ldel;
+			--chunk[0];
 		} else if (str[0] == '+') {
 			stat.cadd += str.length();
 			++stat.ladd;
+			--chunk[1];
+		} else {
+			--chunk[0];
+			--chunk[1];
 		}
 	}
-	if (!file.empty()) {
+	if (!file.empty() && !stat.empty()) {
 		ds.m_stats[file] = stat;
 	}
 	return ds;
