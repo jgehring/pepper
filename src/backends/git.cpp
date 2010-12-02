@@ -260,7 +260,7 @@ Backend::LogIterator *GitBackend::iterator(const std::string &branch)
 		throw PEX(utils::strprintf("Unable to retreive log for branch '%s' (%d)", branch.c_str(), ret));
 	}
 	std::vector<std::string> revisions = utils::split(out, "\n");
-	if (!revisions.empty()) {
+	while (!revisions.empty() && revisions[revisions.size()-1].empty()) {
 		revisions.pop_back();
 	}
 	std::reverse(revisions.begin(), revisions.end());
