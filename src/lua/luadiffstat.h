@@ -21,7 +21,7 @@ class LuaDiffstat
 
 	public:
 		LuaDiffstat(Diffstat *stat) : w(stat) { }
-		LuaDiffstat(lua_State *L) : w(NULL) { }
+		LuaDiffstat(lua_State *) : w(NULL) { }
 
 		int files(lua_State *L) {
 			if (w == NULL) return LuaHelpers::pushNil(L);

@@ -20,7 +20,7 @@ class LuaRepository
 {
 	public:
 		LuaRepository(Repository *repo) : w(repo) { }
-		LuaRepository(lua_State *L) : w(NULL) { }
+		LuaRepository(lua_State *) : w(NULL) { }
 
 		int url(lua_State *L) {
 			return (w ? LuaHelpers::push(L, w->m_backend->options().repoUrl()) : LuaHelpers::pushNil(L));
