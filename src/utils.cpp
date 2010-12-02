@@ -191,11 +191,26 @@ std::string execv(int *ret, const char * const *argv)
 	struct popen_noshell_pass_to_pclose pclose_arg;
 	FILE *pipe = popen_noshell(argv[0], argv, "r", &pclose_arg, 0);
 #else
-	// Concatenate arguments
+	// Concatenate arguments, put possible meta characters in quotes
 	std::string cmd;
 	const char * const *ptr = argv;
+	const char *metachars = "!\\$`\n|&;()<>";
 	while (*ptr) {
-		cmd += *ptr;
+		bool quote = false;
+		for (int i = 0; i < strlen(metachars); i++) {
+			if (strchr(*ptr, metachars[i]) != NULL) {
+				quote = true;
+				break;
+			}
+		}
+
+		if (quote) {
+			cmd += "\"";
+			cmd += *ptr;
+			cmd += "\"";
+		} else {
+			cmd += *ptr;
+		}
 		cmd += " ";
 		++ptr;
 	}

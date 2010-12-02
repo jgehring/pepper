@@ -284,12 +284,12 @@ void GitBackend::prefetch(const std::vector<std::string> &ids)
 Revision *GitBackend::revision(const std::string &id)
 {
 	int ret;
-	std::string meta = utils::exec(&ret, "git", "log", "-1", "--pretty=format:\"%ct\n%aN\n%B\"", id.c_str());
+	std::string meta = utils::exec(&ret, "git", "log", "-1", "--pretty=format:%ct\n%aN\n%B", id.c_str());
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retreive meta-data for revision '%s' (%d)", id.c_str(), ret));
 	}
 	std::vector<std::string> lines = utils::split(meta, "\n");
-	int64_t date;
+	int64_t date = 0;
 	std::string author;
 	if (!lines.empty()) {
 		utils::str2int(lines[0], &date);
