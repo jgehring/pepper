@@ -14,7 +14,7 @@
 #include "backend.h"
 
 class SvnConnection;
-class SvnDiffstatScheduler;
+class SvnDiffstatPrefetcher;
 
 
 class SubversionBackend : public Backend
@@ -63,7 +63,7 @@ class SubversionBackend : public Backend
 
 	private:
 		SvnConnection *d;
-		SvnDiffstatScheduler *m_sched;
+		SvnDiffstatPrefetcher *m_prefetcher;
 };
 
 
