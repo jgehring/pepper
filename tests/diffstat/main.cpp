@@ -19,15 +19,19 @@ int main(int, char **)
 
 	uint64_t ins = 0, del = 0;
 	for (std::map<std::string, Diffstat::Stat>::const_iterator it = stat.begin(); it != stat.end(); ++it) {
-		std::cout << it->second.ladd << "," << it->second.ldel << ",0," << it->first << std::endl;
 		ins += it->second.ladd;
 		del += it->second.ldel;
 	}
 
 	// Print a summary line similar to the last line of the diffstat command
 	// This should be equal to "diffstat | tail -n 1"
-	std::cout << " " << stat.size() << " files changed,";
-	std::cout << " " << ins << " insertions(+),";
-	std::cout << " " << del << " deletions(-)" << std::endl;
+	std::cout << " " << stat.size() << " file" << (stat.size() != 1 ? "s" : "") << " changed";
+	if (ins > 0) {
+		std::cout << ", " << ins << (ins > 1 ? " insertions(+)" : " insertion(+)");
+	}
+	if (del > 0) {
+		std::cout << ", " << del << (del > 1 ? " deletions(-)" : " deletion(-)");
+	}
+	std::cout << std::endl;
 	return 0;
 }

@@ -7,14 +7,6 @@
 
 AT_BANNER([Diffstat tests])
 
-AT_SETUP([Utility functions])
-AT_CHECK([utests utils])
-AT_CLEANUP()
-
-AT_SETUP([ConfReader and ConfWriter])
-AT_CHECK([utests confio])
-AT_CLEANUP()
-
-AT_SETUP([Memblock])
-AT_CHECK([utests memblock])
+AT_SETUP([Original diffstat cases])
+AT_CHECK([perl ../../test_diffstat.pl ../../diffstat/data], [0], [stdout], [stderr])
 AT_CLEANUP()
