@@ -78,8 +78,10 @@ AM_CONDITIONAL([SVN_BACKEND], [test "x$subversion" = "xyes"])
 AC_ARG_ENABLE([debug], [AS_HELP_STRING([--enable-debug], [Turn on debugging])], [debug="$enableval"], [debug="no"])
 if test "x$debug" = "xyes"; then
 	CXXFLAGS="-O0 -g -DDEBUG"
+	CFLAGS="-O0 -g -DDEBUG"
 else
 	CXXFLAGS="-O2 -DNDEBUG"
+	CFLAGS="-O2 -DDEBUG"
 fi
 
 

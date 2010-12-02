@@ -36,7 +36,7 @@ protected:
 		std::string revision;
 		while (m_queue->getArg(&revision)) {
 			int ret;
-			std::string out = utils::exec(std::string("git diff-tree -U0 -a -m --no-renames --root ")+revision, &ret);
+			std::string out = utils::exec(&ret, "git", "diff-tree", "-U0", "-a", "-m", "--no-renames", "--root", revision.c_str());
 			if (ret != 0) {
 				m_queue->failed(revision);
 				continue;
@@ -152,7 +152,7 @@ std::string GitBackend::uuid()
 	// Use the SHA1 of the first commit of the master branch as the UUID.
 	// Let's try to find the "master" branch
 	int ret;
-	std::string out = utils::exec("git branch -a", &ret);
+	std::string out = utils::exec(&ret, "git", "branch", "-a");
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retreive the list of branches (%d)", ret));
 	}
@@ -180,7 +180,7 @@ std::string GitBackend::uuid()
 	}
 
 	// Get ID of first commit of the root branch
-	std::string id = utils::exec(std::string("git rev-list --reverse -1 ")+branch, &ret);
+	std::string id = utils::exec(&ret, "git", "rev-list", "--reverse", "-1", branch.c_str());
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to determine the root commit for branch '%s' (%d)", branch.c_str(), ret));
 	}
@@ -190,6 +190,7 @@ std::string GitBackend::uuid()
 // Returns the HEAD revision for the current branch
 std::string GitBackend::head(const std::string &branch)
 {
+	// TODO
 	return "HEAD";
 }
 
@@ -197,7 +198,7 @@ std::string GitBackend::head(const std::string &branch)
 std::string GitBackend::mainBranch()
 {
 	int ret;
-	std::string out = utils::exec("git branch", &ret);
+	std::string out = utils::exec(&ret, "git", "branch");
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retreive the list of branches (%d)", ret));
 	}
@@ -214,7 +215,7 @@ std::string GitBackend::mainBranch()
 std::vector<std::string> GitBackend::branches()
 {
 	int ret;
-	std::string out = utils::exec("git branch", &ret);
+	std::string out = utils::exec(&ret, "git", "branch");
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retreive the list of branches (%d)", ret));
 	}
@@ -243,7 +244,7 @@ Diffstat GitBackend::diffstat(const std::string &id)
 	}
 
 	int ret;
-	std::string out = utils::exec(std::string("git diff-tree -U0 -a -m --no-renames --root ")+id, &ret);
+	std::string out = utils::exec(&ret, "git", "diff-tree" "-U0", "-a", "-m", "--no-renames", "--root", id.c_str());
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Failed to retrieve diffstat for revision %s (%d)", id.c_str(), ret));
 	}
@@ -255,7 +256,7 @@ Diffstat GitBackend::diffstat(const std::string &id)
 Backend::LogIterator *GitBackend::iterator(const std::string &branch)
 {
 	int ret;
-	std::string out = utils::exec(std::string("git rev-list ")+branch, &ret);
+	std::string out = utils::exec(&ret, "git", "rev-list", branch.c_str());
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retreive log for branch '%s' (%d)", branch.c_str(), ret));
 	}
@@ -280,7 +281,7 @@ void GitBackend::prefetch(const std::vector<std::string> &ids)
 Revision *GitBackend::revision(const std::string &id)
 {
 	int ret;
-	std::string meta = utils::exec(std::string("git log -1 --pretty=format:\"%ct\n%aN\n%B\" ")+id, &ret);
+	std::string meta = utils::exec(&ret, "git", "log", "-1", "--pretty=format:\"%ct\n%aN\n%B\"", id.c_str());
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retreive meta-data for revision '%s' (%d)", id.c_str(), ret));
 	}

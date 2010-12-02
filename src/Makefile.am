@@ -30,10 +30,11 @@ pepper_SOURCES = \
 	lua/report.h lua/report.cpp \
 	\
 	3rdparty/gnuplot-cpp/gnuplot_i.h \
-	3rdparty/lunar/lunar.h
+	3rdparty/lunar/lunar.h \
+	3rdparty/popen-noshell/popen_noshell.h 3rdparty/popen-noshell/popen_noshell.c
 
 AM_CXXFLAGS = \
-	-Wall -W -pipe -ansi \
+	-Wall -W -pipe \
 	$(LUA_CFLAGS)
 INCLUDES = \
 	-I@top_srcdir@/src/3rdparty \
@@ -76,3 +77,5 @@ AM_LDFLAGS += \
 	$(SVN_LDFLAGS) \
 	$(SVN_LIBS) 
 endif
+
+AM_CFLAGS = $(AM_CXXFLAGS)
