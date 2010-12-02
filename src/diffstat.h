@@ -41,6 +41,8 @@ class Diffstat
 		Diffstat();
 		~Diffstat();
 
+		std::map<std::string, Stat> stats() const;
+
 		void write(BOStream &out) const;
 		bool load(BIStream &in);
 

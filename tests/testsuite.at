@@ -1,0 +1,9 @@
+#
+# pepper - SCM statistics report generator
+# Copyright (C) 2010 Jonas Gehring
+#
+
+AT_INIT()
+AT_COPYRIGHT([Copyright (C) 2010 Jonas Gehring])
+
+m4_include([test_diffstat.at])

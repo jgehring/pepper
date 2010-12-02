@@ -29,6 +29,12 @@ Diffstat::~Diffstat()
 
 }
 
+// Returns the actual stats
+std::map<std::string, Diffstat::Stat> Diffstat::stats() const
+{
+	return m_stats;
+}
+
 // Writes the stat to a binary stream
 void Diffstat::write(BOStream &out) const
 {

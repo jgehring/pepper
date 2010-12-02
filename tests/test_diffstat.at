@@ -1,0 +1,20 @@
+#
+# pepper - SCM statistics report generator
+# Copyright (C) 2010 Jonas Gehring
+#
+# Test group for diffstat testing
+#
+
+AT_BANNER([Diffstat tests])
+
+AT_SETUP([Utility functions])
+AT_CHECK([utests utils])
+AT_CLEANUP()
+
+AT_SETUP([ConfReader and ConfWriter])
+AT_CHECK([utests confio])
+AT_CLEANUP()
+
+AT_SETUP([Memblock])
+AT_CHECK([utests memblock])
+AT_CLEANUP()
