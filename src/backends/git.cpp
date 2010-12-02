@@ -55,8 +55,11 @@ private:
 class GitDiffstatPrefetcher
 {
 public:
-	GitDiffstatPrefetcher(int n = 4)
+	GitDiffstatPrefetcher(int n = -1)
 	{
+		if (n < 0) {
+			n = sys::parallel::idealThreadCount();
+		}
 		for (int i = 0; i < n; i++) {
 			GitDiffstatThread * thread = new GitDiffstatThread(&m_queue);
 			thread->start();

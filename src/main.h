@@ -14,6 +14,18 @@
 #include "config.h"
 
 
+// Operating system detection (mostly from Qt, qglobal.h)
+#if defined(__APPLE__) && (defined(__GNUC__) || defined(__xlC__) || defined(__xlc__))
+ #define POS_DARWIN
+#elif defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__bsdi__)
+ #define POS_BSD
+#elif defined(__linux__) || defined(__linux)
+ #define POS_LINUX
+#elif defined(WIN64) || defined(_WIN64) || defined(__WIN64__) || defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+ #define POS_WIN
+#endif
+
+
 // Standard integer types
 #ifdef HAVE_STDINT_H
  #include <stdint.h>

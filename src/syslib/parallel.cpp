@@ -11,6 +11,8 @@
 
 #include <sys/time.h>
 
+#include "main.h"
+
 #include "parallel.h"
 
 
@@ -19,6 +21,36 @@ namespace sys
 
 namespace parallel
 {
+
+// Returns the ideal number of threads, based on the system's CPU resources
+// This function is mainly from Qt, version 4.7.1, but the more exotic systems
+// will fall back to '1'
+int idealThreadCount()
+{
+	int cores = 1;
+#ifdef POS_DARWIN
+	cores = MPProcessorsScheduled();
+#elif defined(POS_BSD)
+	size_t len = sizeof(cores);
+	int mib[2];
+	mib[0] = CTL_HW;
+	mib[1] = HW_NCPU;
+	if (sysctl(mib, 2, &cores, &len, NULL, 0) != 0) {
+		perror("sysctl");
+		cores = -1;
+	}
+#elif defined(POS_LINUX)
+	cores = (int)sysconf(_SC_NPROCESSORS_ONLN);
+#elif defined(POS_WIN)
+	SYSTEM_INFO sysinfo;
+	GetSystemInfo(&sysinfo);
+	cores = sysinfo.dwNumberOfProcessors;
+#else
+ #warning "Unkown operating system; sys::parallel::idealThreadCount() will always return 1"
+#endif
+	return cores;
+}
+
 
 // Constructor
 Mutex::Mutex()

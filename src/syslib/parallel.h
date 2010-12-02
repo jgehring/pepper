@@ -23,6 +23,8 @@ namespace sys
 namespace parallel
 {
 
+int idealThreadCount();
+
 class Mutex
 {
 	friend class WaitCondition;
