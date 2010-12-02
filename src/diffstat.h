@@ -45,9 +45,6 @@ class Diffstat
 		bool load(BIStream &in);
 
 	private:
-		void parse(std::istream &in);
-
-	private:
 		std::map<std::string, Stat> m_stats;
 };
 

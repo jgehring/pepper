@@ -58,11 +58,6 @@ bool Diffstat::load(BIStream &in)
 	return true;
 }
 
-// Parses output generated from diff
-void Diffstat::parse(std::istream &in)
-{
-}
-
 
 // Constructor
 DiffParser::DiffParser(std::istream &in)
