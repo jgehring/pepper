@@ -13,8 +13,8 @@
 
 #include "backend.h"
 
-
 class GitDiffstatPrefetcher;
+
 
 class GitBackend : public Backend
 {
@@ -36,6 +36,7 @@ class GitBackend : public Backend
 		LogIterator *iterator(const std::string &branch = std::string());
 		void prefetch(const std::vector<std::string> &ids);
 		Revision *revision(const std::string &id);
+		void finalize();
 
 	private:
 		GitDiffstatPrefetcher *m_prefetcher;

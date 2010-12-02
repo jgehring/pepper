@@ -298,3 +298,14 @@ Revision *GitBackend::revision(const std::string &id)
 	std::string msg = utils::join(lines, "\n");
 	return new Revision(id, date, author, msg, diffstat(id));
 }
+
+// Handle cleanup of diffstat scheduler
+void GitBackend::finalize()
+{
+	if (m_prefetcher) {
+		m_prefetcher->stop();
+		m_prefetcher->wait();
+		delete m_prefetcher;
+		m_prefetcher = NULL;
+	}
+}
