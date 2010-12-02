@@ -36,7 +36,7 @@ protected:
 		std::string revision;
 		while (m_queue->getArg(&revision)) {
 			int ret;
-			std::string out = utils::exec(std::string("git diff-tree -U0 -a --no-renames --root ")+revision, &ret);
+			std::string out = utils::exec(std::string("git diff-tree -U0 -a -m --no-renames --root ")+revision, &ret);
 			if (ret != 0) {
 				m_queue->failed(revision);
 				continue;
@@ -243,7 +243,7 @@ Diffstat GitBackend::diffstat(const std::string &id)
 	}
 
 	int ret;
-	std::string out = utils::exec(std::string("git diff-tree -U0 -a --no-renames --root ")+id, &ret);
+	std::string out = utils::exec(std::string("git diff-tree -U0 -a -m --no-renames --root ")+id, &ret);
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Failed to retrieve diffstat for revision %s (%d)", id.c_str(), ret));
 	}
