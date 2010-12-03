@@ -1,0 +1,51 @@
+Description of the pepper cache format
+======================================
+
+The repository cache is actually a directory, named with the repository's
+UUID and containing two or more files:
+
+	* index
+	This is the index file, mapping revision identifiers to files
+	and offsets.  It is a gzipped text file with the following format:
+
+		$REVISION_1 $FILEINDEX $OFFSET
+		$REVISION_2 $FILEINDEX $OFFSET
+		...
+	
+	$REVISION_i is a null-terminated string, representing a revision
+	ID. Immediately afer the null byte, a 4-byte unsigned integer
+	specifying the index of the cache file. Finally, there's a nother
+	4-byte unsigned integer that defines the offset in the cache file.
+
+	* cache.N
+	where N is the file index. The cache file is just a series of
+	gzipped revisions which can be identified using the current
+	file offset and index and the table given in the index file.
+	A revision contains the following data:
+
+		$DATE $AUTHOR $MESSAGE $DIFFSTAT
+
+	$DATE is a 64-bit integer, $AUTHOR and $MESSAGE are
+	null-terminated strings. The diffstat data is made of the
+	following components:
+
+		$COUNT $FILE_ENTRY_1 $FILE_ENTRY_2 ...
+
+	$COUNT is an unsigned 32-bit integer, representing the number
+	of file entries that follow. Each one is given in the following
+	format:
+
+		$FILE $BYTES_ADDED $LINES_ADDED $BYTES_REMOVED $BYTES_ADDED
+		
+	$FILE is the name of the file, and the 4 unsigned 32-bit integers
+	following describe the number of bytes or lines added and removed,
+	respectively.
+
+Please note that single revisions are gzipped (using zlib's compress()),
+but not the whole cache file. This allows for faster seeking when selecting 
+individual revisions.
+
+Primitive data is stored using the following conventions:
+
+	* String: UTF-8 encoding, null-terminated
+	* Integer: Big endian
