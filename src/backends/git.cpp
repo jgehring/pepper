@@ -183,18 +183,22 @@ std::string GitBackend::uuid()
 	}
 
 	// Get ID of first commit of the root branch
-	std::string id = utils::exec(&ret, "git", "rev-list", "--reverse", "-1", branch.c_str());
+	std::string id = utils::exec(&ret, "git", "rev-list", "--reverse", "-1", branch.c_str(), "--");
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to determine the root commit for branch '%s' (%d)", branch.c_str(), ret));
 	}
 	return utils::trim(id);
 }
 
-// Returns the HEAD revision for the current branch
+// Returns the HEAD revision for the given branch
 std::string GitBackend::head(const std::string &branch)
 {
-	// TODO
-	return "HEAD";
+	int ret;
+	std::string out = utils::exec(&ret, "git", "rev-list", "-1", branch.c_str(), "--");
+	if (ret != 0) {
+		throw PEX(utils::strprintf("Unable to retreive head commit for branch %s (%d)", branch.c_str(), ret));
+	}
+	return utils::trim(out);
 }
 
 // Returns the currently checked out branch
@@ -259,7 +263,7 @@ Diffstat GitBackend::diffstat(const std::string &id)
 Backend::LogIterator *GitBackend::iterator(const std::string &branch)
 {
 	int ret;
-	std::string out = utils::exec(&ret, "git", "rev-list", branch.c_str());
+	std::string out = utils::exec(&ret, "git", "rev-list", branch.c_str(), "--");
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retreive log for branch '%s' (%d)", branch.c_str(), ret));
 	}
