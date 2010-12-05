@@ -72,6 +72,8 @@ class JobQueue
 				return false;
 			}
 			*res = m_results[arg];
+			m_results.erase(arg);
+			m_status.erase(arg);
 			m_mutex.unlock();
 			return true;
 		}
