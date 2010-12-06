@@ -32,7 +32,7 @@ Lunar<Plot>::RegType Plot::methods[] = {
 
 
 // Constructor
-Plot::Plot(lua_State *L)
+Plot::Plot(lua_State *)
 {
 	g = new Gnuplot("lines");
 }
@@ -116,7 +116,7 @@ int Plot::plotty(lua_State *L)
 }
 
 // Closes and reopens the Gnuplot connection
-int Plot::flush(lua_State *L)
+int Plot::flush(lua_State *)
 {
 	delete g;
 	g = new Gnuplot("lines");

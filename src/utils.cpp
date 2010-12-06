@@ -197,7 +197,7 @@ std::string execv(int *ret, const char * const *argv)
 	const char *metachars = "!\\$`\n|&;()<>";
 	while (*ptr) {
 		bool quote = false;
-		for (int i = 0; i < strlen(metachars); i++) {
+		for (unsigned int i = 0; i < strlen(metachars); i++) {
 			if (strchr(*ptr, metachars[i]) != NULL) {
 				quote = true;
 				break;
