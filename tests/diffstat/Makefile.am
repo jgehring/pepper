@@ -19,7 +19,8 @@ INCLUDES = \
 	-I$(top_srcdir)/src \
 	-I$(top_srcdir)/src/3rdparty
 LIBS += \
-	$(PTHREAD_LIBS)
+	$(PTHREAD_LIBS) \
+	$(FRAMEWORKS)
 
 
 # Optional features

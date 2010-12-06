@@ -13,7 +13,9 @@
 
 #include "main.h"
 
-#ifdef POS_BSD
+#if defined(POS_DARWIN) && defined(HAVE_CORESERVICES)
+ #include <CoreServices/CoreServices.h>
+#elif defined(POS_BSD)
  #include <sys/sysctl.h>
 #endif
 
@@ -32,7 +34,7 @@ namespace parallel
 int idealThreadCount()
 {
 	int cores = 1;
-#ifdef POS_DARWIN
+#if defined(POS_DARWIN) && defined(HAVE_CORESERVICES)
 	cores = MPProcessorsScheduled();
 #elif defined(POS_BSD)
 	size_t len = sizeof(cores);

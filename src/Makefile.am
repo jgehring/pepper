@@ -38,7 +38,9 @@ INCLUDES = \
 	-I@top_srcdir@/src/syslib
 AM_CPPFLAGS = 
 AM_LDFLAGS = \
-	$(LUA_LIB)
+	$(PTHREAD_LIBS) \
+	$(LUA_LIB) \
+	$(FRAMEWORKS)
 
 
 # Optional features

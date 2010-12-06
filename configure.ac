@@ -43,6 +43,10 @@ AM_CONDITIONAL([GNUPLOT], [test "x$gnuplot" = "xyes"])
 
 AC_C_BIGENDIAN()
 
+AC_CHECK_HEADER([CoreServices/CoreServices.h],
+	[AC_DEFINE([HAVE_CORESERVICES], [1], [Define if you have the CoreServices API])
+	 FRAMEWORKS="$FRAMEWORKS -framework CoreServices"])
+
 
 #
 # Checks for types
@@ -132,6 +136,8 @@ fi
 #
 # Write Makefiles
 #
+
+AC_SUBST([FRAMEWORKS])
 
 AC_CONFIG_FILES([
 	Makefile
