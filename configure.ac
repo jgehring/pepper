@@ -12,10 +12,10 @@ AC_CONFIG_HEADER([config.h])
 AC_ARG_ENABLE([debug], [AS_HELP_STRING([--enable-debug], [Turn on debugging])], [debug="$enableval"], [debug="no"])
 
 sinclude(m4/ax_check_zlib.m4)
+sinclude(m4/ax_lua.m4)
 sinclude(m4/ax_pthread.m4)
 sinclude(m4/configure_backends.m4)
 sinclude(m4/configure_features.m4)
-sinclude(m4/find_lua.m4)
 
 
 #
@@ -90,12 +90,17 @@ fi
 
 AX_PTHREAD()
 
-FIND_LUA()
-if test "x$found_lua" != "xyes"; then
-	AC_MSG_ERROR([Lua could not be located. Please check your pkg-config setup.])
+AX_WITH_LUA()
+if test "x$LUA" = "x"; then
+	AC_MSG_ERROR([Lua could not be found. Please use the --with-lua-prefix option.])
 fi
-AC_SUBST([LUA_CFLAGS])
-AC_SUBST([LUA_LIBS])
+AX_LUA_VERSION([501])
+AX_LUA_HEADERS([501])
+AX_LUA_LIBS()
+if test "x$LUA_LIB" = "x"; then
+	AC_MSG_ERROR([Lua could not be found. Please use the --with-lua-prefix option.])
+fi
+AC_SUBST([LUA_LIB])
 
 CHECK_ZLIB()
 

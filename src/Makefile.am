@@ -31,15 +31,14 @@ pepper_SOURCES = \
 	3rdparty/lunar/lunar.h
 
 AM_CXXFLAGS = \
-	-Wall -W -pipe \
-	$(LUA_CFLAGS)
+	-Wall -W -pipe
 INCLUDES = \
 	-I@top_srcdir@/src/3rdparty \
 	-I@top_srcdir@/src/lua \
 	-I@top_srcdir@/src/syslib
 AM_CPPFLAGS = 
 AM_LDFLAGS = \
-	$(LUA_LIBS)
+	$(LUA_LIB)
 
 
 # Optional features
