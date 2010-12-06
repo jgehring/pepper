@@ -13,6 +13,10 @@
 
 #include "main.h"
 
+#ifdef POS_BSD
+ #include <sys/sysctl.h>
+#endif
+
 #include "parallel.h"
 
 
