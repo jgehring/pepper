@@ -11,6 +11,7 @@
 #include <sstream>
 
 #include "jobqueue.h"
+#include "logger.h"
 #include "options.h"
 #include "revision.h"
 #include "utils.h"
@@ -243,6 +244,7 @@ Diffstat GitBackend::diffstat(const std::string &id)
 {
 	// Maybe it's prefetched
 	if (m_prefetcher && m_prefetcher->willFetch(id)) {
+		PDEBUG << "Revision " << id << " will be prefetched" << endl;
 		Diffstat stat;
 		if (!m_prefetcher->get(id, &stat)) {
 			throw PEX(utils::strprintf("Failed to retrieve diffstat for revision %s", id.c_str()));
@@ -250,6 +252,7 @@ Diffstat GitBackend::diffstat(const std::string &id)
 		return stat;
 	}
 
+	PDEBUG << "Fetching revision " << id << " manually" << endl;
 	int ret;
 	std::string out = utils::exec(&ret, "git", "diff-tree" "-U0", "-a", "-m", "--no-renames", "--root", id.c_str());
 	if (ret != 0) {
@@ -282,6 +285,7 @@ void GitBackend::prefetch(const std::vector<std::string> &ids)
 		m_prefetcher = new GitDiffstatPrefetcher();
 	}
 	m_prefetcher->prefetch(ids);
+	PDEBUG << "Started prefetching " << ids.size() << " revisions" << endl;
 }
 
 // Returns the revision data for the given ID
@@ -311,9 +315,11 @@ Revision *GitBackend::revision(const std::string &id)
 void GitBackend::finalize()
 {
 	if (m_prefetcher) {
+		PDEBUG << "Waiting for prefetcher... " << endl;
 		m_prefetcher->stop();
 		m_prefetcher->wait();
 		delete m_prefetcher;
 		m_prefetcher = NULL;
+		PDEBUG << "done" << endl;
 	}
 }

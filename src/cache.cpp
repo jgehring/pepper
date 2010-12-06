@@ -14,11 +14,14 @@
 
 #include <sys/stat.h>
 
+#include "main.h"
+
 #include "bstream.h"
 #include "diffstat.h"
+#include "fs.h"
+#include "logger.h"
 #include "options.h"
 #include "revision.h"
-#include "fs.h"
 #include "utils.h"
 
 #include "cache.h"
@@ -48,9 +51,11 @@ Cache::~Cache()
 Diffstat Cache::diffstat(const std::string &id)
 {
 	if (!lookup(id)) {
+		PTRACE << "Cache miss :" << id << endl;
 		return m_backend->diffstat(id);
 	}
 
+	PTRACE << "Cache hit :" << id << endl;
 	Revision *r = get(id);
 	Diffstat stat = r->diffstat();
 	delete r;
@@ -67,6 +72,7 @@ void Cache::prefetch(const std::vector<std::string> &ids)
 		}
 	}
 
+	Logger::info() << "Cache: " << (ids.size() - missing.size()) << " of " << ids.size() << " revisions already cached, prefetching " << missing.size() << endl;
 	m_backend->prefetch(missing);
 }
 
@@ -74,12 +80,13 @@ void Cache::prefetch(const std::vector<std::string> &ids)
 Revision *Cache::revision(const std::string &id)
 {
 	if (!lookup(id)) {
+		PTRACE << "Cache miss :" << id << endl;
 		Revision *r = m_backend->revision(id);
 		put(id, *r);
 		return r;
 	}
 
-	// TODO: Add meta data
+	PTRACE << "Cache hit :" << id << endl;
 	return get(id);
 }
 
@@ -170,6 +177,7 @@ void Cache::load()
 	m_index.clear();
 
 	std::string path = m_opts.cacheDir() + "/" + uuid();
+	PDEBUG << "Using cache dir: " << path << endl;
 	struct stat statbuf;
 	if (stat(path.c_str(), &statbuf) == -1) {
 		// Create the cache directory
@@ -201,7 +209,5 @@ void Cache::load()
 		m_index[buffer] = pos;
 	}
 
-	if (m_opts.verbosity() > 0) {
-		std::cout << "Cache: " << m_index.size() << " cached revisions for '" << uuid() << '\'' << std::endl;
-	}
+	Logger::info() << "Cache: " << m_index.size() << " cached revisions for '" << uuid() << '\'' << endl;
 }

@@ -7,7 +7,9 @@
  */
 
 
+#include <cassert>
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
 
 #include <signal.h>
@@ -17,6 +19,7 @@
 #include "backend.h"
 #include "cache.h"
 #include "globals.h"
+#include "logger.h"
 #include "options.h"
 #include "report.h"
 #include "utils.h"
@@ -31,6 +34,8 @@ static void terminationHandler(int signum)
 // Installs the given signal handler thread
 static void installSignalHandler(void (*handler)(int))
 {
+	PTRACE << "Installing signal handlers" << endl;
+
 	struct sigaction new_action, old_action;
 	new_action.sa_handler = handler;
 	sigemptyset(&new_action.sa_mask);
@@ -103,6 +108,29 @@ static void printVersion()
 	std::cout << "Released under the GNU General Public License." << std::endl;
 }
 
+// Configures the global logging streams for the given options
+static void setupLogger(std::vector<std::ofstream *> *streams, const Options &opts)
+{
+	// Note that the log level has already been set by Options::parse()
+#ifdef DEBUG
+	// In debug mode, write log data to files if the log level is not high enough
+	std::string files[Logger::NumLevels] = {"", "status.out", "info.out", "debug.out", "trace.out"};
+	for (int i = Logger::level()+1; i < Logger::NumLevels; i++) {
+		if (!files[i].empty()) {
+			std::ofstream *out = new std::ofstream();
+			out->open(files[i].c_str(), std::ios::out);
+			assert(out->good());
+			streams->push_back(out);
+
+			Logger::setOutput(*out, i);
+		}
+	}
+
+	// Turn log level to maximum
+	Logger::setLevel(Logger::NumLevels);
+#endif
+}
+
 // Program entry point
 int main(int argc, char **argv)
 {
@@ -120,6 +148,9 @@ int main(int argc, char **argv)
 		std::cerr << "Run with --help for usage information" << std::endl;
 		return EXIT_FAILURE;
 	}
+
+	std::vector<std::ofstream *> streams;
+	setupLogger(&streams, opts);
 
 	if (opts.helpRequested()) {
 		printHelp(opts);
@@ -146,12 +177,21 @@ int main(int argc, char **argv)
 		}
 	} catch (const Pepper::Exception &ex) {
 		std::cerr << "Error initializing backend: " << ex.where() << ": " << ex.what() << std::endl;
+		Logger::flush();
 		return EXIT_FAILURE;
 	}
 
 	installSignalHandler(&terminationHandler);
 
 	int ret = Report::run(opts.script(), backend);
+
 	delete backend;
+	Logger::flush();
+
+	// Close log files
+	for (unsigned int i = 0; i < streams.size(); i++) {
+		streams[i]->close();
+		delete streams[i];
+	}
 	return ret;
 }

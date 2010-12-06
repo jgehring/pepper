@@ -15,6 +15,7 @@
 #include "backend.h"
 #include "diffstat.h"
 #include "globals.h"
+#include "logger.h"
 #include "repository.h"
 #include "revision.h"
 #include "revisioniterator.h"
@@ -82,23 +83,18 @@ static int map_branch(lua_State *L)
 	int callback = luaL_ref(L, LUA_REGISTRYINDEX);
 	lua_pop(L, 1);
 
-	bool verbose = (repo->backend()->options().verbosity() >= 0);
-	if (verbose) {
-		std::cerr << "Initializing iterator... " << std::flush;
-	}
+	Logger::status() << "Initializing iterator... " << flush;
 
 	Backend *backend = repo->backend();
 	RevisionIterator *it;
 	try {
 		it = new RevisionIterator(branch, backend);
 	} catch (const Pepper::Exception &ex) {
-		if (verbose) {
-			std::cerr << "failed" << std::endl;
-		}
+		Logger::status() << "failed" << endl;
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
 	}
+	Logger::status() << "done" << endl;
 
-	bool first = true;
 	while (!it->atEnd()) {
 		Revision *revision = NULL;
 		try {
@@ -113,14 +109,8 @@ static int map_branch(lua_State *L)
 		lua_call(L, 1, 1);
 		lua_pop(L, 1);
 
-		if (verbose) {
-			if (first) {
-				std::cerr << "done" << std::endl;
-				first = false;
-			}
-			std::cerr << "\r\033[0K";
-			std::cerr << "Mapping revisions... " << revision->id() << std::flush;
-		}
+		Logger::info() << "\r\033[0K";
+		Logger::info() << "Mapping revisions... " << revision->id() << flush;
 
 		if (Globals::terminate) {
 			return LuaHelpers::pushError(L, "Terminated");
@@ -129,10 +119,8 @@ static int map_branch(lua_State *L)
 		delete revision;
 	}
 
-	if (verbose) {
-		std::cerr << "\r\033[0K";
-		std::cerr << "Mapping revisions... done" << std::endl;
-	}
+	Logger::info() << "\r\033[0K";
+	Logger::info() << "Mapping revisions... done" << endl;
 
 	try {
 		backend->finalize();

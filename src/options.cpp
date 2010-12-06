@@ -10,6 +10,7 @@
 #include <cerrno>
 #include <cstdlib>
 
+#include "logger.h"
 #include "utils.h"
 
 #include "syslib/fs.h"
@@ -53,11 +54,6 @@ bool Options::scriptHelpRequested() const
 bool Options::versionRequested() const
 {
 	return m_options["version"] == "true";
-}
-
-int Options::verbosity() const
-{
-	return m_verbosity;
 }
 
 bool Options::useCache() const
@@ -107,13 +103,14 @@ void Options::reset()
 
 	m_options["cache"] = "true";
 #ifdef DEBUG
-	m_verbosity = 1;
+	Logger::setLevel(Logger::Info);
 #else
-	m_verbosity = 0;
+	Logger::setLevel(Logger::None);
 #endif
 
 	// TODO: Where on Windows?
 	m_options["cache_dir"] = utils::strprintf("%s/.%s/cache", getenv("HOME"), PACKAGE_NAME, "cache");
+	PDEBUG << "Default cache dir set to " << m_options["cache_dir"] << endl;
 }
 
 // The actual parsing
@@ -135,9 +132,9 @@ void Options::parse(const std::vector<std::string> &args)
 		} else if (args[i] == "--no-cache") {
 			m_options["cache"] = "false";
 		} else if (args[i] == "-v" || args[i] == "--verbose") {
-			++m_verbosity;
+			Logger::setLevel(Logger::level()+1);
 		} else if (args[i] == "-q" || args[i] == "--quiet") {
-			m_verbosity = -1;
+			Logger::setLevel(Logger::None);
 		} else if (mode == MAIN && !args[i].compare(0, 2, "--") && args[i].length() > 2) {
 			m_options["forced_backend"] = args[i].substr(2);
 			mode = BACKEND;

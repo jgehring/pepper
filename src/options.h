@@ -34,8 +34,6 @@ class Options
 		bool scriptHelpRequested() const;
 		bool versionRequested() const;
 
-		int verbosity() const;
-
 		bool useCache() const;
 		std::string cacheDir() const;
 
@@ -52,7 +50,6 @@ class Options
 		std::string makeAbsolute(const std::string &path);
 
 	private:
-		int m_verbosity;
 		mutable std::map<std::string, std::string> m_options;
 		mutable std::map<std::string, std::string> m_backendOptions, m_scriptOptions;
 };

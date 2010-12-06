@@ -12,6 +12,7 @@ pepper_SOURCES = \
 	diffstat.h diffstat.cpp \
 	globals.h globals.cpp \
 	jobqueue.h \
+	logger.h logger.cpp \
 	main.h main.cpp \
 	options.h options.cpp \
 	repository.h repository.cpp \

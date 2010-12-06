@@ -24,8 +24,10 @@
 #include <svn_time.h>
 #include <svn_utf.h>
 
-#include "jobqueue.h"
 #include "main.h"
+
+#include "jobqueue.h"
+#include "logger.h"
 #include "options.h"
 #include "revision.h"
 #include "utils.h"
@@ -55,6 +57,8 @@ public:
 	// Opens the connection to the Subversion repository
 	void open(const std::string &url, const Options::AuthData &auth, apr_pool_t *ppool = NULL)
 	{
+		PTRACE << "Opening connection to " << url << endl;
+
 		pool = svn_pool_create(ppool);
 		init();
 
@@ -490,6 +494,8 @@ void SubversionBackend::init()
 	}
 #endif // !WIN32
 
+	PDEBUG << "Subversion library initialized, opening connection" << endl;
+
 	std::string url = m_opts.repoUrl();
 	if (!url.compare(0, 1, "/")) {
 		url = std::string("file://") + url;
@@ -649,6 +655,8 @@ Backend::LogIterator *SubversionBackend::iterator(const std::string &branch)
 		prefix = "branches/";
 		prefix += branch;
 	}
+
+	PDEBUG << "Iterator requested for branch " << branch << " -> prefix = " << prefix << endl;
 
 	// Check if the branch exists
 	apr_pool_t *pool = svn_pool_create(d->pool);
