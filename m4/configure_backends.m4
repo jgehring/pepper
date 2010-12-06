@@ -35,7 +35,7 @@ AC_DEFUN([BACKENDS_CHECK], [
 		fi
 
 		if test "x$subversion" != "xno"; then
-			FIND_SVN()
+			FIND_SVN([1],[5])
 			if test "x$svn_found" != "xyes"; then
 				if test "x$subversion" != "xauto"; then
 					AC_MSG_ERROR([Subversion could not be located. Please use the --with-svn option.])
