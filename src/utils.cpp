@@ -105,6 +105,18 @@ std::string join(const std::vector<std::string> &v, const std::string &c)
 	return res;
 }
 
+// Joins several strings
+std::string join(std::vector<std::string>::const_iterator start, std::vector<std::string>::const_iterator end, const std::string &c)
+{
+	std::string res;
+	while (start != end) {
+		res += *start;
+		res += c;
+		++start;
+	}
+	return res.substr(0, res.length()-c.length());
+}
+
 // sprintf for std::string
 std::string strprintf(const char *format, ...)
 {
