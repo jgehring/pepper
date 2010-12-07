@@ -64,7 +64,7 @@ class JobQueue
 
 		bool getResult(const Arg &arg, Result *res) {
 			m_mutex.lock();
-			while (!m_end && m_results.find(arg) == m_results.end()) {
+			while (!m_end && m_status.find(arg) == m_status.end()) {
 				m_resultWait.wait(&m_mutex);
 			}
 			if (m_end || !m_status[arg]) {
