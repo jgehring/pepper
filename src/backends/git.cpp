@@ -158,7 +158,7 @@ std::string GitBackend::uuid()
 	int ret;
 	std::string out = utils::exec(&ret, "git", "branch", "-a");
 	if (ret != 0) {
-		throw PEX(utils::strprintf("Unable to retreive the list of branches (%d)", ret));
+		throw PEX(utils::strprintf("Unable to retrieve the list of branches (%d)", ret));
 	}
 	std::vector<std::string> branches = utils::split(out, "\n");
 	std::string branch;
@@ -204,7 +204,7 @@ std::string GitBackend::head(const std::string &branch)
 	int ret;
 	std::string out = utils::exec(&ret, "git", "rev-list", "-1", branch.c_str(), "--");
 	if (ret != 0) {
-		throw PEX(utils::strprintf("Unable to retreive head commit for branch %s (%d)", branch.c_str(), ret));
+		throw PEX(utils::strprintf("Unable to retrieve head commit for branch %s (%d)", branch.c_str(), ret));
 	}
 	return utils::trim(out);
 }
@@ -215,7 +215,7 @@ std::string GitBackend::mainBranch()
 	int ret;
 	std::string out = utils::exec(&ret, "git", "branch");
 	if (ret != 0) {
-		throw PEX(utils::strprintf("Unable to retreive the list of branches (%d)", ret));
+		throw PEX(utils::strprintf("Unable to retrieve the list of branches (%d)", ret));
 	}
 	std::vector<std::string> branches = utils::split(out, "\n");
 	for (unsigned int i = 0; i < branches.size(); i++) {
@@ -232,7 +232,7 @@ std::vector<std::string> GitBackend::branches()
 	int ret;
 	std::string out = utils::exec(&ret, "git", "branch");
 	if (ret != 0) {
-		throw PEX(utils::strprintf("Unable to retreive the list of branches (%d)", ret));
+		throw PEX(utils::strprintf("Unable to retrieve the list of branches (%d)", ret));
 	}
 	std::vector<std::string> branches = utils::split(out, "\n");
 	for (unsigned int i = 0; i < branches.size(); i++) {
@@ -275,7 +275,7 @@ Backend::LogIterator *GitBackend::iterator(const std::string &branch)
 	int ret;
 	std::string out = utils::exec(&ret, "git", "rev-list", branch.c_str(), "--");
 	if (ret != 0) {
-		throw PEX(utils::strprintf("Unable to retreive log for branch '%s' (%d)", branch.c_str(), ret));
+		throw PEX(utils::strprintf("Unable to retrieve log for branch '%s' (%d)", branch.c_str(), ret));
 	}
 	std::vector<std::string> revisions = utils::split(out, "\n");
 	while (!revisions.empty() && revisions[revisions.size()-1].empty()) {
@@ -301,7 +301,7 @@ Revision *GitBackend::revision(const std::string &id)
 	int ret;
 	std::string meta = utils::exec(&ret, "git", "log", "-1", "--pretty=format:%ct\n%aN\n%B", id.c_str());
 	if (ret != 0) {
-		throw PEX(utils::strprintf("Unable to retreive meta-data for revision '%s' (%d)", id.c_str(), ret));
+		throw PEX(utils::strprintf("Unable to retrieve meta-data for revision '%s' (%d, %s)", id.c_str(), ret, meta.c_str()));
 	}
 	std::vector<std::string> lines = utils::split(meta, "\n");
 	int64_t date = 0;

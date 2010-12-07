@@ -51,11 +51,11 @@ Cache::~Cache()
 Diffstat Cache::diffstat(const std::string &id)
 {
 	if (!lookup(id)) {
-		PTRACE << "Cache miss :" << id << endl;
+		PTRACE << "Cache miss: " << id << endl;
 		return m_backend->diffstat(id);
 	}
 
-	PTRACE << "Cache hit :" << id << endl;
+	PTRACE << "Cache hit: " << id << endl;
 	Revision *r = get(id);
 	Diffstat stat = r->diffstat();
 	delete r;
@@ -80,13 +80,13 @@ void Cache::prefetch(const std::vector<std::string> &ids)
 Revision *Cache::revision(const std::string &id)
 {
 	if (!lookup(id)) {
-		PTRACE << "Cache miss :" << id << endl;
+		PTRACE << "Cache miss: " << id << endl;
 		Revision *r = m_backend->revision(id);
 		put(id, *r);
 		return r;
 	}
 
-	PTRACE << "Cache hit :" << id << endl;
+	PTRACE << "Cache hit: " << id << endl;
 	return get(id);
 }
 
