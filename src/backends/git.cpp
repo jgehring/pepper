@@ -167,28 +167,35 @@ std::string GitBackend::uuid()
 			continue;
 		}
 		if (branches[i][0] == '*') {
-			branch = branches[i]; // Fallback branch: current one
+			branch = branches[i].substr(2); // Fallback branch: current one
 		}
 		branches[i] = branches[i].substr(2);
 	}
 
-	if (std::search_n(branches.begin(), branches.end(), 1, "master") != branches.end()) {
-		branch = "master";
-	}
-	if (std::search_n(branches.begin(), branches.end(), 1, "remotes/origin/master") != branches.end()) {
-		branch = "remotes/origin/master";
-	}
-
 	if (branch.empty()) {
+		if (std::search_n(branches.begin(), branches.end(), 1, "master") != branches.end()) {
+			branch = "master";
+		} else if (std::search_n(branches.begin(), branches.end(), 1, "remotes/origin/master") != branches.end()) {
+			branch = "remotes/origin/master";
+		}
+	}
+	if (branch.empty()) {
+		std::cerr << "Error: unable to retrieve UUID for repository" << std::endl;
 		return std::string();
 	}
 
 	// Get ID of first commit of the root branch
-	std::string id = utils::exec(&ret, "git", "rev-list", "--reverse", "-1", branch.c_str(), "--");
+	// Unfortunatley, the --max-count=n option results in n revisions counting from the HEAD.
+	// This way, we'll always get the HEAD revision with --max-count=1.
+	std::string id = utils::exec(&ret, "git", "rev-list", "--reverse", branch.c_str(), "--");
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to determine the root commit for branch '%s' (%d)", branch.c_str(), ret));
 	}
-	return utils::trim(id);
+	size_t pos = id.find_first_of('\n');
+	if (pos == std::string::npos) {
+		throw PEX(utils::strprintf("Unable to determine the root commit for branch '%s' (%d)", branch.c_str(), ret));
+	}
+	return utils::trim(id.substr(0, pos));
 }
 
 // Returns the HEAD revision for the given branch

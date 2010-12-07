@@ -184,11 +184,13 @@ void Cache::load()
 		if (sys::fs::mkpath(path) < 0) {
 			throw PEX(utils::strprintf("Unable to create cache directory: %s", path.c_str()));
 		}
+		Logger::info() << "Cache: Ceating cache directory for '" << uuid() << '\'' << endl;
 		return;
 	}
 
 	GZIStream in(path+"/index");
 	if (!in.ok()) {
+		Logger::info() << "Cache: Empty cache for '" << uuid() << '\'' << endl;
 		return;
 	}
 
@@ -203,7 +205,7 @@ void Cache::load()
 	while (!in.eof()) {
 		in >> buffer;
 		if (buffer.empty()) {
-			return;
+			break;
 		}
 		in >> pos.first >> pos.second;
 		m_index[buffer] = pos;
