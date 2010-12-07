@@ -43,6 +43,7 @@
 #     --with-lua-prefix=DIR     Lua files are in DIR.
 #     --with-lua-suffix=ARG     Lua binaries and library files are
 #                               suffixed with ARG.
+#     --with-lua-include=DIR    Lua headers are in DIR
 #
 # LICENSE
 #
@@ -85,7 +86,10 @@ AC_DEFUN([_AX_LUA_OPTS],
         [Lua files are in DIR])])
    AC_ARG_WITH([lua-suffix],
      [AS_HELP_STRING([--with-lua-suffix=ARG],
-        [Lua binary and library files are suffixed with ARG])])])dnl
+        [Lua binary and library files are suffixed with ARG])])
+   AC_ARG_WITH([lua-include],
+     [AS_HELP_STRING([--with-lua-include=DIR],
+        [Lua headers are in DIR])])])dnl
 
 AC_DEFUN([AX_WITH_LUA],
   [_AX_LUA_OPTS
@@ -142,13 +146,25 @@ AC_DEFUN([AX_LUA_VERSION],
 
 AC_DEFUN([AX_LUA_HEADERS],
   [_AX_LUA_OPTS
-  if test "x$with_lua_prefix" != x; then
+  if test x"$with_lua_include" != x; then
+    LUA_INCLUDE="-I$with_lua_include"
+  elif test "x$with_lua_prefix" != x; then
     LUA_INCLUDE="-I$with_lua_prefix/include"
   fi
-  LUA_OLD_CPPFLAGS="$CPPFLAGS"
-  CPPFLAGS="$CPPFLAGS $LUA_INCLUDE"
-  AC_CHECK_HEADERS([lua.h lualib.h])
-  CPPFLAGS="$LUA_OLD_CPPFLAGS"])dnl
+  if test "x$with_lua_suffix" != x; then
+    LUA_INCLUDE="$LUA_INCLUDE -I/usr/include/lua$with_lua_suffix"
+  fi
+  LUA_INCLUDE="$LUA_INCLUDE -I/usr/include"
+  for test in $LUA_INCLUDE; do
+    LUA_OLD_CPPFLAGS="$CPPFLAGS"
+    CPPFLAGS="$CPPFLAGS $LUA_INCLUDE"
+    AC_CHECK_HEADERS([lua.h lualib.h], [header_found="yes"])
+    CPPFLAGS="$LUA_OLD_CPPFLAGS"
+    if test "x$headers_found" != x; then
+      LUA_INCLUDE="$test"
+      break
+    fi
+  done])dnl
 
 AC_DEFUN([AX_LUA_LIBS],
   [_AX_LUA_OPTS

@@ -99,11 +99,13 @@ if test "x$LUA" = "x"; then
 	AC_MSG_ERROR([Lua could not be found. Please use the --with-lua-prefix option.])
 fi
 AX_LUA_VERSION([501])
-AX_LUA_HEADERS([501])
+AX_LUA_HEADERS()
+AX_LUA_HEADERS_VERSION([501])
 AX_LUA_LIBS()
 if test "x$LUA_LIB" = "x"; then
 	AC_MSG_ERROR([Lua could not be found. Please use the --with-lua-prefix option.])
 fi
+AC_SUBST([LUA_INCLUDE])
 AC_SUBST([LUA_LIB])
 
 CHECK_ZLIB()

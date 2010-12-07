@@ -37,7 +37,8 @@ INCLUDES = \
 	-I@top_srcdir@/src/3rdparty \
 	-I@top_srcdir@/src/lua \
 	-I@top_srcdir@/src/syslib
-AM_CPPFLAGS = 
+AM_CPPFLAGS = \
+	$(LUA_INCLUDE)
 AM_LDFLAGS = \
 	$(PTHREAD_LIBS) \
 	$(LUA_LIB) \
