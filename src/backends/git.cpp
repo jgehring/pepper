@@ -8,6 +8,7 @@
 
 
 #include <algorithm>
+#include <fstream>
 #include <sstream>
 
 #include "jobqueue.h"
@@ -133,9 +134,24 @@ void GitBackend::init()
 		setenv("GIT_DIR", repo.c_str(), 1);
 	} else if (sys::fs::exists(repo + "/.git/HEAD")) {
 		setenv("GIT_DIR", (repo + "/.git").c_str(), 1);
+	} else if (sys::fs::fileExists(repo + "/.git")) {
+		PDEBUG << "Parsing .git file" << endl;
+		std::ifstream in((repo + "/.git").c_str(), std::ios::in);
+		if (!in.good()) {
+			throw PEX(utils::strprintf("Unable to read from .git file: %s", repo.c_str()));
+		}
+		std::string str;
+		std::getline(in, str);
+		std::vector<std::string> parts = utils::split(str, ":");
+		if (parts.size() < 2) {
+			throw PEX(utils::strprintf("Unable to parse contents of .git file: %s", str.c_str()));
+		}
+		setenv("GIT_DIR", utils::trim(parts[1]).c_str(), 1);
 	} else {
 		throw PEX(utils::strprintf("Not a git repository: %s", repo.c_str()));
 	}
+
+	PDEBUG << "GIT_DIR has been set to " << getenv("GIT_DIR") << endl;
 }
 
 // Returns true if this backend is able to access the given repository
@@ -143,8 +159,11 @@ bool GitBackend::handles(const std::string &url)
 {
 	if (sys::fs::dirExists(url+"/.git")) {
 		return true;
-	} else if (sys::fs::dirExists(url) && !url.compare(url.length() - 5, 5, "/.git")) {
-		// Bare repository
+	} else if (sys::fs::fileExists(url+"/.git")) {
+		PDEBUG << "Detached repository detected" << endl;
+		return true;
+	} else if (sys::fs::dirExists(url) && sys::fs::fileExists(url+"/HEAD") && sys::fs::dirExists(url+"/objects")) {
+		PDEBUG << "Bare repository detected" << endl;
 		return true;
 	}
 	return false;

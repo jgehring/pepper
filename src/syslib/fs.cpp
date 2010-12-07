@@ -100,6 +100,13 @@ bool exists(const std::string &path)
 	return (stat(path.c_str(), &statbuf) != -1);
 }
 
+// Checks if the given regular file exists
+bool fileExists(const std::string &path)
+{
+	struct stat statbuf;
+	return (stat(path.c_str(), &statbuf) == 0 && S_ISREG(statbuf.st_mode));
+}
+
 // Checks if the given directory exists
 bool dirExists(const std::string &path)
 {
