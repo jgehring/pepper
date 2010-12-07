@@ -17,12 +17,14 @@
 
 #include "syslib/parallel.h"
 
+#include "logger.h"
+
 
 template <typename Arg, typename Result>
 class JobQueue
 {
 	public:
-		JobQueue() : m_end(false) { }
+		JobQueue(size_t max = 512) : m_max(max), m_end(false) { }
 
 		void put(const std::vector<Arg> &args) {
 			m_mutex.lock();
@@ -42,7 +44,7 @@ class JobQueue
 
 		bool getArg(Arg *arg) {
 			m_mutex.lock();
-			while (!m_end && m_queue.empty()) {
+			while (!m_end && (m_queue.empty() || m_results.size() > m_max)) {
 				m_argWait.wait(&m_mutex);
 			}
 			if (m_end) {
@@ -75,6 +77,7 @@ class JobQueue
 			m_results.erase(arg);
 			m_status.erase(arg);
 			m_mutex.unlock();
+			m_argWait.wake();
 			return true;
 		}
 
@@ -82,6 +85,9 @@ class JobQueue
 			m_mutex.lock();
 			m_results[arg] = result;
 			m_status[arg] = 1;
+#ifdef DEBUG
+			PTRACE << arg << " ok, " << m_results.size() << " results in queue" << endl;
+#endif
 			m_mutex.unlock();
 			m_resultWait.wakeAll();
 		}
@@ -89,6 +95,9 @@ class JobQueue
 		void failed(const Arg &arg) {
 			m_mutex.lock();
 			m_status[arg] = 0;
+#ifdef DEBUG
+			PTRACE << arg << " FAILED, " << m_results.size() << " results in queue" << endl;
+#endif
 			m_mutex.unlock();
 			m_resultWait.wakeAll();
 		}
@@ -99,6 +108,7 @@ class JobQueue
 		std::queue<Arg> m_queue;
 		std::map<Arg, Result> m_results;
 		std::map<Arg, int> m_status;
+		size_t m_max;
 		bool m_end;
 };
 
