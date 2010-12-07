@@ -316,8 +316,11 @@ void GitBackend::prefetch(const std::vector<std::string> &ids)
 // Returns the revision data for the given ID
 Revision *GitBackend::revision(const std::string &id)
 {
+	// Unfortunately, older git versions don't have the %B format specifier
+	// for unwrapped subject and body, so the raw commit headers will be parsed instead.
+#if 0
 	int ret;
-	std::string meta = utils::exec(&ret, "git", "log", "-1", "--pretty=format:%ct\n%aN\n%B", id.c_str());
+	std::string meta = utils::exec(&ret, "git", "log", "-1", "--pretty=format:%at\n%aN\n%B", id.c_str());
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retrieve meta-data for revision '%s' (%d, %s)", id.c_str(), ret, meta.c_str()));
 	}
@@ -333,6 +336,62 @@ Revision *GitBackend::revision(const std::string &id)
 		lines.erase(lines.begin());
 	}
 	std::string msg = utils::join(lines, "\n");
+#else
+	int ret;
+	std::string header = utils::exec(&ret, "git", "rev-list", "-1", "--header", id.c_str());
+	if (ret != 0) {
+		throw PEX(utils::strprintf("Unable to retrieve meta-data for revision '%s' (%d, %s)", id.c_str(), ret, header.c_str()));
+	}
+	std::vector<std::string> lines = utils::split(header, "\n");
+	if (lines.size() < 6) {
+		throw PEX(utils::strprintf("Unable to parse meta-data for revision '%s' (%d, %s)", id.c_str(), ret, header.c_str()));
+	}
+
+	// Parse author information
+	unsigned int i = 0;
+	while (i < lines.size() && lines[i].compare(0, 7, "author ")) {
+		++i;
+	}
+	if (i >= lines.size()) {
+		throw PEX(utils::strprintf("Unable to parse author information for revision '%s' (%d, %s)", id.c_str(), ret, header.c_str()));
+	}
+	std::vector<std::string> authorln = utils::split(lines[i], " ");
+	if (authorln.size() < 4) {
+		throw PEX(utils::strprintf("Unable to parse author information for revision '%s' (%d, %s)", id.c_str(), ret, lines[i].c_str()));
+	}
+
+	// Author: 2nd to n-2nd entry
+	std::string author = utils::join(authorln.begin()+1, authorln.end()-2, " ");
+	// Strip email address, assuming a start at the last "<" (not really compliant with RFC2882)
+	author = utils::trim(author.substr(0, author.find_last_of('<')));
+
+	// Date: last 2 entries in the form %s %z
+	int64_t date = 0, off = 0;
+	if (!utils::str2int(authorln[authorln.size()-2], &date, 10) || !utils::str2int(authorln[authorln.size()-1], &off, 10)) {
+		throw PEX(utils::strprintf("Unable to parse date information for revision '%s' (%d, %s)", id.c_str(), ret, lines[3].c_str()));
+	}
+	date += off;
+
+	// Last but not least: commit message
+	while (i < lines.size() && !lines[i].empty()) {
+		++i;
+	}
+	if (i >= lines.size()) {
+		throw PEX(utils::strprintf("Unable to parse commit message for revision '%s' (%d, %s)", id.c_str(), ret, header.c_str()));
+	}
+	std::string msg;
+	++i;
+	while (i < lines.size()) {
+		if (!lines[i].empty()) {
+			msg += lines[i].substr(4);
+		}
+		if (i < lines.size()-1) {
+			msg += "\n";
+		}
+		++i;
+	}
+#endif
+
 	return new Revision(id, date, author, msg, diffstat(id));
 }
 
