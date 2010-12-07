@@ -602,12 +602,15 @@ std::vector<std::string> SubversionBackend::branches()
 Diffstat SubversionBackend::diffstat(const std::string &id)
 {
 	if (m_prefetcher && m_prefetcher->willFetch(id)) {
+		PDEBUG << "Revision " << id << " will be prefetched" << endl;
 		Diffstat stat;
 		if (!m_prefetcher->get(id, &stat)) {
 			throw PEX(utils::strprintf("Failed to retrieve diffstat for revision %s", id.c_str()));
 		}
 		return stat;
 	}
+
+	PDEBUG << "Fetching revision " << id << " manually" << endl;
 
 	// First, produce diff of previous revision and this one and save it in a
 	// temporary file

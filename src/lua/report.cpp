@@ -104,6 +104,8 @@ static int map_branch(lua_State *L)
 		}
 		LuaRevision luarev(revision);
 
+		PTRACE << "Fetched revision " << revision->id() << endl;
+
 		lua_rawgeti(L, LUA_REGISTRYINDEX, callback);
 		LuaHelpers::push(L, &luarev);
 		lua_call(L, 1, 1);

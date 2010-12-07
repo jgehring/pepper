@@ -292,7 +292,7 @@ Diffstat GitBackend::diffstat(const std::string &id)
 Backend::LogIterator *GitBackend::iterator(const std::string &branch)
 {
 	int ret;
-	std::string out = utils::exec(&ret, "git", "rev-list", branch.c_str(), "--");
+	std::string out = utils::exec(&ret, "git", "rev-list", "--reverse", branch.c_str(), "--");
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retrieve log for branch '%s' (%d)", branch.c_str(), ret));
 	}
@@ -300,7 +300,6 @@ Backend::LogIterator *GitBackend::iterator(const std::string &branch)
 	while (!revisions.empty() && revisions[revisions.size()-1].empty()) {
 		revisions.pop_back();
 	}
-	std::reverse(revisions.begin(), revisions.end());
 	return new LogIterator(revisions);
 }
 
