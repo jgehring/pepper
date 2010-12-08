@@ -41,6 +41,11 @@ function main()
 			split = string.find(msg, "\n\n")
 			if split ~= nil then
 				msg = string.sub(msg, 1, split)
+			else
+				split = string.find(msg, "\n")
+				if split ~= nil then
+					msg = string.sub(msg, 1, split)
+				end
 			end
 			msg = string.gsub(msg, "\n", "    ")
 			msg = string.gsub(msg, "^%s*(.-)%s*$", "%1")
