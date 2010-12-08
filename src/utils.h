@@ -64,9 +64,6 @@ std::string strprintf(const char *format, ...);
 
 void printOption(const std::string &option, const std::string &text);
 
-std::string execv(int *ret, const char * const *argv);
-std::string exec(int *ret, const char *cmd, const char *arg1 = NULL, const char *arg2 = NULL, const char *arg3 = NULL, const char *arg4 = NULL, const char *arg5 = NULL, const char *arg6 = NULL, const char *arg7 = NULL);
-
 std::vector<char> compress(const std::vector<char> &data, int level = 9);
 std::vector<char> uncompress(const std::vector<char> &data);
 

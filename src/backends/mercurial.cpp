@@ -16,6 +16,7 @@
 #include "revision.h"
 
 #include "syslib/fs.h"
+#include "syslib/io.h"
 
 #include "utils.h"
 
@@ -81,7 +82,7 @@ std::string MercurialBackend::mainBranch()
 std::vector<std::string> MercurialBackend::branches()
 {
 	int ret;
-	std::string out = utils::exec(&ret, "hg", "--noninteractive", "--repository", m_opts.repoUrl().c_str(), "branch");
+	std::string out = sys::io::exec(&ret, "hg", "--noninteractive", "--repository", m_opts.repoUrl().c_str(), "branch");
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retreive the list of branches (%d)", ret));
 	}
@@ -98,7 +99,7 @@ Diffstat MercurialBackend::diffstat(const std::string &id)
 #if 1
 	std::string out = hgcmd("diff", utils::strprintf("git=True, change=\"%s\"", id.c_str()));
 #else
-	std::string out = utils::exec(hgcmd()+" diff --git --change "+id);
+	std::string out = sys::io::exec(hgcmd()+" diff --git --change "+id);
 #endif
 	std::istringstream in(out);
 	return DiffParser::parse(in);
@@ -110,7 +111,7 @@ Backend::LogIterator *MercurialBackend::iterator(const std::string &branch)
 #if 1
 	std::string out = hgcmd("log", utils::strprintf("date=None, rev=None, user=None, quiet=None, branch=[\"%s\"]", branch.c_str()));
 #else
-	std::string out = utils::exec(hgcmd()+" log --quiet --branch "+branch);
+	std::string out = sys::io::exec(hgcmd()+" log --quiet --branch "+branch);
 #endif
 	std::vector<std::string> revisions = utils::split(out, "\n");
 	if (!revisions.empty()) {
@@ -132,7 +133,7 @@ Revision *MercurialBackend::revision(const std::string &id)
 #if 1
 	std::string meta = hgcmd("log", utils::strprintf("rev=[\"%s\"], date=None, user=None, template=\"{date|hgdate}\\n{author|person}\\n{desc}\"", id.c_str()));
 #else
-	std::string meta = utils::exec(hgcmd()+" log -r "+id+" --template=\"{date|hgdate}\n{author|person}\n{desc}\"");
+	std::string meta = sys::io::exec(hgcmd()+" log -r "+id+" --template=\"{date|hgdate}\n{author|person}\n{desc}\"");
 #endif
 	std::vector<std::string> lines = utils::split(meta, "\n");
 	int64_t date;

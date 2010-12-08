@@ -21,6 +21,7 @@ pepper_SOURCES = \
 	utils.h utils.cpp \
 	\
 	syslib/fs.h syslib/fs.cpp \
+	syslib/io.h syslib/io.cpp \
 	syslib/parallel.h syslib/parallel.cpp \
 	\
 	lua/luadiffstat.h \

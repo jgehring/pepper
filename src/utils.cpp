@@ -18,10 +18,6 @@
  #include <zlib.h>
 #endif
 
-#ifdef USE_POPEN_NOSHELL
- #include "popen-noshell/popen_noshell.h"
-#endif
-
 #include "utils.h"
 
 
@@ -194,74 +190,6 @@ void printOption(const std::string &option, const std::string &text)
 		}
 	}
 	std::cout << text << std::endl;
-}
-
-// Runs the specified command line and returns the output
-std::string execv(int *ret, const char * const *argv)
-{
-#ifdef USE_POPEN_NOSHELL
-	struct popen_noshell_pass_to_pclose pclose_arg;
-	FILE *pipe = popen_noshell(argv[0], argv, "r", &pclose_arg, 0);
-#else
-	// Concatenate arguments, put possible meta characters in quotes
-	std::string cmd;
-	const char * const *ptr = argv;
-	const char *metachars = "!\\$`\n|&;()<>";
-	while (*ptr) {
-		bool quote = false;
-		for (unsigned int i = 0; i < strlen(metachars); i++) {
-			if (strchr(*ptr, metachars[i]) != NULL) {
-				quote = true;
-				break;
-			}
-		}
-
-		if (quote) {
-			cmd += "\"";
-			cmd += *ptr;
-			cmd += "\"";
-		} else {
-			cmd += *ptr;
-		}
-		cmd += " ";
-		++ptr;
-	}
-	FILE *pipe = popen(cmd.c_str(), "r");
-#endif
-	if (!pipe) {
-		throw PEX(strprintf("Unable to open pipe for command %s", argv[0]));
-	}
-
-	char buffer[128];
-	std::string result;
-	while (!feof(pipe)) {
-		if (fgets(buffer, 128, pipe) != NULL) {
-			result += buffer;
-		}
-	}
-
-#ifdef USE_POPEN_NOSHELL
-	int r = pclose_noshell(&pclose_arg);
-#else
-	int r = pclose(pipe);
-#endif
-	if (ret != NULL) {
-		*ret = r;
-	}
-	return result;
-}
-
-
-std::string exec(int *ret, const char *cmd, const char *arg1, const char *arg2, const char *arg3, const char *arg4, const char *arg5, const char *arg6, const char *arg7)
-{
-	const char **argv = new const char *[9];
-	argv[0] = cmd;
-	argv[1] = arg1; argv[2] = arg2; argv[3] = arg3;
-	argv[4] = arg4; argv[5] = arg5; argv[6] = arg6;
-	argv[7] = arg7; argv[8] = NULL;
-	std::string out = execv(ret, argv);
-	delete[] argv;
-	return out;
 }
 
 inline uint32_t bswap(uint32_t source) {
