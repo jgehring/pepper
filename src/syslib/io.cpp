@@ -114,7 +114,7 @@ PopenStreambuf::PopenStreambuf(const char *cmd, const char *arg1, const char *ar
 	d->argv[7] = arg7; d->argv[8] = NULL;
 
 #ifdef USE_POPEN_NOSHELL
-	d->pipe = popen_noshell(argv[0], argv, "r", &(d->pclose_arg), 0);
+	d->pipe = popen_noshell(d->argv[0], d->argv, "r", &(d->pclose_arg), 0);
 #else
 	// Concatenate arguments, put possible meta characters in quotes
 	std::string concat;
@@ -143,7 +143,7 @@ PopenStreambuf::PopenStreambuf(const char *cmd, const char *arg1, const char *ar
 #endif
 
 	if (!d->pipe) {
-		throw PEX(std::string("Unable to open pipe for command ")+concat);
+		throw PEX(std::string("Unable to open pipe for command ")+cmd);
 	}
 }
 
