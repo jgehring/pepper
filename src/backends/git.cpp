@@ -365,10 +365,20 @@ Revision *GitBackend::revision(const std::string &id)
 	// Strip email address, assuming a start at the last "<" (not really compliant with RFC2882)
 	author = utils::trim(author.substr(0, author.find_last_of('<')));
 
-	// Date: last 2 entries in the form %s %z
+	// Committer ate: last 2 entries in the form %s %z
+	while (i < lines.size() && lines[i].compare(0, 10, "committer ")) {
+		++i;
+	}
+	if (i >= lines.size()) {
+		throw PEX(utils::strprintf("Unable to parse date information for revision '%s' (%d, %s)", id.c_str(), ret, header.c_str()));
+	}
+	std::vector<std::string> dateln = utils::split(lines[i], " ");
+	if (dateln.size() < 2) {
+		throw PEX(utils::strprintf("Unable to parse date information for revision '%s' (%d, %s)", id.c_str(), ret, lines[i].c_str()));
+	}
 	int64_t date = 0, off = 0;
-	if (!utils::str2int(authorln[authorln.size()-2], &date, 10) || !utils::str2int(authorln[authorln.size()-1], &off, 10)) {
-		throw PEX(utils::strprintf("Unable to parse date information for revision '%s' (%d, %s)", id.c_str(), ret, lines[3].c_str()));
+	if (!utils::str2int(dateln[dateln.size()-2], &date, 10) || !utils::str2int(dateln[dateln.size()-1], &off, 10)) {
+		throw PEX(utils::strprintf("Unable to parse date information for revision '%s' (%d, %s)", id.c_str(), ret, lines[i].c_str()));
 	}
 	date += off;
 
