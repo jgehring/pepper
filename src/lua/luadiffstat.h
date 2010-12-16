@@ -33,11 +33,6 @@ class LuaDiffstat
 			return LuaHelpers::push(L, v);
 		}
 
-		int stats(lua_State *L) {
-			// TODO
-			return 0;
-		}
-
 		int linesAdded(lua_State *L) {
 			std::string file = LuaHelpers::pops(L);
 			if (w == NULL) return LuaHelpers::pushNil(L);
@@ -86,7 +81,6 @@ class LuaDiffstat
 const char LuaDiffstat::className[] = "diffstat";
 Lunar<LuaDiffstat>::RegType LuaDiffstat::methods[] = {
 	LUNAR_DECLARE_METHOD(LuaDiffstat, files),
-	LUNAR_DECLARE_METHOD(LuaDiffstat, stats),
 	LUNAR_DECLARE_METHOD(LuaDiffstat, linesAdded),
 	LUNAR_DECLARE_METHOD(LuaDiffstat, bytesAdded),
 	LUNAR_DECLARE_METHOD(LuaDiffstat, linesRemoved),
