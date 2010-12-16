@@ -234,7 +234,7 @@ std::string GitBackend::uuid()
 std::string GitBackend::head(const std::string &branch)
 {
 	int ret;
-	std::string out = sys::io::exec(&ret, "git", "rev-list", "-1", branch.c_str(), "--");
+	std::string out = sys::io::exec(&ret, "git", "rev-list", "-1", (branch.empty() ? "HEAD" : branch.c_str()), "--");
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retrieve head commit for branch %s (%d)", branch.c_str(), ret));
 	}
