@@ -395,13 +395,15 @@ struct logReceiverBaton
 	sys::parallel::WaitCondition *cond;
 	std::vector<std::string> temp;
 	std::vector<std::string> *ids;
+	int64_t latest;
 };
 
 // Subversion callback for log messages
 static svn_error_t *logReceiver(void *baton, svn_log_entry_t *entry, apr_pool_t *) 
 {
 	logReceiverBaton *b = static_cast<logReceiverBaton *>(baton);
-	b->temp.push_back(utils::int2str(entry->revision));
+	b->latest = entry->revision;
+	b->temp.push_back(utils::int2str(b->latest));
 
 	if (b->temp.size() > 64) {
 		b->mutex->lock();
@@ -418,14 +420,12 @@ static svn_error_t *logReceiver(void *baton, svn_log_entry_t *entry, apr_pool_t 
 // Main thread function
 void SubversionBackend::SvnLogIterator::run()
 {
-	sys::parallel::MutexLocker locker(&m_mutex);
-
 	apr_pool_t *pool = svn_pool_create(d->pool);
 	apr_pool_t *subpool = svn_pool_create(pool);
 	apr_array_header_t *path = apr_array_make(pool, 1, sizeof (const char *));
 	APR_ARRAY_PUSH(path, const char *) = svn_path_canonicalize(m_prefix.empty() ? "." : m_prefix.c_str(), pool);
 	apr_array_header_t *props = apr_array_make(pool, 1, sizeof (const char *)); // Intentionally empty
-	int windowSize = 512;
+	int windowSize = 1024;
 	if (!strncmp(d->url, "file://", strlen("file://"))) {
 		windowSize = 0;
 	}
@@ -434,29 +434,29 @@ void SubversionBackend::SvnLogIterator::run()
 	baton.mutex = &m_mutex;
 	baton.cond = &m_cond;
 	baton.ids = &m_ids;
+	baton.latest = -1;
 
 	// Determine revisions, but not at once
 	int64_t start = 0;
 	while (start < m_head-1) {
-		locker.unlock();
-
-		//	svn_error_t *err = svn_ra_get_log2(c->ra, path, 0, m_head, windowSize, FALSE, TRUE, FALSE, props, &logReceiver, &m_ids, pool);
+		PDEBUG << "Fetching log from " << start << " to " << m_head << " with window size " << windowSize << endl;
 		svn_error_t *err = svn_ra_get_log2(d->ra, path, start, m_head, windowSize, FALSE, FALSE /* otherwise, copy history will be ignored */, FALSE, props, &logReceiver, &baton, pool);
 		if (err != NULL) {
 			throw PEX(SvnConnection::strerr(err));
 		}
 
-		start = (windowSize > 0 ? start + windowSize : m_head);
+		start = baton.latest + 1;
 		svn_pool_clear(subpool);
 	}
 
-	locker.relock();
+	m_mutex.lock();
 	for (unsigned int i = 0; i < baton.temp.size(); i++) {
 		m_ids.push_back(baton.temp[i]);
 	}
+	m_cond.wakeAll();
+	m_mutex.unlock();
 
 	m_finished = true;
-	m_cond.wakeAll();
 	svn_pool_destroy(pool);
 }
 
