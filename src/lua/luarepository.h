@@ -32,9 +32,13 @@ class LuaRepository
 
 		int head(lua_State *L) {
 			if (w == NULL) return LuaHelpers::pushNil(L);
+			std::string branch;
+			if (lua_gettop(L) > 0) {
+				branch = LuaHelpers::pops(L);
+			}
 			std::string h;
 			try {
-				h = w->m_backend->head();
+				h = w->m_backend->head(branch);
 			} catch (const Pepper::Exception &ex) {
 				return LuaHelpers::pushError(L, ex.what(), ex.what());
 			}
