@@ -76,7 +76,9 @@ public:
 		// Setup the authentication data
 		svn_auth_baton_t *auth_baton;
 		svn_config_t *config = hashget<svn_config_t *>(ctx->config, SVN_CONFIG_CATEGORY_CONFIG);
-		if ((err = svn_cmdline_setup_auth_baton(&auth_baton, /*(session->flags & SF_NON_INTERACTIVE)*/0, auth.username.c_str(), auth.password.c_str(), NULL, /*(session->flags & SF_NO_AUTH_CACHE)*/0, config, NULL, NULL, pool))) {
+		const char *userstr = (auth.username.empty() ? NULL : auth.username.c_str());
+		const char *passstr = (auth.password.empty() ? NULL : auth.password.c_str());
+		if ((err = svn_cmdline_setup_auth_baton(&auth_baton, /*(session->flags & SF_NON_INTERACTIVE)*/0, userstr, passstr, NULL, /*(session->flags & SF_NO_AUTH_CACHE)*/0, config, NULL, NULL, pool))) {
 			throw PEX(strerr(err));
 		}
 		ctx->auth_baton = auth_baton;
