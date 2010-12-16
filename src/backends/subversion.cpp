@@ -54,18 +54,18 @@ public:
 	}
 
 	// Opens the connection to the Subversion repository
-	void open(const std::string &url, const Options::AuthData &auth, apr_pool_t *ppool = NULL)
+	void open(const std::string &url, const Options::AuthData &auth)
 	{
 		PTRACE << "Opening connection to " << url << endl;
 
-		pool = svn_pool_create(ppool);
+		pool = svn_pool_create(NULL);
 		init();
 
 		// Canoicalize the repository URL
 		this->url = svn_path_uri_encode(svn_path_canonicalize(url.c_str(), pool), pool);
 
-		// Create the client context
 		svn_error_t *err;
+		// Create the client context
 		if ((err = svn_client_create_context(&ctx, pool))) {
 			throw PEX(strerr(err));
 		}
@@ -83,8 +83,30 @@ public:
 		}
 		ctx->auth_baton = auth_baton;
 
-		/* Setup the RA session */
+		// Setup the RA session
 		if ((err = svn_client_open_ra_session(&ra, this->url, ctx, pool))) {
+			throw PEX(strerr(err));
+		}
+	}
+
+	// Opens the connection to the Subversion repository, using the client context
+	// of the given parent connection
+	void open(SvnConnection *parent)
+	{
+		if (parent->ctx == NULL) {
+			throw PEX("Parent connection not open yet.");
+		}
+
+		pool = svn_pool_create(NULL);
+		init();
+
+		// Copy connection date from parent
+		url = apr_pstrdup(pool, parent->url);
+		ctx = parent->ctx;
+
+		// Setup the RA session
+		svn_error_t *err;
+		if ((err = svn_client_open_ra_session(&ra, url, ctx, pool))) {
 			throw PEX(strerr(err));
 		}
 	}
@@ -232,10 +254,10 @@ private:
 class SvnDiffstatThread : public sys::parallel::Thread
 {
 public:
-	SvnDiffstatThread(const std::string &url, const Options::AuthData &auth, JobQueue<svn_revnum_t, Diffstat> *queue)
+	SvnDiffstatThread(SvnConnection *connection, JobQueue<svn_revnum_t, Diffstat> *queue)
 		: d(new SvnConnection()), m_queue(queue)
 	{
-		d->open(url, auth);
+		d->open(connection);
 	}
 
 	~SvnDiffstatThread()
@@ -297,11 +319,11 @@ private:
 class SvnDiffstatPrefetcher
 {
 public:
-	SvnDiffstatPrefetcher(const std::string &url, const Options::AuthData &auth, int n = 4)
+	SvnDiffstatPrefetcher(SvnConnection *connection, int n = 4)
 	{
 		Logger::info() << "SubversionBackend: Using " << n << " threads for prefetching diffstats" << endl;
 		for (int i = 0; i < n; i++) {
-			SvnDiffstatThread * thread = new SvnDiffstatThread(url, auth, &m_queue);
+			SvnDiffstatThread *thread = new SvnDiffstatThread(connection, &m_queue);
 			thread->start();
 			m_threads.push_back(thread);
 		}
@@ -363,10 +385,10 @@ private:
 
 
 // Constructor
-SubversionBackend::SvnLogIterator::SvnLogIterator(const std::string &url, const std::string &prefix, const Options::AuthData &auth, svn_revnum_t head)
+SubversionBackend::SvnLogIterator::SvnLogIterator(SvnConnection *connection, const std::string &prefix, svn_revnum_t head)
 	: Backend::LogIterator(), d(new SvnConnection()), m_prefix(prefix), m_head(head), m_index(0), m_finished(false)
 {
-	d->open(url, auth);
+	d->open(connection);
 }
 
 // Desctructor
@@ -548,15 +570,19 @@ std::string SubversionBackend::head(const std::string &branch)
 
 	apr_pool_t *pool = svn_pool_create(d->pool);
 	svn_dirent_t *dirent;
-	svn_error_t *err = svn_ra_stat(d->ra, prefix.c_str(), -1, &dirent, pool);
+	svn_error_t *err = svn_ra_stat(d->ra, prefix.c_str(), SVN_INVALID_REVNUM, &dirent, pool);
 	if (err == NULL && dirent == NULL && prefix == "trunk") {
-		err = svn_ra_stat(d->ra, "", -1, &dirent, pool);
+		err = svn_ra_stat(d->ra, "", SVN_INVALID_REVNUM, &dirent, pool);
 	}
 	if (err != NULL) {
 		throw PEX(SvnConnection::strerr(err));
 	}
+	if (dirent == NULL) {
+		throw PEX(std::string("Unable to determine HEAD revision of ")+d->url+"/"+prefix);
+	}
 
-	svn_revnum_t rev = (dirent ? dirent->created_rev : -1);
+	svn_revnum_t rev = dirent->created_rev;
+	PDEBUG << "Head revision for branch " << prefix << " is " << rev << endl;
 	svn_pool_destroy(pool);
 	return utils::int2str((long int)rev);
 }
@@ -601,6 +627,7 @@ std::vector<std::string> SubversionBackend::branches()
 		const char *entry;
 		svn_dirent_t *dirent;
 		apr_hash_this(hi, (const void **)(void *)&entry, NULL, (void **)(void *)&dirent);
+		std::cout << entry << std::endl;
 		if (dirent->kind == svn_node_dir) {
 			branches.push_back(std::string(entry));
 		}
@@ -693,7 +720,7 @@ Backend::LogIterator *SubversionBackend::iterator(const std::string &branch)
 
 	long int headrev;
 	utils::str2int(head(prefix), &headrev);
-	return new SvnLogIterator(d->url, prefix, m_opts.authData(), headrev);
+	return new SvnLogIterator(d, prefix, headrev);
 }
 
 // Adds the given revision IDs to the diffstat scheduler
@@ -704,7 +731,7 @@ void SubversionBackend::prefetch(const std::vector<std::string> &ids)
 		if (!strncmp(d->url, "file://", strlen("file://"))) {
 			nthreads = std::max(1, sys::parallel::idealThreadCount() / 2);
 		}
-		m_prefetcher = new SvnDiffstatPrefetcher(d->url, m_opts.authData(), nthreads);
+		m_prefetcher = new SvnDiffstatPrefetcher(d, nthreads);
 	}
 	m_prefetcher->prefetch(ids);
 }
