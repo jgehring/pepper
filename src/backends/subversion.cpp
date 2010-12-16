@@ -297,6 +297,7 @@ class SvnDiffstatPrefetcher
 public:
 	SvnDiffstatPrefetcher(const std::string &url, const Options::AuthData &auth, int n = 4)
 	{
+		Logger::info() << "SubversionBackend: Using " << n << " threads for prefetching diffstats" << endl;
 		for (int i = 0; i < n; i++) {
 			SvnDiffstatThread * thread = new SvnDiffstatThread(url, auth, &m_queue);
 			thread->start();
@@ -535,13 +536,25 @@ std::string SubversionBackend::uuid()
 // Returns the HEAD revision for the current branch
 std::string SubversionBackend::head(const std::string &branch)
 {
-	// TODO: Respect the branch argument
+	std::string prefix;
+	if (branch == "trunk") {
+		prefix = branch;
+	} else if (!branch.empty()) {
+		prefix = "branches/";
+		prefix += branch;
+	}
+
 	apr_pool_t *pool = svn_pool_create(d->pool);
-	svn_revnum_t rev;
-	svn_error_t *err = svn_ra_get_latest_revnum(d->ra, &rev, pool);
+	svn_dirent_t *dirent;
+	svn_error_t *err = svn_ra_stat(d->ra, prefix.c_str(), -1, &dirent, pool);
+	if (err == NULL && dirent == NULL && prefix == "trunk") {
+		svn_error_t *err = svn_ra_stat(d->ra, "", -1, &dirent, pool);
+	}
 	if (err != NULL) {
 		throw PEX(SvnConnection::strerr(err));
 	}
+
+	svn_revnum_t rev = (dirent ? dirent->created_rev : -1);
 	svn_pool_destroy(pool);
 	return utils::int2str((long int)rev);
 }
