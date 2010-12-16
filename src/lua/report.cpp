@@ -114,10 +114,6 @@ static int map_branch(lua_State *L)
 		Logger::info() << "\r\033[0K";
 		Logger::info() << "Mapping revisions... " << revision->id() << flush;
 
-		if (Globals::terminate) {
-			return LuaHelpers::pushError(L, "Terminated");
-		}
-
 		delete revision;
 	}
 
@@ -255,10 +251,6 @@ int run(const std::string &script, Backend *backend)
 			std::cerr << "Error running report: " << lua_tostring(L, -1) << std::endl;
 			ret = EXIT_FAILURE;
 		}
-	}
-
-	if (Globals::terminate) {
-		ret = EXIT_FAILURE;
 	}
 
 	// Clean up

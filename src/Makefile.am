@@ -18,6 +18,7 @@ pepper_SOURCES = \
 	repository.h repository.cpp \
 	revision.h revision.cpp \
 	revisioniterator.h revisioniterator.cpp \
+	signalhandler.h signalhandler.cpp \
 	utils.h utils.cpp \
 	\
 	syslib/fs.h syslib/fs.cpp \

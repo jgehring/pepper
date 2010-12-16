@@ -12,8 +12,6 @@
 #include <fstream>
 #include <iostream>
 
-#include <signal.h>
-
 #include "main.h"
 
 #include "backend.h"
@@ -22,33 +20,8 @@
 #include "logger.h"
 #include "options.h"
 #include "report.h"
+#include "signalhandler.h"
 #include "utils.h"
-
-
-// Termination handler handlers
-static void terminationHandler(int signum)
-{
-	Globals::terminate = true;
-}
-
-// Installs the given signal handler thread
-static void installSignalHandler(void (*handler)(int))
-{
-	PTRACE << "Installing signal handlers" << endl;
-
-	struct sigaction new_action, old_action;
-	new_action.sa_handler = handler;
-	sigemptyset(&new_action.sa_mask);
-	new_action.sa_flags = 0;
-
-	int signals[] = {SIGINT, SIGHUP, SIGTERM};
-	for (unsigned int i = 0; i < sizeof(signals)/sizeof(signals[0]); i++) {
-		sigaction(signals[i], NULL, &old_action);
-		if (old_action.sa_handler != SIG_IGN) {
-			sigaction(signals[i], &new_action, NULL);
-		}
-	}
-}
 
 
 // Prints program usage information
@@ -170,10 +143,15 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
+	// Setup signal handler thread
+	SignalHandler sighandler;
+
 	try {
 		backend->init();
 		if (opts.useCache()) {
-			backend = new Cache(backend, opts);
+			Cache *cache = new Cache(backend, opts);
+			sighandler.setCache(cache);
+			backend = cache;
 		}
 	} catch (const Pepper::Exception &ex) {
 		std::cerr << "Error initializing backend: " << ex.where() << ": " << ex.what() << std::endl;
@@ -181,8 +159,7 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	installSignalHandler(&terminationHandler);
-
+	sighandler.start();
 	int ret = Report::run(opts.script(), backend);
 
 	delete backend;

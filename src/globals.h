@@ -11,10 +11,13 @@
 #define GLOBALS_H_
 
 
+#include "syslib/parallel.h"
+
+
 namespace Globals
 {
 
-extern bool terminate;
+extern sys::parallel::Mutex cacheMutex;
 
 }
 

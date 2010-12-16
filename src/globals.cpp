@@ -15,6 +15,6 @@
 namespace Globals
 {
 
-bool terminate = false;
+sys::parallel::Mutex cacheMutex;
 
 } // namespace Globals

@@ -41,6 +41,8 @@ class Cache : public Backend
 		Revision *revision(const std::string &id);
 		void finalize() { m_backend->finalize(); }
 
+		void flush();
+
 	private:
 		bool lookup(const std::string &id);
 		void put(const std::string &id, const Revision &rev);

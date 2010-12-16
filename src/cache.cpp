@@ -19,6 +19,7 @@
 #include "bstream.h"
 #include "diffstat.h"
 #include "fs.h"
+#include "globals.h"
 #include "logger.h"
 #include "options.h"
 #include "revision.h"
@@ -90,6 +91,17 @@ Revision *Cache::revision(const std::string &id)
 	return get(id);
 }
 
+// Flushes and closes the cache streams
+void Cache::flush()
+{
+	delete m_iout;
+	m_iout = NULL;
+	delete m_cout;
+	m_cout = NULL;
+	delete m_cin;
+	m_cin = NULL;
+}
+
 // Checks if the diffstat of the given revision is already cached
 bool Cache::lookup(const std::string &id)
 {
@@ -99,6 +111,8 @@ bool Cache::lookup(const std::string &id)
 // Adds the revision of the given revision to the cache
 void Cache::put(const std::string &id, const Revision &rev)
 {
+	sys::parallel::MutexLocker locker(&Globals::cacheMutex);
+
 	// Add revision to cache
 	std::string dir = m_opts.cacheDir() + "/" + uuid(), path;
 	if (m_cout == NULL) {
