@@ -82,7 +82,7 @@ static void printVersion()
 }
 
 // Configures the global logging streams for the given options
-static void setupLogger(std::vector<std::ofstream *> *streams, const Options &opts)
+static void setupLogger(std::vector<std::ofstream *> *streams, const Options &)
 {
 	// Note that the log level has already been set by Options::parse()
 #ifdef DEBUG

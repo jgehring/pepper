@@ -72,6 +72,7 @@ pepper_SOURCES += \
 AM_CPPFLAGS += \
 	-DUSE_SUBVERSION $(APR_CPPFLAGS) $(APR_INCLUDES)
 AM_CXXFLAGS += \
+	-Wno-deprecated-declarations \
 	$(APR_CFLAGS) \
 	$(SVN_CFLAGS)
 AM_LDFLAGS += \

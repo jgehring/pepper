@@ -29,7 +29,9 @@
 #include <stdlib.h>
 #include <inttypes.h>
 
-#define _GNU_SOURCE
+#ifndef _GNU_SOURCE
+ #define _GNU_SOURCE
+#endif
 #include <sched.h>
 
 /*
@@ -143,6 +145,8 @@ void _popen_noshell_child_process(
 		/* free this copied memory; if it was not Valgrind, this memory would have been shared and would belong to the parent! */
 		_pclose_noshell_free_clone_arg_memory(arg_ptr);
 	}
+#else
+	(void)arg_ptr; /* No compiler warnings, please */
 #endif
 
 	if (fflush(stdout) != 0) err(255, "fflush(stdout)");
