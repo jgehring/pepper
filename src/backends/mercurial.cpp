@@ -123,11 +123,7 @@ Diffstat MercurialBackend::diffstat(const std::string &id)
 // Returns a revision iterator for the given branch
 Backend::LogIterator *MercurialBackend::iterator(const std::string &branch)
 {
-#if 1
-	std::string out = hgcmd("log", utils::strprintf("date=None, rev=None, user=None, quiet=None, branch=[\"%s\"]", branch.c_str()));
-#else
-	std::string out = sys::io::exec(hgcmd()+" log --quiet --branch "+branch);
-#endif
+	std::string out = hgcmd("log", utils::strprintf("date=None, user=None, quiet=None, rev=[\"0:%s\"]", (head(branch)).c_str()));
 	std::vector<std::string> revisions = utils::split(out, "\n");
 	if (!revisions.empty()) {
 		revisions.pop_back();
@@ -138,7 +134,6 @@ Backend::LogIterator *MercurialBackend::iterator(const std::string &branch)
 			revisions[i] = revisions[i].substr(pos+1);
 		}
 	}
-	std::reverse(revisions.begin(), revisions.end());
 	return new LogIterator(revisions);
 }
 
