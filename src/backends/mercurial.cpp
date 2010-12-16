@@ -92,11 +92,15 @@ std::string MercurialBackend::mainBranch()
 // Returns a list of available branches
 std::vector<std::string> MercurialBackend::branches()
 {
+#if 1
+	std::string out = hgcmd("branches");
+#else
 	int ret;
 	std::string out = sys::io::exec(&ret, "hg", "--noninteractive", "--repository", m_opts.repoUrl().c_str(), "branches", "--quiet");
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retreive the list of branches (%d)", ret));
 	}
+#endif
 	std::vector<std::string> branches = utils::split(out, "\n");
 	while (!branches.empty() && branches[branches.size()-1].empty()) {
 		branches.pop_back();
