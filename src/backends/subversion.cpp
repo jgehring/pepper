@@ -698,7 +698,11 @@ Backend::LogIterator *SubversionBackend::iterator(const std::string &branch)
 void SubversionBackend::prefetch(const std::vector<std::string> &ids)
 {
 	if (m_prefetcher == NULL) {
-		m_prefetcher = new SvnDiffstatPrefetcher(d->url, m_opts.authData(), 10);
+		int nthreads = 25;
+		if (!strncmp(d->url, "file://", strlen("file://"))) {
+			nthreads = std::max(1, sys::parallel::idealThreadCount() / 2);
+		}
+		m_prefetcher = new SvnDiffstatPrefetcher(d->url, m_opts.authData(), nthreads);
 	}
 	m_prefetcher->prefetch(ids);
 }
