@@ -74,7 +74,9 @@ void Cache::prefetch(const std::vector<std::string> &ids)
 	}
 
 	Logger::info() << "Cache: " << (ids.size() - missing.size()) << " of " << ids.size() << " revisions already cached, prefetching " << missing.size() << endl;
-	m_backend->prefetch(missing);
+	if (!missing.empty()) {
+		m_backend->prefetch(missing);
+	}
 }
 
 // Returns the revision data for the given ID
