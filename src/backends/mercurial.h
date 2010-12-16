@@ -36,7 +36,7 @@ class MercurialBackend : public Backend
 
 	private:
 		std::string hgcmd() const;
-		std::string hgcmd(const std::string &cmd, const std::string &args) const;
+		std::string hgcmd(const std::string &cmd, const std::string &args = std::string()) const;
 };
 
 

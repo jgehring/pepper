@@ -62,33 +62,44 @@ bool MercurialBackend::handles(const std::string &url)
 // Returns a unique identifier for this repository
 std::string MercurialBackend::uuid()
 {
-	// TODO
-	return utils::join(utils::split(m_opts.repoUrl(), "/"), "_");
+	// Use the ID of the first commit of the master branch as the UUID.
+	std::string out = hgcmd("log", "date=None, user=None, quiet=None, rev=\"0\"");
+	size_t pos = out.find(':');
+	if (pos != std::string::npos) {
+		out = out.substr(pos+1);
+	}
+	return utils::trim(out);
 }
 
 // Returns the HEAD revision for the current branch
 std::string MercurialBackend::head(const std::string &branch)
 {
-	return "HEAD";
+	std::string out = hgcmd("log", utils::strprintf("date=None, rev=None, user=None, quiet=None, limit=1, branch=[\"%s\"]", branch.c_str()));
+	size_t pos = out.find(':');
+	if (pos != std::string::npos) {
+		out = out.substr(pos+1);
+	}
+	return utils::trim(out);
 }
 
-// Returns the standard branch (i.e., default)
+// Returns the currently checked out branch
 std::string MercurialBackend::mainBranch()
 {
-	return "default";
+	std::string out = hgcmd("branch");
+	return utils::trim(out);
 }
 
 // Returns a list of available branches
 std::vector<std::string> MercurialBackend::branches()
 {
 	int ret;
-	std::string out = sys::io::exec(&ret, "hg", "--noninteractive", "--repository", m_opts.repoUrl().c_str(), "branch");
+	std::string out = sys::io::exec(&ret, "hg", "--noninteractive", "--repository", m_opts.repoUrl().c_str(), "branches", "--quiet");
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retreive the list of branches (%d)", ret));
 	}
 	std::vector<std::string> branches = utils::split(out, "\n");
-	for (unsigned int i = 0; i < branches.size(); i++) {
-		branches[i] = branches[i].substr(2);
+	while (!branches.empty() && branches[branches.size()-1].empty()) {
+		branches.pop_back();
 	}
 	return branches;
 }
