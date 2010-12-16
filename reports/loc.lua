@@ -12,8 +12,8 @@ function count(r)
 	s = r:diffstat()
 	t = s:files()
 	for i,v in ipairs(t) do
-		lines = lines + s:linesAdded(v) - s:linesRemoved(v)
-		bytes = bytes + s:bytesAdded(v) - s:bytesRemoved(v)
+		lines = lines + s:lines_added(v) - s:lines_removed(v)
+		bytes = bytes + s:bytes_added(v) - s:bytes_removed(v)
 	end
 	if r:date() == 0 then
 		return
@@ -35,7 +35,7 @@ function main()
 
 	-- Gather data
 	branch = pepper.report.getopt("-b,--branch", pepper.report.repository():main_branch())
-	pepper.report.map_branch(count, branch)
+	pepper.report.walk_branch(count, branch)
 
 	-- Generate graphs
 	local p = pepper.plot:new()

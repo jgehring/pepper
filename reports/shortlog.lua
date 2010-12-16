@@ -25,7 +25,7 @@ function main()
 
 	-- Gather data
 	branch = pepper.report.getopt("-b,--branch", pepper.report.repository():main_branch())
-	pepper.report.map_branch(callback, branch)
+	pepper.report.walk_branch(callback, branch)
 
 	-- Sort commit dictionary by name
 	local authors = {}

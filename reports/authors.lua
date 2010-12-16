@@ -22,7 +22,7 @@ function callback(r)
 	-- Calculate new LOC
 	local s = r:diffstat()
 	for i,v in ipairs(s:files()) do
-		loc = loc + s:linesAdded(v) - s:linesRemoved(v)
+		loc = loc + s:lines_added(v) - s:lines_removed(v)
 	end
 
 	-- Save commit and LOC count
@@ -47,7 +47,7 @@ function main()
 
 	-- Gather data
 	branch = pepper.report.getopt("-b,--branch", pepper.report.repository():main_branch())
-	pepper.report.map_branch(callback, branch)
+	pepper.report.walk_branch(callback, branch)
 
 	-- Determine the 6 "busiest" authors (by LOC)
 	local authorloc = {}

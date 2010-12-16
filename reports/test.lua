@@ -27,8 +27,8 @@ function print_revision(r)
 		l = loc[#loc]
 	end
 	for i,v in ipairs(t) do
-		-- print("", v, s:linesAdded(v), s:linesRemoved(v)
-		l = l + s:linesAdded(v) - s:linesRemoved(v)
+		-- print("", v, s:lines_added(v), s:lines_removed(v)
+		l = l + s:lines_added(v) - s:lines_removed(v)
 	end
 	table.insert(loc, l)
 end
@@ -37,7 +37,7 @@ end
 --print_repo(pepper.report.repository())
 
 -- Simple example: Map a function to all revision of a given branch
-pepper.report.map_branch(print_revision, "trunk")
+pepper.report.walk_branch(print_revision, "trunk")
 
 -- Generate graph with LOC
 print("# Revision LOC")

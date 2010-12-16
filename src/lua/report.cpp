@@ -72,7 +72,7 @@ static int getopt(lua_State *L)
 }
 
 // Maps a lua function on all revisions of a given branch
-static int map_branch(lua_State *L)
+static int walk_branch(lua_State *L)
 {
 	if (lua_gettop(L) != 2) {
 		return luaL_error(L, "Invalid number of arguments (2 expected)");
@@ -133,7 +133,7 @@ static int map_branch(lua_State *L)
 static const struct luaL_reg report[] = {
 	{"repository", repository},
 	{"getopt", getopt},
-	{"map_branch", map_branch},
+	{"walk_branch", walk_branch},
 	{NULL, NULL}
 };
 

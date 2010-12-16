@@ -33,7 +33,7 @@ class LuaDiffstat
 			return LuaHelpers::push(L, v);
 		}
 
-		int linesAdded(lua_State *L) {
+		int lines_added(lua_State *L) {
 			std::string file = LuaHelpers::pops(L);
 			if (w == NULL) return LuaHelpers::pushNil(L);
 			if (w->m_stats.find(file) != w->m_stats.end()) {
@@ -42,7 +42,7 @@ class LuaDiffstat
 			return LuaHelpers::push(L, 0);
 		}
 
-		int bytesAdded(lua_State *L) {
+		int bytes_added(lua_State *L) {
 			std::string file = LuaHelpers::pops(L);
 			if (w == NULL) return LuaHelpers::pushNil(L);
 			if (w->m_stats.find(file) != w->m_stats.end()) {
@@ -51,7 +51,7 @@ class LuaDiffstat
 			return LuaHelpers::push(L, 0);
 		}
 
-		int linesRemoved(lua_State *L) {
+		int lines_removed(lua_State *L) {
 			std::string file = LuaHelpers::pops(L);
 			if (w == NULL) return LuaHelpers::pushNil(L);
 			if (w->m_stats.find(file) != w->m_stats.end()) {
@@ -60,7 +60,7 @@ class LuaDiffstat
 			return LuaHelpers::push(L, 0);
 		}
 
-		int bytesRemoved(lua_State *L) {
+		int bytes_removed(lua_State *L) {
 			std::string file = LuaHelpers::pops(L);
 			if (w == NULL) return LuaHelpers::pushNil(L);
 			if (w->m_stats.find(file) != w->m_stats.end()) {
@@ -81,10 +81,10 @@ class LuaDiffstat
 const char LuaDiffstat::className[] = "diffstat";
 Lunar<LuaDiffstat>::RegType LuaDiffstat::methods[] = {
 	LUNAR_DECLARE_METHOD(LuaDiffstat, files),
-	LUNAR_DECLARE_METHOD(LuaDiffstat, linesAdded),
-	LUNAR_DECLARE_METHOD(LuaDiffstat, bytesAdded),
-	LUNAR_DECLARE_METHOD(LuaDiffstat, linesRemoved),
-	LUNAR_DECLARE_METHOD(LuaDiffstat, bytesRemoved),
+	LUNAR_DECLARE_METHOD(LuaDiffstat, lines_added),
+	LUNAR_DECLARE_METHOD(LuaDiffstat, bytes_added),
+	LUNAR_DECLARE_METHOD(LuaDiffstat, lines_removed),
+	LUNAR_DECLARE_METHOD(LuaDiffstat, bytes_removed),
 	{0,0}
 };
 
