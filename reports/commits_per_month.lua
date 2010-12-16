@@ -11,7 +11,7 @@ meta.options = {{"-b, --branch", "Select branch"}}
 function callback(r)
 	local date = os.date("*t", r:date())
 	-- Ignore commits older than 1 year
-	if (date["year"] - now["year"] > 1) or (date["year"] - now["year"] == 1 and date["month"] <= now["month"]) then
+	if (now["year"] - date["year"] > 1) or (now["year"] - date["year"] == 1 and now["month"] <= date["month"]) then
 		return
 	end
 
