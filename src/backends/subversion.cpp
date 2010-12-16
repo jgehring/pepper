@@ -548,7 +548,7 @@ std::string SubversionBackend::head(const std::string &branch)
 	svn_dirent_t *dirent;
 	svn_error_t *err = svn_ra_stat(d->ra, prefix.c_str(), -1, &dirent, pool);
 	if (err == NULL && dirent == NULL && prefix == "trunk") {
-		svn_error_t *err = svn_ra_stat(d->ra, "", -1, &dirent, pool);
+		err = svn_ra_stat(d->ra, "", -1, &dirent, pool);
 	}
 	if (err != NULL) {
 		throw PEX(SvnConnection::strerr(err));
