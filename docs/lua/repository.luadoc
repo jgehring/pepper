@@ -1,0 +1,21 @@
+--- Repository interface
+
+module "pepper.repository"
+
+
+--- Returns the repository URL
+function url()
+
+--- Returns the repository type, i.e. the name of the current backend
+function type()
+
+--- Determines and returns the current HEAD revision
+-- @param branch An optional branch name
+function head(branch)
+
+--- Returns the main branch of the repository
+-- For working copies, this is the branch that is curently checked out
+function main_branch()
+
+--- Determines and returns a table listing all branches
+function branches()

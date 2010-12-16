@@ -4,3 +4,12 @@
 #
 
 SUBDIRS = src tests
+
+# Generate luadoc documentation
+LUADOCS = \
+	docs/lua/diffstat.luadoc \
+	docs/lua/report.luadoc \
+	docs/lua/repository.luadoc \
+	docs/lua/revision.luadoc
+luadoc: $(LUADOCS)
+	luadoc -d luadoc --nofiles $(LUADOCS)

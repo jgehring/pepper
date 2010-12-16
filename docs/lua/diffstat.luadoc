@@ -1,0 +1,23 @@
+--- Interface for diffstats
+
+module "pepper.diffstat"
+
+
+--- Returns a table of all files in the diffstat
+function files()
+
+--- Returns the number of lines added
+--  @param file The file
+function lines_added(file)
+
+--- Returns the number of bytes added
+--  @param file The file
+function bytes_added(file)
+
+--- Returns the number of lines added
+--  @param file The file
+function lines_removed(file)
+
+--- Returns the number of bytes added
+--  @param file The file
+function bytes_removed(file)

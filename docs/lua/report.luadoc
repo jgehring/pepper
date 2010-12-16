@@ -1,0 +1,19 @@
+--- The report interface
+
+module "pepper.report"
+
+
+--- Returns the current repository
+-- @see pepper.repository
+function repository()
+
+--- Returns a command line option for the report script
+-- @param option The command line flags, seperated with commas
+-- @param default An optional default option value
+function getopt(option, default)
+
+--- Calls <code>callback</code> for every revision in the given
+--  <code>branch</code> from <code>repository</code>.
+--  @param callback The callback function
+--  @param branch The name of the branch
+function walk_branch(callback, branch)
