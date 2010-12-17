@@ -39,16 +39,26 @@ function main()
 	pepper.report.walk_branch(count, branch)
 
 	-- Generate graphs
+	local setupcmd =  [[
+set xdata time
+set timefmt "%s"
+set format x "%b %y"
+set format y "%.0f"
+set yrange [0:*]
+set xtics nomirror
+set xtics rotate by -45
+set rmargin 8
+set grid ytics]]
 	local imgtype = pepper.report.getopt("t, type", "svg")
-	local p = pepper.plot:new()
-	p:set_title("Lines of Code (" .. branch .. ")")
+	local p = pepper.gnuplot:new()
+	p:set_title("Lines of Code (on " .. branch .. ")")
 	p:set_output("loc." .. imgtype)
-	p:cmd("set terminal " .. imgtype .. " size 600,480")
-	p:plotty(dates, loc)
+	p:cmd(setupcmd)
+	p:plot_series(dates, loc)
 
-	local p2 = pepper.plot:new()
-	p2:set_title("Bytes of Code (" .. branch .. ")")
+	local p2 = pepper.gnuplot:new()
+	p2:set_title("Bytes of Code (on " .. branch .. ")")
 	p2:set_output("boc." .. imgtype)
-	p2:cmd("set terminal " .. imgtype .. " size 600,480")
-	p2:plotty(dates, boc)
+	p2:cmd(setupcmd)
+	p2:plot_series(dates, boc)
 end

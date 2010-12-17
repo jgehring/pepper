@@ -155,9 +155,10 @@ inline std::string pops(lua_State *L) {
 	std::string s = tops(L, -1); lua_pop(L, 1); return s;
 }
 
-inline std::vector<double> popvd(lua_State *L) {
+inline std::vector<double> topvd(lua_State *L, int index = -1) {
 	std::vector<double> t;
-	luaL_checktype(L, -1, LUA_TTABLE);
+	luaL_checktype(L, index, LUA_TTABLE);
+	lua_pushvalue(L, index);
 	lua_pushnil(L);
 	while (lua_next(L, -2) != 0) {
 		t.push_back(popd(L));
@@ -166,16 +167,24 @@ inline std::vector<double> popvd(lua_State *L) {
 	return t;
 }
 
-inline std::map<std::string, std::vector<double> > popmvd(lua_State *L) {
-	std::map<std::string, std::vector<double> > m;
-	luaL_checktype(L, -1, LUA_TTABLE);
+inline std::vector<std::string> topvs(lua_State *L, int index = -1) {
+	std::vector<std::string> t;
+	luaL_checktype(L, index, LUA_TTABLE);
+	lua_pushvalue(L, index);
 	lua_pushnil(L);
 	while (lua_next(L, -2) != 0) {
-		std::string key = tops(L, -2);
-		m[key] = popvd(L);
+		t.push_back(pops(L));
 	}
 	lua_pop(L, 1);
-	return m;
+	return t;
+}
+
+inline std::vector<double> popvd(lua_State *L) {
+	std::vector<double> t = topvd(L, -1); lua_pop(L, 1); return t;
+}
+
+inline std::vector<std::string> popvs(lua_State *L) {
+	std::vector<std::string> t = topvs(L, -1); lua_pop(L, 1); return t;
 }
 
 
@@ -198,6 +207,11 @@ inline void call(lua_State *L, const T1 &arg1, const T2 &arg2, const T3 &arg3, i
 	push(L, arg2);
 	push(L, arg3);
 	lua_call(L, 3, nresults);
+}
+
+
+inline size_t tablesize(lua_State *L, int index = -1) {
+	return lua_objlen(L, index);
 }
 
 } // namespace LuaHelpers

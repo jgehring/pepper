@@ -7,6 +7,7 @@ SUBDIRS = src tests
 
 # Generate luadoc documentation
 LUADOCS = \
+	docs/lua/gnuplot.luadoc \
 	docs/lua/diffstat.luadoc \
 	docs/lua/report.luadoc \
 	docs/lua/repository.luadoc \

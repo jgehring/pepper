@@ -1,0 +1,32 @@
+--- Gnuplot interface
+
+module "pepper.gnuplot"
+
+
+--- Sends a command to Gnuplot
+-- @param str The command string
+function cmd(str)
+
+--- Sets the output file for plotting
+-- @param filename Output filename
+-- @param width Optional image width (defaults to 640)
+-- @param height Optional image height (defaults to 400)
+-- @param terminal Optional explicit terminal type. This is normally
+-- inferred from the filename.
+function set_output(filename, width, height, terminal)
+
+--- Sets the plot title
+-- @param title The plot title
+function set_title(title)
+
+--- Plots multiple series.
+-- The plotting data is expected to be a table containing
+-- arrays specifiying an index (i.e., the X value) and one
+-- more values (i.e., the Y values).
+-- @param keys The array of X values
+-- @param values The array of Y values
+-- @param titles Optional titles for the series
+function plot_series(keys, values, titles)
+
+--- Finish plotting and restart the Gnuplot process
+function flush()

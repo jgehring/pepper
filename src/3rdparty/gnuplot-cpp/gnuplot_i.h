@@ -67,6 +67,8 @@ class GnuplotException : public std::runtime_error
 
 class Gnuplot
 {
+    friend class Plot;
+
     private:
 
     //----------------------------------------------------------------------------------

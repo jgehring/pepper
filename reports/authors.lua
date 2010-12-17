@@ -63,50 +63,44 @@ function main()
 		i = i + 1
 	end
 
-	-- Generate a data file
+	-- Generate data arrays for the authors
 	table.sort(commits, commitcmp)
-	local line
+	local keys = {}
+	local series = {}
 	local loc = {}
 	for i,a in ipairs(authorloc) do
 		loc[a[1]] = 0
 	end
-	local file, filename = pepper.utils.mkstemp()
 	for t,v in ipairs(commits) do
-		line = "" .. v[1]
+		table.insert(keys, v[1])
+		table.insert(series, {});
 		for i,a in ipairs(authorloc) do
 			if a[1] == v[2] then
 				loc[a[1]] = v[3]
 			end
-			line = line .. " " .. loc[a[1]]
+			table.insert(series[#series], loc[a[1]])
 		end
-		file:write(line .. "\n")
 	end
 
-	-- Run Gnuplot
-	local imgtype = pepper.report.getopt("t,type", "svg")
-	local plot = pepper.plot:new()
-	plot:set_title("Lines of Code by Author (on " .. branch .. ")")
-	plot:set_output("aloc." .. imgtype)
-	plot:cmd("set terminal " .. imgtype .. " size 600,480")
-	plot:cmd([[
+	local authors = {}
+	for i,a in ipairs(authorloc) do
+		table.insert(authors, a[1])
+	end
+
+	local p = pepper.gnuplot:new()
+	p:set_title("Lines of Code by Author (on " .. branch .. ")")
+	p:set_output("authors." .. pepper.report.getopt("t, type", "svg"), 600, 480)
+	p:cmd([[
 set xdata time
 set timefmt "%s"
 set format x "%b %y"
 set format y "%.0f"
 set yrange [0:*]
+set xtics nomirror
 set xtics rotate by -45
 set grid ytics
+set rmargin 8
 set key box
 set key below]])
-	local cmd = "plot "
-	for i,a in ipairs(authorloc) do
-		cmd = cmd .. "\"" .. filename .. "\" using 1:" .. (i+1)
-		cmd = cmd .. " title \"" .. a[1] .. "\" with lines,"
-	end
-	cmd = string.sub(cmd, 1, #cmd-1) .. ";"
-
-	file:close()
-	plot:cmd(cmd)
-	plot:flush()
-	pepper.utils.unlink(filename)
-end
+	p:plot_series(keys, series, authors)
+nd

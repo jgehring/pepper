@@ -25,8 +25,9 @@ class Plot
 		int cmd(lua_State *L);
 		int set_output(lua_State *L);
 		int set_title(lua_State *L);
-		int plotxy(lua_State *L);
-		int plotty(lua_State *L);
+
+		int plot_series(lua_State *L);
+
 		int flush(lua_State *L);
 
 	public:

@@ -55,10 +55,9 @@ function main()
 
 	-- Generate graphs
 	local imgtype = pepper.report.getopt("t,type", "svg")
-	local plot = pepper.plot:new()
+	local plot = pepper.gnuplot:new()
 	plot:set_title("Commits per Month (on " .. branch .. ")")
-	plot:set_output("cpm." .. imgtype)
-	plot:cmd("set terminal " .. imgtype .. " size 800,400")
+	plot:set_output("cpm." .. imgtype, 800, 480)
 	plot:cmd([[
 set format y "%.0f"
 set yrange [0:*]
@@ -67,6 +66,7 @@ set ytics scale 0
 set key box
 set key below
 set boxwidth 0.4
+set xtics nomirror
 set xtics ("January" 1, "March" 3, "May" 5, "July" 7, "September" 9, "November" 11) scale 0
 ]])
 	local cmd = "plot "
