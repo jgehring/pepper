@@ -291,7 +291,10 @@ protected:
 			apr_file_t *infile = NULL, *outfile = NULL, *errfile = NULL;
 			apr_file_open_stderr(&errfile, subpool);
 			if (apr_file_pipe_create(&infile, &outfile, subpool) != APR_SUCCESS) {
-				throw PEX("Unable to create pipe");
+				Logger::err() << "Error: Unable to create pipe for reading diff data" << endl;
+				m_queue->failed(revision);
+				svn_pool_destroy(subpool);
+				continue;
 			}
 
 			AprStreambuf buf(infile);
@@ -299,16 +302,23 @@ protected:
 			DiffParser parser(in);
 			parser.start();
 
+			PTRACE << "Fetching diffstat for revision " << revision << endl;
+
 			svn_error_t *err = svn_client_diff4(apr_array_make(subpool, 0, 1), d->url, &rev1, d->url, &rev2, NULL, svn_depth_infinity, FALSE, FALSE, TRUE, APR_LOCALE_CHARSET, outfile, errfile, NULL, d->ctx, subpool);
 			if (err != NULL) {
-				throw PEX(SvnConnection::strerr(err));
+				Logger::err() << "Error: Diffstat fetching failed: " << SvnConnection::strerr(err) << endl;
+				svn_error_clear(err);
+				m_queue->failed(revision);
+				apr_file_close(outfile);
+				apr_file_close(infile);
+				svn_pool_destroy(subpool);
+				continue;
 			}
 
 			apr_file_close(outfile);
 			parser.wait();
 			m_queue->done(revision, parser.stat());
 			apr_file_close(infile);
-
 			svn_pool_destroy(subpool);
 		}
 		svn_pool_destroy(pool);

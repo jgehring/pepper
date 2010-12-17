@@ -146,9 +146,21 @@ int main(int argc, char **argv)
 	}
 
 	sighandler.start();
-	int ret = Report::run(opts.script(), backend);
+	int ret;
+	try {
+		ret = Report::run(opts.script(), backend);
+	} catch (const Pepper::Exception &ex) {
+		std::cerr << "Recevied exception while running report:" << std::endl;
+		std::cerr << "  what(): " << ex.what() << std::endl;
+		std::cerr << "  where(): " << ex.where() << std::endl;
+		ret = EXIT_FAILURE;
+	} catch (const std::exception &ex) {
+		std::cerr << "Recevied exception while running report:" << std::endl;
+		std::cerr << "  what(): " << ex.what() << std::endl;
+		ret = EXIT_FAILURE;
+	}
 
-	delete backend;
+	delete backend; // This will also flush the cache
 	Logger::flush();
 
 	// Close log files

@@ -39,12 +39,17 @@ protected:
 		std::string revision;
 		while (m_queue->getArg(&revision)) {
 #if 1
-			sys::io::PopenStreambuf buf("git", "diff-tree", "-U0", "-a", "-m", "--no-renames", "--root", revision.c_str());
-			std::istream in(&buf);
-			Diffstat stat = DiffParser::parse(in);
-			if (buf.close() == 0) {
-				m_queue->done(revision, stat);
-			} else {
+			try {
+				sys::io::PopenStreambuf buf("git", "diff-tree", "-U0", "-a", "-m", "--no-renames", "--root", revision.c_str());
+				std::istream in(&buf);
+				Diffstat stat = DiffParser::parse(in);
+				if (buf.close() == 0) {
+					m_queue->done(revision, stat);
+				} else {
+					m_queue->failed(revision);
+				}
+			} catch (const std::exception &ex) {
+				Logger::err() << "Exception while retrieving diffstat: " << ex.what() << endl;
 				m_queue->failed(revision);
 			}
 #else
@@ -212,8 +217,7 @@ std::string GitBackend::uuid()
 		}
 	}
 	if (branch.empty()) {
-		std::cerr << "Error: unable to retrieve UUID for repository" << std::endl;
-		return std::string();
+		throw PEX("Unable to retrieve UUID for repository");
 	}
 
 	// Get ID of first commit of the root branch
