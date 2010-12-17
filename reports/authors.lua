@@ -5,8 +5,8 @@
 
 -- Script meta-data
 meta.name = "LOC by Authors"
-meta.options = {{"-b, --branch", "Select branch"}}
-meta.options = {{"-t, --type", "Select image type"}}
+meta.options = {{"-b, --branch", "Select branch"},
+                {"-t, --type", "Select image type"}}
 
 -- Revision callback function
 function callback(r)
