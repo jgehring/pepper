@@ -5,8 +5,8 @@
 
 -- Script meta-data
 meta.name = "LOC by Authors"
-meta.options = {{"-b, --branch", "Select branch"},
-                {"-t, --type", "Select image type"}}
+meta.options = {{"-bARG, --branch=ARG", "Select branch"},
+                {"-tARG, --type=ARG", "Select image type"}}
 
 -- Revision callback function
 function callback(r)
@@ -47,7 +47,7 @@ function main()
 	authors = {}   -- Total LOC by author
 
 	-- Gather data
-	branch = pepper.report.getopt("-b,--branch", pepper.report.repository():main_branch())
+	branch = pepper.report.getopt("b,branch", pepper.report.repository():main_branch())
 	pepper.report.walk_branch(callback, branch)
 
 	-- Determine the 6 "busiest" authors (by LOC)
@@ -83,7 +83,7 @@ function main()
 	end
 
 	-- Run Gnuplot
-	local imgtype = pepper.report.getopt("-t,--type", "svg")
+	local imgtype = pepper.report.getopt("t,type", "svg")
 	local plot = pepper.plot:new()
 	plot:set_title("Lines of Code by Author (on " .. branch .. ")")
 	plot:set_output("aloc." .. imgtype)

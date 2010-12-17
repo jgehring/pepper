@@ -5,8 +5,8 @@
 
 -- Script meta-data
 meta.name = "Commits per Month"
-meta.options = {{"-b, --branch", "Select branch"},
-                {"-t, --type", "Select image type"}}
+meta.options = {{"-bARG, --branch=ARG", "Select branch"},
+                {"-tARG, --type=ARG", "Select image type"}}
 
 -- Revision callback function
 function callback(r)
@@ -31,7 +31,7 @@ function main()
 	changes = {}
 
 	-- Gather data
-	branch = pepper.report.getopt("-b,--branch", pepper.report.repository():main_branch())
+	branch = pepper.report.getopt("b,branch", pepper.report.repository():main_branch())
 	-- TODO: Restrict to last twelve months
 	pepper.report.walk_branch(callback, branch)
 
@@ -54,7 +54,7 @@ function main()
 	end
 
 	-- Generate graphs
-	local imgtype = pepper.report.getopt("-t,--type", "svg")
+	local imgtype = pepper.report.getopt("t,type", "svg")
 	local plot = pepper.plot:new()
 	plot:set_title("Commits per Month (on " .. branch .. ")")
 	plot:set_output("cpm." .. imgtype)

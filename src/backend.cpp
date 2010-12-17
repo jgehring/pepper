@@ -104,6 +104,12 @@ const Options &Backend::options() const
 	return m_opts;
 }
 
+// Prints a help screen
+void Backend::printHelp() const
+{
+	// The default implementation does nothing
+}
+
 // Allocates a backend of a specific repository type
 Backend *Backend::backendForName(const std::string &name, const Options &options)
 {

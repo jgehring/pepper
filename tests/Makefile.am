@@ -21,11 +21,12 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 		echo '  [@PACKAGE_URL@])'; \
 	} >'$(srcdir)/package.m4'
 
-SUBDIRS = diffstat
+SUBDIRS = diffstat options
 
 EXTRA_DIST = \
 	testsuite.at \
 	test_diffstat.at \
+	test_options.at \
 	$(srcdir)/package.m4 \
 	$(TESTSUITE) \
 	atlocal.in

@@ -3,13 +3,14 @@
 # Copyright (C) 2010 Jonas Gehring
 #
 
-bin_PROGRAMS = pdiffstat
-pdiffstat_SOURCES = \
+bin_PROGRAMS = poptions
+poptions_SOURCES = \
 	main.cpp \
 	\
-	$(top_srcdir)/src/diffstat.cpp \
+	$(top_srcdir)/src/logger.cpp \
+	$(top_srcdir)/src/options.cpp \
 	$(top_srcdir)/src/utils.cpp \
-	$(top_srcdir)/src/syslib/parallel.cpp
+	$(top_srcdir)/src/syslib/fs.cpp
 
 AM_CXXFLAGS = \
 	-Wall -W -pipe \

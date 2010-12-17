@@ -5,7 +5,7 @@
 
 -- Script meta-data
 meta.name = "shortlog"
-meta.options = {{"-b, --branch", "Select branch"}}
+meta.options = {{"-bARG, --branch=ARG", "Select branch"}}
 
 
 -- Revision callback function

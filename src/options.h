@@ -15,15 +15,11 @@
 #include <string>
 #include <vector>
 
+#include "main.h"
+
 
 class Options
 {
-	public:
-		struct AuthData {
-			std::string username;
-			std::string password;
-		};
-
 	public:
 		Options();
 
@@ -39,7 +35,7 @@ class Options
 
 		std::string forcedBackend() const;
 		std::string repoUrl() const;
-		AuthData authData() const;
+		std::map<std::string, std::string> backendOptions() const;
 
 		std::string script() const;
 		std::map<std::string, std::string> scriptOptions() const;
@@ -47,9 +43,10 @@ class Options
 	private:
 		void reset();
 		void parse(const std::vector<std::string> &args);
+		bool parseOpt(const std::string &arg, std::string *key, std::string *value);
 		std::string makeAbsolute(const std::string &path);
 
-	private:
+	PEPPER_PVARS
 		mutable std::map<std::string, std::string> m_options;
 		mutable std::map<std::string, std::string> m_backendOptions, m_scriptOptions;
 };

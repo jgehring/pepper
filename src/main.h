@@ -26,6 +26,14 @@
 #endif
 
 
+// Private variables can be declared like this to enable easy unit testing
+#ifdef PEPPER_UNIT_TESTS
+ #define PEPPER_PVARS public:
+#else
+ #define PEPPER_PVARS private:
+#endif
+
+
 // Standard integer types
 #ifdef HAVE_STDINT_H
  #include <stdint.h>

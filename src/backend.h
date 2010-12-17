@@ -64,6 +64,7 @@ class Backend
 		virtual void finalize();
 
 		const Options &options() const;
+		virtual void printHelp() const;
 
 	protected:
 		Backend(const Options &options);

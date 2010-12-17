@@ -34,39 +34,25 @@ static void printHelp(const Options &opts)
 	utils::printOption("--version", "Print version information");
 	utils::printOption("--no-cache", "Disable revision cache usage");
 
-	std::string backends;
-#ifdef USE_GIT
-	backends += "--git, ";
-#endif
-#ifdef USE_SUBVERSION
-	backends += "--svn, ";
-#endif
-	if (!backends.empty()) {
-		backends.resize(backends.length()-2);
-		utils::printOption(backends, "Force specific backend to be used");
-	}
-
-	std::cout << std::endl;
-	if (opts.backendHelpRequested()) {
+	if (!opts.repoUrl().empty() || !opts.forcedBackend().empty()) {
+		std::cout << std::endl;
 		Backend *backend = Backend::backendFor(opts);
 		if (backend == NULL) {
 			std::cout << "Error: Unkown backend " << opts.forcedBackend() << std::endl;
 		} else {
 			std::cout << "Options for the " << backend->name() << " backend:" << std::endl;
-			// TODO
-//			backend->printHelp();
+			backend->printHelp();
 		}
 		delete backend;
-	} else if (opts.scriptHelpRequested()) {
+	}
+	if (!opts.script().empty()) {
+		std::cout << std::endl;
 		try {
 			Report::printHelp(opts.script());
 		} catch (const Pepper::Exception &ex) {
 			std::cerr << ex.where() << ": " << ex.what() << std::endl;
 			return;
 		}
-	} else {
-		std::cout << "Pass -h, --help or -? as a backend or script option to get more" << std::endl;
-		std::cout << "specific help." << std::endl;
 	}
 
 	std::cout << std::endl;
@@ -131,7 +117,7 @@ int main(int argc, char **argv)
 	} else if (opts.versionRequested()) {
 		printVersion();
 		return EXIT_SUCCESS;
-	} else if (opts.repoUrl().empty()) {
+	} else if (opts.repoUrl().empty() || opts.script().empty()) {
 		printHelp(opts);
 		return EXIT_FAILURE;
 	}

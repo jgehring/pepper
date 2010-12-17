@@ -76,12 +76,9 @@ std::string Options::repoUrl() const
 	return m_options["url"];
 }
 
-Options::AuthData Options::authData() const
+std::map<std::string, std::string> Options::backendOptions() const
 {
-	AuthData data;
-	data.username = m_options["username"];
-	data.password = m_options["password"];
-	return data;
+	return m_scriptOptions;
 }
 
 std::string Options::script() const
@@ -116,44 +113,73 @@ void Options::reset()
 // The actual parsing
 void Options::parse(const std::vector<std::string> &args)
 {
-	enum optmode { MAIN, BACKEND, SCRIPT };
-	int mode = MAIN;
-	std::string key;
-	for (size_t i = 0; i < args.size(); i++) {
+	enum optmode { MAIN, BACKEND, SCRIPT, URL };
+	int mode = URL;
+	std::string key, value;
+	for (int i = (int)args.size()-1; i >= 0; i--) {
 		if (args[i] == "-?" || args[i] == "-h" || args[i] == "--help") {
 			m_options["help"] = "true";
-			if (mode == BACKEND) {
-				m_options["backend_help"] = "true";
-			} else if (mode == SCRIPT) {
-				m_options["script_help"] = "true";
-			}
 		} else if (args[i] == "--version") {
 			m_options["version"] = "true";
+		} else if (mode == URL) {
+			m_options["url"] = makeAbsolute(args[i]);
+			--mode;
+		} else if (mode == SCRIPT) {
+			if (parseOpt(args[i], &key, &value)) {
+				m_scriptOptions[key] = value;
+			} else {
+				m_options["script"] = args[i];
+				--mode;
+			}
+
+		// Main options
 		} else if (args[i] == "--no-cache") {
 			m_options["cache"] = "false";
 		} else if (args[i] == "-v" || args[i] == "--verbose") {
 			Logger::setLevel(Logger::level()+1);
 		} else if (args[i] == "-q" || args[i] == "--quiet") {
 			Logger::setLevel(Logger::None);
-		} else if (mode == MAIN && !args[i].compare(0, 2, "--") && args[i].length() > 2) {
-			m_options["forced_backend"] = args[i].substr(2);
-			mode = BACKEND;
-
-		} else if (mode != MAIN && args[i].length() > 1 && args[i][0] == '-') {
-			key = args[i];
-		} else if (!key.empty()) {
-			(mode == SCRIPT ? m_scriptOptions : m_backendOptions)[key] = args[i];
-			key.clear();
-
-		} else if (m_options["script"].empty()) {
-			m_options["script"] = args[i];
-			mode = SCRIPT;
-		} else if (m_options["url"].empty()) {
-			m_options["url"] = makeAbsolute(args[i]);
-		} else {
-			throw PEX(utils::strprintf("Unkown argument %s", args[i].c_str()));
+		} else if (mode == BACKEND) {
+			if (parseOpt(args[i], &key, &value)) {
+				m_backendOptions[key] = value;
+			} else {
+				m_options["forced_backend"] = args[i];
+				--mode;
+			}
 		}
 	}
+}
+
+// Parses a single option
+bool Options::parseOpt(const std::string &arg, std::string *key, std::string *value)
+{
+	/*
+	 * Valid option syntax:
+	 *    -f
+	 *    --flag
+	 *    -fvalue
+	 *    --flag=value
+	 */
+
+	if (!arg.compare(0, 2, "--") && arg.find("=") != std::string::npos && arg.find("=") > 2) {
+		std::vector<std::string> parts = utils::split(arg, "=");
+		*key = parts[0].substr(2);
+		*value = parts[1];
+		return true;
+	} else if (!arg.compare(0, 2, "--")) {
+		*key = arg.substr(2);
+		*value = std::string();
+		return true;
+	} else if (!arg.compare(0, 1, "-") && arg.length() > 2) {
+		*key = arg.substr(1, 1);
+		*value = arg.substr(2);
+		return true;
+	} else if (!arg.compare(0, 1, "-") && arg.length() == 2) {
+		*key = arg.substr(1);
+		*value = std::string();
+		return true;
+	}
+	return false;
 }
 
 // Converts a possibly relative path to an absolute one

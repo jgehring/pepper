@@ -54,7 +54,7 @@ public:
 	}
 
 	// Opens the connection to the Subversion repository
-	void open(const std::string &url, const Options::AuthData &auth)
+	void open(const std::string &url, const std::map<std::string, std::string> &options)
 	{
 		PTRACE << "Opening connection to " << url << endl;
 
@@ -76,9 +76,14 @@ public:
 		// Setup the authentication data
 		svn_auth_baton_t *auth_baton;
 		svn_config_t *config = hashget<svn_config_t *>(ctx->config, SVN_CONFIG_CATEGORY_CONFIG);
-		const char *userstr = (auth.username.empty() ? NULL : auth.username.c_str());
-		const char *passstr = (auth.password.empty() ? NULL : auth.password.c_str());
-		if ((err = svn_cmdline_setup_auth_baton(&auth_baton, /*(session->flags & SF_NON_INTERACTIVE)*/0, userstr, passstr, NULL, /*(session->flags & SF_NO_AUTH_CACHE)*/0, config, NULL, NULL, pool))) {
+		const char *user = NULL, *pass = NULL;
+		if (options.find("username") != options.end()) {
+			user = apr_pstrdup(pool, options.find("username")->second.c_str());
+		}
+		if (options.find("password") != options.end()) {
+			pass = apr_pstrdup(pool, options.find("password")->second.c_str());
+		}
+		if ((err = svn_cmdline_setup_auth_baton(&auth_baton, (options.find("non-interactive") != options.end()), user, pass, NULL, (options.find("no-auth-cache") != options.end()), config, NULL, NULL, pool))) {
 			throw PEX(strerr(err));
 		}
 		ctx->auth_baton = auth_baton;
@@ -524,7 +529,7 @@ void SubversionBackend::init()
 	if (!url.compare(0, 1, "/")) {
 		url = std::string("file://") + url;
 	}
-	d->open(url, m_opts.authData());
+	d->open(url, m_opts.backendOptions());
 }
 
 // Returns true if this backend is able to access the given repository
@@ -745,6 +750,15 @@ void SubversionBackend::finalize()
 		delete m_prefetcher;
 		m_prefetcher = NULL;
 	}
+}
+
+// Prints a help screen
+void SubversionBackend::printHelp() const
+{
+	utils::printOption("--username=ARG", "Specify a username ARG");
+	utils::printOption("--password=ARG", "Specify a password ARG");
+	utils::printOption("--no-auth-cache", "Do not cache authentication tokens");
+	utils::printOption("--non-interactive", "Do no interactive prompting");
 }
 
 // Returns the revision data for the given ID

@@ -61,6 +61,8 @@ class SubversionBackend : public Backend
 		Revision *revision(const std::string &id);
 		void finalize();
 
+		void printHelp() const;
+
 	private:
 		SvnConnection *d;
 		SvnDiffstatPrefetcher *m_prefetcher;
