@@ -49,7 +49,7 @@ protected:
 					m_queue->failed(revision);
 				}
 			} catch (const std::exception &ex) {
-				Logger::err() << "Exception while retrieving diffstat: " << ex.what() << endl;
+				Logger::err() << "Exception while retrieving diffstat for revision " << revision << ": " << ex.what() << endl;
 				m_queue->failed(revision);
 			}
 #else

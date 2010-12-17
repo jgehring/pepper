@@ -200,7 +200,7 @@ void Cache::load()
 		if (sys::fs::mkpath(path) < 0) {
 			throw PEX(utils::strprintf("Unable to create cache directory: %s", path.c_str()));
 		}
-		Logger::info() << "Cache: Ceating cache directory for '" << uuid() << '\'' << endl;
+		Logger::info() << "Cache: Creating cache directory for '" << uuid() << '\'' << endl;
 		return;
 	}
 

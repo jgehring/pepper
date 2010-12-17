@@ -11,6 +11,8 @@
 
 #include "main.h"
 
+#include "logger.h"
+
 #ifdef USE_POPEN_NOSHELL
  #include "popen-noshell/popen_noshell.h"
 #endif
@@ -87,6 +89,14 @@ std::string exec(int *ret, const char *cmd, const char *arg1, const char *arg2, 
 	argv[1] = arg1; argv[2] = arg2; argv[3] = arg3;
 	argv[4] = arg4; argv[5] = arg5; argv[6] = arg6;
 	argv[7] = arg7; argv[8] = NULL;
+	PTRACE << cmd << " "
+		<< (arg1 ? arg1 : "") << " "
+		<< (arg2 ? arg2 : "") << " "
+		<< (arg3 ? arg3 : "") << " "
+		<< (arg4 ? arg4 : "") << " "
+		<< (arg5 ? arg5 : "") << " "
+		<< (arg6 ? arg6 : "") << " "
+		<< (arg7 ? arg7 : "") << endl;
 	std::string out = execv(ret, argv);
 	delete[] argv;
 	return out;
@@ -112,6 +122,15 @@ PopenStreambuf::PopenStreambuf(const char *cmd, const char *arg1, const char *ar
 	d->argv[1] = arg1; d->argv[2] = arg2; d->argv[3] = arg3;
 	d->argv[4] = arg4; d->argv[5] = arg5; d->argv[6] = arg6;
 	d->argv[7] = arg7; d->argv[8] = NULL;
+
+	PTRACE << cmd << " "
+		<< (arg1 ? arg1 : "") << " "
+		<< (arg2 ? arg2 : "") << " "
+		<< (arg3 ? arg3 : "") << " "
+		<< (arg4 ? arg4 : "") << " "
+		<< (arg5 ? arg5 : "") << " "
+		<< (arg6 ? arg6 : "") << " "
+		<< (arg7 ? arg7 : "") << endl;
 
 #ifdef USE_POPEN_NOSHELL
 	d->pipe = popen_noshell(d->argv[0], d->argv, "r", &(d->pclose_arg), 0);
