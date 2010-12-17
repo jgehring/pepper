@@ -16,9 +16,11 @@
 #include "diffstat.h"
 #include "globals.h"
 #include "logger.h"
+#include "options.h"
 #include "repository.h"
 #include "revision.h"
 #include "revisioniterator.h"
+#include "utils.h"
 
 #include "luadiffstat.h"
 #include "luahelpers.h"
@@ -28,8 +30,7 @@
  #include "plot.h"
 #endif
 
-#include "options.h"
-#include "utils.h"
+#include "syslib/fs.h"
 
 #include "report.h"
 
@@ -112,13 +113,13 @@ static int walk_branch(lua_State *L)
 		lua_pop(L, 1);
 
 		Logger::info() << "\r\033[0K";
-		Logger::info() << "Mapping revisions... " << revision->id() << flush;
+		Logger::info() << "Fetching revisions... " << revision->id() << flush;
 
 		delete revision;
 	}
 
 	Logger::info() << "\r\033[0K";
-	Logger::info() << "Mapping revisions... done" << endl;
+	Logger::info() << "Fetching revisions... done" << endl;
 
 	try {
 		backend->finalize();
@@ -229,6 +230,28 @@ lua_State *setupLua()
 	return L;
 }
 
+// Returns the full path to the given script
+std::string findScript(const std::string &script)
+{
+	if (sys::fs::exists(script)) {
+		return script;
+	}
+	if (sys::fs::exists(script + ".lua")) {
+		return script + ".lua";
+	}
+#ifdef PREFIX
+	std::string builtin = std::string(PREFIX) + "/" + PACKAGE + "/reports/" + script;
+	if (sys::fs::exists(builtin)) {
+		return builtin;
+	}
+	builtin += ".lua";
+	if (sys::fs::exists(builtin)) {
+		return builtin;
+	}
+#endif
+	return script;
+}
+
 // Runs a scripted report using the given backend
 int run(const std::string &script, Backend *backend)
 {
@@ -241,7 +264,11 @@ int run(const std::string &script, Backend *backend)
 
 	// Run the script
 	int ret = EXIT_SUCCESS;
-	if (luaL_dofile(L, script.c_str()) != 0) {
+	std::string path = findScript(script);
+	if (path.empty()) {
+		std::cerr << "Error opening report: No such file or directory" << std::endl;
+		ret = EXIT_FAILURE;
+	} else if (luaL_dofile(L, path.c_str()) != 0) {
 		std::cerr << "Error opening report: " << lua_tostring(L, -1) << std::endl;
 		ret = EXIT_FAILURE;
 	} else {
@@ -267,7 +294,10 @@ void printHelp(const std::string &script)
 	lua_State *L = setupLua();
 
 	// Open the script
-	if (luaL_dofile(L, script.c_str()) != 0) {
+	std::string path = findScript(script);
+	if (path.empty()) {
+		std::cerr << "Error opening report: No such file or directory" << std::endl;
+	} else if (luaL_dofile(L, path.c_str()) != 0) {
 		throw PEX(utils::strprintf("Error opening report: %s", lua_tostring(L, -1)));
 	}
 
