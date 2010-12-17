@@ -6,6 +6,7 @@
 -- Script meta-data
 meta.name = "Commits per Month"
 meta.options = {{"-b, --branch", "Select branch"}}
+meta.options = {{"-t, --type", "Select image type"}}
 
 -- Revision callback function
 function callback(r)
@@ -53,11 +54,12 @@ function main()
 	end
 
 	-- Generate graphs
+	local imgtype = pepper.report.getopt("-t,--type", "svg")
 	local plot = pepper.plot:new()
 	plot:set_title("Commits per Month (on " .. branch .. ")")
-	plot:set_output("cpm.svg")
+	plot:set_output("cpm." .. imgtype)
+	plot:cmd("set terminal " .. imgtype .. " size 800,400")
 	plot:cmd([[
-set terminal svg size 800,400
 set format y "%.0f"
 set yrange [0:*]
 set grid ytics

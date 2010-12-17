@@ -6,6 +6,7 @@
 -- Script meta-data
 meta.name = "LOC by Authors"
 meta.options = {{"-b, --branch", "Select branch"}}
+meta.options = {{"-t, --type", "Select image type"}}
 
 -- Revision callback function
 function callback(r)
@@ -82,9 +83,11 @@ function main()
 	end
 
 	-- Run Gnuplot
+	local imgtype = pepper.report.getopt("-t,--type", "svg")
 	local plot = pepper.plot:new()
 	plot:set_title("Lines of Code by Author (on " .. branch .. ")")
-	plot:set_output("aloc.svg")
+	plot:set_output("aloc." .. imgtype)
+	plot:cmd("set terminal " .. imgtype .. " size 600,480")
 	plot:cmd([[
 set xdata time
 set timefmt "%s"

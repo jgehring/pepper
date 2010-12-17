@@ -6,6 +6,7 @@
 -- Script meta-data
 meta.name = "LOC"
 meta.options = {{"-b, --branch", "Select branch"}}
+meta.options = {{"-t, --type", "Select image type"}}
 
 -- Revision callback function
 function count(r)
@@ -38,13 +39,16 @@ function main()
 	pepper.report.walk_branch(count, branch)
 
 	-- Generate graphs
+	local imgtype = pepper.report.getopt("-t,--type", "svg")
 	local p = pepper.plot:new()
 	p:set_title("Lines of Code (" .. branch .. ")")
-	p:set_output("loc.svg")
+	p:set_output("loc." .. imgtype)
+	p:cmd("set terminal " .. imgtype .. " size 600,480")
 	p:plotty(dates, loc)
 
 	local p2 = pepper.plot:new()
 	p2:set_title("Bytes of Code (" .. branch .. ")")
-	p2:set_output("boc.svg")
+	p2:set_output("boc." .. imgtype)
+	p2:cmd("set terminal " .. imgtype .. " size 600,480")
 	p2:plotty(dates, boc)
 end
