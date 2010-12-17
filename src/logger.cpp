@@ -13,6 +13,7 @@
 // Static variables
 Logger *Logger::s_instances[Logger::NumLevels] = {
 	new Logger(Logger::None, std::cout),
+	new Logger(Logger::Error, std::cerr),
 	new Logger(Logger::Status, std::cout),
 	new Logger(Logger::Info, std::cout),
 	new Logger(Logger::Debug, std::cout),
@@ -37,9 +38,11 @@ void Logger::setOutput(std::ostream &out, int level)
 {
 	if (level < 0) {
 		for (int i = 0; i < Logger::NumLevels; i++) {
-			s_instances[i]->m_out = &out;
+			if (i != Logger::Error) {
+				s_instances[i]->m_out = &out;
+			}
 		}
-	} else {
+	} else if (level != Logger::Error) {
 		s_instances[level]->m_out = &out;
 	}
 }
@@ -47,7 +50,7 @@ void Logger::setOutput(std::ostream &out, int level)
 // Sets the log level
 void Logger::setLevel(int level)
 {
-	s_level = level;
+	s_level = std::max((int)Logger::Error, level);
 }
 
 // Returns the log level

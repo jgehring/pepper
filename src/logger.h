@@ -37,6 +37,7 @@ class Logger
 		enum Level
 		{
 			None = 0,
+			Error,
 			Status, Info, Debug, Trace,
 			NumLevels
 		};
@@ -48,6 +49,7 @@ class Logger
 
 		static void flush();
 
+		static inline Logger &err() { return *s_instances[Error]; }
 		static inline Logger &status() { return *s_instances[Status]; }
 		static inline Logger &info() { return *s_instances[Info]; }
 		static inline Logger &debug() { return *s_instances[Debug]; }

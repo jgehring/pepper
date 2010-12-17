@@ -87,7 +87,7 @@ static void setupLogger(std::vector<std::ofstream *> *streams, const Options &)
 	// Note that the log level has already been set by Options::parse()
 #ifdef DEBUG
 	// In debug mode, write log data to files if the log level is not high enough
-	std::string files[Logger::NumLevels] = {"", "status.out", "info.out", "debug.out", "trace.out"};
+	std::string files[Logger::NumLevels] = {"", "error.out", "status.out", "info.out", "debug.out", "trace.out"};
 	for (int i = Logger::level()+1; i < Logger::NumLevels; i++) {
 		if (!files[i].empty()) {
 			std::ofstream *out = new std::ofstream();
