@@ -30,9 +30,9 @@ static void printHelp(const Options &opts)
 	std::cout << "USAGE: " << PACKAGE_NAME << " [opts.] [backend] [backend opts.] <script> [script opts.] <repository>" << std::endl << std::endl;
 
 	std::cout << "Main options:" << std::endl;
-	utils::printOption("-h, --help, -?", "Print basic usage information");
-	utils::printOption("--version", "Print version information");
-	utils::printOption("--no-cache", "Disable revision cache usage");
+	Options::print("-h, --help, -?", "Print basic usage information");
+	Options::print("--version", "Print version information");
+	Options::print("--no-cache", "Disable revision cache usage");
 
 	if (!opts.repoUrl().empty() || !opts.forcedBackend().empty()) {
 		std::cout << std::endl;

@@ -40,6 +40,8 @@ class Options
 		std::string script() const;
 		std::map<std::string, std::string> scriptOptions() const;
 
+		static void print(const std::string &option, const std::string &text);
+
 	private:
 		void reset();
 		void parse(const std::vector<std::string> &args);

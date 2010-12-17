@@ -306,7 +306,7 @@ void printHelp(const std::string &script)
 
 		std::cout << "Options for report '" << name << "':" << std::endl;
 		for (unsigned int i = 0; i < std::min(switches.size(), text.size()); i++) {
-			utils::printOption(switches[i], text[i]);
+			Options::print(switches[i], text[i]);
 		}
 	} else {
 		std::cout << "No options for report '" << name << "':" << std::endl;

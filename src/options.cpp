@@ -91,6 +91,24 @@ std::map<std::string, std::string> Options::scriptOptions() const
 	return m_scriptOptions;
 }
 
+// Pretty-prints a help screen option
+void Options::print(const std::string &option, const std::string &text)
+{
+	std::cout << "  " << option;
+	if (option.length() < 30) {
+		for (int i = option.length(); i < 32; i++) {
+			std::cout << " ";
+		}
+	} else {
+		std::cout << std::endl;
+		for (int i = 0; i < 34; i++) {
+			std::cout << " ";
+		}
+	}
+	std::cout << text << std::endl;
+}
+
+
 // Resets the options to default values
 void Options::reset()
 {

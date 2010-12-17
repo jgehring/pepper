@@ -62,8 +62,6 @@ std::string join(std::vector<std::string>::const_iterator start, std::vector<std
 
 std::string strprintf(const char *format, ...);
 
-void printOption(const std::string &option, const std::string &text);
-
 std::vector<char> compress(const std::vector<char> &data, int level = 9);
 std::vector<char> uncompress(const std::vector<char> &data);
 

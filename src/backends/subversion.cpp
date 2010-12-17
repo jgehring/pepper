@@ -755,10 +755,10 @@ void SubversionBackend::finalize()
 // Prints a help screen
 void SubversionBackend::printHelp() const
 {
-	utils::printOption("--username=ARG", "Specify a username ARG");
-	utils::printOption("--password=ARG", "Specify a password ARG");
-	utils::printOption("--no-auth-cache", "Do not cache authentication tokens");
-	utils::printOption("--non-interactive", "Do no interactive prompting");
+	Options::print("--username=ARG", "Specify a username ARG");
+	Options::print("--password=ARG", "Specify a password ARG");
+	Options::print("--no-auth-cache", "Do not cache authentication tokens");
+	Options::print("--non-interactive", "Do no interactive prompting");
 }
 
 // Returns the revision data for the given ID
