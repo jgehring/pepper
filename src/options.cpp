@@ -61,6 +61,11 @@ bool Options::useCache() const
 	return m_options["cache"] == "true";
 }
 
+bool Options::checkCache() const
+{
+	return m_options["check_cache"] == "true";
+}
+
 std::string Options::cacheDir() const
 {
 	return m_options["cache_dir"];
@@ -153,6 +158,8 @@ void Options::parse(const std::vector<std::string> &args)
 		// Main options
 		} else if (args[i] == "--no-cache") {
 			m_options["cache"] = "false";
+		} else if (args[i] == "--check-cache") {
+			m_options["check_cache"] = "true";
 		} else if (args[i] == "-v" || args[i] == "--verbose") {
 			Logger::setLevel(Logger::level()+1);
 		} else if (args[i] == "-q" || args[i] == "--quiet") {

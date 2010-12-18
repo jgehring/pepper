@@ -13,6 +13,7 @@
 #include <cstring>
 
 #include <sys/stat.h>
+#include <sys/time.h>
 
 #include "main.h"
 
@@ -28,6 +29,7 @@
 #include "cache.h"
 
 
+#define CACHE_VERSION (uint32_t)1
 #define MAX_CACHEFILE_SIZE 4194304
 
 
@@ -36,7 +38,7 @@ Cache::Cache(Backend *backend, const Options &options)
 	: Backend(options), m_backend(backend), m_iout(NULL), m_cout(NULL),
 	  m_cin(0), m_coindex(0), m_ciindex(0)
 {
-	load();
+
 }
 
 // Destructor
@@ -73,7 +75,7 @@ void Cache::prefetch(const std::vector<std::string> &ids)
 		}
 	}
 
-	Logger::info() << "Cache: " << (ids.size() - missing.size()) << " of " << ids.size() << " revisions already cached, prefetching " << missing.size() << endl;
+	PDEBUG << "Cache: " << (ids.size() - missing.size()) << " of " << ids.size() << " revisions already cached, prefetching " << missing.size() << endl;
 	if (!missing.empty()) {
 		m_backend->prefetch(missing);
 	}
@@ -128,7 +130,7 @@ void Cache::put(const std::string &id, const Revision &rev)
 			++m_coindex;
 		} while (true);
 
-		delete m_cout; m_cout = NULL;
+		delete m_cout;
 		m_cout = new BOStream(path, true);
 	} else if (m_cout->tell() >= MAX_CACHEFILE_SIZE) {
 		delete m_cout;
@@ -139,7 +141,8 @@ void Cache::put(const std::string &id, const Revision &rev)
 	uint32_t offset = m_cout->tell();
 	MOStream rout;
 	rev.write(rout);
-	*m_cout << utils::compress(rout.data());
+	std::vector<char> compressed = utils::compress(rout.data());
+	*m_cout << compressed;
 
 	// Add revision to index
 	if (m_iout == NULL) {
@@ -148,11 +151,11 @@ void Cache::put(const std::string &id, const Revision &rev)
 		} else {
 			m_iout = new GZOStream(dir + "/index", false);
 			// Version number
-			*m_iout << (uint32_t)1;
+			*m_iout << CACHE_VERSION;
 		}
 	}
 	*m_iout << id;
-	*m_iout << m_coindex << offset;
+	*m_iout << m_coindex << offset << utils::crc32(compressed);
 }
 
 // Loads a revision from the cache
@@ -162,7 +165,7 @@ Revision *Cache::get(const std::string &id)
 	std::pair<uint32_t, uint32_t> offset = m_index[id];
 	std::string path = utils::strprintf("%s/cache.%u", dir.c_str(), offset.first);
 	if (m_cin == NULL || offset.first != m_ciindex) {
-		delete m_cout; m_cout = NULL;
+		delete m_cin;
 		m_cin = new BIStream(path);
 		m_ciindex = offset.first;
 		if (!m_cin->ok()) {
@@ -187,9 +190,12 @@ Revision *Cache::get(const std::string &id)
 	return rev;
 }
 
-// Loads the index file of the cache
+// Loads the index file
 void Cache::load()
 {
+	timeval tv;
+	gettimeofday(&tv, NULL);
+
 	m_index.clear();
 
 	std::string path = m_opts.cacheDir() + "/" + uuid();
@@ -212,20 +218,139 @@ void Cache::load()
 
 	uint32_t version;
 	in >> version;
-	if (version != 1) {
+	if (version != CACHE_VERSION) {
 		throw PEX(utils::strprintf("Unkown cache version number %u", version));
 	}
 
 	std::string buffer;
 	std::pair<uint32_t, uint32_t> pos;
+	uint32_t crc;
 	while (!in.eof()) {
 		in >> buffer;
 		if (buffer.empty()) {
 			break;
 		}
 		in >> pos.first >> pos.second;
+		in >> crc;
 		m_index[buffer] = pos;
 	}
 
-	Logger::info() << "Cache: " << m_index.size() << " cached revisions for '" << uuid() << '\'' << endl;
+	timeval c;
+	gettimeofday(&c, NULL);	
+ 	Logger::info() << "Cache: Loaded " << m_index.size() << " revisions in " << (c.tv_sec - tv.tv_sec) * 1000 + (c.tv_usec - tv.tv_usec) / 1000 << " ms" << endl;
+}
+
+// Checks cache entries and removes invalid ones from the index file
+void Cache::check()
+{
+	// TODO: Add timing framework
+	timeval tv;
+	gettimeofday(&tv, NULL);
+
+	std::map<std::string, std::pair<uint32_t, uint32_t> > index;
+
+	std::string path = m_opts.cacheDir() + "/" + uuid();
+	PDEBUG << "Checking cache in dir: " << path << endl;
+	struct stat statbuf;
+	if (stat(path.c_str(), &statbuf) == -1) {
+		// Create the cache directory
+		if (sys::fs::mkpath(path) < 0) {
+			throw PEX(utils::strprintf("Unable to create cache directory: %s", path.c_str()));
+		}
+		Logger::info() << "Cache: Creating cache directory for '" << uuid() << '\'' << endl;
+		return;
+	}
+
+	GZIStream *in = new GZIStream(path+"/index");
+	if (!in->ok()) {
+		Logger::info() << "Cache: Empty cache for '" << uuid() << '\'' << endl;
+		delete in;
+		return;
+	}
+
+	BIStream *cache_in = NULL;
+	uint32_t cache_index = -1;
+
+	uint32_t version;
+	*in >> version;
+	if (version != CACHE_VERSION) {
+		throw PEX(utils::strprintf("Unkown cache version number %u", version));
+	}
+
+	std::string id;
+	std::pair<uint32_t, uint32_t> pos;
+	uint32_t crc;
+	std::map<std::string, uint32_t> crcs;
+	std::vector<std::string> corrupted;
+	while (!in->eof()) {
+		*in >> id;
+		if (id.empty()) {
+			break;
+		}
+		*in >> pos.first >> pos.second;
+		*in >> crc;
+
+		index[id] = pos;
+		crcs[id] = crc;
+
+		bool ok = true;
+		if (cache_in == NULL || cache_index != pos.first) {
+			delete cache_in;
+			cache_in = new BIStream(utils::strprintf("%s/cache.%u", path.c_str(), pos.first));
+			cache_index = pos.first;
+			if (!cache_in->ok()) {
+				delete cache_in; cache_in = NULL;
+				ok = false;
+			}
+		}
+		if (cache_in != NULL) {
+			if (!cache_in->seek(pos.second)) {
+				ok = false;
+			} else {
+				std::vector<char> data;
+				*cache_in >> data;
+				if (utils::crc32(data) != crc) {
+					ok = false;
+				}
+			}
+		}
+
+		if (!ok) {
+			PTRACE << "Revision " << id << " corrupted!" << endl;
+			std::cerr << "Cache: Revision " << id << " is corrupted, removing from index file" << std::endl;
+			corrupted.push_back(id);
+		} else {
+			PTRACE << "Revision " << id << " ok" << endl;
+		}
+	}
+	delete cache_in;
+	delete in;
+
+	timeval c;
+	gettimeofday(&c, NULL);	
+ 	Logger::info() << "Cache: Checked " << index.size() << " revisions in " << (c.tv_sec - tv.tv_sec) * 1000 + (c.tv_usec - tv.tv_usec) / 1000 << " ms" << endl;
+
+	if (corrupted.empty()) {
+		Logger::info() << "Cache: Everything's alright" << endl;
+		return;
+	}
+
+	Logger::info() << "Cache: " << corrupted.size() << " corrupted revisions, rewriting index file" << endl;
+
+	// Remove corrupted revisions from index file
+	for (unsigned int i = 0; i < corrupted.size(); i++) {
+		std::map<std::string, std::pair<uint32_t, uint32_t> >::iterator it = index.find(corrupted[i]);
+		if (it != index.end()) {
+			index.erase(it);
+		}
+	}
+
+	// Rewrite index file
+	GZOStream out(path+"/index");
+	out << CACHE_VERSION;
+	for (std::map<std::string, std::pair<uint32_t, uint32_t> >::iterator it = index.begin(); it != index.end(); ++it) {
+		out << it->first;
+		out << it->second.first << it->second.second;
+		out << crcs[it->first];
+	}
 }

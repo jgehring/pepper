@@ -8,14 +8,16 @@ UUID and containing two or more files:
 	This is the index file, mapping revision identifiers to files
 	and offsets.  It is a gzipped text file with the following format:
 
-		$REVISION_1 $FILEINDEX $OFFSET
-		$REVISION_2 $FILEINDEX $OFFSET
+		$REVISION_1 $FILEINDEX $OFFSET $CRC
+		$REVISION_2 $FILEINDEX $OFFSET $CRC
 		...
 	
 	$REVISION_i is a null-terminated string, representing a revision
 	ID. Immediately afer the null byte, a 4-byte unsigned integer
 	specifying the index of the cache file. Finally, there's a nother
 	4-byte unsigned integer that defines the offset in the cache file.
+	The $CRC checksum is a simple CRC-32 checksum. of the compressed
+	revision data.
 
 	* cache.N
 	where N is the file index. The cache file is just a series of

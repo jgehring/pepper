@@ -25,7 +25,7 @@ class Cache : public Backend
 		Cache(Backend *backend, const Options &options);
 		~Cache();
 
-		void init() { m_backend->init(); }
+		void init() { load(); m_backend->init(); }
 
 		std::string name() const { return m_backend->name(); }
 
@@ -42,6 +42,7 @@ class Cache : public Backend
 		void finalize() { m_backend->finalize(); }
 
 		void flush();
+		void check();
 
 	private:
 		bool lookup(const std::string &id);

@@ -65,6 +65,11 @@ std::string strprintf(const char *format, ...);
 std::vector<char> compress(const std::vector<char> &data, int level = 9);
 std::vector<char> uncompress(const std::vector<char> &data);
 
+uint32_t crc32(const char *data, size_t len);
+inline uint32_t crc32(const std::vector<char> &data) {
+	return crc32(&data[0], data.size());
+}
+
 } // namespace utils
 
 

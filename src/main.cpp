@@ -33,6 +33,7 @@ static void printHelp(const Options &opts)
 	Options::print("-h, --help, -?", "Print basic usage information");
 	Options::print("--version", "Print version information");
 	Options::print("--no-cache", "Disable revision cache usage");
+	Options::print("--check-cache", "Run cache check");
 
 	if (!opts.repoUrl().empty() || !opts.forcedBackend().empty()) {
 		std::cout << std::endl;
@@ -117,7 +118,7 @@ int main(int argc, char **argv)
 	} else if (opts.versionRequested()) {
 		printVersion();
 		return EXIT_SUCCESS;
-	} else if (opts.repoUrl().empty() || opts.script().empty()) {
+	} else if (opts.repoUrl().empty() || (!opts.checkCache() && opts.script().empty())) {
 		printHelp(opts);
 		return EXIT_FAILURE;
 	}
@@ -138,6 +139,20 @@ int main(int argc, char **argv)
 			Cache *cache = new Cache(backend, opts);
 			sighandler.setCache(cache);
 			backend = cache;
+
+			// Simple cache check?
+			if (opts.checkCache()) {
+				try {
+					cache->check();
+					return EXIT_SUCCESS;
+				} catch (const Pepper::Exception &ex) {
+					std::cerr << "Error checking cache: " << ex.where() << ": " << ex.what() << std::endl;
+					Logger::flush();
+					return EXIT_FAILURE;
+				}
+			}
+
+			cache->init();
 		}
 	} catch (const Pepper::Exception &ex) {
 		std::cerr << "Error initializing backend: " << ex.where() << ": " << ex.what() << std::endl;
@@ -146,6 +161,7 @@ int main(int argc, char **argv)
 	}
 
 	sighandler.start();
+
 	int ret;
 	try {
 		ret = Report::run(opts.script(), backend);

@@ -31,6 +31,7 @@ class Options
 		bool versionRequested() const;
 
 		bool useCache() const;
+		bool checkCache() const;
 		std::string cacheDir() const;
 
 		std::string forcedBackend() const;
