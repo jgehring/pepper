@@ -125,7 +125,7 @@ void Options::reset()
 #ifdef DEBUG
 	Logger::setLevel(Logger::Info);
 #else
-	Logger::setLevel(Logger::None);
+	Logger::setLevel(Logger::Status);
 #endif
 
 	// TODO: Where on Windows?

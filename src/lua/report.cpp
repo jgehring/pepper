@@ -96,6 +96,9 @@ static int walk_branch(lua_State *L)
 	}
 	Logger::status() << "done" << endl;
 
+	if (Logger::level() < Logger::Info) {
+		Logger::status() << "Fetching revisions... " << flush;
+	}
 	while (!it->atEnd()) {
 		Revision *revision = NULL;
 		try {
@@ -120,6 +123,9 @@ static int walk_branch(lua_State *L)
 
 	Logger::info() << "\r\033[0K";
 	Logger::info() << "Fetching revisions... done" << endl;
+	if (Logger::level() < Logger::Info) {
+		Logger::status() << "done" << endl;
+	}
 
 	try {
 		backend->finalize();
