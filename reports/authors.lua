@@ -14,21 +14,20 @@ function callback(r)
 		return
 	end
 
-	-- Determine previous LOC
-	local loc = 0
-	if authors[r:author()] ~= nil then
-		loc = authors[r:author()]
-	end
-
-	-- Calculate new LOC
+	-- Accumulate contributed lines
 	local s = r:diffstat()
+	local loc = 0
 	for i,v in ipairs(s:files()) do
-		loc = loc + s:lines_added(v) - s:lines_removed(v)
+		loc = loc + s:lines_added(v)
 	end
 
 	-- Save commit and LOC count
 	table.insert(commits, {r:date(), r:author(), loc})
-	authors[r:author()] = loc 
+	if authors[r:author()] == nil then
+		authors[r:author()] = loc
+	else
+		authors[r:author()] = authors[r:author()] + loc
+	end
 end
 
 -- Checks whether author a has more LOC than b
@@ -43,7 +42,7 @@ end
 
 -- Main script function
 function main()
-	commits = {}   -- Commit list by timestamp
+	commits = {}   -- Commit list by timestamp with LOC delta
 	authors = {}   -- Total LOC by author
 
 	-- Gather data
@@ -63,8 +62,10 @@ function main()
 		i = i + 1
 	end
 
-	-- Generate data arrays for the authors
+	-- Sort commits by time
 	table.sort(commits, commitcmp)
+
+	-- Generate data arrays for the authors
 	local keys = {}
 	local series = {}
 	local loc = {}
@@ -76,7 +77,7 @@ function main()
 		table.insert(series, {});
 		for i,a in ipairs(authorloc) do
 			if a[1] == v[2] then
-				loc[a[1]] = v[3]
+				loc[a[1]] = loc[a[1]] + v[3]
 			end
 			table.insert(series[#series], loc[a[1]])
 		end
@@ -88,13 +89,14 @@ function main()
 	end
 
 	local p = pepper.gnuplot:new()
-	p:set_title("Lines of Code by Author (on " .. branch .. ")")
+	p:set_title("Contributed Lines of Code by Author (on " .. branch .. ")")
 	p:set_output("authors." .. pepper.report.getopt("t, type", "svg"), 600, 480)
 	p:cmd([[
 set xdata time
 set timefmt "%s"
 set format x "%b %y"
-set format y "%.0f"
+set decimal locale
+set format y "%'.0f"
 set yrange [0:*]
 set xtics nomirror
 set xtics rotate by -45
