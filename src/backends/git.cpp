@@ -40,7 +40,7 @@ protected:
 		while (m_queue->getArg(&revision)) {
 #if 1
 			try {
-				sys::io::PopenStreambuf buf("git", "diff-tree", "-U0", "-a", "-m", "--no-renames", "--root", revision.c_str());
+				sys::io::PopenStreambuf buf("git", "diff-tree", "-U0", "-m", "--no-renames", "--root", revision.c_str());
 				std::istream in(&buf);
 				Diffstat stat = DiffParser::parse(in);
 				if (buf.close() == 0) {
@@ -54,7 +54,7 @@ protected:
 			}
 #else
 			int ret;
-			std::string out = sys::io::exec(&ret, "git", "diff-tree", "-U0", "-a", "-m", "--no-renames", "--root", revision.c_str());
+			std::string out = sys::io::exec(&ret, "git", "diff-tree", "-U0", "-m", "--no-renames", "--root", revision.c_str());
 			if (ret != 0) {
 				m_queue->failed(revision);
 				continue;
@@ -297,7 +297,7 @@ Diffstat GitBackend::diffstat(const std::string &id)
 
 	PDEBUG << "Fetching revision " << id << " manually" << endl;
 	int ret;
-	std::string out = sys::io::exec(&ret, "git", "diff-tree", "-U0", "-a", "-m", "--no-renames", "--root", id.c_str());
+	std::string out = sys::io::exec(&ret, "git", "diff-tree", "-U0", "-m", "--no-renames", "--root", id.c_str());
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Failed to retrieve diffstat for revision %s (%d)", id.c_str(), ret));
 	}

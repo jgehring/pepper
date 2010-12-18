@@ -304,7 +304,7 @@ protected:
 
 			PTRACE << "Fetching diffstat for revision " << revision << endl;
 
-			svn_error_t *err = svn_client_diff4(apr_array_make(subpool, 0, 1), d->url, &rev1, d->url, &rev2, NULL, svn_depth_infinity, FALSE, FALSE, TRUE, APR_LOCALE_CHARSET, outfile, errfile, NULL, d->ctx, subpool);
+			svn_error_t *err = svn_client_diff4(apr_array_make(subpool, 0, 1), d->url, &rev1, d->url, &rev2, NULL, svn_depth_infinity, FALSE, FALSE, FALSE, APR_LOCALE_CHARSET, outfile, errfile, NULL, d->ctx, subpool);
 			if (err != NULL) {
 				Logger::err() << "Error: Diffstat fetching failed: " << SvnConnection::strerr(err) << endl;
 				svn_error_clear(err);
@@ -692,7 +692,7 @@ Diffstat SubversionBackend::diffstat(const std::string &id)
 	DiffParser parser(in);
 	parser.start();
 
-	svn_error_t *err = svn_client_diff4(apr_array_make(pool, 0, 1), d->url, &rev1, d->url, &rev2, NULL, svn_depth_infinity, FALSE, FALSE, TRUE, APR_LOCALE_CHARSET, outfile, errfile, NULL, d->ctx, pool);
+	svn_error_t *err = svn_client_diff4(apr_array_make(pool, 0, 1), d->url, &rev1, d->url, &rev2, NULL, svn_depth_infinity, FALSE, FALSE, FALSE, APR_LOCALE_CHARSET, outfile, errfile, NULL, d->ctx, pool);
 	if (err != NULL) {
 		throw PEX(SvnConnection::strerr(err));
 	}
@@ -742,7 +742,7 @@ Backend::LogIterator *SubversionBackend::iterator(const std::string &branch)
 void SubversionBackend::prefetch(const std::vector<std::string> &ids)
 {
 	if (m_prefetcher == NULL) {
-		int nthreads = 25;
+		int nthreads = 10;
 		if (!strncmp(d->url, "file://", strlen("file://"))) {
 			nthreads = std::max(1, sys::parallel::idealThreadCount() / 2);
 		}
