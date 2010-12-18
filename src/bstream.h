@@ -80,11 +80,12 @@ class BIStream : public BStream
 		BIStream &operator>>(uint64_t &i);
 		inline BIStream &operator>>(int64_t &i) { return (*this >> reinterpret_cast<uint64_t &>(i)); }
 		BIStream &operator>>(std::string &s);
+		BIStream &operator>>(std::vector<char> &v);
 		template<typename T> BIStream &operator>>(std::vector<T> &v) {
 			uint32_t size;
 			(*this) >> size;
-			v.clear(); v.resize(size);
-			for (uint32_t i = 0; i < size; i++) {
+			v.resize(size);
+			for (uint32_t i = 0; i < size && !eof(); i++) {
 				(*this) >> v[i];
 			}
 			return *this;
@@ -106,6 +107,7 @@ class BOStream : public BStream
 		BOStream &operator<<(uint64_t i);
 		inline BOStream &operator<<(int64_t i) { return (*this << static_cast<uint64_t>(i)); }
 		BOStream &operator<<(const std::string &s);
+		BOStream &operator<<(const std::vector<char> &v);
 		template<typename T> BOStream &operator<<(const std::vector<T> &v) {
 			(*this) << (uint32_t)v.size();
 			for (uint32_t i = 0; i < v.size(); i++) {
@@ -181,6 +183,12 @@ inline BOStream &BOStream::operator<<(const std::string &s) {
 	return (*this << '\0');
 }
 
+inline BOStream &BOStream::operator<<(const std::vector<char> &v) {
+	(*this) << v.size();
+	write(&v[0], v.size());
+	return *this;
+}
+
 inline BIStream &BIStream::operator>>(char &c) {
 	read((char *)&c, 1);
 	return *this;
@@ -228,6 +236,14 @@ inline BIStream &BIStream::operator>>(std::string &s) {
 	}
 
 	s.append(buffer, bptr-buffer);
+	return *this;
+}
+
+inline BIStream &BIStream::operator>>(std::vector<char> &v) {
+	uint32_t size;
+	*this >> size;
+	v.resize(size);
+	read(&v[0], size);
 	return *this;
 }
 
