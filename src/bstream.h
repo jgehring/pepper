@@ -184,7 +184,7 @@ inline BOStream &BOStream::operator<<(const std::string &s) {
 }
 
 inline BOStream &BOStream::operator<<(const std::vector<char> &v) {
-	(*this) << v.size();
+	(*this) << (uint32_t)v.size();
 	write(&v[0], v.size());
 	return *this;
 }
