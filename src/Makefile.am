@@ -77,9 +77,9 @@ AM_CXXFLAGS += \
 	$(APR_CFLAGS) \
 	$(SVN_CFLAGS)
 AM_LDFLAGS += \
-	$(APR_LIBS) \
 	$(SVN_LDFLAGS) \
-	$(SVN_LIBS) 
+	$(SVN_LIBS) \
+	$(APR_LIBS)
 endif
 
 if POPEN_NOSHELL
