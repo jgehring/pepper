@@ -103,4 +103,4 @@ set rmargin 8
 set key box
 set key below]])
 	p:plot_series(keys, series, authors)
-nd
+end
