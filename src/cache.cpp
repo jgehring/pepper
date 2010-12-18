@@ -222,6 +222,8 @@ void Cache::load()
 		throw PEX(utils::strprintf("Unkown cache version number %u", version));
 	}
 
+	Logger::status() << "Loading cache index... " << ::flush;
+
 	std::string buffer;
 	std::pair<uint32_t, uint32_t> pos;
 	uint32_t crc;
@@ -234,6 +236,8 @@ void Cache::load()
 		in >> crc;
 		m_index[buffer] = pos;
 	}
+
+	Logger::status() << "done" << endl;
 
 	timeval c;
 	gettimeofday(&c, NULL);	
