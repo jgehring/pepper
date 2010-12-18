@@ -112,8 +112,8 @@ int Plot::plot_series(lua_State *L)
 	size_t nseries = 0;
 
 	// Open stream to data file
-    std::ofstream out;
-    std::string file = g->create_tmpfile(out);
+	std::ofstream out;
+	std::string file = g->create_tmpfile(out);
 
 	// Read data entries and write them to a file
 	++index;
@@ -146,8 +146,8 @@ int Plot::plot_series(lua_State *L)
 	}
 	lua_pop(L, 1);
 
-    out.flush();
-    out.close();
+	out.flush();
+	out.close();
 
 	// Read titles (if any)
 	++index;
