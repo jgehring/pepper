@@ -1,0 +1,105 @@
+pepper - SCM statistics report generator
+========================================
+
+About
+-----
+pepper is a statistics report generator for source code management
+software. It can be used to create graphical or textual representations
+of code repositories in a platform-independent manner.
+
+
+Requirements
+------------
+Besides from a working C++ compiler, pepper depends on the following
+third-party software:
+
+	* zlib
+	* POSIX threads
+	* Lua
+
+The following dependencies are optional:
+
+	* Python C API and the Mercurial modules (for the Mercurial backend)
+	* Subversion C API (for the Subversion backend)
+
+pepper has been written in hopefully platform-independent manner,
+and should compile and run on all major Unix platforms, e.g. Linux,
+BSD and Mac OS X. I'm not planning to port the software to Windows myself.
+
+
+Compilation
+-----------
+pepper uses the Autoconf and Automake build systems, so the standard
+way of running
+
+	$ ./configure
+	$ make
+	$ make install
+
+should be fine. You can pass "--help" to the configuration script for
+a brief version of the next two sections.
+
+
+Usage notes
+-----------
+As of now, there is no man page for pepper. However, the command line
+syntax and a brief help screen are shown if you run the program with
+"--help" or invalid arguments.
+
+
+Available SCM backends
+----------------------
+pepper ships with the following backends. The respective command line
+switches for the configuration script are given in brackets.
+
+	* Git (--[en|dis]able-git)
+	The Git backend uses popen() to communicate with the git command 
+	line client.
+
+	* Subversion (--[en|dis]able-subversion)
+	This backend uses the Subversion C API to access the respective
+	repositories. All access methods provided by the API are supported,
+	e.g. file://, http:// or svn://.
+
+	* Mercurial (--[en|dis]able-mercurial)
+	The hg backend uses the Python C API to access Mercurial's
+	python interface directly.
+
+
+Optional features
+-----------------
+Several additional, optional features are available (see the CREDITS
+file for more information about the respective libaries)
+
+	* Gnuplot interface (--[en|dis]able-gnuplot)
+	A Lua interface to Gnuplot. Reports can use it to plot data
+	graphically.
+	This feature is enabled by default.
+
+	* popen-noshell (--[en|dis]able-popen-noshell)
+	A faster version of popen() for Linux 2.6. Its used in pepper
+	is considered experimental, but it increases the performance of
+	the Git backend.
+	This feature is disabled by default.
+
+
+Built-in reports
+----------------
+When installing pepper, several report scripts will be copied to the
+respective shared folder (i.e. $prefix/share/pepper). Here's a brief
+listing of them:
+
+	* loc
+	Plots the lines of code for a given branch.
+	The resulting file is called loc, e.g. "loc.png".
+
+	* authors
+	Plots the contributed lines of code of the 6 busiest authors.
+	The resulting file is called authors, e.g. "authors.png".
+
+	* commits_per_month
+	Displays a histogram of the commits during the last 12 months.
+	The resulting file is called cpm, e.g. "cpm.png".
+	
+	* shortlog
+	Prints a revision log to stdout, similar to "git shortlog".
