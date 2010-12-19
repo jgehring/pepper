@@ -68,6 +68,19 @@ static int getopt(lua_State *L)
 	return LuaHelpers::push(L, value);
 }
 
+// Returns the revision specified by the given ID
+static int revision(lua_State *L)
+{
+	std::string id = LuaHelpers::pops(L);
+	Revision *revision = NULL;
+	try {
+		revision = repo->backend()->revision(id);
+	} catch (const Pepper::Exception &ex) {
+		return LuaHelpers::pushError(L, ex.what(), ex.where());
+	}
+	return LuaHelpers::push(L, revision); // TODO: Memory leak!
+ }
+
 // Maps a lua function on all revisions of a given branch
 static int walk_branch(lua_State *L)
 {
@@ -134,6 +147,7 @@ static int walk_branch(lua_State *L)
 static const struct luaL_reg report[] = {
 	{"getopt", getopt},
 	{"repository", repository},
+	{"revision", revision},
 	{"walk_branch", walk_branch},
 	{NULL, NULL}
 };
