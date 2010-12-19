@@ -50,8 +50,6 @@ function main()
 		table.insert(loc, total)
 	end
 
-	print("Total lines of code: " .. total)
-
 	-- Generate graphs
 	local imgtype = pepper.report.getopt("t, type", "svg")
 	local p = pepper.gnuplot:new()
