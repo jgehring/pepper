@@ -92,35 +92,71 @@ int Diffstat::files(lua_State *L) {
 }
 
 int Diffstat::lines_added(lua_State *L) {
-	std::string file = LuaHelpers::pops(L);
-	if (m_stats.find(file) != m_stats.end()) {
-		return LuaHelpers::push(L, m_stats[file].ladd);
+	if (lua_gettop(L) >= 1) {
+		std::string file = LuaHelpers::pops(L);
+		if (m_stats.find(file) != m_stats.end()) {
+			return LuaHelpers::push(L, m_stats[file].ladd);
+		}
+		return LuaHelpers::push(L, 0);
 	}
-	return LuaHelpers::push(L, 0);
+
+	// Return total
+	int n = 0;
+	for (std::map<std::string, Stat>::const_iterator it = m_stats.begin(); it != m_stats.end(); ++it) {
+		n += it->second.ladd;
+	}
+	return LuaHelpers::push(L, n);
 }
 
 int Diffstat::bytes_added(lua_State *L) {
-	std::string file = LuaHelpers::pops(L);
-	if (m_stats.find(file) != m_stats.end()) {
-		return LuaHelpers::push(L, m_stats[file].cadd);
+	if (lua_gettop(L) >= 1) {
+		std::string file = LuaHelpers::pops(L);
+		if (m_stats.find(file) != m_stats.end()) {
+			return LuaHelpers::push(L, m_stats[file].cadd);
+		}
+		return LuaHelpers::push(L, 0);
 	}
-	return LuaHelpers::push(L, 0);
+
+	// Return total
+	int n = 0;
+	for (std::map<std::string, Stat>::const_iterator it = m_stats.begin(); it != m_stats.end(); ++it) {
+		n += it->second.cadd;
+	}
+	return LuaHelpers::push(L, n);
 }
 
 int Diffstat::lines_removed(lua_State *L) {
-	std::string file = LuaHelpers::pops(L);
-	if (m_stats.find(file) != m_stats.end()) {
-		return LuaHelpers::push(L, m_stats[file].ldel);
+	if (lua_gettop(L) >= 1) {
+		std::string file = LuaHelpers::pops(L);
+		if (m_stats.find(file) != m_stats.end()) {
+			return LuaHelpers::push(L, m_stats[file].ldel);
+		}
+		return LuaHelpers::push(L, 0);
 	}
-	return LuaHelpers::push(L, 0);
+
+	// Return total
+	int n = 0;
+	for (std::map<std::string, Stat>::const_iterator it = m_stats.begin(); it != m_stats.end(); ++it) {
+		n += it->second.ldel;
+	}
+	return LuaHelpers::push(L, n);
 }
 
 int Diffstat::bytes_removed(lua_State *L) {
-	std::string file = LuaHelpers::pops(L);
-	if (m_stats.find(file) != m_stats.end()) {
-		return LuaHelpers::push(L, m_stats[file].cdel);
+	if (lua_gettop(L) >= 1) {
+		std::string file = LuaHelpers::pops(L);
+		if (m_stats.find(file) != m_stats.end()) {
+			return LuaHelpers::push(L, m_stats[file].cdel);
+		}
+		return LuaHelpers::push(L, 0);
 	}
-	return LuaHelpers::push(L, 0);
+
+	// Return total
+	int n = 0;
+	for (std::map<std::string, Stat>::const_iterator it = m_stats.begin(); it != m_stats.end(); ++it) {
+		n += it->second.cdel;
+	}
+	return LuaHelpers::push(L, n);
 }
 
 
