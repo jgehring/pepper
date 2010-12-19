@@ -11,6 +11,7 @@
 #define REPORT_H_
 
 
+#include <iostream>
 #include <string>
 
 
@@ -25,6 +26,8 @@ namespace Report
 int run(const std::string &script, Backend *backend);
 
 void printHelp(const std::string &script);
+
+void listReports(std::ostream &out = std::cout);
 
 } // namespace Report
 

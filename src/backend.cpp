@@ -7,7 +7,6 @@
  */
 
 
-#include <iostream>
 #include <cstring>
 
 #include "options.h"
@@ -78,6 +77,21 @@ Backend *Backend::backendFor(const Options &options)
 		return backendForName(forced, options);
 	}
 	return backendForUrl(options.repoUrl(), options);
+}
+
+// Prints a listing of available backends to
+void Backend::listBackends(std::ostream &out)
+{
+	out << "Available backends (with abbreviations):" << std::endl;
+#ifdef USE_SUBVERSION
+	Options::print("subversion, svn", "Subversion", out);
+#endif
+#ifdef USE_GIT
+	Options::print("git", "Git", out);
+#endif
+#ifdef USE_MERCURIAL
+	Options::print("mercurial, hg", "Mercurial", out);
+#endif
 }
 
 // Initializes the backend

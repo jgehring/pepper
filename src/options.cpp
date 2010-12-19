@@ -56,6 +56,16 @@ bool Options::versionRequested() const
 	return m_options["version"] == "true";
 }
 
+bool Options::backendListRequested() const
+{
+	return m_options["list_backends"] == "true";
+}
+
+bool Options::scriptListRequested() const
+{
+	return m_options["list_scripts"] == "true";
+}
+
 bool Options::useCache() const
 {
 	return m_options["cache"] == "true";
@@ -97,20 +107,20 @@ std::map<std::string, std::string> Options::scriptOptions() const
 }
 
 // Pretty-prints a help screen option
-void Options::print(const std::string &option, const std::string &text)
+void Options::print(const std::string &option, const std::string &text, std::ostream &out)
 {
-	std::cout << "  " << option;
+	out << "  " << option;
 	if (option.length() < 30) {
 		for (int i = option.length(); i < 32; i++) {
-			std::cout << " ";
+			out << " ";
 		}
 	} else {
-		std::cout << std::endl;
+		out << std::endl;
 		for (int i = 0; i < 34; i++) {
-			std::cout << " ";
+			out << " ";
 		}
 	}
-	std::cout << text << std::endl;
+	out << text << std::endl;
 }
 
 
@@ -144,7 +154,7 @@ void Options::parse(const std::vector<std::string> &args)
 			m_options["help"] = "true";
 		} else if (args[i] == "--version") {
 			m_options["version"] = "true";
-		} else if (mode == URL) {
+		} else if (mode == URL && args[i].compare(0, 1, "-")) {
 			m_options["url"] = makeAbsolute(args[i]);
 			--mode;
 		} else if (mode == SCRIPT) {
@@ -160,6 +170,10 @@ void Options::parse(const std::vector<std::string> &args)
 			m_options["cache"] = "false";
 		} else if (args[i] == "--check-cache") {
 			m_options["check_cache"] = "true";
+		} else if (args[i] == "--list-backends") {
+			m_options["list_backends"] = "true";
+		} else if (args[i] == "--list-reports") {
+			m_options["list_scripts"] = "true";
 		} else if (args[i] == "-v" || args[i] == "--verbose") {
 			Logger::setLevel(Logger::level()+1);
 		} else if (args[i] == "-q" || args[i] == "--quiet") {

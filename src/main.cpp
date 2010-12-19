@@ -24,6 +24,13 @@
 #include "utils.h"
 
 
+// Prints a short footer for help screens and listings
+static void printFooter()
+{
+	std::cout << std::endl;
+	std::cout << "Report bugs to " << "<" << PACKAGE_BUGREPORT ">" << std::endl;
+}
+
 // Prints program usage information
 static void printHelp(const Options &opts)
 {
@@ -33,6 +40,9 @@ static void printHelp(const Options &opts)
 	Options::print("-h, --help, -?", "Print basic usage information");
 	Options::print("--version", "Print version information");
 	Options::print("--no-cache", "Disable revision cache usage");
+	std::cout << std::endl;
+	Options::print("--list-reports", "List built-in report scrtips");
+	Options::print("--list-backends", "List available backends");
 	Options::print("--check-cache", "Run cache check");
 
 	if (!opts.repoUrl().empty() || !opts.forcedBackend().empty()) {
@@ -56,8 +66,7 @@ static void printHelp(const Options &opts)
 		}
 	}
 
-	std::cout << std::endl;
-	std::cout << "Report bugs to " << "<" << PACKAGE_BUGREPORT ">" << std::endl;
+	printFooter();
 }
 
 // Prints the program version
@@ -114,11 +123,20 @@ int main(int argc, char **argv)
 	std::vector<std::ofstream *> streams;
 	setupLogger(&streams, opts);
 
+	// Print requested help screens or listings
 	if (opts.helpRequested()) {
 		printHelp(opts);
 		return EXIT_SUCCESS;
 	} else if (opts.versionRequested()) {
 		printVersion();
+		return EXIT_SUCCESS;
+	} else if (opts.backendListRequested()) {
+		Backend::listBackends();
+		printFooter();
+		return EXIT_SUCCESS;
+	} else if (opts.scriptListRequested()) {
+		Report::listReports();
+		printFooter();
 		return EXIT_SUCCESS;
 	} else if (opts.repoUrl().empty() || (!opts.checkCache() && opts.script().empty())) {
 		printHelp(opts);

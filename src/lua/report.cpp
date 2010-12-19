@@ -7,9 +7,9 @@
  */
 
 
+#include <algorithm>
 #include <cstdlib>
 #include <cstring>
-#include <iostream>
 #include <memory>
 
 #include "backend.h"
@@ -351,6 +351,45 @@ void printHelp(const std::string &script)
 
 	lua_gc(L, LUA_GCCOLLECT, 0);
 	lua_close(L);
+}
+
+// Prints a listing of all report scripts to stdout
+void listReports(std::ostream &out)
+{
+	std::string builtin = std::string(DATADIR);
+	out << "Available reports in " << builtin << ":" << std::endl;
+
+	std::vector<std::string> reports = sys::fs::ls(builtin);
+	std::sort(reports.begin(), reports.end());
+
+	for (unsigned int i = 0; i < reports.size(); i++) {
+		if (!sys::fs::fileExists(builtin + "/" + reports[i])) {
+			continue;
+		}
+
+		lua_State *L = setupLua();
+		std::string path = builtin + "/" + reports[i];
+		if (path.empty()) {
+			std::cerr << "Error opening report: No such file or directory" << std::endl;
+		} else if (luaL_dofile(L, path.c_str()) != 0) {
+			throw PEX(utils::strprintf("Error opening report: %s", lua_tostring(L, -1)));
+		}
+
+		lua_getglobal(L, "meta");
+
+		// Retrieve the report description
+		std::string description;
+		lua_getfield(L, -1, "description");
+		if (lua_type(L, -1) == LUA_TSTRING) {
+			description = LuaHelpers::pops(L);
+		} else {
+			lua_pop(L, 1);
+		}
+
+		Options::print(reports[i], description, out);
+		lua_gc(L, LUA_GCCOLLECT, 0);
+		lua_close(L);
+	}
 }
 
 } // namespace Report

@@ -11,6 +11,7 @@
 #define OPTIONS_H_
 
 
+#include <iostream>
 #include <map>
 #include <string>
 #include <vector>
@@ -29,6 +30,8 @@ class Options
 		bool backendHelpRequested() const;
 		bool scriptHelpRequested() const;
 		bool versionRequested() const;
+		bool backendListRequested() const;
+		bool scriptListRequested() const;
 
 		bool useCache() const;
 		bool checkCache() const;
@@ -41,7 +44,7 @@ class Options
 		std::string script() const;
 		std::map<std::string, std::string> scriptOptions() const;
 
-		static void print(const std::string &option, const std::string &text);
+		static void print(const std::string &option, const std::string &text, std::ostream &out = std::cout);
 
 	private:
 		void reset();

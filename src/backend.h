@@ -11,6 +11,7 @@
 #define BACKEND_H_
 
 
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -47,6 +48,7 @@ class Backend
 		virtual ~Backend();
 
 		static Backend *backendFor(const Options &options);
+		static void listBackends(std::ostream &out = std::cout);
 
 		virtual void init();
 
