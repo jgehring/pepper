@@ -4,7 +4,8 @@
 
 
 -- Script meta-data
-meta.name = "LOC"
+meta.title = "LOC"
+meta.description = "Lines of code"
 meta.options = {{"-bARG, --branch=ARG", "Select branch"},
                 {"-tARG, --type=ARG", "Select image type"}}
 

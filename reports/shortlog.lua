@@ -4,7 +4,8 @@
 
 
 -- Script meta-data
-meta.name = "shortlog"
+meta.title = "Shortlog"
+meta.description = "Summarized revision log"
 meta.options = {{"-bARG, --branch=ARG", "Select branch"}}
 
 

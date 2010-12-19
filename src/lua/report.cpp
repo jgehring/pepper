@@ -311,7 +311,7 @@ void printHelp(const std::string &script)
 
 	// Retrieve the report name
 	std::string name = script;
-	lua_getfield(L, -1, "name");
+	lua_getfield(L, -1, "title");
 	if (lua_type(L, -1) == LUA_TSTRING) {
 		name = LuaHelpers::pops(L);
 	}

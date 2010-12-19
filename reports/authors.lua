@@ -4,7 +4,8 @@
 
 
 -- Script meta-data
-meta.name = "LOC by Authors"
+meta.title = "Code contribution by authors"
+meta.description = "Contributed lines of code by authors"
 meta.options = {{"-bARG, --branch=ARG", "Select branch"},
                 {"-tARG, --type=ARG", "Select image type"}}
 

@@ -103,3 +103,6 @@ listing of them:
 	
 	* shortlog
 	Prints a revision log to stdout, similar to "git shortlog".
+
+	* heads
+	Prints all repository branches, similar to "git branch -a".

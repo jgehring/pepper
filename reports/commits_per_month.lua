@@ -4,7 +4,8 @@
 
 
 -- Script meta-data
-meta.name = "Commits per Month"
+meta.title = "Commits per Month"
+meta.descritpion = "Histogramm of commit counts during the last twelve months"
 meta.options = {{"-bARG, --branch=ARG", "Select branch"},
                 {"-tARG, --type=ARG", "Select image type"}}
 
