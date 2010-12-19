@@ -13,8 +13,10 @@ pepper_SOURCES = \
 	globals.h globals.cpp \
 	jobqueue.h \
 	logger.h logger.cpp \
+	luahelpers.h \
 	main.h main.cpp \
 	options.h options.cpp \
+	report.h report.cpp \
 	repository.h repository.cpp \
 	revision.h revision.cpp \
 	revisioniterator.h revisioniterator.cpp \
@@ -24,12 +26,6 @@ pepper_SOURCES = \
 	syslib/fs.h syslib/fs.cpp \
 	syslib/io.h syslib/io.cpp \
 	syslib/parallel.h syslib/parallel.cpp \
-	\
-	lua/luadiffstat.h \
-	lua/luahelpers.h \
-	lua/luarepository.h \
-	lua/luarevision.h \
-	lua/report.h lua/report.cpp \
 	\
 	3rdparty/lunar/lunar.h
 
@@ -91,7 +87,7 @@ endif
 
 if GNUPLOT
 pepper_SOURCES += \
-	lua/plot.h lua/plot.cpp \
+	plot.h plot.cpp \
 	3rdparty/gnuplot-cpp/gnuplot_i.h
 AM_CPPFLAGS += \
 	-DUSE_GNUPLOT

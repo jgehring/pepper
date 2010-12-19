@@ -17,6 +17,8 @@
 
 #include "main.h"
 
+#include "lunar/lunar.h"
+
 #include "syslib/parallel.h"
 
 class BIStream;
@@ -26,7 +28,6 @@ class BOStream;
 class Diffstat
 {
 	friend class DiffParser;
-	friend class LuaDiffstat;
 
 	public:
 		struct Stat
@@ -52,6 +53,19 @@ class Diffstat
 
 	private:
 		std::map<std::string, Stat> m_stats;
+
+	// Lua binding
+	public:
+		Diffstat(lua_State *L);
+
+		int files(lua_State *L);
+		int lines_added(lua_State *L);
+		int bytes_added(lua_State *L);
+		int lines_removed(lua_State *L);
+		int bytes_removed(lua_State *L);
+
+		static const char className[];
+		static Lunar<Diffstat>::RegType methods[];
 };
 
 

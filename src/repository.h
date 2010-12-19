@@ -11,13 +11,14 @@
 #define REPOSITORY_H_
 
 
+#include "lunar/lunar.h"
+
+
 class Backend;
 
 
 class Repository
 {
-	friend class LuaRepository;
-
 	public:
 		Repository(Backend *backend);
 		~Repository();
@@ -26,6 +27,19 @@ class Repository
 
 	private:
 		Backend *m_backend;
+
+	// Lua binding
+	public:
+		Repository(lua_State *L);
+
+		int url(lua_State *L);
+		int type(lua_State *L);
+		int head(lua_State *L);
+		int main_branch(lua_State *L);
+		int branches(lua_State *L);
+
+		static const char className[];
+		static Lunar<Repository>::RegType methods[];
 };
 
 

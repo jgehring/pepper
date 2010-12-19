@@ -22,10 +22,7 @@
 #include "revisioniterator.h"
 #include "utils.h"
 
-#include "luadiffstat.h"
 #include "luahelpers.h"
-#include "luarepository.h"
-#include "luarevision.h"
 #ifdef USE_GNUPLOT
  #include "plot.h"
 #endif
@@ -40,14 +37,13 @@ namespace Report
 
 // Global variables
 static Repository *repo;
-static LuaRepository *luarepo;
 static std::map<std::string, std::string> options;
 
 
 // Returns the current repository
 static int repository(lua_State *L)
 {
-	return LuaHelpers::push(L, luarepo);
+	return LuaHelpers::push(L, repo);
 }
 
 // Returns a script option (or the default value)
@@ -106,18 +102,16 @@ static int walk_branch(lua_State *L)
 		} catch (const Pepper::Exception &ex) {
 			return LuaHelpers::pushError(L, ex.what(), ex.where());
 		}
-		LuaRevision luarev(revision);
 
 		PTRACE << "Fetched revision " << revision->id() << endl;
 
 		lua_rawgeti(L, LUA_REGISTRYINDEX, callback);
-		LuaHelpers::push(L, &luarev);
+		LuaHelpers::push(L, revision);
 		lua_call(L, 1, 1);
 		lua_pop(L, 1);
 
 		Logger::info() << "\r\033[0K";
 		Logger::info() << "Fetching revisions... " << revision->id() << flush;
-
 		delete revision;
 	}
 
@@ -138,8 +132,8 @@ static int walk_branch(lua_State *L)
 
 // Function table of the report library
 static const struct luaL_reg report[] = {
-	{"repository", repository},
 	{"getopt", getopt},
+	{"repository", repository},
 	{"walk_branch", walk_branch},
 	{NULL, NULL}
 };
@@ -222,9 +216,9 @@ lua_State *setupLua()
 	luaL_register(L, "pepper.utils", utils);
 
 	// Register binding classes
-	Lunar<LuaRepository>::Register(L, "pepper");
-	Lunar<LuaRevision>::Register(L, "pepper");
-	Lunar<LuaDiffstat>::Register(L, "pepper");
+	Lunar<Repository>::Register(L, "pepper");
+	Lunar<Revision>::Register(L, "pepper");
+	Lunar<Diffstat>::Register(L, "pepper");
 #ifdef USE_GNUPLOT
 	Lunar<Plot>::Register(L, "pepper");
 #endif
@@ -265,7 +259,6 @@ int run(const std::string &script, Backend *backend)
 
 	// Setup global variables
 	Report::repo = new Repository(backend);
-	Report::luarepo = new LuaRepository(repo);
 	Report::options = backend->options().scriptOptions();
 
 	// Run the script
@@ -290,7 +283,6 @@ int run(const std::string &script, Backend *backend)
 	lua_gc(L, LUA_GCCOLLECT, 0);
 	lua_close(L);
 	delete Report::repo;
-	delete Report::luarepo;
 	return ret;
 }
 

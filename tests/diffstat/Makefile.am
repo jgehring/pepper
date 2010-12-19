@@ -15,12 +15,14 @@ AM_CXXFLAGS = \
 	-Wall -W -pipe \
 	$(PTHREAD_CFLAGS)
 AM_CPPFLAGS = \
-	-DPEPPER_UNIT_TESTS
+	-DPEPPER_UNIT_TESTS \
+	$(LUA_INCLUDE)
 INCLUDES = \
 	-I$(top_srcdir)/src \
 	-I$(top_srcdir)/src/3rdparty
 LIBS += \
 	$(PTHREAD_LIBS) \
+	$(LUA_LIB) \
 	$(FRAMEWORKS)
 
 

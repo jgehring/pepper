@@ -10,6 +10,7 @@
 #include <iostream>
 
 #include "bstream.h"
+#include "luahelpers.h"
 
 #include "revision.h"
 
@@ -58,4 +59,41 @@ bool Revision::load(BIStream &in)
 {
 	in >> m_date >> m_author >> m_message;
 	return m_diffstat.load(in);
+}
+
+/*
+ * Lua binding
+ */
+
+const char Revision::className[] = "revision";
+Lunar<Revision>::RegType Revision::methods[] = {
+	LUNAR_DECLARE_METHOD(Revision, id),
+	LUNAR_DECLARE_METHOD(Revision, date),
+	LUNAR_DECLARE_METHOD(Revision, author),
+	LUNAR_DECLARE_METHOD(Revision, message),
+	LUNAR_DECLARE_METHOD(Revision, diffstat),
+	{0,0}
+};
+
+Revision::Revision(lua_State *) {
+}
+
+int Revision::id(lua_State *L) {
+	return LuaHelpers::push(L, m_id);
+}
+
+int Revision::date(lua_State *L) {
+	return LuaHelpers::push(L, m_date);
+}
+
+int Revision::author(lua_State *L) {
+	return LuaHelpers::push(L, m_author);
+}
+
+int Revision::message(lua_State *L) {
+	return LuaHelpers::push(L, m_message);
+}
+
+int Revision::diffstat(lua_State *L) {
+	return LuaHelpers::push(L, &m_diffstat);
 }

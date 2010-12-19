@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "bstream.h"
+#include "luahelpers.h"
 #include "utils.h"
 
 #include "diffstat.h"
@@ -62,6 +63,64 @@ bool Diffstat::load(BIStream &in)
 		m_stats[buffer] = stat;
 	}
 	return true;
+}
+
+/*
+ * Lua binding
+ */
+
+const char Diffstat::className[] = "diffstat";
+Lunar<Diffstat>::RegType Diffstat::methods[] = {
+	LUNAR_DECLARE_METHOD(Diffstat, files),
+	LUNAR_DECLARE_METHOD(Diffstat, lines_added),
+	LUNAR_DECLARE_METHOD(Diffstat, bytes_added),
+	LUNAR_DECLARE_METHOD(Diffstat, lines_removed),
+	LUNAR_DECLARE_METHOD(Diffstat, bytes_removed),
+	{0,0}
+};
+
+Diffstat::Diffstat(lua_State *) {
+}
+
+int Diffstat::files(lua_State *L) {
+	std::vector<std::string> v(m_stats.size());
+	int i = 0;
+	for (std::map<std::string, Stat>::const_iterator it = m_stats.begin(); it != m_stats.end(); ++it) {
+		v[i++] = it->first;
+	}
+	return LuaHelpers::push(L, v);
+}
+
+int Diffstat::lines_added(lua_State *L) {
+	std::string file = LuaHelpers::pops(L);
+	if (m_stats.find(file) != m_stats.end()) {
+		return LuaHelpers::push(L, m_stats[file].ladd);
+	}
+	return LuaHelpers::push(L, 0);
+}
+
+int Diffstat::bytes_added(lua_State *L) {
+	std::string file = LuaHelpers::pops(L);
+	if (m_stats.find(file) != m_stats.end()) {
+		return LuaHelpers::push(L, m_stats[file].cadd);
+	}
+	return LuaHelpers::push(L, 0);
+}
+
+int Diffstat::lines_removed(lua_State *L) {
+	std::string file = LuaHelpers::pops(L);
+	if (m_stats.find(file) != m_stats.end()) {
+		return LuaHelpers::push(L, m_stats[file].ldel);
+	}
+	return LuaHelpers::push(L, 0);
+}
+
+int Diffstat::bytes_removed(lua_State *L) {
+	std::string file = LuaHelpers::pops(L);
+	if (m_stats.find(file) != m_stats.end()) {
+		return LuaHelpers::push(L, m_stats[file].cdel);
+	}
+	return LuaHelpers::push(L, 0);
 }
 
 

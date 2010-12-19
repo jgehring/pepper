@@ -16,6 +16,8 @@
 
 #include "main.h"
 
+#include "lunar/lunar.h"
+
 #include "diffstat.h"
 
 class BIStream;
@@ -24,8 +26,6 @@ class BOStream;
 
 class Revision
 {
-	friend class LuaRevision;
-
 	public:
 		Revision(const std::string &id);
 		Revision(const std::string &id, int64_t date, const std::string &author, const std::string &message, const Diffstat &diffstat);
@@ -43,6 +43,19 @@ class Revision
 		std::string m_author;
 		std::string m_message;
 		Diffstat m_diffstat;
+
+	// Lua binding
+	public:
+		Revision(lua_State *L);
+
+		int id(lua_State *L);
+		int date(lua_State *L);
+		int author(lua_State *L);
+		int message(lua_State *L);
+		int diffstat(lua_State *L);
+
+		static const char className[];
+		static Lunar<Revision>::RegType methods[];
 };
 
 
