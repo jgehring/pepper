@@ -89,20 +89,20 @@ When installing pepper, several report scripts will be copied to the
 respective shared folder (i.e. $prefix/share/pepper). Here's a brief
 listing of them:
 
-	* loc
-	Plots the lines of code for a given branch.
-	The resulting file is called loc, e.g. "loc.png".
-
 	* authors
 	Plots the contributed lines of code of the 6 busiest authors.
 	The resulting file is called authors, e.g. "authors.png".
+
+	* branches
+	Prints all repository branches, similar to "git branch -a".
 
 	* commits_per_month
 	Displays a histogram of the commits during the last 12 months.
 	The resulting file is called cpm, e.g. "cpm.png".
 	
+	* loc
+	Plots the lines of code for a given branch.
+	The resulting file is called loc, e.g. "loc.png".
+
 	* shortlog
 	Prints a revision log to stdout, similar to "git shortlog".
-
-	* heads
-	Prints all repository branches, similar to "git branch -a".

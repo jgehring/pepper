@@ -1,10 +1,10 @@
 --[[
--- Show repository branches and heads, similar to "git branch -v"
+-- Show repository branches, similar to "git branch -v"
 --]]
 
 
 -- Script meta-data
-meta.name = "Heads"
+meta.name = "Branches"
 
 -- Main script function
 function main()

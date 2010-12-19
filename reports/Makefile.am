@@ -6,7 +6,7 @@
 # Bundled scripts
 dist_pkgdata_DATA = \
 	authors.lua \
+	branches.lua \
 	commits_per_month.lua \
-	heads.lua \
 	loc.lua \
 	shortlog.lua
