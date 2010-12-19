@@ -88,6 +88,8 @@ static void setupLogger(std::vector<std::ofstream *> *streams, const Options &)
 
 	// Turn log level to maximum
 	Logger::setLevel(Logger::NumLevels);
+#else
+	(void)streams; // No compiler warnings, please
 #endif
 }
 
