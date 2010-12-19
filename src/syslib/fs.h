@@ -12,6 +12,7 @@
 
 
 #include <string>
+#include <vector>
 
 
 namespace sys
@@ -31,6 +32,8 @@ bool exists(const std::string &path);
 bool fileExists(const std::string &path);
 bool dirExists(const std::string &path);
 size_t filesize(const std::string &path);
+
+std::vector<std::string> ls(std::string &path);
 
 } // namespace fs
 

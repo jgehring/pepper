@@ -7,9 +7,12 @@
  */
 
 
-#include <cstdlib>
-#include <cstdio>
 #include <climits>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
+#include <dirent.h>
 
 #include <sys/stat.h>
 
@@ -122,6 +125,27 @@ size_t filesize(const std::string &path)
 		return 0;
 	}
 	return statbuf.st_size;
+}
+
+// Lists the contents of the given directory
+std::vector<std::string> ls(std::string &path)
+{
+	DIR *dp;
+	std::vector<std::string> entries;
+
+	if ((dp = opendir(path.c_str())) == NULL) {
+		return entries;
+	}
+
+	struct dirent *ep;
+	while ((ep = readdir(dp)) != NULL) {
+		if (strcmp(ep->d_name, ".") && strcmp(ep->d_name, "..")) {
+			entries.push_back(ep->d_name);
+		}
+	}
+	closedir(dp);
+
+	return entries;
 }
 
 } // namespace fs
