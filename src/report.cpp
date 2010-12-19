@@ -56,16 +56,25 @@ static int getopt(lua_State *L)
 	int narg = lua_gettop(L);
 
 	std::vector<std::string> keys = utils::split(LuaHelpers::tops(L, (narg == 1 ? -1 : -2)), ",", true);
-	std::string value = (narg == 2 ? LuaHelpers::tops(L, -1) : std::string());
+	std::string defaultValue = (narg == 2 ? LuaHelpers::tops(L, -1) : std::string());
 
+	std::string value;
+	bool valueFound = false;
 	for (unsigned int i = 0; i < keys.size(); i++) {
 		if (options.find(keys[i]) != options.end()) {
 			value = options[keys[i]];
+			valueFound = true;
 			break;
 		}
 	}
+
 	lua_pop(L, narg);
-	return LuaHelpers::push(L, value);
+	if (valueFound) {
+		return LuaHelpers::push(L, value);
+	} else if (narg == 2) {
+		return LuaHelpers::push(L, defaultValue);
+	}
+	return LuaHelpers::pushNil(L);
 }
 
 // Returns the revision specified by the given ID
@@ -79,7 +88,7 @@ static int revision(lua_State *L)
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
 	}
 	return LuaHelpers::push(L, revision); // TODO: Memory leak!
- }
+}
 
 // Maps a lua function on all revisions of a given branch
 static int walk_branch(lua_State *L)
