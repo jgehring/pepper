@@ -1,4 +1,6 @@
 *.[oa]
+*.cpp.*
+*.h*
 *.log
 *~
 .*.swp
@@ -9,6 +11,7 @@ aclocal.m4
 atconfig
 atlocal
 autom4te.cache
+callgrind.out.*
 config.guess
 config.h
 config.h.in
@@ -18,5 +21,6 @@ configure
 configure.scan
 depcomp
 install-sh
+massif.out.*
 missing
 stamp-h1
