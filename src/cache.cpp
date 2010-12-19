@@ -193,9 +193,6 @@ Revision *Cache::get(const std::string &id)
 // Loads the index file
 void Cache::load()
 {
-	timeval tv;
-	gettimeofday(&tv, NULL);
-
 	m_index.clear();
 
 	std::string path = m_opts.cacheDir() + "/" + uuid();
@@ -209,6 +206,10 @@ void Cache::load()
 		Logger::info() << "Cache: Creating cache directory for '" << uuid() << '\'' << endl;
 		return;
 	}
+
+	// For git repositories, the hardest part is calling uuid()
+	timeval tv;
+	gettimeofday(&tv, NULL);
 
 	GZIStream in(path+"/index");
 	if (!in.ok()) {
@@ -247,10 +248,6 @@ void Cache::load()
 // Checks cache entries and removes invalid ones from the index file
 void Cache::check()
 {
-	// TODO: Add timing framework
-	timeval tv;
-	gettimeofday(&tv, NULL);
-
 	std::map<std::string, std::pair<uint32_t, uint32_t> > index;
 
 	std::string path = m_opts.cacheDir() + "/" + uuid();
@@ -264,6 +261,10 @@ void Cache::check()
 		Logger::info() << "Cache: Creating cache directory for '" << uuid() << '\'' << endl;
 		return;
 	}
+
+	// TODO: Add timing framework
+	timeval tv;
+	gettimeofday(&tv, NULL);
 
 	GZIStream *in = new GZIStream(path+"/index");
 	if (!in->ok()) {
