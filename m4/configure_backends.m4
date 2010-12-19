@@ -68,7 +68,7 @@ AC_DEFUN([BACKENDS_CHECK], [
 			# Inspiration from Stephan Peijnik
 			# http://blog.sp.or.at/2008/08/31/autoconf-and-python-checking-for-modules/
 			AC_MSG_CHECKING(for mercurial Python module)
-			VERSION=`$PYTHON -c "from mercurial import __version__; print __version__.version" 2> /dev/null`
+			MODVERSION=`$PYTHON -c "from mercurial import __version__; print __version__.version" 2> /dev/null`
 			if test "x$?" != "x0"; then
 				AC_MSG_RESULT(not found)
 				if test "x$mercurial" != "xauto"; then
@@ -77,7 +77,7 @@ AC_DEFUN([BACKENDS_CHECK], [
 				mercurial="no"
 			else
 				mercurial="yes"
-				AC_MSG_RESULT([found $VERSION])
+				AC_MSG_RESULT([found $MODVERSION])
 			fi
 		fi
 	fi
