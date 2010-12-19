@@ -7,6 +7,7 @@ AC_PREREQ([2.6])
 AC_INIT(pepper, alpha, jonas.gehring@boolsoft.org)
 AM_INIT_AUTOMAKE()
 AC_CONFIG_HEADER([config.h])
+AC_CONFIG_TESTDIR([tests])
 
 # Custom arguments that should be listed first
 AC_ARG_ENABLE([debug], [AS_HELP_STRING([--enable-debug], [Turn on debugging])], [debug="$enableval"], [debug="no"])

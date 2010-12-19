@@ -3,7 +3,7 @@
 # Copyright (C) 2010 Jonas Gehring
 #
 
-bin_PROGRAMS = poptions
+noinst_PROGRAMS = poptions
 poptions_SOURCES = \
 	main.cpp \
 	\

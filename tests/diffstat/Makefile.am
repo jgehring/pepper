@@ -3,7 +3,7 @@
 # Copyright (C) 2010 Jonas Gehring
 #
 
-bin_PROGRAMS = pdiffstat
+noinst_PROGRAMS = pdiffstat
 pdiffstat_SOURCES = \
 	main.cpp \
 	\

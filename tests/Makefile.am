@@ -25,15 +25,28 @@ SUBDIRS = diffstat options
 
 EXTRA_DIST = \
 	testsuite.at \
-	test_diffstat.at \
-	test_options.at \
 	$(srcdir)/package.m4 \
 	$(TESTSUITE) \
-	atlocal.in
+	atlocal.in \
+	\
+	test_diffstat.at \
+	test_diffstat.pl \
+	test_options.at \
+	\
+	diffstat/data/git-add.pat \
+	diffstat/data/git-add.ref \
+	diffstat/data/git-del.pat \
+	diffstat/data/git-del.ref \
+	diffstat/data/git-mod.pat \
+	diffstat/data/git-mod.ref \
+	diffstat/data/svn-add.pat \
+	diffstat/data/svn-add.ref \
+	diffstat/data/svn-del.pat \
+	diffstat/data/svn-del.ref \
+	diffstat/data/svn-mod.pat \
+	diffstat/data/svn-mod.ref
 
 TESTSUITE = $(srcdir)/testsuite
-
-CLEANFILES = atconfig
 
 check-local: atconfig atlocal $(TESTSUITE)
 	$(SHELL) '$(TESTSUITE)' $(TESTSUITEFLAGS)
