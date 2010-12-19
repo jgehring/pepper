@@ -3,7 +3,7 @@
 # Copyright (C) 2010 Jonas Gehring
 #
 
-SUBDIRS = src tests
+SUBDIRS = src tests reports
 
 # Generate luadoc documentation
 LUADOCS = \

@@ -148,6 +148,7 @@ AC_CONFIG_FILES([
 	tests/atlocal
 	tests/diffstat/Makefile
 	tests/options/Makefile
+	reports/Makefile
 ])
 AC_OUTPUT()
 
