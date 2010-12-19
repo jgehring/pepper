@@ -93,7 +93,7 @@ std::string Options::repoUrl() const
 
 std::map<std::string, std::string> Options::backendOptions() const
 {
-	return m_scriptOptions;
+	return m_backendOptions;
 }
 
 std::string Options::script() const
