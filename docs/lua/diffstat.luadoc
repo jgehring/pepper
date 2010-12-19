@@ -6,18 +6,26 @@ module "pepper.diffstat"
 --- Returns a table of all files in the diffstat
 function files()
 
---- Returns the number of lines added
---  @param file The file
+--- Returns the number of lines added,
+--  If the <code>file parameter is omitted, the total number of lines
+--  removed is being returned
+--  @param file An optional file name
 function lines_added(file)
 
---- Returns the number of bytes added
---  @param file The file
+--- Returns the number of bytes added,
+--  If the <code>file parameter is omitted, the total number of lines
+--  removed is being returned
+--  @param file An optional file name
 function bytes_added(file)
 
---- Returns the number of lines added
---  @param file The file
+--- Returns the number of lines removed,
+--  If the <code>file parameter is omitted, the total number of lines
+--  removed is being returned
+--  @param file An optional file name
 function lines_removed(file)
 
---- Returns the number of bytes added
---  @param file The file
+--- Returns the number of bytes removed.
+--  If the <code>file parameter is omitted, the total number of lines
+--  removed is being returned
+--  @param file An optional file name
 function bytes_removed(file)

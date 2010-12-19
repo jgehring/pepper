@@ -7,6 +7,6 @@
 
 AT_BANNER([Diffstat tests])
 
-AT_SETUP([Original diffstat cases])
+AT_SETUP([Sample diffstats from git and svn])
 AT_CHECK([perl $top_srcdir/tests/test_diffstat.pl $top_srcdir/tests/diffstat/data], [0], [stdout], [stderr])
 AT_CLEANUP()
