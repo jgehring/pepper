@@ -41,7 +41,7 @@ INCLUDES = \
 	-I@top_srcdir@/src/syslib
 AM_CPPFLAGS = \
 	$(LUA_INCLUDE) \
-	-DPREFIX=\"@prefix@\"
+	-DDATADIR=\"@pkgdatadir@\"
 AM_LDFLAGS = \
 	$(PTHREAD_LIBS) \
 	$(LUA_LIB) \

@@ -246,7 +246,7 @@ std::string findScript(const std::string &script)
 		return script + ".lua";
 	}
 #ifdef PREFIX
-	std::string builtin = std::string(PREFIX) + "/" + PACKAGE + "/reports/" + script;
+	std::string builtin = std::string(DATADIR) + script;
 	if (sys::fs::exists(builtin)) {
 		return builtin;
 	}
