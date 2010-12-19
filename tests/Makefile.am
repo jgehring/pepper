@@ -48,6 +48,8 @@ EXTRA_DIST = \
 
 TESTSUITE = $(srcdir)/testsuite
 
+DISTCLEANFILES = atconfig
+
 check-local: atconfig atlocal $(TESTSUITE)
 	$(SHELL) '$(TESTSUITE)' $(TESTSUITEFLAGS)
 

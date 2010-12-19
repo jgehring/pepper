@@ -56,7 +56,7 @@ switches for the configuration script are given in brackets.
 	The Git backend uses popen() to communicate with the git command 
 	line client.
 
-	* Subversion (--[en|dis]able-subversion)
+	* Subversion (--[en|dis]able-svn)
 	This backend uses the Subversion C API to access the respective
 	repositories. All access methods provided by the API are supported,
 	e.g. file://, http:// or svn://.
