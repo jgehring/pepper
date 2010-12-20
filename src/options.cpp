@@ -65,7 +65,7 @@ bool Options::backendListRequested() const
 
 bool Options::scriptListRequested() const
 {
-	return m_options["list_scripts"] == "true";
+	return m_options["list_reports"] == "true";
 }
 
 bool Options::useCache() const
