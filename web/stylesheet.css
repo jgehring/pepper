@@ -1,0 +1,58 @@
+body {
+	margin: 10px 40px 4px 40px;
+	background-image: url("background.png");
+	background-repeat: no-repeat;
+	background-color: #E7E7E7;
+}
+
+h2 {
+	text-align: center;
+}
+
+h5 {
+  padding-left: 8px;
+  border-left: solid #8F7A71 0.5em;
+  margin-bottom: 0.6em;
+  font-size: 1.3em;
+}
+
+h5 code {
+}
+
+h5 a {
+  font-weight: normal;
+}
+
+div.body {
+	padding: 10px;
+	border: 1px solid #000000;
+	background-color: #FFFFFF;
+}
+
+div.sflogo {
+	border: 1px solid #000000;
+	float: right;
+}
+
+div.index {
+	margin: 1px;
+	float: left;
+}
+
+div.main {
+	clear: both;
+}
+
+a {
+	text-decoration: none;
+	font-weight: bold;
+}
+
+img {
+	border: none;
+}
+
+ul {
+	padding-left: 30px;
+	list-style-type: disc;
+}

@@ -3,9 +3,9 @@ pepper - SCM statistics report generator
 
 About
 -----
-pepper is a statistics report generator for source code management
-software. It can be used to create graphical or textual representations
-of code repositories in a platform-independent manner.
+pepper is a flexible statistics generator for source code management
+repositories. It can be used to create graphical or textual reports,
+independent from the actual SCM software used.
 
 
 Requirements
@@ -29,7 +29,7 @@ Additionally, the following programs may be required at runtime:
 
 pepper has been written in hopefully platform-independent manner,
 and should compile and run on all major Unix platforms, e.g. Linux,
-BSD and Mac OS X. I'm not planning to port the software to Windows myself.
+BSD and Mac OS X. I'm not planning to work too hard on a Windows port.
 
 
 Compilation
@@ -74,7 +74,7 @@ switches for the configuration script are given in brackets.
 Optional features
 -----------------
 Several additional, optional features are available (see the CREDITS
-file for more information about the respective libaries)
+file for more information about the respective libraries)
 
 	* Gnuplot interface (--[en|dis]able-gnuplot)
 	A Lua interface to Gnuplot. Reports can use it to plot data
@@ -111,3 +111,6 @@ listing of them:
 
 	* shortlog
 	Prints a revision log to stdout, similar to "git shortlog".
+
+	* diffstat
+	Prints a diffstat of a given revision

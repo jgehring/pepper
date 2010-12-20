@@ -1,10 +1,10 @@
 pepper - SCM statistics report generator
 ========================================
 
-pepper utilizes several third-party libraries which are shipped with the
-source code distribution. They can be found at src/3rdparty with their
-respective READMEs and License files. For the sake of credit and completeness,
-here's a brief alphabetical listing:
+pepper utilizes several third-party libraries which are shipped with
+the source code distribution. They can be found at src/3rdparty with
+their respective READMEs and License files. For the sake of credit and
+completeness, here's a brief alphabetical listing:
 
 	* gnuplot-cpp, C++ interface to Gnuplot via POSIX threads
 	  Author: Jeremy Conlin (current maintainer)
@@ -20,3 +20,9 @@ here's a brief alphabetical listing:
 	  Author: Ivan Zahariev (famzah)
 	  License: GNU General Public License v3
 	  http://code.google.com/p/popen-noshell
+
+The background image used on the pepper website
+(http://pepper-scm.sf.net) is derived work from
+http://en.wikipedia.org/wiki/File:4_color_mix_of_peppercorns.jpg, and
+therefore licensed under the Creative Commons Attribution-Share Alike
+1.0 Generic license.
