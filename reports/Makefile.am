@@ -8,5 +8,6 @@ dist_pkgdata_DATA = \
 	authors.lua \
 	branches.lua \
 	commits_per_month.lua \
+	diffstat.lua \
 	loc.lua \
 	shortlog.lua
