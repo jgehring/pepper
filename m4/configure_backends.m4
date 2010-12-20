@@ -58,7 +58,7 @@ AC_DEFUN([BACKENDS_CHECK], [
 	fi
 
 	if test "x$mercurial" != "xno"; then
-		AX_PYTHON_DEVEL([>= '2.1'])
+		AX_PYTHON_DEVEL([>= '2.1'], "$mercurial")
 		if test "x$python_found" != "xyes"; then
 			if test "x$mercurial" != "xauto"; then
 				AC_MSG_ERROR([Python could not be located. Please use the PYTHON_VERSION variable.])
