@@ -14,7 +14,3 @@ LUADOCS = \
 	docs/lua/revision.luadoc
 luadoc: $(LUADOCS)
 	luadoc -d luadoc --nofiles $(LUADOCS)
-
-# Don't include my TODO file in the distribution
-dist-hook:
-	rm -f "$(distdir)/TODO"
