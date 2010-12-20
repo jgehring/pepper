@@ -34,11 +34,12 @@ static void printFooter()
 // Prints program usage information
 static void printHelp(const Options &opts)
 {
-	std::cout << "USAGE: " << PACKAGE_NAME << " [opts.] [backend] [backend opts.] <script> [script opts.] <repository>" << std::endl << std::endl;
+	std::cout << "USAGE: " << PACKAGE_NAME << " [options] [report] [report options] <repository>" << std::endl << std::endl;
 
 	std::cout << "Main options:" << std::endl;
 	Options::print("-h, --help, -?", "Print basic usage information");
 	Options::print("--version", "Print version information");
+	Options::print("-bARG, --backend=ARG", "Force usage of backend named ARG");
 	Options::print("--no-cache", "Disable revision cache usage");
 	std::cout << std::endl;
 	Options::print("--list-reports", "List built-in report scrtips");

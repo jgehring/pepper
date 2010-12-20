@@ -17,6 +17,8 @@
 
 #include "options.h"
 
+typedef std::map<std::string, std::string> stringmap;
+
 
 // Constructor
 Options::Options()
@@ -83,7 +85,7 @@ std::string Options::cacheDir() const
 
 std::string Options::forcedBackend() const
 {
-	return m_options["forced_backend"];
+	return m_options["backend"];
 }
 
 std::string Options::repoUrl() const
@@ -91,9 +93,9 @@ std::string Options::repoUrl() const
 	return m_options["url"];
 }
 
-std::map<std::string, std::string> Options::backendOptions() const
+std::map<std::string, std::string> Options::options() const
 {
-	return m_backendOptions;
+	return m_options;
 }
 
 std::string Options::script() const
@@ -128,7 +130,6 @@ void Options::print(const std::string &option, const std::string &text, std::ost
 void Options::reset()
 {
 	m_options.clear();
-	m_backendOptions.clear();
 	m_scriptOptions.clear();
 
 	m_options["cache"] = "true";
@@ -146,46 +147,65 @@ void Options::reset()
 // The actual parsing
 void Options::parse(const std::vector<std::string> &args)
 {
-	enum optmode { MAIN, BACKEND, SCRIPT, URL };
-	int mode = URL;
-	std::string key, value;
-	for (int i = (int)args.size()-1; i >= 0; i--) {
-		if (args[i] == "-?" || args[i] == "-h" || args[i] == "--help") {
-			m_options["help"] = "true";
-		} else if (args[i] == "--version") {
-			m_options["version"] = "true";
-		} else if (mode == URL && args[i].compare(0, 1, "-")) {
-			m_options["url"] = makeAbsolute(args[i]);
-			--mode;
-		} else if (mode == SCRIPT) {
-			if (parseOpt(args[i], &key, &value)) {
-				m_scriptOptions[key] = value;
-			} else {
-				m_options["script"] = args[i];
-				--mode;
-			}
+	struct option_t {
+		const char *flag, *key, *value;
+	} static mainopts[] = {
+		{"-?", "help", "true"},
+		{"-h", "help", "true"},
+		{"--help", "help", "true"},
+		{"--version", "version", "true"},
+		{"--no-cache", "cache", "false"},
+		{"--check-cache", "check_cache", "true"},
+		{"--list-backends", "list_backends", "true"},
+		{"--list-reports", "list_reports", "true"}
+	};
 
-		// Main options
-		} else if (args[i] == "--no-cache") {
-			m_options["cache"] = "false";
-		} else if (args[i] == "--check-cache") {
-			m_options["check_cache"] = "true";
-		} else if (args[i] == "--list-backends") {
-			m_options["list_backends"] = "true";
-		} else if (args[i] == "--list-reports") {
-			m_options["list_scripts"] = "true";
-		} else if (args[i] == "-v" || args[i] == "--verbose") {
-			Logger::setLevel(Logger::level()+1);
-		} else if (args[i] == "-q" || args[i] == "--quiet") {
-			Logger::setLevel(Logger::None);
-		} else if (mode == BACKEND) {
-			if (parseOpt(args[i], &key, &value)) {
-				m_backendOptions[key] = value;
-			} else {
-				m_options["forced_backend"] = args[i];
-				--mode;
+	unsigned int i = 0;
+	std::string key, value;
+
+	// Parse main options
+	while (i < args.size()) {
+		bool ok = false;
+		for (unsigned int j = 0; j < sizeof(mainopts) / sizeof(option_t); j++) {
+			if (args[i] == mainopts[j].flag) {
+				m_options[mainopts[j].key] = mainopts[j].value;
+				ok = true;
+				break;
 			}
 		}
+
+		if (!ok) {
+			if (args[i] == "-v" || args[i] == "--verbose") {
+				Logger::setLevel(Logger::level()+1);
+			} else if (args[i] == "-q" || args[i] == "--quiet") {
+				Logger::setLevel(Logger::None);
+			} else if (parseOpt(args[i], &key, &value)) {
+				if (key == "b") {
+					key = "backend";
+				}
+				m_options[key] = value;
+			} else {
+				m_options[(i == args.size()-1 ? "url" : "script")] = args[i];
+				++i;
+				break;
+			}
+		}
+		++i;
+	}
+
+	// Parse script options
+	while (i < args.size()) {
+		if (parseOpt(args[i], &key, &value)) {
+			m_scriptOptions[key] = value;
+		} else {
+			break;
+		}
+		++i;
+	}
+
+	// Repository URL
+	if (i < args.size()) {
+		m_options["url"] = args[i];
 	}
 }
 

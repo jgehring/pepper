@@ -39,7 +39,7 @@ class Options
 
 		std::string forcedBackend() const;
 		std::string repoUrl() const;
-		std::map<std::string, std::string> backendOptions() const;
+		std::map<std::string, std::string> options() const;
 
 		std::string script() const;
 		std::map<std::string, std::string> scriptOptions() const;
@@ -54,7 +54,7 @@ class Options
 
 	PEPPER_PVARS
 		mutable std::map<std::string, std::string> m_options;
-		mutable std::map<std::string, std::string> m_backendOptions, m_scriptOptions;
+		std::map<std::string, std::string> m_scriptOptions;
 };
 
 

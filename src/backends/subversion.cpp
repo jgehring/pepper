@@ -539,7 +539,7 @@ void SubversionBackend::init()
 	if (!url.compare(0, 1, "/")) {
 		url = std::string("file://") + url;
 	}
-	d->open(url, m_opts.backendOptions());
+	d->open(url, m_opts.options());
 }
 
 // Returns true if this backend is able to access the given repository

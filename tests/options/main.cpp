@@ -24,13 +24,11 @@ struct testdata_t {
 	char **args;
 	stringmap options;
 	stringmap scriptOptions;
-	stringmap backendOptions;
 
 	testdata_t() { }
 	testdata_t(const Options &defaults) {
 		options = defaults.m_options;
 		scriptOptions = defaults.m_scriptOptions;
-		backendOptions = defaults.m_backendOptions;
 	}
 };
 
@@ -90,33 +88,45 @@ static std::vector<testdata_t> setupTestData()
 	tests.push_back(script);
 
 	testdata_t backend(defaults);
-	backend.args = setupArgs(4, "svn", "authors", "-tpng", "http://svn.example.org");
-	backend.options["forced_backend"] = "svn";
+	backend.args = setupArgs(4, "-bsvn", "authors", "-tpng", "http://svn.example.org");
+	backend.options["backend"] = "svn";
 	backend.options["script"] = "authors";
 	backend.options["url"] = "http://svn.example.org";
 	backend.scriptOptions["t"] = "png";
 	tests.push_back(backend);
 
 	testdata_t backend2(defaults);
-	backend2.args = setupArgs(6, "svn", "--username=test", "--non-interactive", "authors", "-tpng", "http://svn.example.org");
-	backend2.options["forced_backend"] = "svn";
+	backend2.args = setupArgs(6, "--backend=svn", "--username=test", "--non-interactive", "authors", "-tpng", "http://svn.example.org");
+	backend2.options["backend"] = "svn";
 	backend2.options["script"] = "authors";
 	backend2.options["url"] = "http://svn.example.org";
 	backend2.scriptOptions["t"] = "png";
-	backend2.backendOptions["username"] = "test";
-	backend2.backendOptions["non-interactive"] = std::string();
+	backend2.options["username"] = "test";
+	backend2.options["non-interactive"] = std::string();
 	tests.push_back(backend2);
 
 	testdata_t full(defaults);
-	full.args = setupArgs(8, "-v", "--no-cache", "svn", "--username=test", "--non-interactive", "authors", "-tpng", "http://svn.example.org");
-	full.options["forced_backend"] = "svn";
+	full.args = setupArgs(8, "-v", "--no-cache", "-bsvn", "--username=test", "--non-interactive", "authors", "-tpng", "http://svn.example.org");
+	full.options["backend"] = "svn";
 	full.options["cache"] = "false";
 	full.options["script"] = "authors";
 	full.options["url"] = "http://svn.example.org";
 	full.scriptOptions["t"] = "png";
-	full.backendOptions["username"] = "test";
-	full.backendOptions["non-interactive"] = std::string();
+	full.options["username"] = "test";
+	full.options["non-interactive"] = std::string();
 	tests.push_back(full);
+
+	testdata_t ccheck(defaults);
+	ccheck.args = setupArgs(2, "--check-cache", "http://svn.example.org");
+	ccheck.options["check_cache"] = "true";
+	ccheck.options["url"] = "http://svn.example.org";
+	tests.push_back(ccheck);
+
+	testdata_t bhelp(defaults);
+	bhelp.args = setupArgs(2, "-bsvn", "-h");
+	bhelp.options["backend"] = "svn";
+	bhelp.options["help"] = "true";
+	tests.push_back(bhelp);
 
 	return tests;
 }
@@ -151,15 +161,11 @@ int main(int, char **)
 		while (data[i].args[argc++] != NULL);
 		opts.parse(argc-1, data[i].args);
 
-		if (!std::equal(opts.m_options.begin(), opts.m_options.end(), data[i].options.begin())) {
+		if (opts.m_options.size() != data[i].options.size() || !std::equal(opts.m_options.begin(), opts.m_options.end(), data[i].options.begin())) {
 			std::cerr << std::endl << i << ": Error: Options don't match!" << std::endl;
 			compare(opts.m_options, data[i].options);
 			ok = false;
-		} else if (!std::equal(opts.m_backendOptions.begin(), opts.m_backendOptions.end(), data[i].backendOptions.begin())) {
-			std::cerr << std::endl << i << ": Error: Backed options don't match!" << std::endl;
-			compare(opts.m_backendOptions, data[i].backendOptions);
-			ok = false;
-		} else if (!std::equal(opts.m_scriptOptions.begin(), opts.m_scriptOptions.end(), data[i].scriptOptions.begin())) {
+		} else if (opts.m_scriptOptions.size() != data[i].scriptOptions.size() || !std::equal(opts.m_scriptOptions.begin(), opts.m_scriptOptions.end(), data[i].scriptOptions.begin())) {
 			std::cerr << std::endl << i << ": Error: Script options don't match!" << std::endl;
 			compare(opts.m_scriptOptions, data[i].scriptOptions);
 			ok = false;
