@@ -95,19 +95,34 @@ fi
 
 AX_PTHREAD()
 
-AX_WITH_LUA()
-if test "x$LUA" = "x"; then
+LUA_SUFFIXES="$with_lua_suffix"
+if test "x$LUA_SUFFIXES" = "x"; then
+	LUA_SUFFIXES="'' 51 5.1"
+fi
+LUA_FOUND="no"
+for with_lua_suffix in $LUA_SUFFIXES; do
+	AX_WITH_LUA()
+	if test "x$LUA" = "x"; then
+		continue
+	fi
+	AX_LUA_VERSION([501])
+	AX_LUA_HEADERS()
+	AX_LUA_HEADERS_VERSION([501])
+	if test "x$LUA_HEADERS_IN_RANGE" != "xyes"; then
+		continue
+	fi
+	AX_LUA_LIBS()
+	if test "x$LUA_LIB" = "x"; then
+		continue
+	fi
+	AC_SUBST([LUA_INCLUDE])
+	AC_SUBST([LUA_LIB])
+	LUA_FOUND="yes"
+	break
+done
+if test "x$LUA_FOUND" = "xno"; then
 	AC_MSG_ERROR([Lua could not be found. Please use the --with-lua-prefix option.])
 fi
-AX_LUA_VERSION([501])
-AX_LUA_HEADERS()
-AX_LUA_HEADERS_VERSION([501])
-AX_LUA_LIBS()
-if test "x$LUA_LIB" = "x"; then
-	AC_MSG_ERROR([Lua could not be found. Please use the --with-lua-prefix option.])
-fi
-AC_SUBST([LUA_INCLUDE])
-AC_SUBST([LUA_LIB])
 
 CHECK_ZLIB()
 

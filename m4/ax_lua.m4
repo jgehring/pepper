@@ -186,6 +186,7 @@ AC_DEFUN([AX_LUA_HEADERS_VERSION],
   LUA_OLD_LIBS="$LIBS"
   LIBS="$LIBS $LUA_LIB"
   LUA_OLD_CPPFLAGS="$CPPFLAGS"
+  LUA_HEADERS_IN_RANGE="yes",
   CPPFLAGS="$CPPFLAGS $LUA_INCLUDE"
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <lua.h>
@@ -199,9 +200,9 @@ int main()
   exit(EXIT_FAILURE);
 }
 ]])],
-  [AC_MSG_RESULT([yes])],
-  [AC_MSG_RESULT([no])
-  AC_MSG_FAILURE([lua.h version not in desired range])])
+  [AC_MSG_RESULT([yes])
+LUA_HEADERS_IN_RANGE="yes"],
+  [AC_MSG_RESULT([no])])
   LIBS="$LUA_OLD_LIBS"
   CPPFLAGS="$LUA_OLD_CPPFLAGS"])dnl
 
