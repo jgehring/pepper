@@ -15,7 +15,7 @@ third-party software:
 
 	* zlib
 	* POSIX threads
-	* Lua
+	* Lua >= 5.1
 
 The following dependencies are optional:
 
