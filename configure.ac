@@ -55,7 +55,7 @@ AC_CHECK_HEADER([CoreServices/CoreServices.h],
 
 AC_TYPE_UINT64_T()
 
-if test "x$popen_noshell" == "xyes"; then
+if test "x$popen_noshell" = "xyes"; then
 	AC_TYPE_PID_T()
 	AC_TYPE_SIZE_T()
 fi
@@ -68,7 +68,7 @@ fi
 AC_CHECK_HEADERS([sys/time.h])
 AC_HEADER_STDBOOL()
 
-if test "x$popen_noshell" == "xyes"; then
+if test "x$popen_noshell" = "xyes"; then
 	AC_CHECK_HEADERS([fcntl.h])
 fi
 
@@ -81,7 +81,7 @@ AC_FUNC_MALLOC()
 AC_FUNC_MKTIME()
 AC_CHECK_FUNCS([atexit getcwd gettimeofday memmove mkdir realpath setenv strtol strchr])
 
-if test "x$popen_noshell" == "xyes"; then
+if test "x$popen_noshell" = "xyes"; then
 	AC_CHECK_FUNCS([strdup dup2 memset])
 	AC_FUNC_ALLOCA()
 	AC_FUNC_REALLOC()

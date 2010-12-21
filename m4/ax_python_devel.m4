@@ -306,7 +306,7 @@ dynamic libraries enabled, or try setting PYTHON_LDFLAGS by hand.
 		AC_MSG_RESULT([$pythonexists])
 
 		if test ! "x$pythonexists" = "xyes"; then
-			if test "x[$2]" == "xyes"; then
+			if test "x[$2]" = "xyes"; then
 				AC_MSG_FAILURE([
 Could not link test program to Python. Maybe the main Python library has been
 installed in some non-standard library path. If so, pass it to configure,
