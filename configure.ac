@@ -97,10 +97,13 @@ AX_PTHREAD()
 
 LUA_SUFFIXES="$with_lua_suffix"
 if test "x$LUA_SUFFIXES" = "x"; then
-	LUA_SUFFIXES="'' 51 5.1"
+	LUA_SUFFIXES="- 51 5.1"
 fi
 LUA_FOUND="no"
 for with_lua_suffix in $LUA_SUFFIXES; do
+	if test "$with_lua_suffix" = "-"; then
+		with_lua_suffix=""
+	fi
 	AX_WITH_LUA()
 	if test "x$LUA" = "x"; then
 		continue
