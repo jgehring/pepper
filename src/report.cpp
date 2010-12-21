@@ -262,8 +262,8 @@ std::string findScript(const std::string &script)
 	if (sys::fs::exists(script + ".lua")) {
 		return script + ".lua";
 	}
-#ifdef PREFIX
-	std::string builtin = std::string(DATADIR) + script;
+#ifdef DATADIR
+	std::string builtin = std::string(DATADIR) + "/" + script;
 	if (sys::fs::exists(builtin)) {
 		return builtin;
 	}
