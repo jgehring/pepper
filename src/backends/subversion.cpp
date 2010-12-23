@@ -102,6 +102,8 @@ public:
 			throw PEX("Parent connection not open yet.");
 		}
 
+		PTRACE << "Opening child connection to " << parent->url << endl;
+
 		pool = svn_pool_create(NULL);
 		init();
 
@@ -270,55 +272,60 @@ public:
 		delete d;
 	}
 
+	static Diffstat diffstat(const std::string &url, svn_revnum_t revision, svn_client_ctx_t *ctx, apr_pool_t *pool)
+	{
+		if (revision <= 0) {
+			return Diffstat();
+		}
+
+		svn_opt_revision_t rev1, rev2;
+		rev1.kind = rev2.kind = svn_opt_revision_number;
+		rev2.value.number = revision;
+		rev1.value.number = rev2.value.number - 1;
+
+		apr_file_t *infile = NULL, *outfile = NULL, *errfile = NULL;
+		apr_file_open_stderr(&errfile, pool);
+		if (apr_file_pipe_create(&infile, &outfile, pool) != APR_SUCCESS) {
+			throw PEX("Unable to create pipe for reading diff data");
+		}
+
+		AprStreambuf buf(infile);
+		std::istream in(&buf);
+		DiffParser parser(in);
+		parser.start();
+
+		PTRACE << "Fetching diffstat for revision " << revision << endl;
+
+		svn_error_t *err = svn_client_diff4(apr_array_make(pool, 0, 1), url.c_str(), &rev1, url.c_str(), &rev2, NULL, svn_depth_infinity, FALSE, FALSE, FALSE, APR_LOCALE_CHARSET, outfile, errfile, NULL, ctx, pool);
+		if (err != NULL) {
+			apr_file_close(outfile);
+			apr_file_close(infile);
+			throw PEX(utils::strprintf("Diffstat fetching of revision %ld failed: %s", revision, SvnConnection::strerr(err).c_str()));
+		}
+
+		apr_file_close(outfile);
+		parser.wait();
+		apr_file_close(infile);
+		return parser.stat();
+	}
+
 protected:
 	void run()
 	{
 		apr_pool_t *pool = svn_pool_create(d->pool);
-		svn_opt_revision_t rev1, rev2;
-		rev1.kind = rev2.kind = svn_opt_revision_number;
-
 		svn_revnum_t revision;
 		while (m_queue->getArg(&revision)) {
 			apr_pool_t *subpool = svn_pool_create(pool);
 
-			rev2.value.number = revision;
-			rev1.value.number = rev2.value.number - 1;
-			if (rev2.value.number <= 0) {
-				m_queue->done(revision, Diffstat());
-				continue;
-			}
-
-			apr_file_t *infile = NULL, *outfile = NULL, *errfile = NULL;
-			apr_file_open_stderr(&errfile, subpool);
-			if (apr_file_pipe_create(&infile, &outfile, subpool) != APR_SUCCESS) {
-				Logger::err() << "Error: Unable to create pipe for reading diff data" << endl;
+			Diffstat stat;
+			try {
+				stat = diffstat(d->url, revision, d->ctx, subpool);
+				m_queue->done(revision, stat);
+			} catch (const Pepper::Exception &ex) {
+				Logger::err() << "Error: " << ex.where() << ": " << ex.what() << endl;
 				m_queue->failed(revision);
-				svn_pool_destroy(subpool);
-				continue;
 			}
 
-			AprStreambuf buf(infile);
-			std::istream in(&buf);
-			DiffParser parser(in);
-			parser.start();
-
-			PTRACE << "Fetching diffstat for revision " << revision << endl;
-
-			svn_error_t *err = svn_client_diff4(apr_array_make(subpool, 0, 1), d->url, &rev1, d->url, &rev2, NULL, svn_depth_infinity, FALSE, FALSE, FALSE, APR_LOCALE_CHARSET, outfile, errfile, NULL, d->ctx, subpool);
-			if (err != NULL) {
-				Logger::err() << "Error: Diffstat fetching failed: " << SvnConnection::strerr(err) << endl;
-				svn_error_clear(err);
-				m_queue->failed(revision);
-				apr_file_close(outfile);
-				apr_file_close(infile);
-				svn_pool_destroy(subpool);
-				continue;
-			}
-
-			apr_file_close(outfile);
-			parser.wait();
-			m_queue->done(revision, parser.stat());
-			apr_file_close(infile);
 			svn_pool_destroy(subpool);
 		}
 		svn_pool_destroy(pool);
@@ -668,40 +675,12 @@ Diffstat SubversionBackend::diffstat(const std::string &id)
 
 	PDEBUG << "Fetching revision " << id << " manually" << endl;
 
-	// First, produce diff of previous revision and this one and save it in a
-	// temporary file
-	apr_pool_t *pool = svn_pool_create(d->pool);
-
-	svn_opt_revision_t rev1, rev2;
-	rev1.kind = rev2.kind = svn_opt_revision_number;
-	utils::str2int(id, (long int *)&(rev2.value.number));
-	if (rev2.value.number <= 0) {
-		svn_pool_destroy(pool);
-		return Diffstat();
-	}
-	rev1.value.number = rev2.value.number - 1;
-
-	apr_file_t *infile = NULL, *outfile = NULL, *errfile = NULL;
-	apr_file_open_stderr(&errfile, pool);
-	if (apr_file_pipe_create(&infile, &outfile, pool) != APR_SUCCESS) {
-		throw PEX("Unable to create pipe");
-	}
-
-	AprStreambuf buf(infile);
-	std::istream in(&buf);
-	DiffParser parser(in);
-	parser.start();
-
-	svn_error_t *err = svn_client_diff4(apr_array_make(pool, 0, 1), d->url, &rev1, d->url, &rev2, NULL, svn_depth_infinity, FALSE, FALSE, FALSE, APR_LOCALE_CHARSET, outfile, errfile, NULL, d->ctx, pool);
-	if (err != NULL) {
-		throw PEX(SvnConnection::strerr(err));
-	}
-
-	apr_file_close(outfile);
-	parser.wait();
-	apr_file_close(infile);
-	svn_pool_destroy(pool);
-	return parser.stat();
+	apr_pool_t *subpool = svn_pool_create(d->pool);
+	svn_revnum_t revision;
+	utils::str2int(id, &revision);
+	Diffstat stat = SvnDiffstatThread::diffstat(d->url, revision, d->ctx, subpool);
+	svn_pool_destroy(subpool);
+	return stat;
 }
 
 // Returns a log iterator for the given branch
