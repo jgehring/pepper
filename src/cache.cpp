@@ -282,6 +282,8 @@ void Cache::check()
 		throw PEX(utils::strprintf("Unkown cache version number %u", version));
 	}
 
+	Logger::status() << "Checking all indexed revisions... " << ::flush;
+
 	std::string id;
 	std::pair<uint32_t, uint32_t> pos;
 	uint32_t crc;
@@ -330,6 +332,8 @@ void Cache::check()
 	}
 	delete cache_in;
 	delete in;
+
+	Logger::status() << "done" << endl;
 
 	timeval c;
 	gettimeofday(&c, NULL);	
