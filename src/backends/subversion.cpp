@@ -499,10 +499,10 @@ void SubversionBackend::SvnLogIterator::run()
 	for (unsigned int i = 0; i < baton.temp.size(); i++) {
 		m_ids.push_back(baton.temp[i]);
 	}
+	m_finished = true;
 	m_cond.wakeAll();
 	m_mutex.unlock();
 
-	m_finished = true;
 	svn_pool_destroy(pool);
 }
 
