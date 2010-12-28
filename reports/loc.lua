@@ -1,5 +1,5 @@
 --[[
--- Generate LOC and BOC graphs
+	Generates a graph, representing Lines of Code over time.
 --]]
 
 
@@ -16,10 +16,7 @@ function count(r)
 	end
 
 	s = r:diffstat()
-	local delta = 0
-	for i,v in ipairs(s:files()) do
-		delta = delta + s:lines_added(v) - s:lines_removed(v)
-	end
+	local delta = s:lines_added() - s:lines_removed()
 
 	if locdeltas[r:date()] == nil then
 		locdeltas[r:date()] = delta
