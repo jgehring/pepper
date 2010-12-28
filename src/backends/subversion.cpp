@@ -486,7 +486,7 @@ void SubversionBackend::SvnLogIterator::run()
 	int64_t start = 0;
 	while (start < m_head-1) {
 		PDEBUG << "Fetching log from " << start << " to " << m_head << " with window size " << windowSize << endl;
-		svn_error_t *err = svn_ra_get_log2(d->ra, path, start, m_head, windowSize, FALSE, FALSE /* otherwise, copy history will be ignored */, FALSE, props, &logReceiver, &baton, pool);
+		svn_error_t *err = svn_ra_get_log2(d->ra, path, start, m_head, windowSize, FALSE, FALSE /* otherwise, copy history will be ignored */, FALSE, props, &logReceiver, &baton, subpool);
 		if (err != NULL) {
 			throw PEX(SvnConnection::strerr(err));
 		}
