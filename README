@@ -101,6 +101,10 @@ listing of them:
 	* branches
 	Prints all repository branches, similar to "git branch -a".
 
+	* commit_scatter
+	Generates a scatter plot visualizing commit activity per daytime.
+	The resulting file is called activity, e.g. "activity.png".
+
 	* commits_per_month
 	Displays a histogram of the commits during the last 12 months.
 	The resulting file is called cpm, e.g. "cpm.png".
