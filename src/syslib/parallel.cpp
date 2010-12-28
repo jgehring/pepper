@@ -111,40 +111,55 @@ void MutexLocker::unlock()
 
 // Constructor
 Thread::Thread()
-	: m_running(false), m_abort(false)
+	: m_running(0)
 {
 
+}
+
+// Destructor
+Thread::~Thread()
+{
+	if (running()) {
+		pthread_cancel(m_pth);
+	}
 }
 
 // Starts the thread
 void Thread::start()
 {
-	assert(m_running == false);
-	m_running = true;
+	m_mutex.lock();
+	assert(m_running == 0);
+	if (m_running != 0) {
+		return;
+	}
+	m_mutex.unlock();
 	pthread_create(&m_pth, NULL, &Thread::main, this);
 }
 
 // Blocks the current thread until this thread has finished
 void Thread::wait()
 {
-	if (m_running) {
+	if (running()) {
 		pthread_join(m_pth, 0);
-		m_running = false;
 	}
 }
 
 // Returns whether the thread is currently running
-bool Thread::running() const
+bool Thread::running()
 {
-	return m_running;
+	int t;
+	m_mutex.lock();
+	t = m_running;
+	m_mutex.unlock();
+	return (t != 0);
 }
 
-// Sets the abort flag
+// Aborts the thread
 void Thread::abort()
 {
-	m_mutex.lock();
-	m_abort = true;
-	m_mutex.unlock();
+	if (running()) {
+		pthread_cancel(m_pth);
+	}
 }
 
 // Sleeping
@@ -173,22 +188,30 @@ void Thread::msleep(int msecs)
 	pthread_mutex_destroy(&mtx);
 }
 
-// Checks if the abort flag is set
-bool Thread::abortFlag()
-{
-	bool t;
-	m_mutex.lock();
-	t = m_abort;
-	m_mutex.unlock();
-	return t;
-}
-
-// Executs the thread's run() function
+// Start function
 void *Thread::main(void *obj)
 {
-	reinterpret_cast<Thread *>(obj)->run();
-	reinterpret_cast<Thread *>(obj)->m_running = false;
+	reinterpret_cast<Thread *>(obj)->setupAndRun();
 	return NULL;
+}
+
+// Cleanup function
+void Thread::cleanup(void *obj)
+{
+	reinterpret_cast<Thread *>(obj)->m_mutex.lock();
+	reinterpret_cast<Thread *>(obj)->m_running = 0;
+	reinterpret_cast<Thread *>(obj)->m_mutex.unlock();
+}
+
+// Do initial setup and call run()
+void Thread::setupAndRun()
+{
+	m_mutex.lock();
+	m_running = 1;
+	pthread_cleanup_push(Thread::cleanup, this);
+	m_mutex.unlock();
+	run();
+	pthread_cleanup_pop(1);
 }
 
 

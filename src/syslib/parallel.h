@@ -59,28 +59,27 @@ class Thread
 {
 	public:
 		Thread();
-		virtual ~Thread() { }
+		virtual ~Thread();
 
 		void start();
 		void abort();
 		void wait();
-		bool running() const;
+		bool running();
 
 		static void msleep(int msecs);
 
 	protected:
 		virtual void run() = 0;
 
-		bool abortFlag();
-
 	private:
 		static void *main(void *obj);
+		static void cleanup(void *obj);
+		void setupAndRun();
 
 	private:
 		pthread_t m_pth;
-		volatile bool m_running;
+		volatile int m_running;
 		Mutex m_mutex;
-		bool m_abort;
 };
 
 
