@@ -94,10 +94,12 @@ int Plot::plot_series(lua_State *L)
 {
 	// Validate arguments
 	int index = -1;
-	if (lua_gettop(L) > 3) {
+	if (lua_gettop(L) > 4) {
 		return LuaHelpers::pushError(L, utils::strprintf("Invalid number of arguments (expected 2-3, got %d)", lua_gettop(L)));
 	}
+	std::string style = "lines";
 	switch (lua_gettop(L)) {
+		case 4: style = LuaHelpers::pops(L);
 		case 3: luaL_checktype(L, index--, LUA_TTABLE);
 		default:
 			luaL_checktype(L, index--, LUA_TTABLE);
@@ -165,7 +167,7 @@ int Plot::plot_series(lua_State *L)
 		} else {
 			cmd << " notitle";
 		}
-		cmd << " with lines";
+		cmd << " with " << style;
 		if (i < nseries-1) {
 			cmd << ", ";
 		}

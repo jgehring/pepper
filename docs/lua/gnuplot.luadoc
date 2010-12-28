@@ -26,7 +26,8 @@ function set_title(title)
 -- @param keys The array of X values
 -- @param values The array of Y values
 -- @param titles Optional titles for the series
-function plot_series(keys, values, titles)
+-- @param mode Optional style for plotting (defaults to <pre>lines</pre>)
+function plot_series(keys, values, titles, style)
 
 --- Finish plotting and restart the Gnuplot process
 function flush()
