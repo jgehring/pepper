@@ -37,7 +37,9 @@ class JobQueue
 		}
 
 		void stop() {
+			m_mutex.lock();
 			m_end = true;
+			m_mutex.unlock();
 			m_argWait.wakeAll();
 			m_resultWait.wakeAll();
 		}
