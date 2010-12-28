@@ -7,6 +7,7 @@
 dist_pkgdata_DATA = \
 	authors.lua \
 	branches.lua \
+	commit_scatter.lua \
 	commits_per_month.lua \
 	diffstat.lua \
 	loc.lua \
