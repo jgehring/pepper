@@ -24,6 +24,7 @@ int Logger::s_level = Logger::Debug;
 #else
 int Logger::s_level = Logger::None;
 #endif
+sys::parallel::Mutex Logger::s_mutex;
 
 
 // Constructor

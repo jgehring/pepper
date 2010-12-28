@@ -15,6 +15,8 @@
 
 #include "main.h"
 
+#include "syslib/parallel.h"
+
 // Easy logging
 #ifndef POS_WIN
  #define PDEBUG (Logger::debug() << __PRETTY_FUNCTION__ << " [" << __LINE__ << "]: ")
@@ -57,22 +59,30 @@ class Logger
 
 		template <typename T>
 		inline Logger &operator<<(const T &s) {
-			if (m_level <= s_level) *m_out << s;
+			if (m_level > s_level) return *this;
+			s_mutex.lock();
+			*m_out << s;
+			s_mutex.unlock();
 			return *this;
 		}
 
 		inline Logger &operator<<(std::ios_base& (* pf)(std::ios_base &)) {
-			if (m_level <= s_level) *m_out << pf;
+			if (m_level > s_level) return *this;
+			s_mutex.lock();
+			*m_out << pf;
+			s_mutex.unlock();
 			return *this;
 		}
 
 		inline Logger &operator<<(LogModifier mod) {
 			if (m_level > s_level) return *this;
+			s_mutex.lock();
 			switch (mod) {
 				case endl: *m_out << std::endl; break;
 				case ::flush: *m_out << std::flush; break;
 				default: break;
 			}
+			s_mutex.unlock();
 			return *this;
 		}
 
@@ -85,6 +95,7 @@ class Logger
 
 		static Logger *s_instances[NumLevels];
 		static int s_level;
+		static sys::parallel::Mutex s_mutex;
 };
 
 
