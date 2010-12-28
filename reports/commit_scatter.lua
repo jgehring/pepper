@@ -5,7 +5,7 @@
 
 -- Script meta-data
 meta.title = "Commit Scatter"
-meta.descritpion = "Scatter plot of commit activity"
+meta.description = "Scatter plot of commit activity"
 meta.options = {{"-bARG, --branch=ARG", "Select branch"},
                 {"-tARG, --type=ARG", "Select image type"}}
 
