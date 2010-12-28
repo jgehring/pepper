@@ -1,3 +1,10 @@
+2010-12-28  --  version 0.1.1
+
+	* Fixed running built-in reports without specifying the full path
+	* Fixed multi-threading issues
+	* Improved Lua detection in configuration
+	* Added status message for cache check
+
 2010-12-20  --  version 0.1
 
 	* Initial release
