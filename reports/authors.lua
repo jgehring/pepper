@@ -1,5 +1,5 @@
 --[[
--- Render LOC by author graph
+	Plots a graph visualizing the code contribution by author
 --]]
 
 

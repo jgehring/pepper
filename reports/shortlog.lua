@@ -1,5 +1,5 @@
 --[[
--- Generate a shortlog (like "git shortlog")
+	Generates a summarized revision log (like "git shortlog")
 --]]
 
 

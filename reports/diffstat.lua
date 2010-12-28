@@ -1,7 +1,7 @@
 --[[
--- Print diffstat for a specified revision
---
--- The histogram rendering is inspired by the git implementation
+	Prints diffstat for a specified revision
+
+	The histogram rendering is inspired by the git implementation
 --]]
 
 

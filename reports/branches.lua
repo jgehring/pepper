@@ -1,5 +1,5 @@
 --[[
--- Show repository branches, similar to "git branch -v"
+	Shows all branches and their current heads, similar to "git branch -v"
 --]]
 
 

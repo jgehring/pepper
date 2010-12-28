@@ -1,5 +1,5 @@
 --[[
-	Generates a graph, representing Lines of Code over time.
+	Generates a graph, representing lines of code over time.
 --]]
 
 

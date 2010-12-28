@@ -1,5 +1,5 @@
 --[[
--- Generate Commits per month graph
+	Generates a histogram using commits per month and the amount of files touched.
 --]]
 
 
