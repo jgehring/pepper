@@ -119,9 +119,7 @@ Thread::Thread()
 // Destructor
 Thread::~Thread()
 {
-	if (running()) {
-		pthread_cancel(m_pth);
-	}
+	assert(!running());
 }
 
 // Starts the thread

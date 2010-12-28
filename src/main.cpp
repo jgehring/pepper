@@ -187,12 +187,12 @@ int main(int argc, char **argv)
 	try {
 		ret = Report::run(opts.script(), backend);
 	} catch (const Pepper::Exception &ex) {
-		std::cerr << "Recevied exception while running report:" << std::endl;
+		std::cerr << "Recieved exception while running report:" << std::endl;
 		std::cerr << "  what(): " << ex.what() << std::endl;
 		std::cerr << "  where(): " << ex.where() << std::endl;
 		ret = EXIT_FAILURE;
 	} catch (const std::exception &ex) {
-		std::cerr << "Recevied exception while running report:" << std::endl;
+		std::cerr << "Recieved exception while running report:" << std::endl;
 		std::cerr << "  what(): " << ex.what() << std::endl;
 		ret = EXIT_FAILURE;
 	}
@@ -205,5 +205,8 @@ int main(int argc, char **argv)
 		streams[i]->close();
 		delete streams[i];
 	}
+
+	sighandler.abort();
+	sighandler.wait();
 	return ret;
 }
