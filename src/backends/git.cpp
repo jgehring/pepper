@@ -262,7 +262,7 @@ std::string GitBackend::mainBranch()
 	return "master";
 }
 
-// Returns a list of available branches
+// Returns a list of available local branches
 std::vector<std::string> GitBackend::branches()
 {
 	int ret;
