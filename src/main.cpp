@@ -155,7 +155,6 @@ int main(int argc, char **argv)
 	SignalHandler sighandler;
 
 	try {
-		backend->init();
 		if (opts.useCache()) {
 			Cache *cache = new Cache(backend, opts);
 			sighandler.setCache(cache);
@@ -174,6 +173,8 @@ int main(int argc, char **argv)
 			}
 
 			cache->init();
+		} else {
+			backend->init();
 		}
 	} catch (const Pepper::Exception &ex) {
 		std::cerr << "Error initializing backend: " << ex.where() << ": " << ex.what() << std::endl;

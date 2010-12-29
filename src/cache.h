@@ -25,7 +25,7 @@ class Cache : public Backend
 		Cache(Backend *backend, const Options &options);
 		~Cache();
 
-		void init() { load(); m_backend->init(); }
+		void init() { m_backend->init(); load(); }
 
 		std::string name() const { return m_backend->name(); }
 
