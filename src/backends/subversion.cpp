@@ -649,7 +649,6 @@ std::vector<std::string> SubversionBackend::branches()
 		const char *entry;
 		svn_dirent_t *dirent;
 		apr_hash_this(hi, (const void **)(void *)&entry, NULL, (void **)(void *)&dirent);
-		std::cout << entry << std::endl;
 		if (dirent->kind == svn_node_dir) {
 			branches.push_back(std::string(entry));
 		}
