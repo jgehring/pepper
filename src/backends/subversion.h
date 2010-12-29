@@ -54,6 +54,7 @@ class SubversionBackend : public Backend
 		std::string head(const std::string &branch = std::string());
 		std::string mainBranch();
 		std::vector<std::string> branches();
+		std::vector<Tag> tags();
 		Diffstat diffstat(const std::string &id);
 
 		LogIterator *iterator(const std::string &branch = std::string());

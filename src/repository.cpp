@@ -10,6 +10,7 @@
 #include "backend.h"
 #include "luahelpers.h"
 #include "options.h"
+#include "tag.h"
 
 #include "repository.h"
 
@@ -44,6 +45,7 @@ Lunar<Repository>::RegType Repository::methods[] = {
 	LUNAR_DECLARE_METHOD(Repository, head),
 	LUNAR_DECLARE_METHOD(Repository, main_branch),
 	LUNAR_DECLARE_METHOD(Repository, branches),
+	LUNAR_DECLARE_METHOD(Repository, tags),
 	{0,0}
 };
 
@@ -88,4 +90,22 @@ int Repository::branches(lua_State *L) {
 		return LuaHelpers::pushError(L, ex.what(), ex.what());
 	}
 	return LuaHelpers::push(L, b);
+}
+
+int Repository::tags(lua_State *L) {
+	if (m_backend == NULL) return LuaHelpers::pushNil(L);
+	std::vector<Tag> t;
+	try {
+		t = m_backend->tags();
+	} catch (const Pepper::Exception &ex) {
+		return LuaHelpers::pushError(L, ex.what(), ex.what());
+	}
+
+	lua_createtable(L, t.size(), 0);
+	int table = lua_gettop(L);
+	for (unsigned int i = 0; i < t.size(); i++) {
+		Lunar<Tag>::push(L, new Tag(t[i]), true);
+		lua_rawseti(L, table, i+1);
+	}
+	return 1;
 }

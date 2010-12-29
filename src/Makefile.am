@@ -21,6 +21,7 @@ pepper_SOURCES = \
 	revision.h revision.cpp \
 	revisioniterator.h revisioniterator.cpp \
 	signalhandler.h signalhandler.cpp \
+	tag.h tag.cpp \
 	utils.h utils.cpp \
 	\
 	syslib/fs.h syslib/fs.cpp \

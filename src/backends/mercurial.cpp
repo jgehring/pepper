@@ -108,6 +108,32 @@ std::vector<std::string> MercurialBackend::branches()
 	return branches;
 }
 
+// Returns a list of available tags
+std::vector<Tag> MercurialBackend::tags()
+{
+	// TODO: Determine correct keyword for non-quiet output, if any
+	PyRun_SimpleString("myui.quiet = False\n");
+	std::string out = hgcmd("tags");
+	PyRun_SimpleString("myui.quiet = True\n");
+
+	std::vector<std::string> lines = utils::split(out, "\n");
+	std::vector<Tag> tags;
+	for (unsigned int i = 0; i < lines.size(); i++) {
+		size_t pos = lines[i].find(" ");
+		if ((pos = lines[i].find(" ")) == std::string::npos) {
+			continue;
+		}
+		std::string name = lines[i].substr(0, pos);
+		if ((pos = lines[i].find(":", pos)) == std::string::npos) {
+			continue;
+		}
+		std::string id = lines[i].substr(pos+1);
+		tags.push_back(Tag(id, name));
+	}
+
+	return tags;
+}
+
 // Returns a diffstat for the specified revision
 Diffstat MercurialBackend::diffstat(const std::string &id)
 {

@@ -34,6 +34,7 @@ class Cache : public Backend
 		std::string head(const std::string &branch = std::string()) { return m_backend->head(branch); }
 		std::string mainBranch() { return m_backend->mainBranch(); }
 		std::vector<std::string> branches() { return m_backend->branches(); }
+		std::vector<Tag> tags() { return m_backend->tags(); }
 		Diffstat diffstat(const std::string &id);
 
 		LogIterator *iterator(const std::string &branch = std::string()) { return m_backend->iterator(branch); }

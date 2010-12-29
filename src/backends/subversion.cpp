@@ -660,6 +660,47 @@ std::vector<std::string> SubversionBackend::branches()
 	return branches;
 }
 
+// Returns a list of available tags
+std::vector<Tag> SubversionBackend::tags()
+{
+	// Assume the repository has a standard layout and tags can be found
+	// in "/tags/", if any
+	std::vector<Tag> tags;
+
+	apr_pool_t *pool = svn_pool_create(d->pool);
+
+	// Check if tags directoy is present
+	svn_dirent_t *dirent;
+	svn_error_t *err = svn_ra_stat(d->ra, "tags", SVN_INVALID_REVNUM, &dirent, pool);
+	if (err != NULL) {
+		throw PEX(SvnConnection::strerr(err));
+	}
+
+	if (dirent == NULL || dirent->kind != svn_node_dir) {
+		// No tags here
+		return tags;
+	}
+
+	// Get directory entries
+	apr_hash_t *dirents = apr_hash_make(pool), *props = apr_hash_make(pool);
+	err = svn_ra_get_dir2(d->ra, &dirents, NULL, &props, "tags", SVN_INVALID_REVNUM, SVN_DIRENT_KIND | SVN_DIRENT_CREATED_REV, pool);
+	if (err != NULL) {
+		throw PEX(SvnConnection::strerr(err));
+	}
+
+	for (apr_hash_index_t *hi = apr_hash_first(pool, dirents); hi; hi = apr_hash_next(hi)) {
+		const char *entry;
+		svn_dirent_t *dirent;
+		apr_hash_this(hi, (const void **)(void *)&entry, NULL, (void **)(void *)&dirent);
+		if (dirent->kind == svn_node_dir) {
+			tags.push_back(Tag(utils::int2str(dirent->created_rev), entry));
+		}
+	}
+
+	svn_pool_clear(pool);
+	return tags;
+}
+
 // Returns a diffstat for the specified revision
 Diffstat SubversionBackend::diffstat(const std::string &id)
 {

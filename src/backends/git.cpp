@@ -282,6 +282,34 @@ std::vector<std::string> GitBackend::branches()
 	return branches;
 }
 
+// Returns a list of available tags
+std::vector<Tag> GitBackend::tags()
+{
+	int ret;
+
+	// Fetch list of tag names
+	std::string out = sys::io::exec(&ret, "git", "tag");
+	if (ret != 0) {
+		throw PEX(utils::strprintf("Unable to retrieve the list of tags (%d)", ret));
+	}
+	std::vector<std::string> names = utils::split(out, "\n");
+	std::vector<Tag> tags;
+
+	// Determine corresponding commits
+	for (unsigned int i = 0; i < names.size(); i++) {
+		if (names[i].empty()) {
+			continue;
+		}
+
+		std::string out = sys::io::exec(&ret, "git", "rev-list", "-1", names[i].c_str());
+		if (ret != 0) {
+			throw PEX(utils::strprintf("Unable to retrieve the list of tags (%d)", ret));
+		}
+		tags.push_back(Tag(utils::trim(out), names[i]));
+	}
+	return tags;
+}
+
 // Returns a diffstat for the specified revision
 Diffstat GitBackend::diffstat(const std::string &id)
 {

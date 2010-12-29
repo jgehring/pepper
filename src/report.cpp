@@ -21,6 +21,7 @@
 #include "repository.h"
 #include "revision.h"
 #include "revisioniterator.h"
+#include "tag.h"
 #include "utils.h"
 
 #include "luahelpers.h"
@@ -243,6 +244,7 @@ lua_State *setupLua()
 	Lunar<Repository>::Register(L, "pepper");
 	Lunar<Revision>::Register(L, "pepper");
 	Lunar<Diffstat>::Register(L, "pepper");
+	Lunar<Tag>::Register(L, "pepper");
 #ifdef USE_GNUPLOT
 	Lunar<Plot>::Register(L, "pepper");
 #endif

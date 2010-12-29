@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "diffstat.h"
+#include "tag.h"
 
 #include "syslib/parallel.h"
 
@@ -58,6 +59,7 @@ class Backend
 		virtual std::string head(const std::string &branch = std::string()) = 0;
 		virtual std::string mainBranch() = 0;
 		virtual std::vector<std::string> branches() = 0;
+		virtual std::vector<Tag> tags() = 0;
 		virtual Diffstat diffstat(const std::string &id) = 0;
 
 		virtual LogIterator *iterator(const std::string &branch = std::string()) = 0;
