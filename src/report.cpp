@@ -3,7 +3,8 @@
  * Copyright (C) 2010 Jonas Gehring
  *
  * file: report.cpp
- * Lua interface for gathering repository data
+ * Report script access and invocation, as well as a Lua interface proiding
+ * main report actions
  */
 
 
@@ -32,7 +33,7 @@
 #include "report.h"
 
 
-namespace Report
+namespace report
 {
 
 // Global variables
@@ -281,8 +282,8 @@ int run(const std::string &script, Backend *backend)
 	lua_State *L = setupLua();
 
 	// Setup global variables
-	Report::repo = new Repository(backend);
-	Report::options = backend->options().scriptOptions();
+	report::repo = new Repository(backend);
+	report::options = backend->options().scriptOptions();
 
 	// Run the script
 	int ret = EXIT_SUCCESS;
@@ -305,7 +306,7 @@ int run(const std::string &script, Backend *backend)
 	// Clean up
 	lua_gc(L, LUA_GCCOLLECT, 0);
 	lua_close(L);
-	delete Report::repo;
+	delete report::repo;
 	return ret;
 }
 
@@ -407,4 +408,4 @@ void listReports(std::ostream &out)
 	}
 }
 
-} // namespace Report
+} // namespace report

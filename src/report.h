@@ -3,7 +3,7 @@
  * Copyright (C) 2010 Jonas Gehring
  *
  * file: report.h
- * Lua interface for gathering repository data (interface)
+ * Report script access and invocation (interface)
  */
 
 
@@ -20,7 +20,7 @@ class Backend;
 struct lua_State;
 
 
-namespace Report
+namespace report
 {
 
 int run(const std::string &script, Backend *backend);
@@ -29,7 +29,7 @@ void printHelp(const std::string &script);
 
 void listReports(std::ostream &out = std::cout);
 
-} // namespace Report
+} // namespace report
 
 
 #endif // REPORT_H_

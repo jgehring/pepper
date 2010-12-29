@@ -60,7 +60,7 @@ static void printHelp(const Options &opts)
 	if (!opts.script().empty()) {
 		std::cout << std::endl;
 		try {
-			Report::printHelp(opts.script());
+			report::printHelp(opts.script());
 		} catch (const Pepper::Exception &ex) {
 			std::cerr << ex.where() << ": " << ex.what() << std::endl;
 			return;
@@ -136,7 +136,7 @@ int main(int argc, char **argv)
 		printFooter();
 		return EXIT_SUCCESS;
 	} else if (opts.scriptListRequested()) {
-		Report::listReports();
+		report::listReports();
 		printFooter();
 		return EXIT_SUCCESS;
 	} else if (opts.repoUrl().empty() || (!opts.checkCache() && opts.script().empty())) {
@@ -185,7 +185,7 @@ int main(int argc, char **argv)
 
 	int ret;
 	try {
-		ret = Report::run(opts.script(), backend);
+		ret = report::run(opts.script(), backend);
 	} catch (const Pepper::Exception &ex) {
 		std::cerr << "Recieved exception while running report:" << std::endl;
 		std::cerr << "  what(): " << ex.what() << std::endl;
