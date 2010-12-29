@@ -638,8 +638,8 @@ std::vector<std::string> SubversionBackend::branches()
 	}
 
 	// Get directory entries
-	apr_hash_t *dirents = apr_hash_make(pool);
-	err = svn_ra_get_dir2(d->ra, &dirents, NULL, NULL, "branches", SVN_INVALID_REVNUM, SVN_DIRENT_KIND, pool);
+	apr_hash_t *dirents;
+	err = svn_ra_get_dir2(d->ra, &dirents, NULL, NULL, "branches", dirent->created_rev, SVN_DIRENT_KIND, pool);
 	if (err != NULL) {
 		throw PEX(SvnConnection::strerr(err));
 	}
@@ -682,8 +682,8 @@ std::vector<Tag> SubversionBackend::tags()
 	}
 
 	// Get directory entries
-	apr_hash_t *dirents = apr_hash_make(pool);
-	err = svn_ra_get_dir2(d->ra, &dirents, NULL, NULL, "tags", SVN_INVALID_REVNUM, SVN_DIRENT_KIND | SVN_DIRENT_CREATED_REV, pool);
+	apr_hash_t *dirents;
+	err = svn_ra_get_dir2(d->ra, &dirents, NULL, NULL, "tags", dirent->created_rev, SVN_DIRENT_KIND | SVN_DIRENT_CREATED_REV, pool);
 	if (err != NULL) {
 		throw PEX(SvnConnection::strerr(err));
 	}
