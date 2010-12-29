@@ -20,6 +20,7 @@
 #include <svn_path.h>
 #include <svn_pools.h>
 #include <svn_ra.h>
+#include <svn_sorts.h>
 #include <svn_time.h>
 #include <svn_utf.h>
 
@@ -209,8 +210,7 @@ class AprStreambuf : public std::streambuf
 {
 public:
 	explicit AprStreambuf(apr_file_t *file) 
-	   : std::streambuf(), f(file),
-	     m_putback(8), m_buffer(4096 + 8)
+		: std::streambuf(), f(file), m_putback(8), m_buffer(4096 + 8)
 	{
 		char *end = &m_buffer.front() + m_buffer.size();
 		setg(end, end, end);
@@ -688,12 +688,12 @@ std::vector<Tag> SubversionBackend::tags()
 		throw PEX(SvnConnection::strerr(err));
 	}
 
-	for (apr_hash_index_t *hi = apr_hash_first(pool, dirents); hi; hi = apr_hash_next(hi)) {
-		const char *entry;
-		svn_dirent_t *dirent;
-		apr_hash_this(hi, (const void **)(void *)&entry, NULL, (void **)(void *)&dirent);
+	apr_array_header_t *array = svn_sort__hash(dirents, &svn_sort_compare_items_lexically,  pool);
+	for (int i = 0; i < array->nelts; i++) {
+		svn_sort__item_t *item = &APR_ARRAY_IDX(array, i, svn_sort__item_t);
+		svn_dirent_t *dirent = (svn_dirent_t *)apr_hash_get(dirents, item->key, item->klen);
 		if (dirent->kind == svn_node_dir) {
-			tags.push_back(Tag(utils::int2str(dirent->created_rev), entry));
+			tags.push_back(Tag(utils::int2str(dirent->created_rev), (const char *)item->key));
 		}
 	}
 
