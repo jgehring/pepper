@@ -7,8 +7,8 @@
  */
 
 
-#ifndef SYS_THREAD_H_
-#define SYS_THREAD_H_
+#ifndef SYS_PARALLEL_H_
+#define SYS_PARALLEL_H_
 
 
 #include <string>
@@ -120,4 +120,4 @@ class Semaphore
 } // namespace sys
 
 
-#endif // SYS_THREAD_H_
+#endif // SYS_PARALLEL_H_

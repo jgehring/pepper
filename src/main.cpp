@@ -16,12 +16,29 @@
 
 #include "backend.h"
 #include "cache.h"
-#include "globals.h"
 #include "logger.h"
 #include "options.h"
 #include "report.h"
-#include "signalhandler.h"
 #include "utils.h"
+
+#include "syslib/sigblock.h"
+
+
+// Signal handler
+struct SignalHandler : public sys::sigblock::Handler
+{
+	SignalHandler(Cache *cache = NULL) : cache(cache) { }
+
+	void operator()(int signum)
+	{
+		if (cache) {
+			Logger::status() << "Catched signal " << signum << ", flushing cache" << endl;
+			cache->flush();
+		}
+	}
+
+	Cache *cache;
+};
 
 
 // Prints a short footer for help screens and listings
@@ -151,14 +168,13 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	// Setup signal handler thread
 	SignalHandler sighandler;
 
 	try {
 		if (opts.useCache()) {
 			Cache *cache = new Cache(backend, opts);
-			sighandler.setCache(cache);
 			backend = cache;
+			sighandler.cache = cache;
 
 			// Simple cache check?
 			if (opts.checkCache()) {
@@ -182,7 +198,8 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	sighandler.start();
+	int signums[] = {SIGINT, SIGTERM};
+	sys::sigblock::block(2, signums, &sighandler);
 
 	int ret;
 	try {
@@ -207,7 +224,5 @@ int main(int argc, char **argv)
 		delete streams[i];
 	}
 
-	sighandler.abort();
-	sighandler.wait();
 	return ret;
 }

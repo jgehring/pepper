@@ -15,7 +15,6 @@
 
 #include "backend.h"
 #include "diffstat.h"
-#include "globals.h"
 #include "logger.h"
 #include "options.h"
 #include "repository.h"

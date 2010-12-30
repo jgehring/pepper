@@ -10,7 +10,6 @@ pepper_SOURCES = \
 	bstream.h bstream.cpp \
 	cache.h cache.cpp \
 	diffstat.h diffstat.cpp \
-	globals.h globals.cpp \
 	jobqueue.h \
 	logger.h logger.cpp \
 	luahelpers.h \
@@ -20,13 +19,13 @@ pepper_SOURCES = \
 	repository.h repository.cpp \
 	revision.h revision.cpp \
 	revisioniterator.h revisioniterator.cpp \
-	signalhandler.h signalhandler.cpp \
 	tag.h tag.cpp \
 	utils.h utils.cpp \
 	\
 	syslib/fs.h syslib/fs.cpp \
 	syslib/io.h syslib/io.cpp \
 	syslib/parallel.h syslib/parallel.cpp \
+	syslib/sigblock.h syslib/sigblock.cpp \
 	\
 	3rdparty/lunar/lunar.h
 

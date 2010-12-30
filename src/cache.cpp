@@ -12,6 +12,8 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <signal.h>
+
 #include <sys/stat.h>
 #include <sys/time.h>
 
@@ -20,11 +22,12 @@
 #include "bstream.h"
 #include "diffstat.h"
 #include "fs.h"
-#include "globals.h"
 #include "logger.h"
 #include "options.h"
 #include "revision.h"
 #include "utils.h"
+
+#include "syslib/sigblock.h"
 
 #include "cache.h"
 
@@ -44,10 +47,8 @@ Cache::Cache(Backend *backend, const Options &options)
 // Destructor
 Cache::~Cache()
 {
+	flush();
 	delete m_backend;
-	delete m_iout;
-	delete m_cout;
-	delete m_cin;
 }
 
 // Returns a diffstat for the specified revision
@@ -115,7 +116,8 @@ bool Cache::lookup(const std::string &id)
 // Adds the revision of the given revision to the cache
 void Cache::put(const std::string &id, const Revision &rev)
 {
-	sys::parallel::MutexLocker locker(&Globals::cacheMutex);
+	// Defer any signals while writing to the cache
+	SIGBLOCK_DEFER();
 
 	// Add revision to cache
 	std::string dir = m_opts.cacheDir() + "/" + uuid(), path;
@@ -354,12 +356,17 @@ void Cache::check()
 		}
 	}
 
-	// Rewrite index file
-	GZOStream out(path+"/index");
-	out << CACHE_VERSION;
-	for (std::map<std::string, std::pair<uint32_t, uint32_t> >::iterator it = index.begin(); it != index.end(); ++it) {
-		out << it->first;
-		out << it->second.first << it->second.second;
-		out << crcs[it->first];
+	// Defer any signals while writing to the cache
+	{
+		SIGBLOCK_DEFER();
+
+		// Rewrite index file
+		GZOStream out(path+"/index");
+		out << CACHE_VERSION;
+		for (std::map<std::string, std::pair<uint32_t, uint32_t> >::iterator it = index.begin(); it != index.end(); ++it) {
+			out << it->first;
+			out << it->second.first << it->second.second;
+			out << crcs[it->first];
+		}
 	}
 }
