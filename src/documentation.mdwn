@@ -45,9 +45,9 @@ code in your repository located at `/home/joe/myrepo` by running
 
 	$ pepper loc /home/joe/myrepo
 
-The built-in reports can be listed by passing `--list-reports` to the
-program.  Your might also want to take a look at the [[ScriptingGuide]]
-to learn how to write your own custom reports.
+The built-in reports can be listed by passing `--list-reports` to
+the program.  Your might also want to take a look at the [[scripting
+guide|ScriptingGuide]] to learn how to write your own custom reports.
 
 
 ---
