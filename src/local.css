@@ -1,0 +1,91 @@
+body {
+	margin: 10px 40px 4px 40px;
+	background-image: url("background.png");
+	background-position: top right;
+	background-repeat: no-repeat;
+	background-color: #E7E7E7;
+}
+
+.header {
+	padding-bottom: 0.6em;
+}
+
+div #pagebody {
+	padding: 10px;
+	border: 1px solid #000000;
+	background-color: #FFFFFF;
+}
+
+div.toc {
+	float: left;
+}
+
+div.clear {
+	clear: both;
+}
+
+div.toc ol {
+	padding-left: 2.5em;
+}
+
+div.toc li {
+	list-style-type: disc;
+}
+
+div.sflogo {
+	border: 1px solid #000000;
+	float: right;
+}
+
+img {
+	border: none;
+}
+
+ul {
+	padding-left: 2.5em;
+}
+
+div #feedlink {
+	display: none;
+}
+
+div.inlinepage {
+	border: none;
+	padding: 0em;
+	padding-left: 2.5em;
+	margin-bottom: 1.12em;
+}
+
+div.inlineheader .header {
+	padding: 0em;
+	margin: 1.12em;
+	margin-top: 0em;
+	font-weight: bolder;
+	display: list-item;
+	font-size: 100%;
+}
+
+div.inlinefooter {
+	font-size: small;
+}
+
+div.inlinefooter .pagedate {
+	margin-top: 0em;
+}
+
+
+/* Code with syntax highlighting */
+pre.hl {
+	border: 1px solid black;
+	padding: 0.5em;
+	margin-left: 2.5em;
+}
+.hl.kwb, .hl.kwd { color: #000000}
+/*
+.hl.slc, .hl.com { color: #1818B2; font-style: normal; }
+.hl.str, .hl.num { color: #B21818; }
+.hl.esc { color: #; }
+.hl.opt { color: #18B218; }
+.hl.kwa { color: #AF5F00; }
+.hl.kwb, .hl.kwc, .hl.kwd { color: #000000}
+*/

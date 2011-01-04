@@ -1,0 +1,10 @@
+[[!meta date="2010-12-28"]]
+
+pepper 0.1.1 is now available. This release adds a new report showing
+commit times in a scatter plot and fixes several bugs.  Among others,
+running built-in reports without specifying the full path and several
+issues related to multi-threading have been fixed. The Lua detection
+of the configure script should work automatically for most Linux
+distributions now.
+
+Source tarballs can be found at the [[Download]] section.

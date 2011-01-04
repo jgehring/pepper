@@ -1,0 +1,23 @@
+###Tarballs
+
+pepper is distributed as a source code package. You
+can grab the latest release from the [file list at
+SourceForge](http://sourceforge.net/projects/scm-pepper/files/) or use
+these direct links:
+
+* [pepper-0.1.tar.gz](http://prdownloads.sourceforge.net/scm-pepper/pepper-0.1.tar.gz)
+* [pepper-0.1.tar.bz2](http://prdownloads.sourceforge.net/scm-pepper/pepper-0.1.tar.bz2)
+
+Previous releases are available at
+[SourceForge](http://sourceforge.net/projects/scm-pepper/files/). The plain-text
+[change log](ChangeLog) summarizes the changes between susequent releases.
+
+<!-- TODO: Create and link to build/install page -->
+
+---
+
+
+###Git repository
+
+The latest, possibly unstable source code can be obtained from
+pepper's [Git repository at GitHub](http://github.com/jgehring/pepper).

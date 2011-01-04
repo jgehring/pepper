@@ -1,0 +1,128 @@
+[[!meta title="scripting guide"]]
+[[!toc startlevel="3" levels="1"]]
+<div class="clear"></div>
+
+---
+
+This short guide explains the main report concepts by using illustrative examples
+scripts. The API reference is available [here](../documentation/api/).
+
+
+### Language
+
+pepper's report scripts are written in Lua. There's extensive
+online information about the programming language, including a
+[detailed introduction](http://www.lua.org/pil/) and a [reference
+manual](http://www.lua.org/manual/5.1/).
+
+
+### Script layout
+
+Report scripts should encapsulate their actions in functions, i.e. they
+should do nothing unless their entry function is being called. The entry
+function is called `main()`, and is not expected to return a value.
+
+The only code outside of functions is the declaration of the global
+`meta` table, which can be used to set up the name of the script,
+a short description and command-line options.
+
+A skeleton script might look light the following:
+
+[[!format lua """
+-- Skeleton script
+
+-- Meta-data
+meta.name = "Skeleton"
+meta.description = "Just a skeleton"
+
+-- Entry point
+function main()
+	-- Nothing here
+end
+"""]]
+
+
+### Using repository information
+
+Report scripts can use the global `pepper.report` table to access the current
+environment. The following code will print the repository's type, its location
+and the current head revision.
+
+[[!format lua """
+function main()
+	local repository = pepper.report.repository()
+	print(repository:type() .. " repository at " .. repository:url())
+	print("HEAD is " .. repository:head())
+end
+"""]]
+
+
+### Examining a revision range
+
+The function `pepper.report.walk_branch` function can be used to iterate
+over all revisions on a given branch. The following code will gather
+information about the number of commits and the number of authors on
+a branch.
+
+[[!format lua """
+-- This function will be called for every revision
+function callback(revision)
+	-- Initialize the author's commit count if necessary
+	if authors[revision:author()] == nil then
+		authors[revision:author()] = 0
+	end
+
+	-- Update commit count
+	authors[revision:author()] = authors[revision:author()] + 1
+end
+
+-- Entry point
+function main()
+	local repository = pepper.report.repository()
+	authors = {} -- Global dictionary of authors
+
+	local branch = repository:main_branch()
+	pepper.report.walk_branch(callback, branch)
+
+	-- Count the number of authors and the number of commits
+	local num_authors = 0
+	local num_commits = 0
+	for k,v in pairs(authors) do
+		num_authors = num_authors + 1
+		num_commits = num_commits + v
+	end
+
+	-- Print result
+	print("Commits on branch " .. branch .. ":")
+	print(num_commits .. " commits from " .. num_authors .. " author(s)")
+end
+"""]]
+
+Here, `main_branch()` will return the branch that is currently checked out
+for local repositories.
+
+
+### Option handling
+
+Users can specify report options at the command line after defining
+the path to the report script. Option handling in scripts consists of
+two parts:
+
+* Declaration of available options using the `meta` table. These options
+  will be presented to the user if help is requested at the command line.
+* Retrieval of option values using `pepper.report.getopt()`. Default option
+  values can be specified, too.
+
+Here's a short script that prints the head revision of a given branch for
+illustrative purposes:
+
+[[!format lua """
+meta.title = "Branch HEAD"
+meta.options = {{"-bARG, --branch=ARG", "Select branch"}}
+
+function main()
+	local repository = pepper.report.repository()
+	local branch = pepper.report.getopt("b,branch", repository:main_branch())
+	print("Branch " .. branch .. " is at " .. repository:head(branch))
+end
+"""]]

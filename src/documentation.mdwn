@@ -1,0 +1,82 @@
+[[!toc startlevel="3" levels="1"]]
+<div class="clear"></div>
+
+---
+
+
+### Users
+
+#### Building the source package
+
+First, you need to grab a source tarball from the [[Download]] page and
+extract it using tar:
+
+	$ tar xvzf pepper-0.1.1.tar.gz
+	$ cd pepper-0.1.1
+
+Next, you should make sure that your all compile-time dependencies are
+satisfied. You'll need a C++ compiler and Lua 5.1 (e.g., provided by
+`lua5.1` and `liblua5.1-dev` on Debian). Some backends have additional
+dependencies that can be found in the [README](README) file.
+
+pepper's build system uses
+[Autoconf](http://www.gnu.org/software/autoconf) and
+[Automake](http://www.gnu.org/software/automake), so configuration and
+installation is accomplished with
+
+	$ ./configure
+	$ make
+	# make install
+
+The configuration script will print a feature summary after its job has
+been finished.  A detailed listing of available backends and optional
+features can be found in pepper's [README](README) file.
+
+
+#### Basic usage
+
+pepper's command line syntax is printed to your terminal if you pass
+`--help` as a program argument:
+
+	$ pepper [options] [report] [report options] <repository>
+
+As a short example, you can generate a graph visualizing the lines of
+code in your repository located at `/home/joe/myrepo` by running
+
+	$ pepper loc /home/joe/myrepo
+
+The built-in reports can be listed by passing `--list-reports` to the
+program.  Your might also want to take a look at the [[ScriptingGuide]]
+to learn how to write your own custom reports.
+
+
+---
+
+### Developers
+
+#### Scripting tutorial
+
+In pepper, reports are scripts written in [Lua](http://www.lua.org). A short
+tutorial for writing custom reports is available at [[ScriptingGuide]].
+
+#### API reference
+
+An API reference for Lua scripts is available [here](api/). It has been
+generated with [LuaDoc](http://luadoc.luaforge.net).
+
+#### Source code repository
+
+pepper's [Git](http://git-scm.com) repository is hosted at
+[GitHub](http://github.com/jgehring/pepper). Public read-only access is
+provided, so you can get your local copy using
+
+[[!format sh """
+$ git clone git://github.com/jgehring/pepper
+"""]]
+
+<!-- TODO
+#### Implementing a new SCM backend
+
+There's also a short guide for implementing new backends at
+[[BackendImplementation]].
+-->

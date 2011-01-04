@@ -1,0 +1,6 @@
+This page contains a listing of all news items that have been posted
+on [pepper's homepage](..).
+
+---
+
+[[!inline pages="news/*" and !"*/Discussion" show=0 description="pepper news" rss="yes" archive="yes" feedfile="news" timeformat="%B %d, %Y, %H:%M %Z"]]

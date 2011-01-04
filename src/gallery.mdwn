@@ -1,0 +1,50 @@
+###Gallery
+
+These example images have been generated using the pepper's built-in
+reports.  The output type has been set to `svg` in order to render both
+thumbnails and high-resolution versions of each plot after wards. The
+latter can be accessed by clicking on a thumbnail image.
+
+The repository data is from [pepper's own git
+repository](http://github.com/jgehring/pepper)
+as well as from the self-hosting repositories of
+[Git](http://git.kernel.org/?p=git/git.git;a=summary) and
+[Mercurial](http://selenic.com/repo/hg). Additionally,
+a clone of [Linus Torvald's kernel
+tree](http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=summary)
+has been used.
+
+---
+
+
+####Busiest authors
+
+The `authors` report plots the contributions of the 6 "busiest" authors.
+
+<table width="100%">
+<tr>
+<td><a href="authors-pepper.png"><img src="authors-pepper-thumb.png" title="pepper" width="80%"></a></td>
+<td><a href="authors-git.png"><img src="authors-git-thumb.png" title="Git" width="80%"></a></td>
+<td><a href="authors-hg.png"><img src="authors-hg-thumb.png" title="Mercurial" width="80%"></a></td>
+<td><a href="authors-linux.png"><img src="authors-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
+</tr>
+</table>
+
+---
+
+
+####Commits of the last twelve months
+
+The `commits_per_month` report plots a histogram of the commits during
+the last twelve months. The red bars represent the number of commits,
+while the green bars visualize the sum of the number of files touched
+per commit.
+
+<table width="100%">
+<tr>
+<td><a href="cpm-pepper.png"><img src="cpm-pepper-thumb.png" title="pepper" width="80%"></a></td>
+<td><a href="cpm-git.png"><img src="cpm-git-thumb.png" title="Git" width="80%"></a></td>
+<td><a href="cpm-hg.png"><img src="cpm-hg-thumb.png" title="Mercurial" width="80%"></a></td>
+<td><a href="cpm-linux.png"><img src="cpm-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
+</tr>
+</table>
