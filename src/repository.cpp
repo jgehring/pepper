@@ -71,7 +71,7 @@ int Repository::head(lua_State *L) {
 	try {
 		h = m_backend->head(branch);
 	} catch (const Pepper::Exception &ex) {
-		return LuaHelpers::pushError(L, ex.what(), ex.what());
+		return LuaHelpers::pushError(L, ex.what(), ex.where());
 	}
 	return LuaHelpers::push(L, h);
 }
@@ -87,7 +87,7 @@ int Repository::branches(lua_State *L) {
 	try {
 		b = m_backend->branches();
 	} catch (const Pepper::Exception &ex) {
-		return LuaHelpers::pushError(L, ex.what(), ex.what());
+		return LuaHelpers::pushError(L, ex.what(), ex.where());
 	}
 	return LuaHelpers::push(L, b);
 }
@@ -98,7 +98,7 @@ int Repository::tags(lua_State *L) {
 	try {
 		t = m_backend->tags();
 	} catch (const Pepper::Exception &ex) {
-		return LuaHelpers::pushError(L, ex.what(), ex.what());
+		return LuaHelpers::pushError(L, ex.what(), ex.where());
 	}
 
 	lua_createtable(L, t.size(), 0);
