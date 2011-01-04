@@ -22,11 +22,9 @@
 		<li class="L3"><a href="http://sourceforge.net/tracker/?group_id=386093">Tracker</a></li>
 	</ol>
 </div>
-<!--
 <div class="sflogo">
 	<a href="http://sourceforge.net/projects/scm-pepper"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=386093&amp;type=16" width="150" height="40" alt="Get pepper at SourceForge.net. Fast, secure and Free Open Source software downloads"></a>
 </div>
--->
 <div class="clear"></div>
 
 ---
