@@ -8,4 +8,6 @@ ikiwiki --setup setup
 
 # Copy static files from pepper's source code directory
 cp "$PEPPER_SRCDIR/README" pub/documentation/
+rm -rf pub/documentation/api
+cp -r "$PEPPER_SRCDIR/luadoc" pub/documentation/api
 cp "$PEPPER_SRCDIR/ChangeLog" pub/download/
