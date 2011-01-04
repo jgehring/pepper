@@ -1,0 +1,10 @@
+[[!meta title="New Homepage"]]
+
+I'm happy to announce that pepper's homepage is now generated using
+[IkiWiki](http://ikiwiki.info), a nifty wiki compiler. The homepage
+has been split into categories now, a navigation bar can be found on
+top of the index page. There's also a lot of new content, including
+[[documentation]] and a small [[scripting guide|ScriptingGuide]].
+
+The source code of the website is available at
+[GitHub](http://github.com/jgehring/pepper-hp).
