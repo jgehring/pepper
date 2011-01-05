@@ -176,6 +176,8 @@ int main(int argc, char **argv)
 			backend = cache;
 			sighandler.cache = cache;
 
+			cache->init();
+
 			// Simple cache check?
 			if (opts.checkCache()) {
 				try {
@@ -187,8 +189,6 @@ int main(int argc, char **argv)
 					return EXIT_FAILURE;
 				}
 			}
-
-			cache->init();
 		} else {
 			backend->init();
 		}
