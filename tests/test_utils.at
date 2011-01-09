@@ -7,6 +7,6 @@
 
 AT_BANNER([Utility functions])
 
-AT_SETUP([Testing command lines])
+AT_SETUP([Testing utility functions])
 AT_CHECK([putils], [0], [ignore])
 AT_CLEANUP()
