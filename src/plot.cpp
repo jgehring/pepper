@@ -32,9 +32,13 @@ Lunar<Plot>::RegType Plot::methods[] = {
 
 
 // Constructor
-Plot::Plot(lua_State *)
+Plot::Plot(lua_State *L)
 {
-	g = new Gnuplot();
+	try {
+		g = new Gnuplot();
+	} catch (const GnuplotException &ex) {
+		LuaHelpers::pushError(L, ex.what());
+	}
 }
 
 // Destructor
@@ -179,9 +183,13 @@ int Plot::plot_series(lua_State *L)
 
 // Closes and reopens the Gnuplot connection. This will force
 // plotting to finish and temporary files to be closed
-int Plot::flush(lua_State *)
+int Plot::flush(lua_State *L)
 {
-	delete g;
-	g = new Gnuplot("lines");
+	try {
+		delete g;
+		g = new Gnuplot();
+	} catch (const GnuplotException &ex) {
+		return LuaHelpers::pushError(L, ex.what());
+	}
 	return 0;
 }
