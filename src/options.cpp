@@ -111,18 +111,39 @@ std::map<std::string, std::string> Options::scriptOptions() const
 // Pretty-prints a help screen option
 void Options::print(const std::string &option, const std::string &text, std::ostream &out)
 {
+	const size_t offset = 34;
+	const size_t textlen = 78 - offset;
 	out << "  " << option;
-	if (option.length() < 30) {
-		for (int i = option.length(); i < 32; i++) {
+	if (option.length() < offset-4) {
+		for (size_t i = option.length(); i < offset-2; i++) {
 			out << " ";
 		}
 	} else {
 		out << std::endl;
-		for (int i = 0; i < 34; i++) {
+		for (size_t i = 0; i < offset; i++) {
 			out << " ";
 		}
 	}
-	out << text << std::endl;
+
+	if (text.length() < textlen) {
+		out << text << std::endl;
+		return;
+	}
+
+	// Word-wrap text
+	std::vector<std::string> words = utils::split(text, " ");
+	int pos = 0;
+	for (size_t j = 0; j < words.size(); j++) {
+		if (pos + words[j].length() > textlen-1) {
+			out << std::endl;
+			for (size_t i = 0; i < offset; i++) {
+				out << " ";
+			}
+			pos = 0;
+		}
+		out << words[j] << " ";
+		pos += words[j].length() + 1;
+	}
 }
 
 
