@@ -37,6 +37,13 @@ FEATURES_CHECK()
 AM_CONDITIONAL([POPEN_NOSHELL], [test "x$popen_noshell" = "xyes"])
 AM_CONDITIONAL([GNUPLOT], [test "x$gnuplot" = "xyes"])
 
+# Build unit tests?
+AC_ARG_ENABLE([tests], [AS_HELP_STRING([--enable-tests], [Build the test suite])], [testsuite="$enableval"], [testsuite="ifdebug"])
+if test "x$testsuite" = "xifdebug" -a "x$debug" = "xyes"; then
+	testsuite="yes"
+fi
+AM_CONDITIONAL([TESTSUITE], [test "x$testsuite" = "xyes"])
+
 
 #
 # Checks for system and compiler characteristics
