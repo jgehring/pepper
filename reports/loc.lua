@@ -7,7 +7,8 @@
 meta.title = "LOC"
 meta.description = "Lines of code"
 meta.options = {{"-bARG, --branch=ARG", "Select branch"},
-                {"-tARG, --type=ARG", "Select image type"}}
+                {"-tARG, --type=ARG", "Select image type"},
+                {"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with a regular expression"}}
 
 -- Revision callback function
 function count(r)
@@ -22,6 +23,37 @@ function count(r)
 		locdeltas[r:date()] = delta
 	else
 		locdeltas[r:date()] = locdeltas[r:date()] + delta
+	end
+end
+
+-- Convert from UNIX to Gnuplot epoch
+function convepoch(t)
+	return t - 946684800
+end
+
+-- Adds x2tics for repository tags
+function add_tagmarks(plot)
+	-- Fetch tags and generate tic data
+	local repo = pepper.report.repository()
+	local regex = pepper.report.getopt("tags", "*")
+	local tags = repo:tags()
+	local x2tics = ""
+	if #tags > 0 then
+		x2tics = "("
+		for k,v in ipairs(tags) do
+			if v:name():find(regex) ~= nil then
+				x2tics = x2tics .. "\"" .. v:name() .. "\" " .. convepoch(pepper.report.revision(v:id()):date()) .. ","
+			end
+		end
+		if #x2tics == 1 then
+			return
+		end
+		x2tics = x2tics:sub(0, #x2tics-1) .. ")"
+		plot:cmd("set x2data time")
+		plot:cmd("set format x2 \"%s\"")
+		plot:cmd("set x2tics " .. x2tics)
+		plot:cmd("set x2tics border rotate by 60")
+		plot:cmd("set x2tics font \"Helvetica,8\"")
 	end
 end
 
@@ -47,11 +79,23 @@ function main()
 		table.insert(loc, total)
 	end
 
-	-- Generate graphs
+	-- Setup plot
 	local imgtype = pepper.report.getopt("t, type", "svg")
 	local p = pepper.gnuplot:new()
 	p:set_title("Lines of Code (on " .. branch .. ")")
-	p:set_output("loc." .. imgtype)
+	p:set_output("loc." .. imgtype, 800, 480)
+
+	if pepper.report.getopt("tags") ~= nil then
+		add_tagmarks(p)
+	end
+
+	-- Determine time range: 5% spacing at start and end, rounded to 1000 seconds
+	-- This is imporant for aligning the xaxis and x2axis (when using tags)
+	local range = dates[#dates] - dates[1]
+	local tstart = convepoch(1000 * math.floor((dates[1] - 0.05 * range) / 1000))
+	local tend = convepoch(1000 * math.ceil((dates[#dates] + 0.05 * range) / 1000))
+
+	-- Generate graphs
 	p:cmd([[
 set xdata time
 set timefmt "%s"
@@ -62,6 +106,10 @@ set yrange [0:*]
 set xtics nomirror
 set xtics rotate by -45
 set rmargin 8
-set grid ytics]])
+set grid ytics
+set grid x2tics
+]])
+	p:cmd("set xrange [" .. tstart .. ":" .. tend .. "]")
+	p:cmd("set x2range [" .. tstart .. ":" .. tend .. "]")
 	p:plot_series(dates, loc)
 end
