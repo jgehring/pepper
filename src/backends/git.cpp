@@ -305,7 +305,11 @@ std::vector<Tag> GitBackend::tags()
 		if (ret != 0) {
 			throw PEX(utils::strprintf("Unable to retrieve the list of tags (%d)", ret));
 		}
-		tags.push_back(Tag(utils::trim(out), names[i]));
+
+		std::string id = utils::trim(out);
+		if (!id.empty()) {
+			tags.push_back(Tag(id, names[i]));
+		}
 	}
 	return tags;
 }
