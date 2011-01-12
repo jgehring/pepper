@@ -14,6 +14,7 @@
 Logger *Logger::s_instances[Logger::NumLevels] = {
 	new Logger(Logger::None, std::cout),
 	new Logger(Logger::Error, std::cerr),
+	new Logger(Logger::Warn, std::cerr),
 	new Logger(Logger::Status, std::cout),
 	new Logger(Logger::Info, std::cout),
 	new Logger(Logger::Debug, std::cout),
@@ -39,11 +40,11 @@ void Logger::setOutput(std::ostream &out, int level)
 {
 	if (level < 0) {
 		for (int i = 0; i < Logger::NumLevels; i++) {
-			if (i != Logger::Error) {
+			if (i != Logger::Error && i != Logger::Warn) {
 				s_instances[i]->m_out = &out;
 			}
 		}
-	} else if (level != Logger::Error) {
+	} else if (level != Logger::Error && level != Logger::Warn) {
 		s_instances[level]->m_out = &out;
 	}
 }
@@ -51,7 +52,7 @@ void Logger::setOutput(std::ostream &out, int level)
 // Sets the log level
 void Logger::setLevel(int level)
 {
-	s_level = std::max((int)Logger::Error, level);
+	s_level = std::max((int)Logger::Warn, level);
 }
 
 // Returns the log level
