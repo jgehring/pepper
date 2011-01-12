@@ -1,0 +1,6 @@
+pepper 0.1.2 is now available. This release adds tag access for
+reports scripts and fixes several bugs. The tags and branches listing
+of Subversion repositories accessed via http:// has been fixed, and the
+signal handling code for protecting cache writes has been rewritten.
+
+As usual, source tarballs can be found at the [[Download]] section.
