@@ -56,6 +56,8 @@ static void printHelp(const Options &opts)
 	std::cout << "Main options:" << std::endl;
 	Options::print("-h, --help, -?", "Print basic usage information");
 	Options::print("--version", "Print version information");
+	Options::print("-v, --verbose", "Increase verbosity");
+	Options::print("-q, --quiet", "Set verbosity to minimum");
 	Options::print("-bARG, --backend=ARG", "Force usage of backend named ARG");
 	Options::print("--no-cache", "Disable revision cache usage");
 	std::cout << std::endl;
