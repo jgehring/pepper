@@ -1,3 +1,12 @@
+2010-01-12  --  version 0.1.2
+
+	* Added tag access for scripts, and optional tag markers in
+	  "Lines of Code" report
+	* Fixed tags and branches listing for Subversion repositories
+	  accessed via http://
+	* Fixed signal blocking during cache file writing
+	* Removed test suite from default non-debug build
+
 2010-12-28  --  version 0.1.1
 
 	* Fixed running built-in reports without specifying the full path
