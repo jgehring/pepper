@@ -1,0 +1,9 @@
+[[!meta title="AUR package"]]
+
+I've added a [PKGBUILD for
+pepper](http://aur.archlinux.org/packages.php?ID=45324) to the [Arch User
+Repository](http://aur.archlinux.org/). Arch users can install the program
+now using their favorite AUR package manager, e.g. `yaourt -S scm-pepper`.
+
+In order to add support for all available repository types, the
+`subversion` and `mercurial` packages should be installed first.

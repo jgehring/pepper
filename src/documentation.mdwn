@@ -8,8 +8,10 @@
 
 #### Building the source package
 
-First, you need to grab a source tarball from the [[Download]] page and
-extract it using tar:
+If you're on unix, you should check if your distribution offers a package
+for pepper first (see the [[Download]] page for a list of packages). If
+it doesn't, you need to grab a source tarball from the [[Download]]
+page and extract it using tar:
 
 	$ tar xvzf pepper-0.1.2.tar.gz
 	$ cd pepper-0.1.2

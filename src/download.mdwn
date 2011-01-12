@@ -1,4 +1,10 @@
-###Tarballs
+[[!toc startlevel="3" levels="1"]]
+<div class="clear"></div>
+
+---
+
+
+### Tarballs
 
 pepper is distributed as a source code package. You
 can grab the latest release from the [file list at
@@ -12,12 +18,27 @@ Previous releases are available at
 [SourceForge](http://sourceforge.net/projects/scm-pepper/files/). The plain-text
 [change log](ChangeLog) summarizes the changes between subsequent releases.
 
-<!-- TODO: Create and link to build/install page -->
+Please see the [[Documentation]] page for installation instructions and
+basic usage information.
+
 
 ---
 
+### Distribution packages
 
-###Git repository
+Here's a list of packages, ready to install for the respective
+distributions:
+
+* [Arch Linux (AUR)](http://aur.archlinux.org/packages.php?ID=45324)
+
+For source packages, please remember to install optional build-time
+dependencies for the repository backends first (e.g., `subversion`
+and `mercurial` on Arch Linux).
+
+
+---
+
+### Git repository
 
 The latest, possibly unstable source code can be obtained from
 pepper's [Git repository at GitHub](http://github.com/jgehring/pepper).
