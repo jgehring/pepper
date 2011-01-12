@@ -144,6 +144,7 @@ void Options::print(const std::string &option, const std::string &text, std::ost
 		out << words[j] << " ";
 		pos += words[j].length() + 1;
 	}
+	out << std::endl;
 }
 
 
