@@ -15,6 +15,7 @@ LUADOCS = \
 	docs/lua/diffstat.luadoc \
 	docs/lua/report.luadoc \
 	docs/lua/repository.luadoc \
-	docs/lua/revision.luadoc
+	docs/lua/revision.luadoc \
+	docs/lua/tag.luadoc 
 luadoc: $(LUADOCS)
 	luadoc -d luadoc --nofiles $(LUADOCS)

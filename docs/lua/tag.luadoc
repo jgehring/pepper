@@ -1,0 +1,10 @@
+--- Simple tag object
+
+module "pepper.tag"
+
+
+--- Returns the tag name
+function name()
+
+--- Returns the tag revision ID
+function id()
