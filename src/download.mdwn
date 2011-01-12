@@ -10,7 +10,7 @@ these direct links:
 
 Previous releases are available at
 [SourceForge](http://sourceforge.net/projects/scm-pepper/files/). The plain-text
-[change log](ChangeLog) summarizes the changes between susequent releases.
+[change log](ChangeLog) summarizes the changes between subsequent releases.
 
 <!-- TODO: Create and link to build/install page -->
 
