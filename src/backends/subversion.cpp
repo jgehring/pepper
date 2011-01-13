@@ -43,7 +43,7 @@ class SvnConnection
 {
 public:
 	SvnConnection()
-		: pool(NULL), ctx(NULL), ra(NULL), url(NULL)
+		: pool(NULL), ctx(NULL), ra(NULL), url(NULL), root(NULL)
 	{
 	}
 
@@ -93,6 +93,11 @@ public:
 		if ((err = svn_client_open_ra_session(&ra, this->url, ctx, pool))) {
 			throw PEX(strerr(err));
 		}
+
+		// Determine the repository root
+		if ((err = svn_ra_get_repos_root2(ra, &root, pool))) {
+			throw PEX(strerr(err));
+		}
 	}
 
 	// Opens the connection to the Subversion repository, using the client context
@@ -108,9 +113,10 @@ public:
 		pool = svn_pool_create(NULL);
 		init();
 
-		// Copy connection date from parent
-		url = apr_pstrdup(pool, parent->url);
+		// Copy connection data from parent
 		ctx = parent->ctx;
+		url = apr_pstrdup(pool, parent->url);
+		root = apr_pstrdup(pool, parent->root);
 
 		// Setup the RA session
 		svn_error_t *err;
@@ -201,7 +207,7 @@ public:
 	apr_pool_t *pool;
 	svn_client_ctx_t *ctx;
 	svn_ra_session_t *ra;
-	const char *url;
+	const char *url, *root;
 };
 
 
@@ -272,7 +278,9 @@ public:
 		delete d;
 	}
 
-	static Diffstat diffstat(const std::string &url, svn_revnum_t revision, svn_client_ctx_t *ctx, apr_pool_t *pool)
+	// This function will always perform a diff on the full repository in
+	// order to avoid errors due to non-existent paths and to cache consistency.
+	static Diffstat diffstat(SvnConnection *c, svn_revnum_t revision, apr_pool_t *pool)
 	{
 		if (revision <= 0) {
 			return Diffstat();
@@ -296,7 +304,7 @@ public:
 
 		PTRACE << "Fetching diffstat for revision " << revision << endl;
 
-		svn_error_t *err = svn_client_diff4(apr_array_make(pool, 0, 1), url.c_str(), &rev1, url.c_str(), &rev2, NULL, svn_depth_infinity, FALSE, FALSE, FALSE, APR_LOCALE_CHARSET, outfile, errfile, NULL, ctx, pool);
+		svn_error_t *err = svn_client_diff4(apr_array_make(pool, 0, 1), c->root, &rev1, c->root, &rev2, NULL, svn_depth_infinity, FALSE, FALSE, FALSE, APR_LOCALE_CHARSET, outfile, errfile, NULL, c->ctx, pool);
 		if (err != NULL) {
 			apr_file_close(outfile);
 			apr_file_close(infile);
@@ -319,7 +327,7 @@ protected:
 
 			Diffstat stat;
 			try {
-				stat = diffstat(d->url, revision, d->ctx, subpool);
+				stat = diffstat(d, revision, subpool);
 				m_queue->done(revision, stat);
 			} catch (const Pepper::Exception &ex) {
 				Logger::err() << "Error: " << ex.where() << ": " << ex.what() << endl;
@@ -719,7 +727,7 @@ Diffstat SubversionBackend::diffstat(const std::string &id)
 	apr_pool_t *subpool = svn_pool_create(d->pool);
 	svn_revnum_t revision;
 	utils::str2int(id, &revision);
-	Diffstat stat = SvnDiffstatThread::diffstat(d->url, revision, d->ctx, subpool);
+	Diffstat stat = SvnDiffstatThread::diffstat(d, revision, subpool);
 	svn_pool_destroy(subpool);
 	return stat;
 }
