@@ -10,8 +10,6 @@
 #include <cstring>
 #include <iostream>
 
-#include <sys/time.h>
-
 #include "main.h"
 
 #ifdef HAVE_LIBZ
@@ -23,16 +21,6 @@
 
 namespace utils
 {
-
-// Wrapper for strptime()
-int64_t ptime(const std::string &str, const std::string &format)
-{
-	struct tm tm;
-	if (strptime(str.c_str(), format.c_str(), &tm) == NULL) {
-		return -1;
-	}
-	return mktime(&tm);
-}
 
 // Removes white-space characters at the beginning and end of a string
 void trim(std::string *str)

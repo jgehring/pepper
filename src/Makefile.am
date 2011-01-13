@@ -26,6 +26,7 @@ pepper_SOURCES = \
 	syslib/io.h syslib/io.cpp \
 	syslib/parallel.h syslib/parallel.cpp \
 	syslib/sigblock.h syslib/sigblock.cpp \
+	syslib/datetime.h syslib/datetime.cpp \
 	\
 	3rdparty/lunar/lunar.h
 

@@ -14,8 +14,6 @@
 
 #include <signal.h>
 
-#include <sys/time.h>
-
 #include "main.h"
 
 #include "bstream.h"
@@ -28,6 +26,7 @@
 
 #include "syslib/fs.h"
 #include "syslib/sigblock.h"
+#include "syslib/datetime.h"
 
 #include "cache.h"
 
@@ -211,8 +210,7 @@ void Cache::load()
 	}
 
 	// For git repositories, the hardest part is calling uuid()
-	timeval tv;
-	gettimeofday(&tv, NULL);
+	sys::datetime::Watch watch;
 
 	GZIStream *in = new GZIStream(path+"/index");
 	if (!in->ok()) {
@@ -255,10 +253,7 @@ void Cache::load()
 
 	Logger::status() << "done" << endl;
 	delete in;
-
-	timeval c;
-	gettimeofday(&c, NULL);	
- 	Logger::info() << "Cache: Loaded " << m_index.size() << " revisions in " << (c.tv_sec - tv.tv_sec) * 1000 + (c.tv_usec - tv.tv_usec) / 1000 << " ms" << endl;
+	Logger::info() << "Cache: Loaded " << m_index.size() << " revisions in " << watch.elapsedMSecs() << " ms" << endl;
 }
 
 // Clears all cache files
@@ -296,9 +291,7 @@ void Cache::check()
 		return;
 	}
 
-	// TODO: Add timing framework
-	timeval tv;
-	gettimeofday(&tv, NULL);
+	sys::datetime::Watch watch;
 
 	GZIStream *in = new GZIStream(path+"/index");
 	if (!in->ok()) {
@@ -369,9 +362,7 @@ void Cache::check()
 
 	Logger::status() << "done" << endl;
 
-	timeval c;
-	gettimeofday(&c, NULL);	
- 	Logger::info() << "Cache: Checked " << index.size() << " revisions in " << (c.tv_sec - tv.tv_sec) * 1000 + (c.tv_usec - tv.tv_usec) / 1000 << " ms" << endl;
+	Logger::info() << "Cache: Checked " << index.size() << " revisions in " << watch.elapsedMSecs() << " ms" << endl;
 
 	if (corrupted.empty()) {
 		Logger::info() << "Cache: Everything's alright" << endl;
