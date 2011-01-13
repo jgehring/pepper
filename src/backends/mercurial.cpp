@@ -138,9 +138,9 @@ std::vector<Tag> MercurialBackend::tags()
 Diffstat MercurialBackend::diffstat(const std::string &id)
 {
 #if 1
-	std::string out = hgcmd("diff", utils::strprintf("git=True, change=\"%s\"", id.c_str()));
+	std::string out = hgcmd("diff", utils::strprintf("change=\"%s\"", id.c_str()));
 #else
-	std::string out = sys::io::exec(hgcmd()+" diff --git --change "+id);
+	std::string out = sys::io::exec(hgcmd()+" diff --change "+id);
 #endif
 	std::istringstream in(out);
 	return DiffParser::parse(in);
