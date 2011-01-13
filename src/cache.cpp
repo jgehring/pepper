@@ -14,7 +14,6 @@
 
 #include <signal.h>
 
-#include <sys/stat.h>
 #include <sys/time.h>
 
 #include "main.h"
@@ -27,6 +26,7 @@
 #include "revision.h"
 #include "utils.h"
 
+#include "syslib/fs.h"
 #include "syslib/sigblock.h"
 
 #include "cache.h"
@@ -201,8 +201,7 @@ void Cache::load()
 
 	std::string path = m_opts.cacheDir() + "/" + uuid();
 	PDEBUG << "Using cache dir: " << path << endl;
-	struct stat statbuf;
-	if (stat(path.c_str(), &statbuf) == -1) {
+	if (!sys::fs::dirExists(path)) {
 		// Create the cache directory
 		if (sys::fs::mkpath(path) < 0) {
 			throw PEX(utils::strprintf("Unable to create cache directory: %s", path.c_str()));
@@ -268,8 +267,7 @@ void Cache::clear()
 	flush();
 
 	std::string path = m_opts.cacheDir() + "/" + uuid();
-	struct stat statbuf;
-	if (stat(path.c_str(), &statbuf) == -1) {
+	if (!sys::fs::dirExists(path)) {
 		return;
 	}
 
@@ -289,8 +287,7 @@ void Cache::check()
 
 	std::string path = m_opts.cacheDir() + "/" + uuid();
 	PDEBUG << "Checking cache in dir: " << path << endl;
-	struct stat statbuf;
-	if (stat(path.c_str(), &statbuf) == -1) {
+	if (!sys::fs::dirExists(path)) {
 		// Create the cache directory
 		if (sys::fs::mkpath(path) < 0) {
 			throw PEX(utils::strprintf("Unable to create cache directory: %s", path.c_str()));
