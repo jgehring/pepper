@@ -35,6 +35,8 @@ enum LogModifier
 
 class Logger
 {
+	friend struct SignalHandler;
+
 	public:
 		enum Level
 		{
@@ -89,6 +91,11 @@ class Logger
 
 	public:
 		Logger(int level, std::ostream &out);
+
+	private:
+		static inline void unlock() {
+			s_mutex.unlock();
+		}
 
 	private:
 		int m_level;

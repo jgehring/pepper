@@ -31,6 +31,11 @@ struct SignalHandler : public sys::sigblock::Handler
 
 	void operator()(int signum)
 	{
+		// This is very unclean, but functions called from here should not be
+		// blocked by logging functions. And this is more useful than turning
+		// logging off.
+		Logger::unlock();
+
 		if (cache) {
 			Logger::status() << "Catched signal " << signum << ", flushing cache" << endl;
 			cache->flush();
