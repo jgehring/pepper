@@ -589,6 +589,7 @@ std::string SubversionBackend::head(const std::string &branch)
 		prefix = "branches/";
 		prefix += branch;
 	}
+	PDEBUG << "branch = " << branch << " -> prefix = " << prefix << endl;
 
 	apr_pool_t *pool = svn_pool_create(d->pool);
 	svn_dirent_t *dirent;
@@ -753,7 +754,7 @@ Backend::LogIterator *SubversionBackend::iterator(const std::string &branch)
 	svn_pool_destroy(pool);
 
 	long int headrev;
-	utils::str2int(head(prefix), &headrev);
+	utils::str2int(head(branch), &headrev);
 	return new SvnLogIterator(d, prefix, headrev);
 }
 
