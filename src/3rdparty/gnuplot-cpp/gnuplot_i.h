@@ -1696,6 +1696,7 @@ Gnuplot& Gnuplot::cmd(const std::string &cmdstr)
 //
 void Gnuplot::init()
 {
+#if 0 // There are head-less systems, too
     // char * getenv ( const char * name );  get value of environment variable
     // Retrieves a C string containing the value of the environment variable 
     // whose name is specified as argument.  If the requested variable is not 
@@ -1706,6 +1707,7 @@ void Gnuplot::init()
         valid = false;
         throw GnuplotException("Can't find DISPLAY variable");
     }
+#endif
 #endif
 
 
