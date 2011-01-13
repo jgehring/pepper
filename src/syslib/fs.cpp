@@ -96,6 +96,12 @@ int mkpath(const std::string &path)
 	return mkdir(path);
 }
 
+// Wrapper for unlink()
+int unlink(const std::string &path)
+{
+	return ::unlink(path.c_str());
+}
+
 // Checks if the given file (or directory) exists
 bool exists(const std::string &path)
 {

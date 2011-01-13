@@ -50,6 +50,7 @@ class Cache : public Backend
 		void put(const std::string &id, const Revision &rev);
 		Revision *get(const std::string &id);
 		void load();
+		void clear();
 
 	private:
 		Backend *m_backend;

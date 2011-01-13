@@ -27,6 +27,7 @@ std::string canonicalize(const std::string &path);
 
 int mkdir(const std::string &path);
 int mkpath(const std::string &path);
+int unlink(const std::string &path);
 
 bool exists(const std::string &path);
 bool fileExists(const std::string &path);

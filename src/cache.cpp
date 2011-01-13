@@ -32,7 +32,7 @@
 #include "cache.h"
 
 
-#define CACHE_VERSION (uint32_t)1
+#define CACHE_VERSION (uint32_t)2
 #define MAX_CACHEFILE_SIZE 4194304
 
 
@@ -99,12 +99,14 @@ Revision *Cache::revision(const std::string &id)
 // Flushes and closes the cache streams
 void Cache::flush()
 {
+	PTRACE << "Flushing cache..." << endl;
 	delete m_iout;
 	m_iout = NULL;
 	delete m_cout;
 	m_cout = NULL;
 	delete m_cin;
 	m_cin = NULL;
+	PTRACE << "Cache flushed" << endl;
 }
 
 // Checks if the diffstat of the given revision is already cached
@@ -213,16 +215,31 @@ void Cache::load()
 	timeval tv;
 	gettimeofday(&tv, NULL);
 
-	GZIStream in(path+"/index");
-	if (!in.ok()) {
+	GZIStream *in = new GZIStream(path+"/index");
+	if (!in->ok()) {
 		Logger::info() << "Cache: Empty cache for '" << uuid() << '\'' << endl;
 		return;
 	}
 
 	uint32_t version;
-	in >> version;
-	if (version != CACHE_VERSION) {
-		throw PEX(utils::strprintf("Unkown cache version number %u", version));
+	*in >> version;
+	switch (version) {
+		case 1:
+			if (m_backend->name() == "git" || m_backend->name() == "mercurial") {
+				// GitBackend::diffstat() has been flawed in version 2, so invalidate the
+				// cache.
+				Logger::warn() << "Warning: Cache is out of date, clearing" << endl;
+				delete in;
+				clear();
+				return;
+			}
+			break;
+
+		case CACHE_VERSION:
+			break;
+
+		default:
+			 throw PEX(utils::strprintf("Unkown cache version number %u", version));
 	}
 
 	Logger::status() << "Loading cache index... " << ::flush;
@@ -230,21 +247,42 @@ void Cache::load()
 	std::string buffer;
 	std::pair<uint32_t, uint32_t> pos;
 	uint32_t crc;
-	while (!in.eof()) {
-		in >> buffer;
+	while (!in->eof()) {
+		*in >> buffer;
 		if (buffer.empty()) {
 			break;
 		}
-		in >> pos.first >> pos.second;
-		in >> crc;
+		*in >> pos.first >> pos.second;
+		*in >> crc;
 		m_index[buffer] = pos;
 	}
 
 	Logger::status() << "done" << endl;
+	delete in;
 
 	timeval c;
 	gettimeofday(&c, NULL);	
  	Logger::info() << "Cache: Loaded " << m_index.size() << " revisions in " << (c.tv_sec - tv.tv_sec) * 1000 + (c.tv_usec - tv.tv_usec) / 1000 << " ms" << endl;
+}
+
+// Clears all cache files
+void Cache::clear()
+{
+	flush();
+
+	std::string path = m_opts.cacheDir() + "/" + uuid();
+	struct stat statbuf;
+	if (stat(path.c_str(), &statbuf) == -1) {
+		return;
+	}
+
+	PDEBUG << "Clearing cache in dir: " << path << endl;
+	std::vector<std::string> files = sys::fs::ls(path);
+	for (size_t i = 0; i < files.size(); i++) {
+		std::string fullpath = path + "/" + files[i];
+		PDEBUG << "Unlinking " << fullpath << endl;
+		sys::fs::unlink(fullpath);
+	}
 }
 
 // Checks cache entries and removes invalid ones from the index file
