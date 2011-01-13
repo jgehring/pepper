@@ -164,13 +164,15 @@ static int test_strprintf()
 		{ "Ints: %d + %i = %u", "Ints: 2 + 2 = 4", "" },
 		{ "Strings: %c and %s", "Strings: a and abc", "" },
 		{ "Floats: %e, %E, %f, %F, %g, %G", "Floats: 3.14, 1.41421, -1, 1, 3, -3", ""},
-		{ "Escaping %% works", "Escaping % works", ""}
+		{ "Escaping %% works", "Escaping % works", ""},
+		{ "Longs for %ld and %lu are ok", "Longs for -23 and 100 are ok", ""}
 	};
 	inout[0].gen = utils::strprintf(inout[0].src);
 	inout[1].gen = utils::strprintf(inout[1].src, 2, 2, 4);
 	inout[2].gen = utils::strprintf(inout[2].src, 'a', "abc");
 	inout[3].gen = utils::strprintf(inout[3].src, 3.14, sqrt(2.0), -1.0f, 1.0f, 3.0, -3.0);
 	inout[4].gen = utils::strprintf(inout[4].src);
+	inout[5].gen = utils::strprintf(inout[5].src, (long)-23, (unsigned long)100);
 
 	for (unsigned int i = 0; i < sizeof(inout) / sizeof(inout_t); i++) {
 		if (inout[i].gen != inout[i].out) {

@@ -122,23 +122,27 @@ std::string strprintf(const char *format, ...)
 	std::ostringstream os;
 
 	const char *ptr = format-1;
+	int lmod = 0;
 	while (*(++ptr) != '\0') {
 		if (*ptr != '%') {
 			os << *ptr;
 			continue;
 		}
 
-		++ptr;
+format:
+		if (*(++ptr) == '\0') {
+			break;
+		}
 
 		// Only a subset of format specifiers is supported
 		switch (*ptr) {
 			case 'd':
 			case 'i':
-				os << va_arg(vl, int);
+				os << (lmod ? va_arg(vl, long int) : va_arg(vl, int));
 				break;
 
 			case 'u':
-				os << va_arg(vl, unsigned);
+				os << (lmod ? va_arg(vl, unsigned long) : va_arg(vl, unsigned));
 				break;
 
 			case 'c':
@@ -162,13 +166,19 @@ std::string strprintf(const char *format, ...)
 				os << '%';
 				break;
 
+			case 'l':
+				lmod = true;
+				goto format;
+				break;
+
 			default:
 #ifndef NDEBUG
-				std::cerr << "Error in strprintf(): unknown format specifier " << *ptr << std::endl;
-				exit(1);
+				throw PEX(std::string("Unknown format specifier ") + *ptr);
 #endif
 				break;
 		}
+
+		lmod = false;
 	}
 
 	va_end(vl);
