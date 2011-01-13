@@ -225,15 +225,12 @@ void Cache::load()
 	*in >> version;
 	switch (version) {
 		case 1:
-			if (m_backend->name() == "git" || m_backend->name() == "mercurial") {
-				// GitBackend::diffstat() has been flawed in version 2, so invalidate the
-				// cache.
-				Logger::warn() << "Warning: Cache is out of date, clearing" << endl;
-				delete in;
-				clear();
-				return;
-			}
-			break;
+			// The diffstats for Mercurial and Git have been flawed in version 1.
+			// The Subversion backend uses repository-wide diffstats now.
+			Logger::warn() << "Warning: Cache is out of date, clearing" << endl;
+			delete in;
+			clear();
+			return;
 
 		case CACHE_VERSION:
 			break;
