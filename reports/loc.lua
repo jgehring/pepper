@@ -51,6 +51,7 @@ function add_tagmarks(plot)
 		x2tics = x2tics:sub(0, #x2tics-1) .. ")"
 		plot:cmd("set x2data time")
 		plot:cmd("set format x2 \"%s\"")
+		plot:cmd("set x2tics scale 0")
 		plot:cmd("set x2tics " .. x2tics)
 		plot:cmd("set x2tics border rotate by 60")
 		plot:cmd("set x2tics font \"Helvetica,8\"")
@@ -78,7 +79,6 @@ function main()
 		total = total + locdeltas[v]
 		table.insert(loc, total)
 	end
-	print("Total line count: " .. total)
 
 	-- Setup plot
 	local imgtype = pepper.report.getopt("t, type", "svg")
