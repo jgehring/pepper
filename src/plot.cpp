@@ -34,6 +34,8 @@ Lunar<Plot>::RegType Plot::methods[] = {
 // Constructor
 Plot::Plot(lua_State *L)
 {
+	Gnuplot::set_terminal_std("svg");
+
 	try {
 		g = new Gnuplot();
 	} catch (const GnuplotException &ex) {
