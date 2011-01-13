@@ -78,6 +78,7 @@ function main()
 		total = total + locdeltas[v]
 		table.insert(loc, total)
 	end
+	print("Total line count: " .. total)
 
 	-- Setup plot
 	local imgtype = pepper.report.getopt("t, type", "svg")

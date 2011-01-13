@@ -106,7 +106,7 @@ static int walk_branch(lua_State *L)
 	Logger::status() << "Initializing iterator... " << flush;
 
 	Backend *backend = repo->backend();
-	RevisionIterator *it;
+	RevisionIterator *it = NULL;
 	try {
 		it = new RevisionIterator(branch, backend);
 	} catch (const Pepper::Exception &ex) {
@@ -123,6 +123,7 @@ static int walk_branch(lua_State *L)
 		try {
 			revision = backend->revision(it->next());
 		} catch (const Pepper::Exception &ex) {
+			delete it;
 			return LuaHelpers::pushError(L, ex.what(), ex.where());
 		}
 
@@ -144,12 +145,12 @@ static int walk_branch(lua_State *L)
 		Logger::status() << "done" << endl;
 	}
 
+	delete it;
 	try {
 		backend->finalize();
 	} catch (const Pepper::Exception &ex) {
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
 	}
-	delete it;
 	return 0;
 }
 
