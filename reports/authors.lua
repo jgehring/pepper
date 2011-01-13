@@ -7,7 +7,8 @@
 meta.title = "Code contribution by authors"
 meta.description = "Contributed lines of code by authors"
 meta.options = {{"-bARG, --branch=ARG", "Select branch"},
-                {"-tARG, --type=ARG", "Select image type"}}
+                {"-tARG, --type=ARG", "Select image type"},
+                {"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with a regular expression"}}
 
 -- Revision callback function
 function callback(r)
@@ -39,6 +40,38 @@ end
 -- Checks whether commit a has been earlier than b
 function commitcmp(a, b)
 	return (a[1] < b[1])
+end
+
+-- Convert from UNIX to Gnuplot epoch
+function convepoch(t)
+	return t - 946684800
+end
+
+-- Adds x2tics for repository tags
+function add_tagmarks(plot)
+	-- Fetch tags and generate tic data
+	local repo = pepper.report.repository()
+	local regex = pepper.report.getopt("tags", "*")
+	local tags = repo:tags()
+	local x2tics = ""
+	if #tags > 0 then
+		x2tics = "("
+		for k,v in ipairs(tags) do
+			if v:name():find(regex) ~= nil then
+				x2tics = x2tics .. "\"" .. v:name() .. "\" " .. convepoch(pepper.report.revision(v:id()):date()) .. ","
+			end
+		end
+		if #x2tics == 1 then
+			return
+		end
+		x2tics = x2tics:sub(0, #x2tics-1) .. ")"
+		plot:cmd("set x2data time")
+		plot:cmd("set format x2 \"%s\"")
+		plot:cmd("set x2tics scale 0")
+		plot:cmd("set x2tics " .. x2tics)
+		plot:cmd("set x2tics border rotate by 60")
+		plot:cmd("set x2tics font \"Helvetica,8\"")
+	end
 end
 
 -- Main script function
@@ -92,6 +125,17 @@ function main()
 	local p = pepper.gnuplot:new()
 	p:set_title("Contributed Lines of Code by Author (on " .. branch .. ")")
 	p:set_output("authors." .. pepper.report.getopt("t, type", "svg"), 600, 480)
+
+	if pepper.report.getopt("tags") ~= nil then
+		add_tagmarks(p)
+	end
+
+	-- Determine time range: 5% spacing at start and end, rounded to 1000 seconds
+	-- This is imporant for aligning the xaxis and x2axis (when using tags)
+	local range = keys[#keys] - keys[1]
+	local tstart = convepoch(1000 * math.floor((keys[1] - 0.05 * range) / 1000))
+	local tend = convepoch(1000 * math.ceil((keys[#keys] + 0.05 * range) / 1000))
+
 	p:cmd([[
 set xdata time
 set timefmt "%s"
@@ -102,8 +146,11 @@ set yrange [0:*]
 set xtics nomirror
 set xtics rotate by -45
 set grid ytics
+set grid x2tics
 set rmargin 8
 set key box
 set key below]])
+	p:cmd("set xrange [" .. tstart .. ":" .. tend .. "]")
+	p:cmd("set x2range [" .. tstart .. ":" .. tend .. "]")
 	p:plot_series(keys, series, authors)
 end
