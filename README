@@ -118,3 +118,7 @@ listing of them:
 
 	* diffstat
 	Prints a diffstat of a given revision
+
+	* directories
+	Plots the directory sizes for the 6 largest directories.
+	The resulting file is called directories, e.g. "directories.png".
