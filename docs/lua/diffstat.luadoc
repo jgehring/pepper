@@ -3,6 +3,9 @@
 module "pepper.diffstat"
 
 
+--- Constructs a copy of the source diffstat
+function diffstat(source)
+
 --- Returns an array of all files in the diffstat
 function files()
 

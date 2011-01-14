@@ -79,7 +79,12 @@ Lunar<Diffstat>::RegType Diffstat::methods[] = {
 	{0,0}
 };
 
-Diffstat::Diffstat(lua_State *) {
+Diffstat::Diffstat(lua_State *L) {
+	Diffstat *other = Lunar<Diffstat>::check(L, 1);
+	if (other == NULL) {
+		return;
+	}
+	m_stats = other->m_stats;
 }
 
 int Diffstat::files(lua_State *L) {
