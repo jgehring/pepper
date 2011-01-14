@@ -40,6 +40,8 @@ EXTRA_DIST = \
 	diffstat/data/git-del.ref \
 	diffstat/data/git-mod.pat \
 	diffstat/data/git-mod.ref \
+	diffstat/data/git-quotes.pat \
+	diffstat/data/git-quotes.ref \
 	diffstat/data/svn-add.pat \
 	diffstat/data/svn-add.ref \
 	diffstat/data/svn-del.pat \
