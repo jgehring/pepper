@@ -1,3 +1,14 @@
+2010-01-15  --  version 0.1.3
+
+	* Added directories report, visualizing directory sizes over time
+	* Added tag markers in authors report
+	* Fixed ambiguous (and wrong) diffs for merge commits in Git and
+	  Mercurial repositories.
+	* Fixed branch walking on subdirectories in Subversion repositories
+	* Linearized branch walking in Git and Mercurial repositories
+	* Fixed plotting in headless environments
+	* Fixed wrong date calculations in commits_per_month report
+
 2010-01-12  --  version 0.1.2
 
 	* Added tag access for scripts, and optional tag markers in

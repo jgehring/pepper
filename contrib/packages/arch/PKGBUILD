@@ -1,6 +1,6 @@
 # Maintainer: Jonas Gehring <jonas.gehring@boolsoft.org>
 pkgname=scm-pepper
-pkgver=0.1.2
+pkgver=0.1.3
 pkgrel=1
 pkgdesc="Flexible SCM statistics report generator"
 url="http://scm-pepper.sourceforge.net"
