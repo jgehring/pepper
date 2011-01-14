@@ -169,9 +169,16 @@ int main(int argc, char **argv)
 	}
 
 	// Setup backend
-	Backend *backend = Backend::backendFor(opts);
-	if (backend == NULL) {
-		std::cerr << "Error: No backend found for url: " << opts.repoUrl() << std::endl;
+	Backend *backend;
+	try {
+		backend = Backend::backendFor(opts);
+		if (backend == NULL) {
+			std::cerr << "Error: No backend found for url: " << opts.repoUrl() << std::endl;
+			return EXIT_FAILURE;
+		}
+	} catch (const Pepper::Exception &ex) {
+		std::cerr << "Error detecting repository type: " << ex.where() << ": " << ex.what() << std::endl;
+		Logger::flush();
 		return EXIT_FAILURE;
 	}
 

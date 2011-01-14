@@ -142,24 +142,30 @@ Backend *Backend::backendForName(const std::string &name, const Options &options
 		return new MercurialBackend(options);
 	}
 #endif
-	return NULL;
+
+	throw PEX(std::string("No such backend: " + name));
 }
 
 // Tries to guess a backend by examining the repository URL
 Backend *Backend::backendForUrl(const std::string &url, const Options &options)
 {
+	std::string absurl = sys::fs::makeAbsolute(url);
+	if (absurl.empty()) {
+		throw PEX(std::string("No such file or directory: " + url));
+	}
+
 #ifdef USE_SUBVERSION
-	if (SubversionBackend::handles(url)) {
+	if (SubversionBackend::handles(absurl)) {
 		return new SubversionBackend(options);
 	}
 #endif
 #ifdef USE_GIT
-	if (GitBackend::handles(url)) {
+	if (GitBackend::handles(absurl)) {
 		return new GitBackend(options);
 	}
 #endif
 #ifdef USE_MERCURIAL
-	if (MercurialBackend::handles(url)) {
+	if (MercurialBackend::handles(absurl)) {
 		return new MercurialBackend(options);
 	}
 #endif
