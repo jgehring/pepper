@@ -50,7 +50,6 @@ class Options
 		void reset();
 		void parse(const std::vector<std::string> &args);
 		bool parseOpt(const std::string &arg, std::string *key, std::string *value);
-		std::string makeAbsolute(const std::string &path);
 
 	PEPPER_PVARS
 		mutable std::map<std::string, std::string> m_options;

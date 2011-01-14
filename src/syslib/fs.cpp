@@ -16,6 +16,8 @@
 
 #include <sys/stat.h>
 
+#include "utils.h"
+
 #include "fs.h"
 
 
@@ -74,6 +76,27 @@ std::string canonicalize(const std::string &path)
 		return std::string();
 	}
 	return std::string(cpath);
+}
+
+// Converts a possibly relative path to an absolute one
+std::string makeAbsolute(const std::string &path)
+{
+	// Check for a URL scheme
+	if (path.empty() || path.find("://") != std::string::npos) {
+		return path;
+	}
+
+	// Make path absolute
+	std::string abspath(path);
+	if (abspath[0] != '/') {
+		char cwd[FILENAME_MAX];
+		if (!getcwd(cwd, sizeof(cwd))) {
+			throw PEX(utils::strprintf("Unable to determine current directory (%d)", errno));
+		}
+		abspath = std::string(cwd) + "/" + path;
+	}
+
+	return canonicalize(abspath);
 }
 
 // Wrapper for mkdir()
