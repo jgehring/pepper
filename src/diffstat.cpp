@@ -194,6 +194,9 @@ Diffstat DiffParser::parse(std::istream &in)
 			}
 			if (header[0] != "/dev/null") {
 				file = header[0];
+				if (file[0] == '"' && file[file.length()-1] == '"') {
+					file = file.substr(1, file.length()-2);
+				}
 				if (!file.compare(0, 2, "a/")) {
 					file = file.substr(2);
 				}
@@ -210,6 +213,9 @@ Diffstat DiffParser::parse(std::istream &in)
 			}
 			if (header[0] != "/dev/null") {
 				file = header[0];
+				if (file[0] == '"' && file[file.length()-1] == '"') {
+					file = file.substr(1, file.length()-2);
+				}
 				if (!file.compare(0, 2, "b/")) {
 					file = file.substr(2);
 				}
