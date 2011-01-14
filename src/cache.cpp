@@ -18,7 +18,6 @@
 
 #include "bstream.h"
 #include "diffstat.h"
-#include "fs.h"
 #include "logger.h"
 #include "options.h"
 #include "revision.h"
