@@ -22,6 +22,8 @@ namespace sigblock
 
 struct Handler
 {
+	virtual ~Handler() { }
+
 	virtual void operator()(int signum) = 0;
 };
 
