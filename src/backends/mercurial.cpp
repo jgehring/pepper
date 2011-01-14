@@ -137,8 +137,14 @@ std::vector<Tag> MercurialBackend::tags()
 // Returns a diffstat for the specified revision
 Diffstat MercurialBackend::diffstat(const std::string &id)
 {
+	std::vector<std::string> ids = utils::split(id, ":");
 #if 1
-	std::string out = hgcmd("diff", utils::strprintf("change=\"%s\"", id.c_str()));
+	std::string out;
+	if (ids.size() > 1) {
+		out = hgcmd("diff", utils::strprintf("rev=[\"%s:%s\"]", ids[0].c_str(), ids[1].c_str()));
+	} else {
+		out = hgcmd("diff", utils::strprintf("change=\"%s\"", ids[0].c_str()));
+	}
 #else
 	std::string out = sys::io::exec(hgcmd()+" diff --change "+id);
 #endif
@@ -149,7 +155,8 @@ Diffstat MercurialBackend::diffstat(const std::string &id)
 // Returns a revision iterator for the given branch
 Backend::LogIterator *MercurialBackend::iterator(const std::string &branch)
 {
-	std::string out = hgcmd("log", utils::strprintf("date=None, user=None, quiet=None, rev=[\"0:%s\"]", (head(branch)).c_str()));
+	// Request log from HEAD to 0, so follow_first is effective
+	std::string out = hgcmd("log", utils::strprintf("date=None, user=None, follow_first=True, quiet=None, rev=[\"%s:0\"]", (head(branch)).c_str()));
 	std::vector<std::string> revisions = utils::split(out, "\n");
 	if (!revisions.empty()) {
 		revisions.pop_back();
@@ -160,14 +167,23 @@ Backend::LogIterator *MercurialBackend::iterator(const std::string &branch)
 			revisions[i] = revisions[i].substr(pos+1);
 		}
 	}
+
+	std::reverse(revisions.begin(), revisions.end());
+
+	// Add parent revisions, so diffstat fetching will give correct results
+	for (int i = revisions.size()-1; i > 0; i--) {
+		revisions[i] = revisions[i-1] + ":" + revisions[i];
+	}
+
 	return new LogIterator(revisions);
 }
 
 // Returns the revision data for the given ID
 Revision *MercurialBackend::revision(const std::string &id)
 {
+	std::vector<std::string> ids = utils::split(id, ":");
 #if 1
-	std::string meta = hgcmd("log", utils::strprintf("rev=[\"%s\"], date=None, user=None, template=\"{date|hgdate}\\n{author|person}\\n{desc}\"", id.c_str()));
+	std::string meta = hgcmd("log", utils::strprintf("rev=[\"%s\"], date=None, user=None, template=\"{date|hgdate}\\n{author|person}\\n{desc}\"", ids.back().c_str()));
 #else
 	std::string meta = sys::io::exec(hgcmd()+" log -r "+id+" --template=\"{date|hgdate}\n{author|person}\n{desc}\"");
 #endif
