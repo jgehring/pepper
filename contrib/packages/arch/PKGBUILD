@@ -12,7 +12,7 @@ optdepends=('git: Git repository access'
 'mercurial: Mercurial repository access'
 'gnuplot: plotting support for reports')
 source=("http://prdownloads.sourceforge.net/scm-pepper/pepper-${pkgver}.tar.bz2")
-sha1sums=('9beea9be67b6d3e001fbc0363ddb6aa57612865f')
+sha1sums=('4e0204c918c31dfe55d849cfcbc1e2c95237fefa')
 
 build() {
 	cd ${srcdir}/pepper-${pkgver}
