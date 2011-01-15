@@ -290,10 +290,7 @@ int run(const std::string &script, Backend *backend)
 	// Run the script
 	int ret = EXIT_SUCCESS;
 	std::string path = findScript(script);
-	if (path.empty()) {
-		std::cerr << "Error opening report: No such file or directory" << std::endl;
-		ret = EXIT_FAILURE;
-	} else if (luaL_dofile(L, path.c_str()) != 0) {
+	if (luaL_dofile(L, path.c_str()) != 0) {
 		std::cerr << "Error opening report: " << lua_tostring(L, -1) << std::endl;
 		ret = EXIT_FAILURE;
 	} else {
@@ -319,9 +316,7 @@ void printHelp(const std::string &script)
 
 	// Open the script
 	std::string path = findScript(script);
-	if (path.empty()) {
-		std::cerr << "Error opening report: No such file or directory" << std::endl;
-	} else if (luaL_dofile(L, path.c_str()) != 0) {
+	if (luaL_dofile(L, path.c_str()) != 0) {
 		throw PEX(utils::strprintf("Error opening report: %s", lua_tostring(L, -1)));
 	}
 
@@ -387,9 +382,7 @@ void listReports(std::ostream &out)
 
 		lua_State *L = setupLua();
 		std::string path = builtin + "/" + reports[i];
-		if (path.empty()) {
-			std::cerr << "Error opening report: No such file or directory" << std::endl;
-		} else if (luaL_dofile(L, path.c_str()) != 0) {
+		if (luaL_dofile(L, path.c_str()) != 0) {
 			throw PEX(utils::strprintf("Error opening report: %s", lua_tostring(L, -1)));
 		}
 
