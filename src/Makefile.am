@@ -45,6 +45,17 @@ AM_LDFLAGS = \
 	$(LUA_LIB) \
 	$(FRAMEWORKS)
 
+# Debugging?
+if DEBUG
+AM_CXXFLAGS += \
+	-O0 -g -DDEBUG -rdynamic
+AM_LDFLAGS += \
+	-rdynamic
+else
+AM_CXXFLAGS += \
+	-O2 -DNDEBUG
+endif
+
 
 # Optional features
 if GIT_BACKEND

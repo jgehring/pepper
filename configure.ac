@@ -11,6 +11,7 @@ AC_CONFIG_TESTDIR([tests])
 
 # Custom arguments that should be listed first
 AC_ARG_ENABLE([debug], [AS_HELP_STRING([--enable-debug], [Turn on debugging])], [debug="$enableval"], [debug="no"])
+AM_CONDITIONAL([DEBUG], [test "x$debug" = "xyes"])
 
 sinclude(m4/ax_check_zlib.m4)
 sinclude(m4/ax_lua.m4)
@@ -147,18 +148,6 @@ AM_CONDITIONAL([GIT_BACKEND], [test "x$git" = "xyes"])
 AM_CONDITIONAL([MERCURIAL_BACKEND], [test "x$mercurial" = "xyes"])
 AM_CONDITIONAL([SVN_BACKEND], [test "x$subversion" = "xyes"])
 
-
-#
-# Debugging
-#
-
-if test "x$debug" = "xyes"; then
-	CXXFLAGS="-O0 -g -DDEBUG"
-	CFLAGS="-O0 -g -DDEBUG"
-else
-	CXXFLAGS="-O2 -DNDEBUG"
-	CFLAGS="-O2 -DDEBUG"
-fi
 
 
 #

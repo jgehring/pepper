@@ -72,14 +72,17 @@ static void printHelp(const Options &opts)
 
 	if (!opts.repoUrl().empty() || !opts.forcedBackend().empty()) {
 		std::cout << std::endl;
-		Backend *backend = Backend::backendFor(opts);
-		if (backend == NULL) {
-			std::cout << "Error: Unkown backend " << opts.forcedBackend() << std::endl;
-		} else {
+		try {
+			Backend *backend = Backend::backendFor(opts);
+			if (backend == NULL) {
+				throw PEX("No backend found");
+			}
 			std::cout << "Options for the " << backend->name() << " backend:" << std::endl;
 			backend->printHelp();
+			delete backend;
+		} catch (const std::exception &ex) {
+			std::cout << "Sorry, unable to find a backend for '" << opts.repoUrl() << "'" << std::endl;
 		}
-		delete backend;
 	}
 	if (!opts.script().empty()) {
 		std::cout << std::endl;
@@ -127,27 +130,9 @@ static void setupLogger(std::vector<std::ofstream *> *streams, const Options &)
 #endif
 }
 
-// Program entry point
-int main(int argc, char **argv)
+// Runs the program according to the given actions
+int start(const Options &opts)
 {
-#ifdef WIN32
-	// On windows, we need to change the mode for stdout to binary to avoid
-	// newlines being automatically translated to CRLF.
-	_setmode(_fileno(stdout), _O_BINARY);
-#endif // WIN32
-
-	Options opts;
-	try {
-		opts.parse(argc, argv);
-	} catch (const std::exception &ex) {
-		std::cerr << "Error parsing arguments: " << ex.what() << std::endl;
-		std::cerr << "Run with --help for usage information" << std::endl;
-		return EXIT_FAILURE;
-	}
-
-	std::vector<std::ofstream *> streams;
-	setupLogger(&streams, opts);
-
 	// Print requested help screens or listings
 	if (opts.helpRequested()) {
 		printHelp(opts);
@@ -220,8 +205,9 @@ int main(int argc, char **argv)
 		ret = report::run(opts.script(), backend);
 	} catch (const Pepper::Exception &ex) {
 		std::cerr << "Recieved exception while running report:" << std::endl;
-		std::cerr << "  what(): " << ex.what() << std::endl;
+		std::cerr << "  what():  " << ex.what() << std::endl;
 		std::cerr << "  where(): " << ex.where() << std::endl;
+		std::cerr << "  trace(): " << ex.trace() << std::endl;
 		ret = EXIT_FAILURE;
 	} catch (const std::exception &ex) {
 		std::cerr << "Recieved exception while running report:" << std::endl;
@@ -230,6 +216,45 @@ int main(int argc, char **argv)
 	}
 
 	delete backend; // This will also flush the cache
+	return ret;
+}
+
+// Program entry point
+int main(int argc, char **argv)
+{
+#ifdef WIN32
+	// On windows, we need to change the mode for stdout to binary to avoid
+	// newlines being automatically translated to CRLF.
+	_setmode(_fileno(stdout), _O_BINARY);
+#endif // WIN32
+
+	Options opts;
+	try {
+		opts.parse(argc, argv);
+	} catch (const std::exception &ex) {
+		std::cerr << "Error parsing arguments: " << ex.what() << std::endl;
+		std::cerr << "Run with --help for usage information" << std::endl;
+		return EXIT_FAILURE;
+	}
+
+	std::vector<std::ofstream *> streams;
+	setupLogger(&streams, opts);
+
+	int ret;
+	try {
+		ret = start(opts);
+	} catch (const Pepper::Exception &ex) {
+		std::cerr << "Recieved unhandled exception:" << std::endl;
+		std::cerr << "  what():  " << ex.what() << std::endl;
+		std::cerr << "  where(): " << ex.where() << std::endl;
+		std::cerr << "  trace(): " << ex.trace() << std::endl;
+		ret = EXIT_FAILURE;
+	} catch (const std::exception &ex) {
+		std::cerr << "Recieved unhandled exception:" << std::endl;
+		std::cerr << "  what(): " << ex.what() << std::endl;
+		ret = EXIT_FAILURE;
+	}
+
 	Logger::flush();
 
 	// Close log files
