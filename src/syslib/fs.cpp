@@ -73,7 +73,7 @@ std::string canonicalize(const std::string &path)
 	// NOTE: glibc-only
 	char cpath[PATH_MAX];
 	if (realpath(path.c_str(), cpath) == NULL) {
-		return std::string();
+		throw PEX_ERRNO();
 	}
 	return std::string(cpath);
 }
@@ -91,7 +91,7 @@ std::string makeAbsolute(const std::string &path)
 	if (abspath[0] != '/') {
 		char cwd[FILENAME_MAX];
 		if (!getcwd(cwd, sizeof(cwd))) {
-			throw PEX(utils::strprintf("Unable to determine current directory (%d)", errno));
+			throw PEX_ERRNO();
 		}
 		abspath = std::string(cwd) + "/" + path;
 	}
@@ -100,29 +100,32 @@ std::string makeAbsolute(const std::string &path)
 }
 
 // Wrapper for mkdir()
-int mkdir(const std::string &path)
+void mkdir(const std::string &path)
 {
 	// Use current umask
-	return ::mkdir(path.c_str(), 0777);
+	if (::mkdir(path.c_str(), 0777) != 0) {
+		throw PEX_ERRNO();
+	}
 }
 
 // mkdir() for a complete path
-int mkpath(const std::string &path)
+void mkpath(const std::string &path)
 {
 	std::string dir = dirname(path);
 	struct stat statbuf;
-	if (stat(dir.c_str(), &statbuf) == -1) {
-		if (mkpath(dir) == -1) {
-			return -1;
-		}
+	if (stat(dir.c_str(), &statbuf) != 0) {
+		mkpath(dir);
 	}
-	return mkdir(path);
+
+	mkdir(path);
 }
 
 // Wrapper for unlink()
-int unlink(const std::string &path)
+void unlink(const std::string &path)
 {
-	return ::unlink(path.c_str());
+	if (::unlink(path.c_str()) == -1) {
+		throw PEX_ERRNO();
+	}
 }
 
 // Checks if the given file (or directory) exists
@@ -151,7 +154,7 @@ size_t filesize(const std::string &path)
 {
 	struct stat statbuf;
 	if (stat(path.c_str(), &statbuf) == -1) {
-		return 0;
+		throw PEX_ERRNO();
 	}
 	return statbuf.st_size;
 }
@@ -163,7 +166,7 @@ std::vector<std::string> ls(std::string &path)
 	std::vector<std::string> entries;
 
 	if ((dp = opendir(path.c_str())) == NULL) {
-		return entries;
+		throw PEX_ERRNO();
 	}
 
 	struct dirent *ep;

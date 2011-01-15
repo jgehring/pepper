@@ -26,9 +26,9 @@ std::string dirname(const std::string &path);
 std::string canonicalize(const std::string &path);
 std::string makeAbsolute(const std::string &path);
 
-int mkdir(const std::string &path);
-int mkpath(const std::string &path);
-int unlink(const std::string &path);
+void mkdir(const std::string &path);
+void mkpath(const std::string &path);
+void unlink(const std::string &path);
 
 bool exists(const std::string &path);
 bool fileExists(const std::string &path);

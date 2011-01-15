@@ -201,8 +201,10 @@ void Cache::load()
 	PDEBUG << "Using cache dir: " << path << endl;
 	if (!sys::fs::dirExists(path)) {
 		// Create the cache directory
-		if (sys::fs::mkpath(path) < 0) {
-			throw PEX(utils::strprintf("Unable to create cache directory: %s", path.c_str()));
+		try {
+			sys::fs::mkpath(path);
+		} catch (const std::exception &ex) {
+			throw PEX(utils::strprintf("Unable to create cache directory: %s", ex.what()));
 		}
 		Logger::info() << "Cache: Creating cache directory for '" << uuid() << '\'' << endl;
 		return;
@@ -283,8 +285,10 @@ void Cache::check()
 	PDEBUG << "Checking cache in dir: " << path << endl;
 	if (!sys::fs::dirExists(path)) {
 		// Create the cache directory
-		if (sys::fs::mkpath(path) < 0) {
-			throw PEX(utils::strprintf("Unable to create cache directory: %s", path.c_str()));
+		try {
+			sys::fs::mkpath(path);
+		} catch (const std::exception &ex) {
+			throw PEX(utils::strprintf("Unable to create cache directory: %s", ex.what()));
 		}
 		Logger::info() << "Cache: Creating cache directory for '" << uuid() << '\'' << endl;
 		return;

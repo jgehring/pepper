@@ -7,6 +7,7 @@
  */
 
 
+#include <cerrno>
 #include <cstring>
 
 #include "main.h"
@@ -29,9 +30,10 @@ namespace io
 // Runs the specified command line and returns the output
 std::string execv(int *ret, const char * const *argv)
 {
+	FILE *pipe = NULL;
 #ifdef USE_POPEN_NOSHELL
 	struct popen_noshell_pass_to_pclose pclose_arg;
-	FILE *pipe = popen_noshell(argv[0], argv, "r", &pclose_arg, 0);
+	pipe = popen_noshell(argv[0], argv, "r", &pclose_arg, 0);
 #else
 	// Concatenate arguments, put possible meta characters in quotes
 	std::string cmd;
@@ -56,10 +58,10 @@ std::string execv(int *ret, const char * const *argv)
 		cmd += " ";
 		++ptr;
 	}
-	FILE *pipe = popen(cmd.c_str(), "r");
+	pipe = popen(cmd.c_str(), "r");
 #endif
-	if (!pipe) {
-		throw PEX(std::string("Unable to open pipe for command ")+argv[0]);
+	if (pipe == NULL) {
+		throw (errno != 0 ? PEX_ERRNO() : PEX(std::string("Unable to open pipe for command ")+argv[0]));
 	}
 
 	char buffer[128];
@@ -70,10 +72,11 @@ std::string execv(int *ret, const char * const *argv)
 		}
 	}
 
+	int r = -1;
 #ifdef USE_POPEN_NOSHELL
-	int r = pclose_noshell(&pclose_arg);
+	r = pclose_noshell(&pclose_arg);
 #else
-	int r = pclose(pipe);
+	r = pclose(pipe);
 #endif
 	if (ret != NULL) {
 		*ret = r;
@@ -162,7 +165,7 @@ PopenStreambuf::PopenStreambuf(const char *cmd, const char *arg1, const char *ar
 #endif
 
 	if (!d->pipe) {
-		throw PEX(std::string("Unable to open pipe for command ")+cmd);
+		throw (errno != 0 ? PEX_ERRNO() : PEX(std::string("Unable to open pipe for command ")+cmd));
 	}
 }
 
