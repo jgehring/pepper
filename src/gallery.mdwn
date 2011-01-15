@@ -1,4 +1,4 @@
-###Gallery
+### Gallery
 
 These example images have been generated using the pepper's built-in
 reports.  The output type has been set to `svg` in order to render both
@@ -17,7 +17,7 @@ has been used.
 ---
 
 
-####Busiest authors
+#### Busiest authors
 
 The `authors` report plots the contributions of the 6 "busiest" authors.
 
@@ -33,7 +33,7 @@ The `authors` report plots the contributions of the 6 "busiest" authors.
 ---
 
 
-####Commits of the last twelve months
+#### Commits of the last twelve months
 
 The `commits_per_month` report plots a histogram of the commits during
 the last twelve months. The red bars represent the number of commits,
@@ -46,5 +46,22 @@ per commit.
 <td><a href="cpm-git.png"><img src="cpm-git-thumb.png" title="Git" width="80%"></a></td>
 <td><a href="cpm-hg.png"><img src="cpm-hg-thumb.png" title="Mercurial" width="80%"></a></td>
 <td><a href="cpm-linux.png"><img src="cpm-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
+</tr>
+</table>
+
+---
+
+
+#### Directory sizes
+
+The `directories` report plots the evolution of directory sizes. The 6
+largest directories in the current head revision are used.
+
+<table width="100%">
+<tr>
+<td><a href="directories-pepper.png"><img src="directories-pepper-thumb.png" title="pepper" width="80%"></a></td>
+<td><a href="directories-git.png"><img src="directories-git-thumb.png" title="Git" width="80%"></a></td>
+<td><a href="directories-hg.png"><img src="directories-hg-thumb.png" title="Mercurial" width="80%"></a></td>
+<td><a href="directories-linux.png"><img src="directories-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
 </tr>
 </table>
