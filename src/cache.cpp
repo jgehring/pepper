@@ -125,8 +125,7 @@ void Cache::put(const std::string &id, const Revision &rev)
 		m_coindex = 0;
 		do {
 			path = utils::strprintf("%s/cache.%u", dir.c_str(), m_coindex);
-			// TODO: For compressed files, the stat returns the actual data size
-			if (sys::fs::filesize(path) < MAX_CACHEFILE_SIZE) {
+			if (!sys::fs::fileExists(path) || sys::fs::filesize(path) < MAX_CACHEFILE_SIZE) {
 				break;
 			}
 			++m_coindex;
