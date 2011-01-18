@@ -101,6 +101,12 @@ std::string join(std::vector<std::string>::const_iterator start, std::vector<std
 	return res.substr(0, res.length()-c.length());
 }
 
+// Encloses a string in single quotes
+std::string quote(const std::string &str)
+{
+	return std::string("'") + str + "'";
+}
+
 // sprintf for std::string
 std::string strprintf(const char *format, ...)
 {

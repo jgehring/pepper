@@ -57,6 +57,7 @@ std::string trim(const std::string &str);
 std::vector<std::string> split(const std::string &str, const std::string &token, bool trim = false);
 std::string join(const std::vector<std::string> &v, const std::string &c = std::string());
 std::string join(std::vector<std::string>::const_iterator start, std::vector<std::string>::const_iterator end, const std::string &c = std::string());
+std::string quote(const std::string &str);
 
 std::string strprintf(const char *format, ...);
 
