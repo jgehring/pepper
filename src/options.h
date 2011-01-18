@@ -39,6 +39,7 @@ class Options
 
 		std::string forcedBackend() const;
 		std::string repoUrl() const;
+		std::string value(const std::string &key, const std::string &defvalue = std::string()) const;
 		std::map<std::string, std::string> options() const;
 
 		std::string script() const;

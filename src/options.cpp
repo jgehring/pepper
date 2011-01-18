@@ -93,6 +93,14 @@ std::string Options::repoUrl() const
 	return m_options["url"];
 }
 
+std::string Options::value(const std::string &key, const std::string &defvalue) const
+{
+	if (m_options.find(key) != m_options.end()) {
+		return m_options[key];
+	}
+	return defvalue;
+}
+
 std::map<std::string, std::string> Options::options() const
 {
 	return m_options;
