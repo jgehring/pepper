@@ -592,9 +592,10 @@ std::string SubversionBackend::head(const std::string &branch)
 {
 	std::string prefix;
 	if (branch == "trunk") {
-		prefix = branch;
+		prefix = m_opts.value("trunk", "trunk");
 	} else if (!branch.empty()) {
-		prefix = "branches/";
+		prefix = m_opts.value("branches", "branches");
+		prefix += "/";
 		prefix += branch;
 	}
 	PDEBUG << "branch = " << branch << " -> prefix = " << prefix << endl;
@@ -602,7 +603,7 @@ std::string SubversionBackend::head(const std::string &branch)
 	apr_pool_t *pool = svn_pool_create(d->pool);
 	svn_dirent_t *dirent;
 	svn_error_t *err = svn_ra_stat(d->ra, prefix.c_str(), SVN_INVALID_REVNUM, &dirent, pool);
-	if (err == NULL && dirent == NULL && prefix == "trunk") {
+	if (err == NULL && dirent == NULL && branch == "trunk") {
 		err = svn_ra_stat(d->ra, "", SVN_INVALID_REVNUM, &dirent, pool);
 	}
 	if (err != NULL) {
@@ -627,15 +628,14 @@ std::string SubversionBackend::mainBranch()
 // Returns a list of available branches
 std::vector<std::string> SubversionBackend::branches()
 {
-	// Assume the repository has a standard layout and branches can be found
-	// in "/branches/", if any
+	std::string prefix = m_opts.value("branches", "branches");
 	std::vector<std::string> branches;
 
 	apr_pool_t *pool = svn_pool_create(d->pool);
 
 	// Check if branches directoy is present
 	svn_dirent_t *dirent;
-	svn_error_t *err = svn_ra_stat(d->ra, "branches", SVN_INVALID_REVNUM, &dirent, pool);
+	svn_error_t *err = svn_ra_stat(d->ra, prefix.c_str(), SVN_INVALID_REVNUM, &dirent, pool);
 	if (err != NULL) {
 		throw PEX(SvnConnection::strerr(err));
 	}
@@ -648,7 +648,7 @@ std::vector<std::string> SubversionBackend::branches()
 
 	// Get directory entries
 	apr_hash_t *dirents;
-	err = svn_ra_get_dir2(d->ra, &dirents, NULL, NULL, "branches", dirent->created_rev, SVN_DIRENT_KIND, pool);
+	err = svn_ra_get_dir2(d->ra, &dirents, NULL, NULL, prefix.c_str(), dirent->created_rev, SVN_DIRENT_KIND, pool);
 	if (err != NULL) {
 		throw PEX(SvnConnection::strerr(err));
 	}
@@ -672,15 +672,14 @@ std::vector<std::string> SubversionBackend::branches()
 // Returns a list of available tags
 std::vector<Tag> SubversionBackend::tags()
 {
-	// Assume the repository has a standard layout and tags can be found
-	// in "/tags/", if any
+	std::string prefix = m_opts.value("tags", "tags");
 	std::vector<Tag> tags;
 
 	apr_pool_t *pool = svn_pool_create(d->pool);
 
 	// Check if tags directoy is present
 	svn_dirent_t *dirent;
-	svn_error_t *err = svn_ra_stat(d->ra, "tags", SVN_INVALID_REVNUM, &dirent, pool);
+	svn_error_t *err = svn_ra_stat(d->ra, prefix.c_str(), SVN_INVALID_REVNUM, &dirent, pool);
 	if (err != NULL) {
 		throw PEX(SvnConnection::strerr(err));
 	}
@@ -692,7 +691,7 @@ std::vector<Tag> SubversionBackend::tags()
 
 	// Get directory entries
 	apr_hash_t *dirents;
-	err = svn_ra_get_dir2(d->ra, &dirents, NULL, NULL, "tags", dirent->created_rev, SVN_DIRENT_KIND | SVN_DIRENT_CREATED_REV, pool);
+	err = svn_ra_get_dir2(d->ra, &dirents, NULL, NULL, prefix.c_str(), dirent->created_rev, SVN_DIRENT_KIND | SVN_DIRENT_CREATED_REV, pool);
 	if (err != NULL) {
 		throw PEX(SvnConnection::strerr(err));
 	}
@@ -737,9 +736,10 @@ Backend::LogIterator *SubversionBackend::iterator(const std::string &branch)
 {
 	std::string prefix;
 	if (branch == "trunk") {
-		prefix = branch;
+		prefix = m_opts.value("trunk", "trunk");
 	} else if (!branch.empty()) {
-		prefix = "branches/";
+		prefix = m_opts.value("branches", "branches");
+		prefix += "/";
 		prefix += branch;
 	}
 
@@ -797,6 +797,9 @@ void SubversionBackend::printHelp() const
 	Options::print("--password=ARG", "Specify a password ARG");
 	Options::print("--no-auth-cache", "Do not cache authentication tokens");
 	Options::print("--non-interactive", "Do no interactive prompting");
+	Options::print("--trunk=ARG", "Trunk is at subdirectory ARG");
+	Options::print("--branches=ARG", "Branches are in subdirectory ARG");
+	Options::print("--tags=ARG", "Tags are in subdirectory ARG");
 }
 
 // Returns the revision data for the given ID
