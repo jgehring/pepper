@@ -7,8 +7,10 @@
 meta.title = "Directories"
 meta.description = "Directory sizes"
 meta.options = {{"-bARG, --branch=ARG", "Select branch"},
-                {"-tARG, --type=ARG", "Select image type"},
-                {"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with a regular expression"}}
+                {"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with a regular expression"},
+                {"-oARG, --output=ARG", "Select output file (defaults to stdout)"},
+                {"-tARG, --type=ARG", "Explicitly set image type"},
+                {"-sW[xH], --size=W[xH]", "Set image size to width W and height H"}}
 
 -- Returns the dirname() of a file
 function dirname(filename) 
@@ -82,13 +84,31 @@ function commitcmp(a, b)
 	return (a[1] < b[1])
 end
 
+-- Sets up the plot according to the command line arguments
+function setup_plot(branch)
+	local p = pepper.gnuplot:new()
+	p:set_title("Directory sizes (on " .. branch .. ")")
+
+	local file = pepper.report.getopt("o, output", "")
+	local size = pepper.utils.split(pepper.report.getopt("s, size", "600"), "x")
+	local terminal = pepper.report.getopt("t, type", "svg")
+	local width = tonumber(size[1])
+	local height = width * 0.8
+	if (#size > 1) then
+		height = tonumber(size[2])
+	end
+
+	p:set_output(file, width, height, terminal)
+	return p
+end
+
 -- Main report function
 function main()
 	commits = {}     -- Commit list by timestamp with diffstat
 	directories = {} -- Total LOC by directory
 
 	-- Gather data
-	branch = pepper.report.getopt("b, branch", pepper.report.repository():main_branch())
+	local branch = pepper.report.getopt("b, branch", pepper.report.repository():main_branch())
 	pepper.report.walk_branch(count, branch)
 
 	-- Determine the largest directories (by current LOC)
@@ -141,9 +161,7 @@ function main()
 		end
 	end
 
-	local p = pepper.gnuplot:new()
-	p:set_title("Directory sizes (on " .. branch .. ")")
-	p:set_output("directories." .. pepper.report.getopt("t, type", "svg"), 600, 480)
+	local p = setup_plot(branch)
 
 	if pepper.report.getopt("tags") ~= nil then
 		add_tagmarks(p)

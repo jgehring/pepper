@@ -7,7 +7,9 @@
 meta.title = "Commits per Month"
 meta.description = "Histogramm of commit counts during the last twelve months"
 meta.options = {{"-bARG, --branch=ARG", "Select branch"},
-                {"-tARG, --type=ARG", "Select image type"}}
+                {"-oARG, --output=ARG", "Select output file (defaults to stdout)"},
+                {"-tARG, --type=ARG", "Explicitly set image type"},
+                {"-sW[xH], --size=W[xH]", "Set image size to width W and height H"}}
 
 -- Revision callback function
 function callback(r)
@@ -25,6 +27,24 @@ function callback(r)
 	changes[date["month"]] = changes[date["month"]] + #r:diffstat():files()
 end
 
+-- Sets up the plot according to the command line arguments
+function setup_plot(branch)
+	local p = pepper.gnuplot:new()
+	p:set_title("Commits per Month (on " .. branch .. ")")
+
+	local file = pepper.report.getopt("o, output", "")
+	local size = pepper.utils.split(pepper.report.getopt("s, size", "800"), "x")
+	local terminal = pepper.report.getopt("t, type", "svg")
+	local width = tonumber(size[1])
+	local height = width * 0.6
+	if (#size > 1) then
+		height = tonumber(size[2])
+	end
+
+	p:set_output(file, width, height, terminal)
+	return p
+end
+
 -- Main report function
 function main()
 	now = os.date("*t", os.time())
@@ -32,7 +52,7 @@ function main()
 	changes = {}
 
 	-- Gather data
-	branch = pepper.report.getopt("b,branch", pepper.report.repository():main_branch())
+	local branch = pepper.report.getopt("b,branch", pepper.report.repository():main_branch())
 	-- TODO: Restrict to last twelve months
 	pepper.report.walk_branch(callback, branch)
 
@@ -57,11 +77,9 @@ function main()
 	end
 
 	-- Generate graphs
-	local imgtype = pepper.report.getopt("t,type", "svg")
 	local plot = pepper.gnuplot:new()
-	plot:set_title("Commits per Month (on " .. branch .. ")")
-	plot:set_output("cpm." .. imgtype, 800, 480)
-	plot:cmd([[
+	local p = setup_plot(branch)
+	p:cmd([[
 set format y "%.0f"
 set yrange [0:*]
 set grid ytics
@@ -86,14 +104,14 @@ set xtics nomirror
 		month = (month % 12) + 1
 		i = i + 1
 	end
-	plot:cmd("set xtics (" .. xtics:sub(0, #xtics-1) .. ") scale 0")
+	p:cmd("set xtics (" .. xtics:sub(0, #xtics-1) .. ") scale 0")
 
 	local cmd = "plot "
 	cmd = cmd .. "\"" .. filename .. "\" using 1:3 with boxes fs solid title \"Commits\", "
 	cmd = cmd .. "\"" .. filename .. "\" using ($1+.4):4 with boxes fs solid title \"Changes\";"
 
 	file:close()
-	plot:cmd(cmd)
-	plot:flush()
+	p:cmd(cmd)
+	p:flush()
 	pepper.utils.unlink(filename)
 end
