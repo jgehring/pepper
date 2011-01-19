@@ -104,7 +104,7 @@ public:
 		 if (file) snprintf(m_where, sizeof(m_where), "%s:%d", file, line);
 		 else m_where[0] = 0;
 		 char buf[512];
-#ifdef _GNU_SOURCE
+#if (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && !defined(_GNU_SOURCE)
 		 m_str = std::string(strerror_r(code, buf, sizeof(buf)));
 #else
 		 strerror_r(code, buf, sizeof(buf));
