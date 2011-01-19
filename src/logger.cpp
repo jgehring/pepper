@@ -12,13 +12,13 @@
 
 // Static variables
 Logger *Logger::s_instances[Logger::NumLevels] = {
-	new Logger(Logger::None, std::cout),
+	new Logger(Logger::None, std::cerr),
 	new Logger(Logger::Error, std::cerr),
 	new Logger(Logger::Warn, std::cerr),
-	new Logger(Logger::Status, std::cout),
-	new Logger(Logger::Info, std::cout),
-	new Logger(Logger::Debug, std::cout),
-	new Logger(Logger::Trace, std::cout)
+	new Logger(Logger::Status, std::cerr),
+	new Logger(Logger::Info, std::cerr),
+	new Logger(Logger::Debug, std::cerr),
+	new Logger(Logger::Trace, std::cerr)
 };
 #ifdef DEBUG
 int Logger::s_level = Logger::Debug;
