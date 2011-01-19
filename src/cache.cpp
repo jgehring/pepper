@@ -37,7 +37,7 @@
 // Constructor
 Cache::Cache(Backend *backend, const Options &options)
 	: Backend(options), m_backend(backend), m_iout(NULL), m_cout(NULL),
-	  m_cin(0), m_coindex(0), m_ciindex(0)
+	  m_cin(0), m_coindex(0), m_ciindex(0), m_loaded(false)
 {
 
 }
@@ -110,12 +110,20 @@ void Cache::flush()
 // Checks if the diffstat of the given revision is already cached
 bool Cache::lookup(const std::string &id)
 {
+	if (!m_loaded) {
+		load();
+	}
+
 	return (m_index.find(id) != m_index.end());
 }
 
 // Adds the revision of the given revision to the cache
 void Cache::put(const std::string &id, const Revision &rev)
 {
+	if (!m_loaded) {
+		load();
+	}
+
 	// Defer any signals while writing to the cache
 	SIGBLOCK_DEFER();
 
@@ -162,6 +170,10 @@ void Cache::put(const std::string &id, const Revision &rev)
 // Loads a revision from the cache
 Revision *Cache::get(const std::string &id)
 {
+	if (!m_loaded) {
+		load();
+	}
+
 	std::string dir = m_opts.cacheDir() + "/" + uuid();
 	std::pair<uint32_t, uint32_t> offset = m_index[id];
 	std::string path = utils::strprintf("%s/cache.%u", dir.c_str(), offset.first);
@@ -195,6 +207,7 @@ Revision *Cache::get(const std::string &id)
 void Cache::load()
 {
 	m_index.clear();
+	m_loaded = true;
 
 	std::string path = m_opts.cacheDir() + "/" + uuid();
 	PDEBUG << "Using cache dir: " << path << endl;

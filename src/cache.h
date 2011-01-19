@@ -25,7 +25,7 @@ class Cache : public Backend
 		Cache(Backend *backend, const Options &options);
 		~Cache();
 
-		void init() { load(); }
+		void init() { }
 
 		std::string name() const { return m_backend->name(); }
 
@@ -58,6 +58,7 @@ class Cache : public Backend
 		BOStream *m_iout, *m_cout;
 		BIStream *m_cin;
 		uint32_t m_coindex, m_ciindex;
+		bool m_loaded;
 
 		std::map<std::string, std::pair<uint32_t, uint32_t> > m_index;
 };
