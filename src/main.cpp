@@ -171,11 +171,11 @@ int start(const Options &opts)
 
 	try {
 		if (opts.useCache()) {
+			backend->init();
+
 			Cache *cache = new Cache(backend, opts);
 			backend = cache;
 			sighandler.cache = cache;
-
-			cache->init();
 
 			// Simple cache check?
 			if (opts.checkCache()) {
@@ -188,6 +188,8 @@ int start(const Options &opts)
 					return EXIT_FAILURE;
 				}
 			}
+
+			cache->init();
 		} else {
 			backend->init();
 		}
