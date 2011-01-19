@@ -149,6 +149,18 @@ AM_CONDITIONAL([MERCURIAL_BACKEND], [test "x$mercurial" = "xyes"])
 AM_CONDITIONAL([SVN_BACKEND], [test "x$subversion" = "xyes"])
 
 
+#
+# Debugging
+#
+
+if test "x$debug" = "xyes"; then
+	CXXFLAGS="-O0 -g -DDEBUG"
+	CFLAGS="-O0 -g -DDEBUG"
+else
+	CXXFLAGS="-O2 -DNDEBUG"
+	CFLAGS="-O2 -DNDEBUG"
+fi
+
 
 #
 # Write Makefiles

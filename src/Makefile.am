@@ -48,12 +48,9 @@ AM_LDFLAGS = \
 # Debugging?
 if DEBUG
 AM_CXXFLAGS += \
-	-O0 -g -DDEBUG -rdynamic
+	-rdynamic
 AM_LDFLAGS += \
 	-rdynamic
-else
-AM_CXXFLAGS += \
-	-O2 -DNDEBUG
 endif
 
 
