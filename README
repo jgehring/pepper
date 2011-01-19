@@ -91,27 +91,29 @@ file for more information about the respective libraries)
 Built-in reports
 ----------------
 When installing pepper, several report scripts will be copied to the
-respective shared folder (i.e. $prefix/share/pepper). Here's a brief
-listing of them:
+respective shared folder (i.e. $prefix/share/pepper) and can be accessed
+by their filename. Reports producing a plot will print it to standard
+output by default.
+
+Report-specific command-line options will be printed if "--help" is
+being passed as a program option.
+
+Here's a brief listing:
 
 	* authors
 	Plots the contributed lines of code of the 6 busiest authors.
-	The resulting file is called authors, e.g. "authors.png".
 
 	* branches
 	Prints all repository branches, similar to "git branch -a".
 
 	* commit_scatter
 	Generates a scatter plot visualizing commit activity per daytime.
-	The resulting file is called activity, e.g. "activity.png".
 
 	* commits_per_month
 	Displays a histogram of the commits during the last 12 months.
-	The resulting file is called cpm, e.g. "cpm.png".
 	
 	* loc
 	Plots the lines of code for a given branch.
-	The resulting file is called loc, e.g. "loc.png".
 
 	* shortlog
 	Prints a revision log to stdout, similar to "git shortlog".
@@ -121,4 +123,3 @@ listing of them:
 
 	* directories
 	Plots the directory sizes for the 6 largest directories.
-	The resulting file is called directories, e.g. "directories.png".
