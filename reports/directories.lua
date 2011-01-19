@@ -91,14 +91,18 @@ function setup_plot(branch)
 
 	local file = pepper.report.getopt("o, output", "")
 	local size = pepper.utils.split(pepper.report.getopt("s, size", "600"), "x")
-	local terminal = pepper.report.getopt("t, type", "svg")
+	local terminal = pepper.report.getopt("t, type")
 	local width = tonumber(size[1])
 	local height = width * 0.8
 	if (#size > 1) then
 		height = tonumber(size[2])
 	end
 
-	p:set_output(file, width, height, terminal)
+	if terminal ~= nil then
+		p:set_output(file, width, height, terminal)
+	else
+		p:set_output(file, width, height)
+	end
 	return p
 end
 
