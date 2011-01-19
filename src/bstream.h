@@ -137,8 +137,6 @@ class MOStream : public BOStream
 		std::vector<char> data() const;
 };
 
-#ifdef HAVE_LIBZ
-
 // Compressed input stream
 class GZIStream : public BIStream
 {
@@ -152,8 +150,6 @@ class GZOStream : public BOStream
 	public:
 		GZOStream(const std::string &path, bool append = false);
 };
-
-#endif // HAVE_LIBZ
 
 
 // Inlined functions

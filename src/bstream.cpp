@@ -188,13 +188,18 @@ std::vector<char> MOStream::data() const
 	return std::vector<char>(ms->m_buffer, ms->m_buffer + ms->p);
 }
 
-#ifdef HAVE_LIBZ
 
 // Constructors
 GZIStream::GZIStream(const std::string &path)
+#ifdef HAVE_LIBZ
 	: BIStream(new GzStream(gzopen(path.c_str(), "rb")))
+#else
+	: BIStream(path)
+#endif
 {
 }
+
+#ifdef HAVE_LIBZ
 
 // Single-linked buffer
 struct LBuffer {
@@ -205,10 +210,17 @@ struct LBuffer {
 	~LBuffer() { delete[] data; }
 };
 
+#endif // HAVE_LIBZ
+
 // Constructor
 GZOStream::GZOStream(const std::string &path, bool append)
+#ifdef HAVE_LIBZ
 	: BOStream(append ? NULL : new GzStream(gzopen(path.c_str(), "wb")))
+#else
+	: BOStream(path, append)
+#endif
 {
+#ifdef HAVE_LIBZ
 	// Appending to gzipped files does not work. Instead, read the whole
 	// file and re-write it.
 	if (append) {
@@ -240,6 +252,5 @@ GZOStream::GZOStream(const std::string &path, bool append)
 
 		m_stream = new GzStream(gz);
 	}
-}
-
 #endif // HAVE_LIBZ
+}
