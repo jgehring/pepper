@@ -74,17 +74,28 @@ int Plot::set_output(lua_State *L)
 	}
 
 	if (terminal.empty()) {
-		// Determine terminal type from extension
-		terminal = file.substr(file.find_last_of(".")+1);
-		if (terminal.empty() || terminal == "ps" || terminal == "eps") {
-			terminal = "postscript";
-		} else if (terminal == "jpg") {
-			terminal = "jpeg";
+		// Determine terminal type from extension or fall back to SVG
+		size_t pos = file.find_last_of(".");
+		if (pos != std::string::npos) {
+			terminal = file.substr(pos+1);
+			if (terminal.empty()) {
+				terminal = "svg";
+			} else if (terminal == "ps" || terminal == "eps") {
+				terminal = "postscript";
+			} else if (terminal == "jpg") {
+				terminal = "jpeg";
+			}
+		} else {
+			terminal = "svg";
 		}
 	}
 
 	g->cmd(utils::strprintf("set terminal %s size %d,%d", terminal.c_str(), width, height));
-	g->cmd(utils::strprintf("set output \"%s\"", file.c_str()));
+	if (!file.empty()) {
+		g->cmd(utils::strprintf("set output \"%s\"", file.c_str()));
+	} else {
+		g->cmd(utils::strprintf("set output"));
+	}
 	return 0;
 }
 
