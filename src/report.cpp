@@ -220,11 +220,24 @@ static int utils_unlink(lua_State *L)
 	return 0;
 }
 
+// Splits a string
+static int utils_split(lua_State *L)
+{
+	if (lua_gettop(L) != 2) {
+		return luaL_error(L, "Invalid number of arguments (2 expected)");
+	}
+
+	std::string pattern = LuaHelpers::pops(L);
+	std::string string = LuaHelpers::pops(L);
+	return LuaHelpers::push(L, utils::split(string, pattern));
+}
+
 // Function table of the utils library
 static const struct luaL_reg utils[] = {
 	// TODO: Error handling for all functions
 	{"mkstemp", utils_mkstemp},
 	{"unlink", utils_unlink},
+	{"split", utils_split},
 	{NULL, NULL}
 };
 

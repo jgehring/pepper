@@ -9,11 +9,13 @@ module "pepper.report"
 function getopt(option, default)
 
 --- Returns the current repository
+-- @return A repository instance
 -- @see pepper.repository
 function repository()
 
 --- Fetches a specific revision
 -- @param id The revision ID
+-- @return The revision object
 -- @see pepper.revision
 function revision(id)
 

@@ -1,0 +1,18 @@
+--- Miscellaneous utility functions
+
+module "pepper.utils"
+
+
+--- Opens a unique temporary file
+-- @param template An optional filename template
+-- @return A pair containing the file handle and the file name
+function mkstemp(template)
+
+--- Removes a file
+-- @param path The path to the file
+function unlink(path)
+
+--- Splits the given string
+-- @param string The string
+-- @param pattern A pattern specifying the split points (not a regular expression)
+function split(string, pattern)
