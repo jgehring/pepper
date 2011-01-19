@@ -307,8 +307,11 @@ void Cache::check()
 
 	uint32_t version;
 	*in >> version;
-	if (version != CACHE_VERSION) {
-		throw PEX(utils::strprintf("Unkown cache version number %u", version));
+	if (version == 0 || version > CACHE_VERSION) {
+		Logger::warn() << "Cache: Unkown cache version number " << version << ", clearing" << endl;
+		delete in;
+		clear();
+		return;
 	}
 
 	Logger::status() << "Checking all indexed revisions... " << ::flush;
