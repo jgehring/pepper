@@ -269,6 +269,30 @@ lua_State *setupLua()
 	return L;
 }
 
+// Returns all paths that may contains reports
+static std::vector<std::string> reportDirs()
+{
+	std::vector<std::string> dirs;
+#ifdef DATADIR
+	dirs.push_back(DATADIR);
+#endif
+
+	// Read the PEPPER_REPORTS environment variable
+	char *env = getenv("PEPPER_REPORTS");
+	if (env != NULL) {
+#ifdef POS_WIN
+		std::vector<std::string> parts = utils::split(env, ";");
+#else
+		std::vector<std::string> parts = utils::split(env, ":");
+#endif
+		for (size_t i = 0; i < parts.size(); i++) {
+			dirs.push_back(parts[i]);
+		}
+	}
+
+	return dirs;
+}
+
 // Returns the full path to the given script
 std::string findScript(const std::string &script)
 {
@@ -278,16 +302,18 @@ std::string findScript(const std::string &script)
 	if (sys::fs::exists(script + ".lua")) {
 		return script + ".lua";
 	}
-#ifdef DATADIR
-	std::string builtin = std::string(DATADIR) + "/" + script;
-	if (sys::fs::exists(builtin)) {
-		return builtin;
+
+	std::vector<std::string> dirs = reportDirs();
+	for (size_t i = 0; i < dirs.size(); i++) {
+		std::string path = dirs[i] + "/" + script;
+		if (sys::fs::exists(path)) {
+			return path;
+		}
+		path += ".lua";
+		if (sys::fs::exists(path)) {
+			return path;
+		}
 	}
-	builtin += ".lua";
-	if (sys::fs::exists(builtin)) {
-		return builtin;
-	}
-#endif
 	return script;
 }
 
@@ -382,37 +408,53 @@ void printHelp(const std::string &script)
 // Prints a listing of all report scripts to stdout
 void listReports(std::ostream &out)
 {
-	std::string builtin = std::string(DATADIR);
-	out << "Available reports in " << builtin << ":" << std::endl;
+	std::vector<std::string> dirs = reportDirs();
+	for (size_t j = 0; j < dirs.size(); j++) {
+		std::string builtin = dirs[j];
+		out << "Available reports in " << builtin << ":" << std::endl;
 
-	std::vector<std::string> reports = sys::fs::ls(builtin);
-	std::sort(reports.begin(), reports.end());
+		std::vector<std::string> reports = sys::fs::ls(builtin);
+		std::sort(reports.begin(), reports.end());
 
-	for (unsigned int i = 0; i < reports.size(); i++) {
-		if (!sys::fs::fileExists(builtin + "/" + reports[i])) {
-			continue;
+		for (size_t i = 0; i < reports.size(); i++) {
+			if (reports[i].empty() || reports[i][reports[i].length()-1] == '~' || !sys::fs::fileExists(builtin + "/" + reports[i])) {
+				continue;
+			}
+
+			lua_State *L = setupLua();
+			std::string path = builtin + "/" + reports[i];
+			if (luaL_dofile(L, path.c_str()) != 0) {
+				PDEBUG << "Error opening report at " << path << ": " << lua_tostring(L, -1) << endl;
+				lua_gc(L, LUA_GCCOLLECT, 0);
+				lua_close(L);
+				continue;
+			}
+
+			lua_getglobal(L, "meta");
+
+			// Retrieve the report description
+			std::string description;
+			lua_getfield(L, -1, "description");
+			if (lua_type(L, -1) == LUA_TSTRING) {
+				description = LuaHelpers::pops(L);
+			} else {
+				lua_pop(L, 1);
+			}
+
+			// Strip possible Lua suffix when displaying
+			std::string name = reports[i];
+			if (name.length() > 4 && name.compare(name.length()-4, 4, ".lua") == 0) {
+				name = name.substr(0, name.length()-4);
+			}
+
+			Options::print(reports[i], description, out);
+			lua_gc(L, LUA_GCCOLLECT, 0);
+			lua_close(L);
 		}
 
-		lua_State *L = setupLua();
-		std::string path = builtin + "/" + reports[i];
-		if (luaL_dofile(L, path.c_str()) != 0) {
-			throw PEX(utils::strprintf("Error opening report: %s", lua_tostring(L, -1)));
+		if (j < dirs.size()-1) {
+			out << std::endl;
 		}
-
-		lua_getglobal(L, "meta");
-
-		// Retrieve the report description
-		std::string description;
-		lua_getfield(L, -1, "description");
-		if (lua_type(L, -1) == LUA_TSTRING) {
-			description = LuaHelpers::pops(L);
-		} else {
-			lua_pop(L, 1);
-		}
-
-		Options::print(reports[i], description, out);
-		lua_gc(L, LUA_GCCOLLECT, 0);
-		lua_close(L);
 	}
 }
 
