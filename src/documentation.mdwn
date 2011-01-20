@@ -13,8 +13,8 @@ for pepper first (see the [[Download]] page for a list of packages). If
 it doesn't, you need to grab a source tarball from the [[Download]]
 page and extract it using tar:
 
-	$ tar xvzf pepper-0.1.3.tar.gz
-	$ cd pepper-0.1.3
+	$ tar xvzf pepper-0.1.4.tar.gz
+	$ cd pepper-0.1.4
 
 Next, you should make sure that your all compile-time dependencies are
 satisfied. You'll need a C++ compiler and Lua 5.1 (e.g., provided by
@@ -38,14 +38,29 @@ features can be found in pepper's [README](README) file.
 #### Basic usage
 
 pepper's command line syntax is printed to your terminal if you pass
-`--help` as a program argument:
+`--help` (as a main option) to the program:
 
 	$ pepper [options] [report] [report options] <repository>
 
 As a short example, you can generate a graph visualizing the lines of
 code in your repository located at `/home/joe/myrepo` by running
 
-	$ pepper loc /home/joe/myrepo
+	$ pepper loc /home/joe/myrepo > loc.svg
+
+The command-line options for the current report and backend can be
+printed by passing `help` as a main option:
+
+	$ pepper --help loc /home/joe/myrepo
+
+For example, if you want to render the LOC graph including tag markers
+into a 800x600 PNG file and also watch more detailed progress information,
+you will run
+
+	$ pepper --verbose loc --tags --output=loc.png --size=800x600 /home/joe/myrepo
+
+Some options can be abbreviated as shown in the help screen:
+
+	$ pepper -v loc --tags -oloc.png -s800x600 /home/joe/myrepo
 
 The built-in reports can be listed by passing `--list-reports` to
 the program.  Your might also want to take a look at the [[scripting

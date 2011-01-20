@@ -1,0 +1,11 @@
+[[!meta title="pepper 0.1.4 released"]]
+
+Version 0.1.4 of pepper is now available. This release adds additional
+report options for controlling the plot output, like the file name or
+the image size.  Additionally, support for custom Subversion repository
+layouts (trunk, branches and tag locations) has been added. A couple of
+bugs have been fixed as well.
+
+Please refer to the [change log](ChangeLog) for a more detailed
+listing. As usual, source tarballs can be found at the [[Download]]
+section.

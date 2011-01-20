@@ -29,7 +29,7 @@ for repo in repos:
 	print(">> Generating reports for " + repo)
 	for report in reports:
 		print(">>> " + report)
-		subprocess.check_call([srcdir + "/src/pepper", "--quiet", srcdir + "/reports/" + report, "--branch=" + repos[repo]["branch"], "--tags=" + repos[repo]["tags"], repos[repo]["dir"]])
+		subprocess.check_call([srcdir + "/src/pepper", "--quiet", srcdir + "/reports/" + report, "--branch=" + repos[repo]["branch"], "--tags=" + repos[repo]["tags"], "--output=" + reports[report]["file"] + ".svg", repos[repo]["dir"]])
 		os.rename(reports[report]["file"] + ".svg", outdir + "/" + reports[report]["file"] + "-" + repo + ".svg")
 
 print(">> Generating thumbnails")
