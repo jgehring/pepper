@@ -1,6 +1,6 @@
 # Maintainer: Jonas Gehring <jonas.gehring@boolsoft.org>
 pkgname=scm-pepper
-pkgver=0.1.3
+pkgver=0.1.4
 pkgrel=1
 pkgdesc="Flexible SCM statistics report generator"
 url="http://scm-pepper.sourceforge.net"
@@ -12,7 +12,7 @@ optdepends=('git: Git repository access'
 'mercurial: Mercurial repository access'
 'gnuplot: plotting support for reports')
 source=("http://prdownloads.sourceforge.net/scm-pepper/pepper-${pkgver}.tar.bz2")
-sha1sums=('4e0204c918c31dfe55d849cfcbc1e2c95237fefa')
+sha1sums=('42440fa0cb79d2e5a2a8841d5afe602ca5ba58e8')
 
 build() {
 	cd ${srcdir}/pepper-${pkgver}
