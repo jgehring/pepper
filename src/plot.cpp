@@ -79,23 +79,25 @@ int Plot::set_output(lua_State *L)
 		if (pos != std::string::npos) {
 			terminal = file.substr(pos+1);
 			if (terminal.empty()) {
-				terminal = "svg";
-			} else if (terminal == "ps" || terminal == "eps") {
-				terminal = "postscript";
-			} else if (terminal == "jpg") {
-				terminal = "jpeg";
+				terminal = Gnuplot::get_terminal_std();
 			}
 		} else {
-			terminal = "svg";
+			terminal = Gnuplot::get_terminal_std();;
 		}
 	}
 
-	g->cmd(utils::strprintf("set terminal %s size %d,%d", terminal.c_str(), width, height));
+	if (terminal == "ps" || terminal == "eps") {
+		terminal = "postscript eps color enhanced";
+	} else if (terminal == "jpg") {
+		terminal = "jpeg";
+	}
+
 	if (!file.empty()) {
 		g->cmd(utils::strprintf("set output \"%s\"", file.c_str()));
 	} else {
 		g->cmd(utils::strprintf("set output"));
 	}
+	g->cmd(utils::strprintf("set terminal %s size %d,%d", terminal.c_str(), width, height));
 	return 0;
 }
 

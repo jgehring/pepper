@@ -169,6 +169,7 @@ class Gnuplot
 		/// \return ---
 		// ----------------------------------------------------------------------------
         static void set_terminal_std(const std::string &type);
+        static std::string get_terminal_std();
 
     	//-----------------------------------------------------------------------------
     	// constructors
@@ -899,6 +900,12 @@ void Gnuplot::set_terminal_std(const std::string &type)
 
     Gnuplot::terminal_std = type;
     return;
+}
+
+
+std::string Gnuplot::get_terminal_std()
+{
+    return Gnuplot::terminal_std;
 }
 
 
