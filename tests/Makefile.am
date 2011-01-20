@@ -21,7 +21,7 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 		echo '  [@PACKAGE_URL@])'; \
 	} >'$(srcdir)/package.m4'
 
-SUBDIRS = diffstat options utils
+SUBDIRS = diffstat options utils bstreams
 
 EXTRA_DIST = \
 	testsuite.at \

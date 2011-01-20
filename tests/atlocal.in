@@ -4,4 +4,4 @@
 #
 
 # Additional paths for the autotest suite
-PATH=@abs_builddir@:@abs_top_builddir@/src:@abs_builddir@/diffstat:@abs_builddir@/options:@abs_builddir@/utils:$PATH
+PATH=@abs_builddir@:@abs_top_builddir@/src:@abs_builddir@/diffstat:@abs_builddir@/options:@abs_builddir@/utils:@abs_builddir@/bstreams:$PATH

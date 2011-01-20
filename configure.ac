@@ -176,6 +176,7 @@ AC_CONFIG_FILES([
 	tests/diffstat/Makefile
 	tests/options/Makefile
 	tests/utils/Makefile
+	tests/bstreams/Makefile
 	reports/Makefile
 ])
 AC_OUTPUT()
