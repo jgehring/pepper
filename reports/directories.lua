@@ -181,7 +181,6 @@ function main()
 set xdata time
 set timefmt "%s"
 set format x "%b %y"
-set decimal locale
 set format y "%'.0f"
 set yrange [0:*]
 set xtics nomirror
