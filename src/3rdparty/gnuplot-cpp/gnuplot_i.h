@@ -96,6 +96,7 @@ class Gnuplot
         static std::string       m_sGNUPlotFileName; 
 	///\brief gnuplot path
         static std::string       m_sGNUPlotPath;
+        static std::string       m_sGNUPlotArgs;
 	///\brief standart terminal, used by showonscreen     
         static std::string       terminal_std;       
 
@@ -158,6 +159,7 @@ class Gnuplot
 		/// \return true on success, false otherwise
 		// ----------------------------------------------------------------------------
         static bool set_GNUPlotPath(const std::string &path);
+        static void set_GNUPlotArgs(const std::string &args);
 
 
 		// ----------------------------------------------------------------------------
@@ -603,6 +605,7 @@ std::string Gnuplot::m_sGNUPlotPath = "C:/program files/gnuplot/bin/";
 std::string Gnuplot::m_sGNUPlotFileName = "gnuplot";
 std::string Gnuplot::m_sGNUPlotPath = "/usr/local/bin/";
 #endif
+std::string Gnuplot::m_sGNUPlotArgs = "";
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__TOS_WIN__)
 std::string Gnuplot::terminal_std = "windows";
@@ -880,6 +883,11 @@ bool Gnuplot::set_GNUPlotPath(const std::string &path)
         Gnuplot::m_sGNUPlotPath.clear();
         return false;
     }
+}
+
+void Gnuplot::set_GNUPlotArgs(const std::string &args)
+{
+    Gnuplot::m_sGNUPlotArgs = args;
 }
 
 
@@ -1730,7 +1738,7 @@ void Gnuplot::init()
     // open pipe
     //
     std::string tmp = Gnuplot::m_sGNUPlotPath + "/" + 
-        Gnuplot::m_sGNUPlotFileName;
+        Gnuplot::m_sGNUPlotFileName + " " + Gnuplot::m_sGNUPlotArgs;
 
     // FILE *popen(const char *command, const char *mode);
     // The popen() function shall execute the command specified by the string 

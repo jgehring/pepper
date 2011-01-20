@@ -34,7 +34,17 @@ Lunar<Plot>::RegType Plot::methods[] = {
 // Constructor
 Plot::Plot(lua_State *L)
 {
+#if ( defined(unix) || defined(__unix) || defined(__unix__) ) && !defined(__APPLE__)
+	if (getenv("DISPLAY")) {
+		Gnuplot::set_terminal_std("x11");
+	} else {
+		Gnuplot::set_terminal_std("svg");
+	}
+#else
 	Gnuplot::set_terminal_std("svg");
+#endif
+
+	Gnuplot::set_GNUPlotArgs("-persist");
 
 	try {
 		g = new Gnuplot();
