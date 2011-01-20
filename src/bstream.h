@@ -210,13 +210,17 @@ inline BIStream &BIStream::operator>>(std::string &s) {
 	char buffer[120], *bptr = buffer;
 	char c;
 	s.clear();
-	while (!eof()) {
+	do {
+		if (eof()) {
+			s.clear();
+			return *this;
+		}
 		(*this) >> c;
 		switch (c) {
 			case 0: break;
 			default: {
 				*bptr = c;
-				if (bptr-buffer == sizeof(buffer)) {
+				if (bptr-buffer == sizeof(buffer)-1) {
 					s.append(buffer, sizeof(buffer));
 					bptr = buffer;
 				} else {
@@ -226,12 +230,11 @@ inline BIStream &BIStream::operator>>(std::string &s) {
 			}
 		}
 		break;
-	}
-	if (eof()) {
-		s.clear();
-	}
+	} while (true);
 
-	s.append(buffer, bptr-buffer);
+	if (bptr != buffer) {
+		s.append(buffer, bptr-buffer);
+	}
 	return *this;
 }
 
