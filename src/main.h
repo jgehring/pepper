@@ -80,7 +80,7 @@
 #include <exception>
 #include <string>
 
-#if defined(__GNUG__)
+#if defined(_GNU_SOURCE)
  #include <execinfo.h>
  #include <cxxabi.h>
 #endif
@@ -134,7 +134,7 @@ private:
 // Credits go out to Timo Bingmann (http://idlebox.net/2008/0901-stacktrace-demangled/)
 inline std::string stackTrace()
 {
-#if defined(__GNUG__) && !defined(Q_OS_MAC)
+#if defined(_GNU_SOURCE)
 	std::string str = "Stack trace:\n";
 
 	// storage array for stack trace address data
