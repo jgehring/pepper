@@ -92,8 +92,8 @@ Built-in reports
 ----------------
 When installing pepper, several report scripts will be copied to the
 respective shared folder (i.e. $prefix/share/pepper) and can be accessed
-by their filename. Reports producing a plot will print it to standard
-output by default.
+by their filename. Reports producing a plot will open a X11 window if
+possible or print it to standard output by default.
 
 Report-specific command-line options will be printed if "--help" is
 being passed as a program option.
