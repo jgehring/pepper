@@ -170,7 +170,11 @@ void Options::reset()
 #endif
 
 	// TODO: Where on Windows?
-	m_options["cache_dir"] = utils::strprintf("%s/.%s/cache", getenv("HOME"), PACKAGE_NAME, "cache");
+	if (char *cachedir = getenv("PEPPER_CACHEDIR")) {
+		m_options["cache_dir"] = std::string(cachedir);
+	} else {
+		m_options["cache_dir"] = utils::strprintf("%s/.%s/cache", getenv("HOME"), PACKAGE_NAME, "cache");
+	}
 	PDEBUG << "Default cache dir set to " << m_options["cache_dir"] << endl;
 }
 
