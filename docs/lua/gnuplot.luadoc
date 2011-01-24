@@ -19,15 +19,23 @@ function set_output(filename, width, height, terminal)
 -- @param title The plot title
 function set_title(title)
 
---- Plots multiple series.
--- The plotting data is expected to be a table containing
--- arrays specifiying an index (i.e., the X value) and one
--- more values (i.e., the Y values).
+--- Plots one or more data series.
+-- The <code>values</code> parameter may contain multiple Y values per
+-- entry, i.e. it can be a two-dimensional array.
 -- @param keys The array of X values
 -- @param values The array of Y values
 -- @param titles Optional titles for the series
 -- @param style Optional style for plotting (defaults to "lines")
 function plot_series(keys, values, titles, style)
+
+--- Plots a histogram bar chart from data sequences.
+-- The <code>values</code> parameter may contain multiple Y values per
+-- entry, i.e. it can be a two-dimensional array.
+-- @param keys The array of X values, used as the X-axis keys
+-- @param values The array of Y values
+-- @param titles Optional titles for the series
+-- @param style Optional style for plotting (defaults to none)
+function plot_histogram(keys, values, titles, style)
 
 --- Finish plotting and restart the Gnuplot process
 function flush()

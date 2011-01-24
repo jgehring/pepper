@@ -32,6 +32,7 @@ Lunar<Plot>::RegType Plot::methods[] = {
 	LUNAR_DECLARE_METHOD(Plot, set_output),
 	LUNAR_DECLARE_METHOD(Plot, set_title),
 	LUNAR_DECLARE_METHOD(Plot, plot_series),
+	LUNAR_DECLARE_METHOD(Plot, plot_histogram),
 	LUNAR_DECLARE_METHOD(Plot, flush),
 	{0,0}
 };
@@ -203,6 +204,97 @@ int Plot::plot_series(lua_State *L)
 			cmd << " notitle";
 		}
 		cmd << " with " << style;
+		if (i < nseries-1) {
+			cmd << ", ";
+		}
+	}
+	PDEBUG << "Running plot with command: " << cmd.str() << endl;
+	g->cmd(cmd.str());
+	return 0;
+}
+
+// Plots a histogram
+int Plot::plot_histogram(lua_State *L)
+{
+	// Validate arguments
+	int index = -1;
+	if (lua_gettop(L) > 4) {
+		return LuaHelpers::pushError(L, utils::strprintf("Invalid number of arguments (expected 2-3, got %d)", lua_gettop(L)));
+	}
+	std::string style = "";
+	switch (lua_gettop(L)) {
+		case 4: style = LuaHelpers::pops(L);
+		case 3: luaL_checktype(L, index--, LUA_TTABLE);
+		default:
+			luaL_checktype(L, index--, LUA_TTABLE);
+			luaL_checktype(L, index--, LUA_TTABLE);
+			break;
+	}
+
+	// First, read the keys (at index)
+	++index;
+	std::vector<std::string> keys = LuaHelpers::topvs(L, index);
+
+	size_t nseries = 0;
+
+	// Open stream to data file
+	std::ofstream out;
+	std::string file = g->create_tmpfile(out);
+
+	// Read data entries and write them to a file
+	++index;
+	if (LuaHelpers::tablesize(L, index) != keys.size()) {
+		return LuaHelpers::pushError(L, utils::strprintf("Number of keys and values doesn't match (%d != %d)", LuaHelpers::tablesize(L, index), keys.size()));
+	}
+	lua_pushvalue(L, index);
+	lua_pushnil(L);
+	int j = 0;
+	while (lua_next(L, -2) != 0) {
+		out << '"' << keys[j++] << "\" ";
+		if (lua_type(L, -1) == LUA_TTABLE) {
+			if (nseries == 0) {
+				nseries = LuaHelpers::tablesize(L, -1);
+			} else if (nseries != LuaHelpers::tablesize(L, -1)) {
+				return LuaHelpers::pushError(L, "Inconsistent number of series");
+			}
+			
+			lua_pushvalue(L, -1);
+			lua_pushnil(L);
+			while (lua_next(L, -2) != 0) {
+				out << LuaHelpers::popd(L) << " ";
+			}
+			lua_pop(L, 2);
+		} else {
+			nseries = 1;
+			out << LuaHelpers::popd(L);
+		}
+		out << std::endl;
+	}
+	lua_pop(L, 1);
+
+	out.flush();
+	out.close();
+
+	// Read titles (if any)
+	++index;
+	std::vector<std::string> titles;
+	if (index < 0) {
+		titles = LuaHelpers::topvs(L, index);
+	}
+
+	g->cmd("set style data histogram");
+	std::ostringstream cmd;
+	cmd << "plot ";
+	for (size_t i = 0; i < nseries; i++) {
+		cmd << "\"" << file << "\" using  " << (i+2) << ":xtic(1)";
+		if (titles.size() > i) {
+			cmd << " title \"" << titles[i] << "\"";
+		} else {
+			cmd << " notitle";
+		}
+		if (!style.empty()) {
+			cmd << " with " << style;
+		}
 		if (i < nseries-1) {
 			cmd << ", ";
 		}

@@ -63,8 +63,9 @@ function main()
 	-- Generate a data file
 	local names = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"}
 	local month = (now["month"] % 12) + 1
+	local keys = {}
+	local values = {}
 	local i = 1
-	local file, filename = pepper.utils.mkstemp()
 	while true do
 		ncommits = 0
 		nchanges = 0
@@ -72,7 +73,15 @@ function main()
 			ncommits = commits[month]
 			nchanges = changes[month]
 		end
-		file:write(i .. " " .. names[month] .. " " .. ncommits .. " " .. nchanges .. "\n")
+
+		-- Workaround: Place labels at every 2nd month only
+		if (i % 2) == 1 then
+			table.insert(keys, names[month])
+		else
+			table.insert(keys, "")
+		end
+		table.insert(values, {ncommits, nchanges})
+
 		if month == now["month"] then
 			break
 		end
@@ -81,8 +90,8 @@ function main()
 	end
 
 	-- Generate graphs
-	local plot = pepper.gnuplot:new()
 	local p = setup_plot(branch)
+
 	p:cmd([[
 set format y "%.0f"
 set yrange [0:*]
@@ -90,32 +99,9 @@ set grid ytics
 set ytics scale 0 
 set key box
 set key below
-set boxwidth 0.4
 set xtics nomirror
+set style fill solid border -1
+set style histogram cluster gap 1
 ]])
-
-	-- Determine xtics
-	month = (now["month"] % 12) + 1
-	i = 1
-	local xtics = ""
-	while true do
-		if month == now["month"] then
-			break
-		end
-		if i % 2 ~= 0 then
-			xtics = xtics .. '"' .. names[month] .. "\" " .. i .. ","
-		end
-		month = (month % 12) + 1
-		i = i + 1
-	end
-	p:cmd("set xtics (" .. xtics:sub(0, #xtics-1) .. ") scale 0")
-
-	local cmd = "plot "
-	cmd = cmd .. "\"" .. filename .. "\" using 1:3 with boxes fs solid title \"Commits\", "
-	cmd = cmd .. "\"" .. filename .. "\" using ($1+.4):4 with boxes fs solid title \"Changes\";"
-
-	file:close()
-	p:cmd(cmd)
-	p:flush()
-	pepper.utils.unlink(filename)
+	p:plot_histogram(keys, values, {"Commits", "Changes"})
 end

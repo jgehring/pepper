@@ -31,6 +31,7 @@ class Plot
 		int set_title(lua_State *L);
 
 		int plot_series(lua_State *L);
+		int plot_histogram(lua_State *L);
 
 		int flush(lua_State *L);
 
