@@ -1,6 +1,10 @@
 /*
  * pepper - SCM statistics report generator
- * Copyright (C) 2010 Jonas Gehring
+ * Copyright (C) 2010-2011 Jonas Gehring
+ *
+ * Released under the GNU General Public License, version 3.
+ * Please see the COPYING file in the source distribution for license
+ * terms and conditions, or see http://www.gnu.org/licenses/.
  *
  * file: main.cpp
  * Program entry point
@@ -101,7 +105,7 @@ static void printHelp(const Options &opts)
 static void printVersion()
 {
 	std::cout << PACKAGE_NAME << " " << PACKAGE_VERSION << std::endl;
-	std::cout << "Copyright (C) 2010 " << "Jonas Gehring <" << PACKAGE_BUGREPORT << ">" << std::endl;
+	std::cout << "Copyright (C) 2010-2011 " << "Jonas Gehring <" << PACKAGE_BUGREPORT << ">" << std::endl;
 	std::cout << "Released under the GNU General Public License." << std::endl;
 }
 

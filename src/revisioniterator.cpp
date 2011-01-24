@@ -1,6 +1,10 @@
 /*
  * pepper - SCM statistics report generator
- * Copyright (C) 2010 Jonas Gehring
+ * Copyright (C) 2010-2011 Jonas Gehring
+ *
+ * Released under the GNU General Public License, version 3.
+ * Please see the COPYING file in the source distribution for license
+ * terms and conditions, or see http://www.gnu.org/licenses/.
  *
  * file: revisioniterator.cpp
  * Base class for revision iterators
@@ -10,7 +14,7 @@
  * in two properties:
  *
  *    * The revsions that are included in the iteration are determined in a
- *      seperate thread, concurrent to the backend data fetching operations.
+ *      separate thread, concurrent to the backend data fetching operations.
  *    * Backends can pre-fetch revision data, probably using multiple threads
  *
  * The backend provides a LogIterator thread which offers methods for retrieving 
