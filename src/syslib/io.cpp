@@ -31,6 +31,12 @@ namespace sys
 namespace io
 {
 
+// Checks whether the given file is a terminal
+bool isterm(FILE *f)
+{
+	return (bool)isatty(fileno(f));
+}
+
 // Runs the specified command line and returns the output
 std::string execv(int *ret, const char * const *argv)
 {

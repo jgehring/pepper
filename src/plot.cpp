@@ -20,6 +20,8 @@
 
 #include "luahelpers.h"
 
+#include "syslib/io.h"
+
 #include "plot.h"
 
 
@@ -39,7 +41,7 @@ Lunar<Plot>::RegType Plot::methods[] = {
 Plot::Plot(lua_State *L)
 {
 #if ( defined(unix) || defined(__unix) || defined(__unix__) ) && !defined(__APPLE__)
-	if (getenv("DISPLAY")) {
+	if (getenv("DISPLAY") && sys::io::isterm(stdout)) {
 		Gnuplot::set_terminal_std("x11");
 	} else {
 		Gnuplot::set_terminal_std("svg");
