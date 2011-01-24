@@ -17,6 +17,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <stack>
 
 #include <svn_client.h>
 #include <svn_cmdline.h>
@@ -733,6 +734,64 @@ Diffstat SubversionBackend::diffstat(const std::string &id)
 	Diffstat stat = SvnDiffstatThread::diffstat(d, revision, subpool);
 	svn_pool_destroy(subpool);
 	return stat;
+}
+
+// Returns a file listing for the given revision (defaults to HEAD)
+std::vector<std::string> SubversionBackend::tree(const std::string &id)
+{
+	svn_revnum_t revision;
+	if (id.empty()) {
+		revision = SVN_INVALID_REVNUM;
+	} else if (!utils::str2int(id, &revision)) {
+		throw PEX(std::string("Error parsing revision number ") + id);
+	}
+
+	apr_pool_t *pool = svn_pool_create(d->pool);
+
+	std::vector<std::string> contents;
+
+	// Pseudo-recursively list directory entries
+	std::stack<std::pair<std::string, int> > stack;
+	stack.push(std::pair<std::string, int>("", svn_node_dir));
+	while (!stack.empty()) {
+		apr_pool_t *subpool = svn_pool_create(pool);
+
+		std::string node = stack.top().first;
+		if (stack.top().second != svn_node_dir) {
+			contents.push_back(node);
+			stack.pop();
+			continue;
+		}
+		stack.pop();
+
+		PTRACE << "Listing directory contents in " << node << "@" << revision << endl;
+
+		apr_hash_t *dirents;
+		svn_error_t *err = svn_ra_get_dir2(d->ra, &dirents, NULL, NULL, node.c_str(), revision, SVN_DIRENT_KIND, subpool);
+		if (err != NULL) {
+			throw PEX(SvnConnection::strerr(err));
+		}
+
+		std::string prefix = (node.empty() ? "" : node + "/");
+		std::stack<std::pair<std::string, int> > next;
+		apr_array_header_t *array = svn_sort__hash(dirents, &svn_sort_compare_items_lexically,  subpool);
+		for (int i = 0; i < array->nelts; i++) {
+			svn_sort__item_t *item = &APR_ARRAY_IDX(array, i, svn_sort__item_t);
+			svn_dirent_t *dirent = (svn_dirent_t *)apr_hash_get(dirents, item->key, item->klen);
+			if (dirent->kind == svn_node_file || dirent->kind == svn_node_dir) {
+				next.push(std::pair<std::string, int>(prefix + (const char *)item->key, dirent->kind));
+			}
+		}
+		while (!next.empty()) {
+			stack.push(next.top());
+			next.pop();
+		}
+
+		svn_pool_destroy(subpool);
+	}
+
+	svn_pool_destroy(pool);
+	return contents;
 }
 
 // Returns a log iterator for the given branch

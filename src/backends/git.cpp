@@ -345,6 +345,21 @@ Diffstat GitBackend::diffstat(const std::string &id)
 	return GitDiffstatThread::diffstat(revs[0]);
 }
 
+// Returns a file listing for the given revision (defaults to HEAD)
+std::vector<std::string> GitBackend::tree(const std::string &id)
+{
+	int ret;
+	std::string out = sys::io::exec(&ret, "git", "ls-tree", "-r", "--full-name", "--name-only", (id.empty() ? "HEAD" : utils::quote(id).c_str()));
+	if (ret != 0) {
+		throw PEX(utils::strprintf("Unable to retrieve tree listing for ID '%s' (%d)", id.c_str(), ret));
+	}
+	std::vector<std::string> contents = utils::split(out, "\n");
+	while (!contents.empty() && contents[contents.size()-1].empty()) {
+		contents.pop_back();
+	}
+	return contents;
+}
+
 // Returns a revision iterator for the given branch
 Backend::LogIterator *GitBackend::iterator(const std::string &branch)
 {

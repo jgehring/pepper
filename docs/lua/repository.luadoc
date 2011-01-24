@@ -19,3 +19,7 @@ function main_branch()
 
 --- Determines and returns a table listing all branches
 function branches()
+
+--- Returns a list of all files in the repository
+-- @param id Optional revision ID, defaults to current (i.e., the HEAD revision)
+function tree(id)

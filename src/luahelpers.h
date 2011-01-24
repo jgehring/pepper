@@ -139,6 +139,11 @@ inline int topi(lua_State *L, int index = -1) {
 	return luaL_checkinteger(L, index);
 }
 
+inline bool topb(lua_State *L, int index = -1) {
+	luaL_checktype(L, index, LUA_TBOOLEAN);
+	return (bool)lua_toboolean(L, index);
+}
+
 inline double topd(lua_State *L, int index = -1) {
 	return luaL_checknumber(L, index);
 }
@@ -149,6 +154,10 @@ inline std::string tops(lua_State *L, int index = -1) {
 
 inline int popi(lua_State *L) {
 	int i = topi(L, -1); lua_pop(L, 1); return i;
+}
+
+inline bool popb(lua_State *L) {
+	bool b = topb(L, -1); lua_pop(L, 1); return b;
 }
 
 inline double popd(lua_State *L) {

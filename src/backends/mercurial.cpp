@@ -156,6 +156,17 @@ Diffstat MercurialBackend::diffstat(const std::string &id)
 	return DiffParser::parse(in);
 }
 
+// Returns a file listing for the given revision (defaults to HEAD)
+std::vector<std::string> MercurialBackend::tree(const std::string &id)
+{
+	std::string out = hgcmd("status", utils::strprintf("change=\"%s\", all=True, no_status=True", id.c_str()));
+	std::vector<std::string> contents = utils::split(out, "\n");
+	if (!contents.empty() && contents[contents.size()-1].empty()) {
+		contents.pop_back();
+	}
+	return contents;
+}
+
 // Returns a revision iterator for the given branch
 Backend::LogIterator *MercurialBackend::iterator(const std::string &branch)
 {

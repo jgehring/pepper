@@ -42,6 +42,7 @@ class Repository
 		int main_branch(lua_State *L);
 		int branches(lua_State *L);
 		int tags(lua_State *L);
+		int tree(lua_State *L);
 
 		static const char className[];
 		static Lunar<Repository>::RegType methods[];

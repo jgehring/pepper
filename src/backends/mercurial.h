@@ -35,6 +35,7 @@ class MercurialBackend : public Backend
 		std::vector<std::string> branches();
 		std::vector<Tag> tags();
 		Diffstat diffstat(const std::string &id);
+		std::vector<std::string> tree(const std::string &id = std::string());
 
 		LogIterator *iterator(const std::string &branch = std::string());
 		Revision *revision(const std::string &id);

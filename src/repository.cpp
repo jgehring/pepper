@@ -50,6 +50,7 @@ Lunar<Repository>::RegType Repository::methods[] = {
 	LUNAR_DECLARE_METHOD(Repository, main_branch),
 	LUNAR_DECLARE_METHOD(Repository, branches),
 	LUNAR_DECLARE_METHOD(Repository, tags),
+	LUNAR_DECLARE_METHOD(Repository, tree),
 	{0,0}
 };
 
@@ -112,4 +113,17 @@ int Repository::tags(lua_State *L) {
 		lua_rawseti(L, table, i+1);
 	}
 	return 1;
+}
+
+int Repository::tree(lua_State *L) {
+	if (m_backend == NULL) return LuaHelpers::pushNil(L);
+
+	std::string id = LuaHelpers::pops(L);
+	std::vector<std::string> t;
+	try {
+		t = m_backend->tree(id);
+	} catch (const Pepper::Exception &ex) {
+		return LuaHelpers::pushError(L, ex.what(), ex.where());
+	}
+	return LuaHelpers::push(L, t);
 }
