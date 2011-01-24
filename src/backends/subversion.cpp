@@ -721,16 +721,19 @@ Diffstat SubversionBackend::diffstat(const std::string &id)
 		PDEBUG << "Revision " << id << " will be prefetched" << endl;
 		Diffstat stat;
 		if (!m_prefetcher->get(id, &stat)) {
-			throw PEX(utils::strprintf("Failed to retrieve diffstat for revision %s", id.c_str()));
+			throw PEX(std::string("Failed to retrieve diffstat for revision ") + id);
 		}
 		return stat;
+	}
+
+	svn_revnum_t revision;
+	if (!utils::str2int(id, &revision)) {
+		throw PEX(std::string("Error parsing revision number ") + id);
 	}
 
 	PDEBUG << "Fetching revision " << id << " manually" << endl;
 
 	apr_pool_t *subpool = svn_pool_create(d->pool);
-	svn_revnum_t revision;
-	utils::str2int(id, &revision);
 	Diffstat stat = SvnDiffstatThread::diffstat(d, revision, subpool);
 	svn_pool_destroy(subpool);
 	return stat;
@@ -870,10 +873,13 @@ Revision *SubversionBackend::revision(const std::string &id)
 {
 	std::map<std::string, std::string> data;
 
+	svn_revnum_t revnum;
+	if (!utils::str2int(id, &(revnum))) {
+		throw PEX(std::string("Error parsing revision number ") + id);
+	}
+
 	apr_pool_t *pool = svn_pool_create(d->pool);
 	apr_hash_t *props;
-	svn_revnum_t revnum;
-	utils::str2int(id, &(revnum));
 
 	svn_error_t *err = svn_ra_rev_proplist(d->ra, revnum, &props, pool);
 	if (err != NULL) {
