@@ -110,7 +110,7 @@ Here's a brief listing:
 	Generates a scatter plot visualizing commit activity per daytime.
 
 	* commits_per_month
-	Displays a histogram of the commits during the last 12 months.
+	Plots a histogram of the commits during the last 12 months.
 	
 	* loc
 	Plots the lines of code for a given branch.
@@ -119,7 +119,10 @@ Here's a brief listing:
 	Prints a revision log to stdout, similar to "git shortlog".
 
 	* diffstat
-	Prints a diffstat of a given revision
+	Prints a diffstat of a given revision.
 
 	* directories
 	Plots the directory sizes for the 6 largest directories.
+
+	* filetypes
+	Plots a histogram visualizing the number of files per type.
