@@ -1,7 +1,12 @@
 *.[oa]
+*.bak
 *.cpp.*
 *.h.*
 *.log
+*.out
+*.patch
+*.tar.bz2
+*.tar.gz
 *~
 .*.swp
 .deps
