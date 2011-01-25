@@ -57,12 +57,12 @@ class Logger
 
 		static void flush();
 
-		static inline Logger &err() { return *s_instances[Error]; }
-		static inline Logger &warn() { return *s_instances[Warn]; }
-		static inline Logger &status() { return *s_instances[Status]; }
-		static inline Logger &info() { return *s_instances[Info]; }
-		static inline Logger &debug() { return *s_instances[Debug]; }
-		static inline Logger &trace() { return *s_instances[Trace]; }
+		static inline Logger &err() { return s_instances[Error]; }
+		static inline Logger &warn() { return s_instances[Warn]; }
+		static inline Logger &status() { return s_instances[Status]; }
+		static inline Logger &info() { return s_instances[Info]; }
+		static inline Logger &debug() { return s_instances[Debug]; }
+		static inline Logger &trace() { return s_instances[Trace]; }
 
 		template <typename T>
 		inline Logger &operator<<(const T &s) {
@@ -105,7 +105,7 @@ class Logger
 		int m_level;
 		std::ostream *m_out;
 
-		static Logger *s_instances[NumLevels];
+		static Logger s_instances[NumLevels];
 		static int s_level;
 		static sys::parallel::Mutex s_mutex;
 };

@@ -15,14 +15,14 @@
 
 
 // Static variables
-Logger *Logger::s_instances[Logger::NumLevels] = {
-	new Logger(Logger::None, std::cerr),
-	new Logger(Logger::Error, std::cerr),
-	new Logger(Logger::Warn, std::cerr),
-	new Logger(Logger::Status, std::cerr),
-	new Logger(Logger::Info, std::cerr),
-	new Logger(Logger::Debug, std::cerr),
-	new Logger(Logger::Trace, std::cerr)
+Logger Logger::s_instances[Logger::NumLevels] = {
+	Logger(Logger::None, std::cerr),
+	Logger(Logger::Error, std::cerr),
+	Logger(Logger::Warn, std::cerr),
+	Logger(Logger::Status, std::cerr),
+	Logger(Logger::Info, std::cerr),
+	Logger(Logger::Debug, std::cerr),
+	Logger(Logger::Trace, std::cerr)
 };
 #ifdef DEBUG
 int Logger::s_level = Logger::Debug;
@@ -45,11 +45,11 @@ void Logger::setOutput(std::ostream &out, int level)
 	if (level < 0) {
 		for (int i = 0; i < Logger::NumLevels; i++) {
 			if (i != Logger::Error && i != Logger::Warn) {
-				s_instances[i]->m_out = &out;
+				s_instances[i].m_out = &out;
 			}
 		}
 	} else if (level != Logger::Error && level != Logger::Warn) {
-		s_instances[level]->m_out = &out;
+		s_instances[level].m_out = &out;
 	}
 }
 
@@ -69,6 +69,6 @@ int Logger::level()
 void Logger::flush()
 {
 	for (int i = 0; i < Logger::NumLevels; i++) {
-		s_instances[i]->m_out->flush();
+		s_instances[i].m_out->flush();
 	}
 }
