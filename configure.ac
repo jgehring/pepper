@@ -92,6 +92,7 @@ fi
 AC_FUNC_MALLOC()
 AC_FUNC_MKTIME()
 AC_CHECK_FUNCS([atexit getcwd gettimeofday memmove mkdir realpath setenv strtol strchr])
+AC_FUNC_STRERROR_R()
 
 if test "x$popen_noshell" = "xyes"; then
 	AC_CHECK_FUNCS([strdup dup2 memset])
