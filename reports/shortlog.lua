@@ -6,7 +6,8 @@
 -- Script meta-data
 meta.title = "Shortlog"
 meta.description = "Summarized revision log"
-meta.options = {{"-bARG, --branch=ARG", "Select branch"}}
+meta.options = {{"-bARG, --branch=ARG", "Select branch"},
+                {"-s, --summary", "Print commit count summary only"}}
 
 
 -- Revision callback function
@@ -25,7 +26,7 @@ function main()
 	messages = {}
 
 	-- Gather data
-	branch = pepper.report.getopt("-b,--branch", pepper.report.repository():main_branch())
+	branch = pepper.report.getopt("b,branch", pepper.report.repository():main_branch())
 	pepper.report.walk_branch(callback, branch)
 
 	-- Sort commit dictionary by name
@@ -36,22 +37,32 @@ function main()
 	table.sort(authors)
 
 	-- Print results
-	for i,author in ipairs(authors) do
-		print(author .. " (" .. #messages[author] .. "):")
-		for j,msg in ipairs(messages[author]) do
-			split = string.find(msg, "\n\n")
-			if split ~= nil then
-				msg = string.sub(msg, 1, split)
-			else
-				split = string.find(msg, "\n")
+	if pepper.report.getopt("s,summary") == nil then
+		for i,author in ipairs(authors) do
+			print(author .. " (" .. #messages[author] .. "):")
+			for j,msg in ipairs(messages[author]) do
+				split = string.find(msg, "\n\n")
 				if split ~= nil then
 					msg = string.sub(msg, 1, split)
+				else
+					split = string.find(msg, "\n")
+					if split ~= nil then
+						msg = string.sub(msg, 1, split)
+					end
 				end
+				msg = string.gsub(msg, "\n", "    ")
+				msg = string.gsub(msg, "^%s*(.-)%s*$", "%1")
+				print("      " .. msg)
 			end
-			msg = string.gsub(msg, "\n", "    ")
-			msg = string.gsub(msg, "^%s*(.-)%s*$", "%1")
-			print("      " .. msg)
+			print()
 		end
-		print()
+	else
+		for i,author in ipairs(authors) do
+			local str = tostring(#messages[author])
+			while #str < 6 do
+				str = " " .. str
+			end
+			print(str .. "  " .. author)
+		end
 	end
 end
