@@ -44,6 +44,9 @@ class GitBackend : public Backend
 		Revision *revision(const std::string &id);
 		void finalize();
 
+	public:
+		static std::string quote(const std::string &arg);
+
 	private:
 		GitDiffstatPrefetcher *m_prefetcher;
 };

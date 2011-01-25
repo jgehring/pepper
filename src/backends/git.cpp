@@ -40,7 +40,7 @@ public:
 	static Diffstat diffstat(const std::string &id, const std::string &parent = std::string())
 	{
 		if (!parent.empty()) {
-			sys::io::PopenStreambuf buf("git", "diff-tree", "-U0", "--no-renames", utils::quote(parent).c_str(), utils::quote(id).c_str());
+			sys::io::PopenStreambuf buf("git", "diff-tree", "-U0", "--no-renames", GitBackend::quote(parent).c_str(), GitBackend::quote(id).c_str());
 			std::istream in(&buf);
 			Diffstat stat = DiffParser::parse(in);
 			if (buf.close() != 0) {
@@ -48,7 +48,7 @@ public:
 			}
 			return stat;
 		} else {
-			sys::io::PopenStreambuf buf("git", "diff-tree", "-U0", "--no-renames", "--root", utils::quote(id).c_str());
+			sys::io::PopenStreambuf buf("git", "diff-tree", "-U0", "--no-renames", "--root", GitBackend::quote(id).c_str());
 			std::istream in(&buf);
 			Diffstat stat = DiffParser::parse(in);
 			if (buf.close() != 0) {
@@ -232,7 +232,7 @@ std::string GitBackend::uuid()
 	// Get ID of first commit of the root branch
 	// Unfortunatley, the --max-count=n option results in n revisions counting from the HEAD.
 	// This way, we'll always get the HEAD revision with --max-count=1.
-	std::string id = sys::io::exec(&ret, "git", "rev-list", "--reverse", utils::quote(branch).c_str(), "--");
+	std::string id = sys::io::exec(&ret, "git", "rev-list", "--reverse", quote(branch).c_str(), "--");
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to determine the root commit for branch '%s' (%d)", branch.c_str(), ret));
 	}
@@ -247,7 +247,7 @@ std::string GitBackend::uuid()
 std::string GitBackend::head(const std::string &branch)
 {
 	int ret;
-	std::string out = sys::io::exec(&ret, "git", "rev-list", "-1", utils::quote(branch.empty() ? "HEAD" : branch).c_str(), "--");
+	std::string out = sys::io::exec(&ret, "git", "rev-list", "-1", quote(branch.empty() ? "HEAD" : branch).c_str(), "--");
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retrieve head commit for branch %s (%d)", branch.c_str(), ret));
 	}
@@ -310,7 +310,7 @@ std::vector<Tag> GitBackend::tags()
 			continue;
 		}
 
-		std::string out = sys::io::exec(&ret, "git", "rev-list", "-1", utils::quote(names[i]).c_str());
+		std::string out = sys::io::exec(&ret, "git", "rev-list", "-1", quote(names[i]).c_str());
 		if (ret != 0) {
 			throw PEX(utils::strprintf("Unable to retrieve the list of tags (%d)", ret));
 		}
@@ -349,7 +349,7 @@ Diffstat GitBackend::diffstat(const std::string &id)
 std::vector<std::string> GitBackend::tree(const std::string &id)
 {
 	int ret;
-	std::string out = sys::io::exec(&ret, "git", "ls-tree", "-r", "--full-name", "--name-only", (id.empty() ? "HEAD" : utils::quote(id).c_str()));
+	std::string out = sys::io::exec(&ret, "git", "ls-tree", "-r", "--full-name", "--name-only", (id.empty() ? "HEAD" : quote(id).c_str()));
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retrieve tree listing for ID '%s' (%d)", id.c_str(), ret));
 	}
@@ -364,7 +364,7 @@ std::vector<std::string> GitBackend::tree(const std::string &id)
 Backend::LogIterator *GitBackend::iterator(const std::string &branch)
 {
 	int ret;
-	std::string out = sys::io::exec(&ret, "git", "rev-list", "--first-parent", "--reverse", utils::quote(branch).c_str(), "--");
+	std::string out = sys::io::exec(&ret, "git", "rev-list", "--first-parent", "--reverse", quote(branch).c_str(), "--");
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retrieve log for branch '%s' (%d)", branch.c_str(), ret));
 	}
@@ -419,7 +419,7 @@ Revision *GitBackend::revision(const std::string &id)
 	std::string rev = utils::split(id, ":").back();
 
 	int ret;
-	std::string header = sys::io::exec(&ret, "git", "rev-list", "-1", "--header", utils::quote(rev).c_str());
+	std::string header = sys::io::exec(&ret, "git", "rev-list", "-1", "--header", quote(rev).c_str());
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retrieve meta-data for revision '%s' (%d, %s)", rev.c_str(), ret, header.c_str()));
 	}
@@ -497,4 +497,14 @@ void GitBackend::finalize()
 		m_prefetcher = NULL;
 		PDEBUG << "done" << endl;
 	}
+}
+
+// Adds argument quotes if needed
+std::string GitBackend::quote(const std::string &arg)
+{
+#ifdef USE_POPEN_NOSHELL
+	return arg;
+#else
+	return utils::quote(arg);
+#endif
 }
