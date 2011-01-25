@@ -7,6 +7,7 @@
 meta.title = "File types histogram"
 meta.description = "A histogram of the file types distribution"
 meta.options = {{"-rARG, --revision=ARG", "Select revision (defaults to HEAD)"},
+                {"-nARG", "Show the ARG most frequent file types"},
                 {"-oARG, --output=ARG", "Select output file (defaults to stdout)"},
                 {"-tARG, --type=ARG", "Explicitly set image type"},
                 {"-sW[xH], --size=W[xH]", "Set image size to width W and height H"}}
@@ -133,8 +134,9 @@ function main()
 	-- Use descriptive titles
 	local keys = {}
 	local values = {}
+	local n = 1 + tonumber(pepper.report.getopt("n", 6))
 	for i,v in pairs(extcount) do
-		if i > 7 then
+		if i > n then
 			break
 		end
 		if v[1] ~= "unknown" then

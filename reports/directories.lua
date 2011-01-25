@@ -8,6 +8,7 @@ meta.title = "Directories"
 meta.description = "Directory sizes"
 meta.options = {{"-bARG, --branch=ARG", "Select branch"},
                 {"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with a regular expression"},
+                {"-nARG", "Show the ARG largest directories"},
                 {"-oARG, --output=ARG", "Select output file (defaults to stdout)"},
                 {"-tARG, --type=ARG", "Explicitly set image type"},
                 {"-sW[xH], --size=W[xH]", "Set image size to width W and height H"}}
@@ -121,7 +122,7 @@ function main()
 		table.insert(dirloc, {k, v})
 	end
 	table.sort(dirloc, dircmp)
-	local i = 7
+	local i = 1 + tonumber(pepper.report.getopt("n", 6))
 	while i <= #dirloc do
 		directories[dirloc[i][1]] = nil
 		dirloc[i] = nil
