@@ -243,7 +243,11 @@ void Options::parse(const std::vector<std::string> &args)
 
 	// Repository URL
 	if (i < args.size()) {
-		m_options["url"] = args[i];
+		try {
+			m_options["url"] = sys::fs::makeAbsolute(args[i]);
+		} catch (...) {
+			m_options["url"] = args[i];
+		}
 	}
 }
 

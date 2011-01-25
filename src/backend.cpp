@@ -15,8 +15,6 @@
 
 #include "options.h"
 
-#include "syslib/fs.h"
-
 #include "backend.h"
 
 #ifdef USE_GIT
@@ -153,23 +151,18 @@ Backend *Backend::backendForName(const std::string &name, const Options &options
 // Tries to guess a backend by examining the repository URL
 Backend *Backend::backendForUrl(const std::string &url, const Options &options)
 {
-	std::string absurl = sys::fs::makeAbsolute(url);
-	if (absurl.empty()) {
-		throw PEX(std::string("No such file or directory: " + url));
-	}
-
 #ifdef USE_SUBVERSION
-	if (SubversionBackend::handles(absurl)) {
+	if (SubversionBackend::handles(url)) {
 		return new SubversionBackend(options);
 	}
 #endif
 #ifdef USE_GIT
-	if (GitBackend::handles(absurl)) {
+	if (GitBackend::handles(url)) {
 		return new GitBackend(options);
 	}
 #endif
 #ifdef USE_MERCURIAL
-	if (MercurialBackend::handles(absurl)) {
+	if (MercurialBackend::handles(url)) {
 		return new MercurialBackend(options);
 	}
 #endif
