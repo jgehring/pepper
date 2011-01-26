@@ -31,8 +31,6 @@ class Options
 		void parse(int argc, char **argv);
 
 		bool helpRequested() const;
-		bool backendHelpRequested() const;
-		bool scriptHelpRequested() const;
 		bool versionRequested() const;
 		bool backendListRequested() const;
 		bool scriptListRequested() const;

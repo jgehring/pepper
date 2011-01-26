@@ -47,16 +47,6 @@ bool Options::helpRequested() const
 	return m_options["help"] == "true";
 }
 
-bool Options::backendHelpRequested() const
-{
-	return m_options["backend_help"] == "true";
-}
-
-bool Options::scriptHelpRequested() const
-{
-	return m_options["script_help"] == "true";
-}
-
 bool Options::versionRequested() const
 {
 	return m_options["version"] == "true";
