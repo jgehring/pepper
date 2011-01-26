@@ -50,6 +50,7 @@ class Options
 		std::map<std::string, std::string> scriptOptions() const;
 
 		static void print(const std::string &option, const std::string &text, std::ostream &out = std::cout);
+		static void printHelp(std::ostream &out = std::cout);
 
 	private:
 		void reset();

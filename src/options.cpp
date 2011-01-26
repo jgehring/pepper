@@ -160,6 +160,22 @@ void Options::print(const std::string &option, const std::string &text, std::ost
 }
 
 
+// Prints the main program options
+void Options::printHelp(std::ostream &out)
+{
+	print("-h, --help, -?", "Print basic usage information", out);
+	print("--version", "Print version information", out);
+	print("-v, --verbose", "Increase verbosity", out);
+	print("-q, --quiet", "Set verbosity to minimum", out);
+	print("-bARG, --backend=ARG", "Force usage of backend named ARG", out);
+	print("--no-cache", "Disable revision cache usage", out);
+	out << std::endl;
+	print("--list-reports", "List built-in report scrtips", out);
+	print("--list-backends", "List available backends", out);
+	print("--check-cache", "Run cache check", out);
+}
+
+
 // Resets the options to default values
 void Options::reset()
 {
