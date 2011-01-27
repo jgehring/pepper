@@ -53,6 +53,7 @@ static int atpanic(lua_State *L)
 #ifdef DEBUG
 	std::cerr << Pepper::stackTrace();
 #endif
+	return 0;
 }
 
 
