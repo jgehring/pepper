@@ -202,6 +202,8 @@ void Options::parse(const std::vector<std::string> &args)
 	unsigned int i = 0;
 	std::string key, value;
 
+	bool compat01 = (strncmp(PACKAGE_VERSION, "0.1", 3) == 0);
+
 	// Parse main options
 	while (i < args.size()) {
 		bool ok = false;
@@ -218,6 +220,11 @@ void Options::parse(const std::vector<std::string> &args)
 				Logger::setLevel(Logger::level()+1);
 			} else if (args[i] == "-q" || args[i] == "--quiet") {
 				Logger::setLevel(Logger::None);
+
+			// Compability notes
+			} else if (compat01 && args[i] == "--check-cache") {
+				Logger::warn() << "NOTE: The --check-cache option is deprecated, plase use the cache_check report" << endl;
+
 			} else if (parseOpt(args[i], &key, &value)) {
 				if (key == "b") {
 					key = "backend";
