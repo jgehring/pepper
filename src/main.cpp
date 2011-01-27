@@ -164,12 +164,12 @@ int start(const Options &opts)
 
 	SignalHandler sighandler;
 
+	Cache *cache = NULL;
 	try {
 		if (opts.useCache()) {
 			backend->init();
 
-			Cache *cache = new Cache(backend, opts);
-			backend = cache;
+			cache = new Cache(backend, opts);
 			sighandler.cache = cache;
 
 			// Simple cache check?
@@ -199,7 +199,7 @@ int start(const Options &opts)
 
 	int ret;
 	try {
-		ret = report::run(opts.script(), backend);
+		ret = report::run(opts.report(), (cache ? cache : backend));
 	} catch (const Pepper::Exception &ex) {
 		std::cerr << "Recieved exception while running report:" << std::endl;
 		std::cerr << "  what():  " << ex.what() << std::endl;
@@ -212,7 +212,8 @@ int start(const Options &opts)
 		ret = EXIT_FAILURE;
 	}
 
-	delete backend; // This will also flush the cache
+	delete cache; // This will also flush the cache
+	delete backend;
 	return ret;
 }
 

@@ -50,7 +50,6 @@ Cache::Cache(Backend *backend, const Options &options)
 Cache::~Cache()
 {
 	flush();
-	delete m_backend;
 }
 
 // Returns a diffstat for the specified revision
