@@ -32,7 +32,7 @@ A skeleton script might look light the following:
 -- Skeleton script
 
 -- Meta-data
-meta.name = "Skeleton"
+meta.title = "Skeleton"
 meta.description = "Just a skeleton"
 
 -- Entry point
