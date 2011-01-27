@@ -3,7 +3,7 @@
 --]]
 
 -- Script meta-data
-meta.name = "Cache check"
+meta.title = "Cache check"
 meta.description = "Checks the revision cache"
 
 -- Main script function

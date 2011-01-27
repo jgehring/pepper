@@ -4,7 +4,7 @@
 
 
 -- Script meta-data
-meta.name = "Branches"
+meta.title = "Branches"
 
 -- Main script function
 function main()

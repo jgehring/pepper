@@ -4,7 +4,7 @@
 
 
 -- Script meta-data
-meta.name = "Tags"
+meta.title = "Tags"
 
 -- Main script function
 function main()
