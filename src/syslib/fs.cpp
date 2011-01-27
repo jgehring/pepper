@@ -93,14 +93,20 @@ std::string makeAbsolute(const std::string &path)
 	// Make path absolute
 	std::string abspath(path);
 	if (abspath[0] != '/') {
-		char cwd[FILENAME_MAX];
-		if (!getcwd(cwd, sizeof(cwd))) {
-			throw PEX_ERRNO();
-		}
-		abspath = std::string(cwd) + "/" + path;
+		abspath = cwd() + "/" + path;
 	}
 
 	return canonicalize(abspath);
+}
+
+// Returns the current working directory
+std::string cwd()
+{
+	char cwd[FILENAME_MAX];
+	if (!getcwd(cwd, sizeof(cwd))) {
+		throw PEX_ERRNO();
+	}
+	return std::string(cwd);
 }
 
 // Wrapper for mkdir()

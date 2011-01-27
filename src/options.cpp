@@ -167,6 +167,7 @@ void Options::reset()
 	m_options.clear();
 	m_reportOptions.clear();
 
+	m_options["repository"] = sys::fs::cwd();
 	m_options["cache"] = "true";
 #ifdef DEBUG
 	Logger::setLevel(Logger::Info);

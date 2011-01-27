@@ -128,6 +128,12 @@ static std::vector<testdata_t> setupTestData()
 	bhelp.options["help"] = "true";
 	tests.push_back(bhelp);
 
+	testdata_t norepo(defaults);
+	norepo.args = setupArgs(1, "loc");
+	norepo.options["report"] = "loc";
+	norepo.options["repository"] = sys::fs::cwd();
+	tests.push_back(norepo);
+
 	return tests;
 }
 
