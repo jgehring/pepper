@@ -12,6 +12,7 @@ pdiffstat_SOURCES = \
 	main.cpp \
 	\
 	$(top_srcdir)/src/diffstat.cpp \
+	$(top_srcdir)/src/pex.cpp \
 	$(top_srcdir)/src/utils.cpp \
 	$(top_srcdir)/src/syslib/parallel.cpp
 

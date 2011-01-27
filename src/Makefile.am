@@ -19,6 +19,7 @@ pepper_SOURCES = \
 	luahelpers.h \
 	main.h main.cpp \
 	options.h options.cpp \
+	pex.h pex.cpp \
 	report.h report.cpp \
 	repository.h repository.cpp \
 	revision.h revision.cpp \

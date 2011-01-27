@@ -334,7 +334,7 @@ protected:
 			try {
 				stat = diffstat(d, revision, subpool);
 				m_queue->done(revision, stat);
-			} catch (const Pepper::Exception &ex) {
+			} catch (const PepperException &ex) {
 				Logger::err() << "Error: " << ex.where() << ": " << ex.what() << endl;
 				m_queue->failed(revision);
 			}

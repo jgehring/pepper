@@ -83,7 +83,7 @@ static void printHelp(const Options &opts)
 		std::cout << std::endl;
 		try {
 			report::printHelp(opts.report());
-		} catch (const Pepper::Exception &ex) {
+		} catch (const PepperException &ex) {
 			std::cerr << ex.where() << ": " << ex.what() << std::endl;
 			return;
 		}
@@ -156,7 +156,7 @@ int start(const Options &opts)
 			std::cerr << "Error: No backend found for url: " << opts.repository() << std::endl;
 			return EXIT_FAILURE;
 		}
-	} catch (const Pepper::Exception &ex) {
+	} catch (const PepperException &ex) {
 		std::cerr << "Error detecting repository type: " << ex.where() << ": " << ex.what() << std::endl;
 		Logger::flush();
 		return EXIT_FAILURE;
@@ -176,7 +176,7 @@ int start(const Options &opts)
 		} else {
 			backend->init();
 		}
-	} catch (const Pepper::Exception &ex) {
+	} catch (const PepperException &ex) {
 		std::cerr << "Error initializing backend: " << ex.where() << ": " << ex.what() << std::endl;
 		Logger::flush();
 		return EXIT_FAILURE;
@@ -188,7 +188,7 @@ int start(const Options &opts)
 	int ret;
 	try {
 		ret = report::run(opts.report(), (cache ? cache : backend));
-	} catch (const Pepper::Exception &ex) {
+	} catch (const PepperException &ex) {
 		std::cerr << "Recieved exception while running report:" << std::endl;
 		std::cerr << "  what():  " << ex.what() << std::endl;
 		std::cerr << "  where(): " << ex.where() << std::endl;
@@ -229,7 +229,7 @@ int main(int argc, char **argv)
 	int ret;
 	try {
 		ret = start(opts);
-	} catch (const Pepper::Exception &ex) {
+	} catch (const PepperException &ex) {
 		std::cerr << "Recieved unhandled exception:" << std::endl;
 		std::cerr << "  what():  " << ex.what() << std::endl;
 		std::cerr << "  where(): " << ex.where() << std::endl;

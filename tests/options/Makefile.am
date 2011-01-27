@@ -13,6 +13,7 @@ poptions_SOURCES = \
 	\
 	$(top_srcdir)/src/logger.cpp \
 	$(top_srcdir)/src/options.cpp \
+	$(top_srcdir)/src/pex.cpp \
 	$(top_srcdir)/src/utils.cpp \
 	$(top_srcdir)/src/syslib/fs.cpp \
 	$(top_srcdir)/src/syslib/parallel.cpp

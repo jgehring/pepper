@@ -75,7 +75,7 @@ int Repository::head(lua_State *L) {
 	std::string h;
 	try {
 		h = m_backend->head(branch);
-	} catch (const Pepper::Exception &ex) {
+	} catch (const PepperException &ex) {
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
 	}
 	return LuaHelpers::push(L, h);
@@ -91,7 +91,7 @@ int Repository::branches(lua_State *L) {
 	std::vector<std::string> b;
 	try {
 		b = m_backend->branches();
-	} catch (const Pepper::Exception &ex) {
+	} catch (const PepperException &ex) {
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
 	}
 	return LuaHelpers::push(L, b);
@@ -102,7 +102,7 @@ int Repository::tags(lua_State *L) {
 	std::vector<Tag> t;
 	try {
 		t = m_backend->tags();
-	} catch (const Pepper::Exception &ex) {
+	} catch (const PepperException &ex) {
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
 	}
 
@@ -122,7 +122,7 @@ int Repository::tree(lua_State *L) {
 	std::vector<std::string> t;
 	try {
 		t = m_backend->tree(id);
-	} catch (const Pepper::Exception &ex) {
+	} catch (const PepperException &ex) {
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
 	}
 	return LuaHelpers::push(L, t);

@@ -51,7 +51,7 @@ static int atpanic(lua_State *L)
 {
 	std::cerr << "Lua PANIC: " << LuaHelpers::tops(L) << std::endl;
 #ifdef DEBUG
-	std::cerr << Pepper::stackTrace();
+	std::cerr << PepperException::stackTrace();
 #endif
 	return 0;
 }
@@ -101,7 +101,7 @@ static int revision(lua_State *L)
 	Revision *revision = NULL;
 	try {
 		revision = repo->backend()->revision(id);
-	} catch (const Pepper::Exception &ex) {
+	} catch (const PepperException &ex) {
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
 	}
 	return LuaHelpers::push(L, revision); // TODO: Memory leak!
@@ -125,7 +125,7 @@ static int walk_branch(lua_State *L)
 	RevisionIterator *it = NULL;
 	try {
 		it = new RevisionIterator(branch, backend);
-	} catch (const Pepper::Exception &ex) {
+	} catch (const PepperException &ex) {
 		Logger::status() << "failed" << endl;
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
 	}
@@ -138,7 +138,7 @@ static int walk_branch(lua_State *L)
 		Revision *revision = NULL;
 		try {
 			revision = backend->revision(it->next());
-		} catch (const Pepper::Exception &ex) {
+		} catch (const PepperException &ex) {
 			delete it;
 			return LuaHelpers::pushError(L, ex.what(), ex.where());
 		}
@@ -164,7 +164,7 @@ static int walk_branch(lua_State *L)
 	delete it;
 	try {
 		backend->finalize();
-	} catch (const Pepper::Exception &ex) {
+	} catch (const PepperException &ex) {
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
 	}
 	return 0;
@@ -269,7 +269,7 @@ static int internal_check_cache(lua_State *L)
 
 	try {
 		cache->check();
-	} catch (const Pepper::Exception &ex) {
+	} catch (const PepperException &ex) {
 		return LuaHelpers::pushError(L, utils::strprintf("Error checking cache: %s: %s", ex.where(), ex.what()));
 	}
 

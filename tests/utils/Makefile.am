@@ -11,6 +11,7 @@ noinst_PROGRAMS = putils
 putils_SOURCES = \
 	main.cpp \
 	\
+	$(top_srcdir)/src/pex.cpp \
 	$(top_srcdir)/src/utils.cpp
 
 AM_CXXFLAGS = \
