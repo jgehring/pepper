@@ -412,8 +412,18 @@ void printHelp(const std::string &script)
 	std::string name = script;
 	lua_getfield(L, -1, "title");
 	if (lua_type(L, -1) == LUA_TSTRING) {
-		name = LuaHelpers::pops(L);
+		name = LuaHelpers::tops(L);
+	} else {
+		lua_pop(L, 1);
+		// "meta.name" has been used in the first version of the scripting tutorial
+		lua_getfield(L, -1, "name");
+		if (lua_type(L, -1) == LUA_TSTRING) {
+			name = LuaHelpers::tops(L);
+		}
 	}
+	lua_pop(L, 1);
+
+	std::cout << "Options for report '" << name << "':" << std::endl;
 
 	// Check for possible options
 	lua_getfield(L, -1, "options");
@@ -439,12 +449,9 @@ void printHelp(const std::string &script)
 		}
 		lua_pop(L, 1);
 
-		std::cout << "Options for report '" << name << "':" << std::endl;
 		for (unsigned int i = 0; i < std::min(switches.size(), text.size()); i++) {
 			Options::print(switches[i], text[i]);
 		}
-	} else {
-		std::cout << "No options for report '" << name << "':" << std::endl;
 	}
 	lua_pop(L, 1);
 
@@ -483,10 +490,9 @@ void listReports(std::ostream &out)
 			std::string description;
 			lua_getfield(L, -1, "description");
 			if (lua_type(L, -1) == LUA_TSTRING) {
-				description = LuaHelpers::pops(L);
-			} else {
-				lua_pop(L, 1);
+				description = LuaHelpers::tops(L);
 			}
+			lua_pop(L, 1);
 
 			// Strip possible Lua suffix when displaying
 			std::string name = reports[i];
