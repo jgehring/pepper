@@ -46,6 +46,16 @@ static Repository *repo;
 static std::map<std::string, std::string> options;
 
 
+// Prints a backtrace if Lua is panicking
+static int atpanic(lua_State *L)
+{
+	std::cerr << "Lua PANIC: " << LuaHelpers::tops(L) << std::endl;
+#ifdef DEBUG
+	std::cerr << Pepper::stackTrace();
+#endif
+}
+
+
 // Returns the current repository
 static int repository(lua_State *L)
 {
@@ -281,6 +291,8 @@ lua_State *setupLua()
 	// Setup lua context
 	lua_State *L = lua_open();
 	luaL_openlibs(L);
+
+	lua_atpanic(L, atpanic);
 
 	// Register report functions
 	luaL_register(L, "pepper.report", report);
