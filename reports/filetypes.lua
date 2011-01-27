@@ -5,7 +5,7 @@
 
 -- Script meta-data
 meta.title = "File types histogram"
-meta.description = "A histogram of the file types distribution"
+meta.description = "Histogram of the file types distribution"
 meta.options = {{"-rARG, --revision=ARG", "Select revision (defaults to HEAD)"},
                 {"-nARG", "Show the ARG most frequent file types"},
                 {"-oARG, --output=ARG", "Select output file (defaults to stdout)"},
