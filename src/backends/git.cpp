@@ -156,7 +156,7 @@ GitBackend::~GitBackend()
 // Initializes the backend
 void GitBackend::init()
 {
-	std::string repo = m_opts.repoUrl();
+	std::string repo = m_opts.repository();
 	if (sys::fs::exists(repo + "/HEAD")) {
 		setenv("GIT_DIR", repo.c_str(), 1);
 	} else if (sys::fs::exists(repo + "/.git/HEAD")) {

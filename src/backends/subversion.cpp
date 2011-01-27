@@ -555,7 +555,7 @@ void SubversionBackend::init()
 
 	PDEBUG << "Subversion library initialized, opening connection" << endl;
 
-	std::string url = m_opts.repoUrl();
+	std::string url = m_opts.repository();
 	if (!url.compare(0, 1, "/")) {
 		url = std::string("file://") + url;
 	}

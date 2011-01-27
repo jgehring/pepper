@@ -60,12 +60,12 @@ static void printFooter()
 // Prints program usage information
 static void printHelp(const Options &opts)
 {
-	std::cout << "USAGE: " << PACKAGE_NAME << " [options] [report] [report options] <repository>" << std::endl << std::endl;
+	std::cout << "USAGE: " << PACKAGE_NAME << " [options] [report] [report options] [repository]" << std::endl << std::endl;
 
 	std::cout << "Main options:" << std::endl;
 	Options::printHelp();
 
-	if (!opts.repoUrl().empty() || !opts.forcedBackend().empty()) {
+	if (!opts.repository().empty() || !opts.forcedBackend().empty()) {
 		std::cout << std::endl;
 		try {
 			Backend *backend = Backend::backendFor(opts);
@@ -76,13 +76,13 @@ static void printHelp(const Options &opts)
 			backend->printHelp();
 			delete backend;
 		} catch (const std::exception &ex) {
-			std::cout << "Sorry, unable to find a backend for '" << opts.repoUrl() << "'" << std::endl;
+			std::cout << "Sorry, unable to find a backend for '" << opts.repository() << "'" << std::endl;
 		}
 	}
-	if (!opts.script().empty()) {
+	if (!opts.report().empty()) {
 		std::cout << std::endl;
 		try {
-			report::printHelp(opts.script());
+			report::printHelp(opts.report());
 		} catch (const Pepper::Exception &ex) {
 			std::cerr << ex.where() << ": " << ex.what() << std::endl;
 			return;
@@ -139,11 +139,11 @@ int start(const Options &opts)
 		Backend::listBackends();
 		printFooter();
 		return EXIT_SUCCESS;
-	} else if (opts.scriptListRequested()) {
+	} else if (opts.reportListRequested()) {
 		report::listReports();
 		printFooter();
 		return EXIT_SUCCESS;
-	} else if (opts.repoUrl().empty() || (!opts.checkCache() && opts.script().empty())) {
+	} else if (opts.repository().empty() || opts.report().empty()) {
 		printHelp(opts);
 		return EXIT_FAILURE;
 	}
@@ -153,7 +153,7 @@ int start(const Options &opts)
 	try {
 		backend = Backend::backendFor(opts);
 		if (backend == NULL) {
-			std::cerr << "Error: No backend found for url: " << opts.repoUrl() << std::endl;
+			std::cerr << "Error: No backend found for url: " << opts.repository() << std::endl;
 			return EXIT_FAILURE;
 		}
 	} catch (const Pepper::Exception &ex) {
@@ -171,18 +171,6 @@ int start(const Options &opts)
 
 			cache = new Cache(backend, opts);
 			sighandler.cache = cache;
-
-			// Simple cache check?
-			if (opts.checkCache()) {
-				try {
-					cache->check();
-					return EXIT_SUCCESS;
-				} catch (const Pepper::Exception &ex) {
-					std::cerr << "Error checking cache: " << ex.where() << ": " << ex.what() << std::endl;
-					Logger::flush();
-					return EXIT_FAILURE;
-				}
-			}
 
 			cache->init();
 		} else {

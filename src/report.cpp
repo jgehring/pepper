@@ -328,7 +328,7 @@ int run(const std::string &script, Backend *backend)
 
 	// Setup global variables
 	report::repo = new Repository(backend);
-	report::options = backend->options().scriptOptions();
+	report::options = backend->options().reportOptions();
 
 	// Run the script
 	int ret = EXIT_SUCCESS;

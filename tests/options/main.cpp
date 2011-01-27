@@ -21,18 +21,20 @@
 #include "options.h"
 #include "logger.h"
 
+#include "syslib/fs.h"
+
 
 typedef std::map<std::string, std::string> stringmap;
 
 struct testdata_t {
 	char **args;
 	stringmap options;
-	stringmap scriptOptions;
+	stringmap reportOptions;
 
 	testdata_t() { }
 	testdata_t(const Options &defaults) {
 		options = defaults.m_options;
-		scriptOptions = defaults.m_scriptOptions;
+		reportOptions = defaults.m_reportOptions;
 	}
 };
 
@@ -79,32 +81,32 @@ static std::vector<testdata_t> setupTestData()
 
 	testdata_t simple(defaults);
 	simple.args = setupArgs(2, "loc", "http://svn.example.org");
-	simple.options["script"] = "loc";
-	simple.options["url"] = "http://svn.example.org";
+	simple.options["report"] = "loc";
+	simple.options["repository"] = "http://svn.example.org";
 	tests.push_back(simple);
 
-	testdata_t script(defaults);
-	script.args = setupArgs(4, "loc", "--branch=trunk", "-tpng", "http://svn.example.org");
-	script.options["script"] = "loc";
-	script.options["url"] = "http://svn.example.org";
-	script.scriptOptions["branch"] = "trunk";
-	script.scriptOptions["t"] = "png";
-	tests.push_back(script);
+	testdata_t report(defaults);
+	report.args = setupArgs(4, "loc", "--branch=trunk", "-tpng", "http://svn.example.org");
+	report.options["report"] = "loc";
+	report.options["repository"] = "http://svn.example.org";
+	report.reportOptions["branch"] = "trunk";
+	report.reportOptions["t"] = "png";
+	tests.push_back(report);
 
 	testdata_t backend(defaults);
 	backend.args = setupArgs(4, "-bsvn", "authors", "-tpng", "http://svn.example.org");
 	backend.options["backend"] = "svn";
-	backend.options["script"] = "authors";
-	backend.options["url"] = "http://svn.example.org";
-	backend.scriptOptions["t"] = "png";
+	backend.options["report"] = "authors";
+	backend.options["repository"] = "http://svn.example.org";
+	backend.reportOptions["t"] = "png";
 	tests.push_back(backend);
 
 	testdata_t backend2(defaults);
 	backend2.args = setupArgs(6, "--backend=svn", "--username=test", "--non-interactive", "authors", "-tpng", "http://svn.example.org");
 	backend2.options["backend"] = "svn";
-	backend2.options["script"] = "authors";
-	backend2.options["url"] = "http://svn.example.org";
-	backend2.scriptOptions["t"] = "png";
+	backend2.options["report"] = "authors";
+	backend2.options["repository"] = "http://svn.example.org";
+	backend2.reportOptions["t"] = "png";
 	backend2.options["username"] = "test";
 	backend2.options["non-interactive"] = std::string();
 	tests.push_back(backend2);
@@ -113,18 +115,12 @@ static std::vector<testdata_t> setupTestData()
 	full.args = setupArgs(8, "-v", "--no-cache", "-bsvn", "--username=test", "--non-interactive", "authors", "-tpng", "http://svn.example.org");
 	full.options["backend"] = "svn";
 	full.options["cache"] = "false";
-	full.options["script"] = "authors";
-	full.options["url"] = "http://svn.example.org";
-	full.scriptOptions["t"] = "png";
+	full.options["report"] = "authors";
+	full.options["repository"] = "http://svn.example.org";
+	full.reportOptions["t"] = "png";
 	full.options["username"] = "test";
 	full.options["non-interactive"] = std::string();
 	tests.push_back(full);
-
-	testdata_t ccheck(defaults);
-	ccheck.args = setupArgs(2, "--check-cache", "http://svn.example.org");
-	ccheck.options["check_cache"] = "true";
-	ccheck.options["url"] = "http://svn.example.org";
-	tests.push_back(ccheck);
 
 	testdata_t bhelp(defaults);
 	bhelp.args = setupArgs(2, "-bsvn", "-h");
@@ -169,9 +165,9 @@ int main(int, char **)
 			std::cerr << std::endl << i << ": Error: Options don't match!" << std::endl;
 			compare(opts.m_options, data[i].options);
 			ok = false;
-		} else if (opts.m_scriptOptions.size() != data[i].scriptOptions.size() || !std::equal(opts.m_scriptOptions.begin(), opts.m_scriptOptions.end(), data[i].scriptOptions.begin())) {
-			std::cerr << std::endl << i << ": Error: Script options don't match!" << std::endl;
-			compare(opts.m_scriptOptions, data[i].scriptOptions);
+		} else if (opts.m_reportOptions.size() != data[i].reportOptions.size() || !std::equal(opts.m_reportOptions.begin(), opts.m_reportOptions.end(), data[i].reportOptions.begin())) {
+			std::cerr << std::endl << i << ": Error: Report options don't match!" << std::endl;
+			compare(opts.m_reportOptions, data[i].reportOptions);
 			ok = false;
 		} else {
 			std::cout << i << " " << std::flush;

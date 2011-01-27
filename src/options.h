@@ -33,19 +33,18 @@ class Options
 		bool helpRequested() const;
 		bool versionRequested() const;
 		bool backendListRequested() const;
-		bool scriptListRequested() const;
+		bool reportListRequested() const;
 
 		bool useCache() const;
-		bool checkCache() const;
 		std::string cacheDir() const;
 
 		std::string forcedBackend() const;
-		std::string repoUrl() const;
+		std::string repository() const;
 		std::string value(const std::string &key, const std::string &defvalue = std::string()) const;
 		std::map<std::string, std::string> options() const;
 
-		std::string script() const;
-		std::map<std::string, std::string> scriptOptions() const;
+		std::string report() const;
+		std::map<std::string, std::string> reportOptions() const;
 
 		static void print(const std::string &option, const std::string &text, std::ostream &out = std::cout);
 		static void printHelp(std::ostream &out = std::cout);
@@ -57,7 +56,7 @@ class Options
 
 	PEPPER_PVARS
 		mutable std::map<std::string, std::string> m_options;
-		std::map<std::string, std::string> m_scriptOptions;
+		std::map<std::string, std::string> m_reportOptions;
 };
 
 

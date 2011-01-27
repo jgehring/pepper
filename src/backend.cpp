@@ -78,7 +78,7 @@ Backend *Backend::backendFor(const Options &options)
 	if (!forced.empty()) {
 		return backendForName(forced, options);
 	}
-	return backendForUrl(options.repoUrl(), options);
+	return backendForUrl(options.repository(), options);
 }
 
 // Prints a listing of available backends to

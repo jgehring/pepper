@@ -59,7 +59,7 @@ Repository::Repository(lua_State *) {
 }
 
 int Repository::url(lua_State *L) {
-	return (m_backend ? LuaHelpers::push(L, m_backend->options().repoUrl()) : LuaHelpers::pushNil(L));
+	return (m_backend ? LuaHelpers::push(L, m_backend->options().repository()) : LuaHelpers::pushNil(L));
 }
 
 int Repository::type(lua_State *L) {

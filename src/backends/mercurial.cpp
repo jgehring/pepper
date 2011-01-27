@@ -43,7 +43,7 @@ MercurialBackend::~MercurialBackend()
 // Initializes the backend
 void MercurialBackend::init()
 {
-	std::string repo = m_opts.repoUrl();
+	std::string repo = m_opts.repository();
 	if (!sys::fs::dirExists(repo + "/.hg")) {
 		throw PEX(utils::strprintf("Not a mercurial repository: %s", repo.c_str()));
 	}
@@ -100,7 +100,7 @@ std::vector<std::string> MercurialBackend::branches()
 	std::string out = hgcmd("branches");
 #else
 	int ret;
-	std::string out = sys::io::exec(&ret, "hg", "--noninteractive", "--repository", m_opts.repoUrl().c_str(), "branches", "--quiet");
+	std::string out = sys::io::exec(&ret, "hg", "--noninteractive", "--repository", m_opts.repository().c_str(), "branches", "--quiet");
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retreive the list of branches (%d)", ret));
 	}
@@ -227,7 +227,7 @@ Revision *MercurialBackend::revision(const std::string &id)
 // Returns the hg command with the correct --repository command line switch
 std::string MercurialBackend::hgcmd() const
 {
-	return std::string("hg --noninteractive --repository ") + m_opts.repoUrl();
+	return std::string("hg --noninteractive --repository ") + m_opts.repository();
 }
 
 // Returns the Python code for a hg command

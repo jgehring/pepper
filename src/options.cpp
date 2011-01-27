@@ -57,7 +57,7 @@ bool Options::backendListRequested() const
 	return m_options["list_backends"] == "true";
 }
 
-bool Options::scriptListRequested() const
+bool Options::reportListRequested() const
 {
 	return m_options["list_reports"] == "true";
 }
@@ -65,11 +65,6 @@ bool Options::scriptListRequested() const
 bool Options::useCache() const
 {
 	return m_options["cache"] == "true";
-}
-
-bool Options::checkCache() const
-{
-	return m_options["check_cache"] == "true";
 }
 
 std::string Options::cacheDir() const
@@ -82,9 +77,9 @@ std::string Options::forcedBackend() const
 	return m_options["backend"];
 }
 
-std::string Options::repoUrl() const
+std::string Options::repository() const
 {
-	return m_options["url"];
+	return m_options["repository"];
 }
 
 std::string Options::value(const std::string &key, const std::string &defvalue) const
@@ -100,15 +95,16 @@ std::map<std::string, std::string> Options::options() const
 	return m_options;
 }
 
-std::string Options::script() const
+std::string Options::report() const
 {
-	return m_options["script"];
+	return m_options["report"];
 }
 
-std::map<std::string, std::string> Options::scriptOptions() const
+std::map<std::string, std::string> Options::reportOptions() const
 {
-	return m_scriptOptions;
+	return m_reportOptions;
 }
+
 
 // Pretty-prints a help screen option
 void Options::print(const std::string &option, const std::string &text, std::ostream &out)
@@ -162,7 +158,6 @@ void Options::printHelp(std::ostream &out)
 	out << std::endl;
 	print("--list-reports", "List built-in report scrtips", out);
 	print("--list-backends", "List available backends", out);
-	print("--check-cache", "Run cache check", out);
 }
 
 
@@ -170,7 +165,7 @@ void Options::printHelp(std::ostream &out)
 void Options::reset()
 {
 	m_options.clear();
-	m_scriptOptions.clear();
+	m_reportOptions.clear();
 
 	m_options["cache"] = "true";
 #ifdef DEBUG
@@ -199,7 +194,6 @@ void Options::parse(const std::vector<std::string> &args)
 		{"--help", "help", "true"},
 		{"--version", "version", "true"},
 		{"--no-cache", "cache", "false"},
-		{"--check-cache", "check_cache", "true"},
 		{"--list-backends", "list_backends", "true"},
 		{"--list-reports", "list_reports", "true"}
 	};
@@ -229,7 +223,7 @@ void Options::parse(const std::vector<std::string> &args)
 				}
 				m_options[key] = value;
 			} else {
-				m_options[(i == args.size()-1 ? "url" : "script")] = args[i];
+				m_options["report"] = args[i];
 				++i;
 				break;
 			}
@@ -237,10 +231,10 @@ void Options::parse(const std::vector<std::string> &args)
 		++i;
 	}
 
-	// Parse script options
+	// Parse report options
 	while (i < args.size()) {
 		if (parseOpt(args[i], &key, &value)) {
-			m_scriptOptions[key] = value;
+			m_reportOptions[key] = value;
 		} else {
 			break;
 		}
@@ -250,9 +244,9 @@ void Options::parse(const std::vector<std::string> &args)
 	// Repository URL
 	if (i < args.size()) {
 		try {
-			m_options["url"] = sys::fs::makeAbsolute(args[i]);
+			m_options["repository"] = sys::fs::makeAbsolute(args[i]);
 		} catch (...) {
-			m_options["url"] = args[i];
+			m_options["repository"] = args[i];
 		}
 	}
 }
