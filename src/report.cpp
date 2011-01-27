@@ -493,7 +493,7 @@ void listReports(std::ostream &out)
 				name = name.substr(0, name.length()-4);
 			}
 
-			Options::print(reports[i], description, out);
+			Options::print(name, description, out);
 			lua_gc(L, LUA_GCCOLLECT, 0);
 			lua_close(L);
 		}
