@@ -18,6 +18,7 @@
 #include <memory>
 
 #include "backend.h"
+#include "cache.h"
 #include "diffstat.h"
 #include "logger.h"
 #include "options.h"
@@ -246,6 +247,34 @@ static const struct luaL_reg utils[] = {
 };
 
 
+// Runs a cache check for the given repository
+static int internal_check_cache(lua_State *L)
+{
+	Repository *repo = LuaHelpers::popl<Repository>(L);
+	Cache *cache = dynamic_cast<Cache *>(repo->backend());
+	if (cache == NULL) {
+		cache = new Cache(repo->backend(), repo->backend()->options());
+	}
+
+	try {
+		cache->check();
+	} catch (const Pepper::Exception &ex) {
+		return LuaHelpers::pushError(L, utils::strprintf("Error checking cache: %s: %s", ex.where(), ex.what()));
+	}
+
+	if (cache != repo->backend()) {
+		delete cache;
+	}
+	return LuaHelpers::pushNil(L);
+}
+
+// Function table of internal functions
+static const struct luaL_reg internal[] = {
+	{"check_cache", internal_check_cache},
+	{NULL, NULL}
+};
+
+
 // Sets up the lua context
 lua_State *setupLua()
 {
@@ -256,6 +285,7 @@ lua_State *setupLua()
 	// Register report functions
 	luaL_register(L, "pepper.report", report);
 	luaL_register(L, "pepper.utils", utils);
+	luaL_register(L, "pepper.internal", internal);
 
 	// Register binding classes
 	Lunar<Repository>::Register(L, "pepper");

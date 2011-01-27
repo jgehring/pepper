@@ -152,6 +152,11 @@ inline std::string tops(lua_State *L, int index = -1) {
 	return luaL_checkstring(L, index);
 }
 
+template <class T>
+inline T *topl(lua_State *L, int index = -1) {
+	return Lunar<T>::check(L, index);
+}
+
 inline int popi(lua_State *L) {
 	int i = topi(L, -1); lua_pop(L, 1); return i;
 }
@@ -166,6 +171,11 @@ inline double popd(lua_State *L) {
 
 inline std::string pops(lua_State *L) {
 	std::string s = tops(L, -1); lua_pop(L, 1); return s;
+}
+
+template <class T>
+inline T* popl(lua_State *L) {
+	T *t = topl<T>(L); lua_pop(L, 1); return t;
 }
 
 inline std::vector<double> topvd(lua_State *L, int index = -1) {
