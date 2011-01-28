@@ -12,17 +12,15 @@
 
 
 #include "Python.h"
+#include "main.h" // Avoid compilation warnings
 
 #include <algorithm>
-#include <sstream>
 
 #include "options.h"
 #include "revision.h"
+#include "utils.h"
 
 #include "syslib/fs.h"
-#include "syslib/io.h"
-
-#include "utils.h"
 
 #include "backends/mercurial.h"
 

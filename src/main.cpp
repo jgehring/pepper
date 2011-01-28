@@ -11,19 +11,17 @@
  */
 
 
+#include "main.h"
+
 #include <cassert>
 #include <cstdlib>
 #include <fstream>
-#include <iostream>
-
-#include "main.h"
 
 #include "backend.h"
 #include "cache.h"
 #include "logger.h"
 #include "options.h"
 #include "report.h"
-#include "utils.h"
 
 #include "syslib/sigblock.h"
 

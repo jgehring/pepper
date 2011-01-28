@@ -11,7 +11,7 @@
  */
 
 
-#include <cstring>
+#include "main.h"
 
 #include "options.h"
 

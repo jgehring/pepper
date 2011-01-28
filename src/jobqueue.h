@@ -19,9 +19,9 @@
 #include <queue>
 #include <vector>
 
-#include "syslib/parallel.h"
-
 #include "logger.h"
+
+#include "syslib/parallel.h"
 
 
 template <typename Arg, typename Result>

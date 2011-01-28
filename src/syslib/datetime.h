@@ -17,9 +17,6 @@
 
 #include <string>
 
-#include <pthread.h>
-#include <semaphore.h>
-
 
 namespace sys
 {

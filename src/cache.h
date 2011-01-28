@@ -16,10 +16,10 @@
 
 
 #include "backend.h"
-#include "revision.h"
 
 class BIStream;
 class BOStream;
+class Revision;
 
 
 // This cache should be transparent and inherits the wrapped class

@@ -16,12 +16,8 @@
 
 
 #include <iostream>
-#include <string>
-
 
 class Backend;
-
-struct lua_State;
 
 
 namespace report

@@ -11,11 +11,9 @@
  */
 
 
-#include <cassert>
+#include "main.h"
 
 #include <sys/time.h>
-
-#include "main.h"
 
 #include "datetime.h"
 

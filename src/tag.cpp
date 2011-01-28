@@ -11,6 +11,8 @@
  */
 
 
+#include "main.h"
+
 #include "luahelpers.h"
 
 #include "tag.h"

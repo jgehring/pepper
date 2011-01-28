@@ -11,6 +11,8 @@
  */
 
 
+#include "main.h"
+
 #include "backend.h"
 #include "luahelpers.h"
 #include "options.h"

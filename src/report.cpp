@@ -12,23 +12,22 @@
  */
 
 
+#include "main.h"
+
 #include <algorithm>
-#include <cstdlib>
 #include <cstring>
-#include <memory>
 
 #include "backend.h"
 #include "cache.h"
 #include "diffstat.h"
 #include "logger.h"
+#include "luahelpers.h"
 #include "options.h"
 #include "repository.h"
 #include "revision.h"
 #include "revisioniterator.h"
 #include "tag.h"
 #include "utils.h"
-
-#include "luahelpers.h"
 #ifdef USE_GNUPLOT
  #include "plot.h"
 #endif

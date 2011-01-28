@@ -11,6 +11,8 @@
  */
 
 
+#include "main.h"
+
 #include <cstdlib>
 #include <cstring>
 
@@ -20,8 +22,6 @@
 #include "syslib/fs.h"
 
 #include "options.h"
-
-typedef std::map<std::string, std::string> stringmap;
 
 
 // Constructor

@@ -11,7 +11,7 @@
  */
 
 
-#include <iostream>
+#include "main.h"
 
 #include "bstream.h"
 #include "luahelpers.h"

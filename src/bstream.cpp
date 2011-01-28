@@ -11,9 +11,9 @@
  */
 
 
-#include <cstdio>
-
 #include "main.h"
+
+#include <cstring>
 
 #ifdef HAVE_LIBZ
  #include <zlib.h>

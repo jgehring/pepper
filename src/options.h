@@ -15,12 +15,12 @@
 #define OPTIONS_H_
 
 
+#include "main.h"
+
 #include <iostream>
 #include <map>
 #include <string>
 #include <vector>
-
-#include "main.h"
 
 
 class Options

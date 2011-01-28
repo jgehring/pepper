@@ -15,10 +15,9 @@
 #define BSTREAM_H_
 
 
-#include <cstring>
 #include <string>
 #include <vector>
-#include <iostream>
+#include <cstdio>
 
 #include "main.h"
 

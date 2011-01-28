@@ -11,10 +11,11 @@
  */
 
 
-#include <cstring>
-#include <iostream>
-
 #include "main.h"
+
+#include <cstdarg>
+#include <cstdio>
+#include <cstring>
 
 #ifdef HAVE_LIBZ
  #include <zlib.h>

@@ -17,8 +17,6 @@
 
 #include <string>
 
-#include "main.h"
-
 #include "lunar/lunar.h"
 
 

@@ -17,8 +17,6 @@
 
 #include <iostream>
 
-#include "main.h"
-
 #include "syslib/parallel.h"
 
 // Easy logging

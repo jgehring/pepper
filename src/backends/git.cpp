@@ -11,9 +11,10 @@
  */
 
 
+#include "main.h"
+
 #include <algorithm>
 #include <fstream>
-#include <sstream>
 
 #include "jobqueue.h"
 #include "logger.h"

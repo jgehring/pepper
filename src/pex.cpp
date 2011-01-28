@@ -18,8 +18,8 @@
 #include <cstring>
 
 #if defined(_GNU_SOURCE)
- #include <execinfo.h>
  #include <cxxabi.h>
+ #include <execinfo.h>
 #endif
 
 #include "pex.h"

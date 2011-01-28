@@ -11,10 +11,10 @@
  */
 
 
+#include "main.h"
+
 #include <cerrno>
 #include <cstring>
-
-#include "main.h"
 
 #include "logger.h"
 

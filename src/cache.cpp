@@ -11,13 +11,6 @@
  */
 
 
-#include <iostream>
-#include <fstream>
-#include <cstdlib>
-#include <cstring>
-
-#include <signal.h>
-
 #include "main.h"
 
 #include "bstream.h"
@@ -27,9 +20,9 @@
 #include "revision.h"
 #include "utils.h"
 
+#include "syslib/datetime.h"
 #include "syslib/fs.h"
 #include "syslib/sigblock.h"
-#include "syslib/datetime.h"
 
 #include "cache.h"
 

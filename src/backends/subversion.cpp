@@ -13,10 +13,10 @@
 
 #define __STDC_CONSTANT_MACROS // For INT64_C
 
+#include "main.h"
+
 #include <algorithm>
 #include <cstdlib>
-#include <fstream>
-#include <iostream>
 #include <stack>
 
 #include <svn_client.h>
@@ -28,8 +28,6 @@
 #include <svn_sorts.h>
 #include <svn_time.h>
 #include <svn_utf.h>
-
-#include "main.h"
 
 #include "jobqueue.h"
 #include "logger.h"

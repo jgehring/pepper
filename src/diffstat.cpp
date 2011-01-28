@@ -11,15 +11,13 @@
  */
 
 
-#include <cstring>
-#include <vector>
+#include "main.h"
 
 #include "bstream.h"
 #include "luahelpers.h"
 #include "utils.h"
 
 #include "diffstat.h"
-
 
 
 // Constructor

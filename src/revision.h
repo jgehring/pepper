@@ -15,14 +15,13 @@
 #define REVISION_H_
 
 
-#include <map>
 #include <string>
 
 #include "main.h"
 
-#include "lunar/lunar.h"
-
 #include "diffstat.h"
+
+#include "lunar/lunar.h"
 
 class BIStream;
 class BOStream;
