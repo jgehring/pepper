@@ -6,7 +6,7 @@
  * Please see the COPYING file in the source distribution for license
  * terms and conditions, or see http://www.gnu.org/licenses/.
  *
- * file: syslib/fs.cpp
+ * file: syslib/io.cpp
  * I/O classes and functions
  */
 
@@ -15,6 +15,7 @@
 
 #include <cerrno>
 #include <cstring>
+#include <cstdio>
 
 #include "logger.h"
 
