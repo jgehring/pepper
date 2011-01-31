@@ -92,7 +92,7 @@ dnl Print a backend configuration report
 AC_DEFUN([BACKENDS_REPORT], [
 	echo
 	echo "    Enabled SCM backends:"
-	if test "x$git" = "xyes"; then echo "      * Git"; fi
-	if test "x$mercurial" = "xyes"; then echo "      * Mercurial"; fi
+	if test "x$git" = "xyes"; then echo "      * git"; fi
+	if test "x$mercurial" = "xyes"; then echo "      * mercurial"; fi
 	if test "x$subversion" = "xyes"; then echo "      * Subversion"; fi
 ])

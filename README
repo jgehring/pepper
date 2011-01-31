@@ -82,17 +82,17 @@ file for more information about the respective libraries)
 	This feature is enabled by default.
 
 	* popen-noshell (--[en|dis]able-popen-noshell)
-	A faster version of popen() for Linux 2.6. This increases the
-	performance of the Git backend.
-	This feature is enabled by default if the clone() system call
-	is available.
+	A faster version of popen() for Linux 2.6. Its used in pepper
+	is considered experimental, but it increases the performance of
+	the Git backend.
+	This feature is disabled by default.
 
 
 Built-in reports
 ----------------
 When installing pepper, several report scripts will be copied to the
 respective shared folder (i.e. $prefix/share/pepper) and can be accessed
-by their file name. Reports producing a plot will open a X11 window if
+by their filename. Reports producing a plot will open a X11 window if
 possible or print it to standard output by default.
 
 Report-specific command-line options will be printed if "--help" is

@@ -8,7 +8,7 @@ dnl terms and conditions, or see http://www.gnu.org/licenses/.
 dnl
 
 dnl Ivan Zahariev's popen-noshell
-AC_ARG_ENABLE([popen-noshell], [AS_HELP_STRING([--disable-popen-noshell], [Don't use a faster version of popen() on Linux])], [popen_noshell="$enableval"], [popen_noshell="auto"])
+AC_ARG_ENABLE([popen-noshell], [AS_HELP_STRING([--enable-popen-noshell], [Use a faster but experimental version of popen() on Linux])], [popen_noshell="$enableval"], [popen_noshell="no"])
 AC_ARG_ENABLE([gnuplot], [AS_HELP_STRING([--disable-gnuplot], [Don't offer Gnuplot graphing to Lua scripts])], [gnuplot="$enableval"], [gnuplot="yes"])
 
 
@@ -24,6 +24,6 @@ dnl Print a feature configuration report
 AC_DEFUN([FEATURES_REPORT], [
 	echo
 	echo "    Enabled features:"
-	if test "x$gnuplot" = "xyes"; then echo "      * gnuplot"; fi
 	if test "x$popen_noshell" = "xyes"; then echo "      * popen-noshell"; fi
+	if test "x$gnuplot" = "xyes"; then echo "      * gnuplot"; fi
 ])
