@@ -3,7 +3,7 @@
 Version 0.1.5 of pepper is now available. This release
 adds a new report showing a histogram of file types in the
 repository. The command-line argument for the repository can
-be ommitted now to use the current directory. Additionally,
+be omitted now to use the current directory. Additionally,
 the cache check is now performed by the new built-in `check_cache`
 report. Two bugs reported by Dominik Geyer have been fixed (see
 [#3162914](http://sourceforge.net/tracker/?func=detail&aid=3162914&group_id=386093&atid=1604684)
