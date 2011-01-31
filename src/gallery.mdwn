@@ -33,25 +33,6 @@ The `authors` report plots the contributions of the 6 "busiest" authors.
 ---
 
 
-#### Commits of the last twelve months
-
-The `commits_per_month` report plots a histogram of the commits during
-the last twelve months. The red bars represent the number of commits,
-while the green bars visualize the sum of the number of files touched
-per commit.
-
-<table width="100%">
-<tr>
-<td><a href="cpm-pepper.png"><img src="cpm-pepper-thumb.png" title="pepper" width="80%"></a></td>
-<td><a href="cpm-git.png"><img src="cpm-git-thumb.png" title="Git" width="80%"></a></td>
-<td><a href="cpm-hg.png"><img src="cpm-hg-thumb.png" title="Mercurial" width="80%"></a></td>
-<td><a href="cpm-linux.png"><img src="cpm-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
-</tr>
-</table>
-
----
-
-
 #### Directory sizes
 
 The `directories` report plots the evolution of directory sizes. The 6
@@ -63,5 +44,57 @@ largest directories in the current head revision are used.
 <td><a href="directories-git.png"><img src="directories-git-thumb.png" title="Git" width="80%"></a></td>
 <td><a href="directories-hg.png"><img src="directories-hg-thumb.png" title="Mercurial" width="80%"></a></td>
 <td><a href="directories-linux.png"><img src="directories-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
+</tr>
+</table>
+
+---
+
+
+#### Commits of the last twelve months
+
+The `commits_per_month` report plots a histogram of the commits during
+the last twelve months. The red bars represent the number of commits,
+while the green bars visualize the sum of the number of files touched
+per commit.
+
+<table width="100%">
+<tr>
+<td><a href="commits-pepper.png"><img src="commits-pepper-thumb.png" title="pepper" width="80%"></a></td>
+<td><a href="commits-git.png"><img src="commits-git-thumb.png" title="Git" width="80%"></a></td>
+<td><a href="commits-hg.png"><img src="commits-hg-thumb.png" title="Mercurial" width="80%"></a></td>
+<td><a href="commits-linux.png"><img src="commits-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
+</tr>
+</table>
+
+---
+
+
+#### Commit times
+
+This is a scatter plot of the commit times, similar to the one provided by
+[StatSVN](http://www.statsvn.org/statsvn/developers.html#Developer_Activity_).
+
+<table width="100%">
+<tr>
+<td><a href="activity-pepper.png"><img src="activity-pepper-thumb.png" title="pepper" width="80%"></a></td>
+<td><a href="activity-git.png"><img src="activity-git-thumb.png" title="Git" width="80%"></a></td>
+<td><a href="activity-hg.png"><img src="activity-hg-thumb.png" title="Mercurial" width="80%"></a></td>
+<td><a href="activity-linux.png"><img src="activity-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
+</tr>
+</table>
+
+---
+
+
+#### File types
+
+The file types report maps file extensions to types and plots a corresponding histogram.
+
+<table width="100%">
+<tr>
+<td><a href="filetypes-pepper.png"><img src="filetypes-pepper-thumb.png" title="pepper" width="80%"></a></td>
+<td><a href="filetypes-git.png"><img src="filetypes-git-thumb.png" title="Git" width="80%"></a></td>
+<td><a href="filetypes-hg.png"><img src="filetypes-hg-thumb.png" title="Mercurial" width="80%"></a></td>
+<td><a href="filetypes-linux.png"><img src="filetypes-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
 </tr>
 </table>

@@ -11,8 +11,8 @@ can grab the latest release from the [file list at
 SourceForge](http://sourceforge.net/projects/scm-pepper/files/) or use
 these direct links:
 
-* [pepper-0.1.4.tar.gz](http://prdownloads.sourceforge.net/scm-pepper/pepper-0.1.4.tar.gz)
-* [pepper-0.1.4.tar.bz2](http://prdownloads.sourceforge.net/scm-pepper/pepper-0.1.4.tar.bz2)
+* [pepper-0.1.5.tar.gz](http://prdownloads.sourceforge.net/scm-pepper/pepper-0.1.5.tar.gz)
+* [pepper-0.1.5.tar.bz2](http://prdownloads.sourceforge.net/scm-pepper/pepper-0.1.5.tar.bz2)
 
 Previous releases are available at
 [SourceForge](http://sourceforge.net/projects/scm-pepper/files/). The plain-text

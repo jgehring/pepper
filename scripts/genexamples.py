@@ -22,7 +22,9 @@ reports = {
 	"loc" : { "file" : "loc" },
 	"authors" : { "file" : "authors" },
 	"directories" : { "file" : "directories" },
-	"commits_per_month" : { "file" : "cpm" }
+	"commits_per_month" : { "file" : "commits" },
+	"commit_scatter" : { "file" : "activity" },
+	"filetypes" : { "file" : "filetypes" }
 }
 
 for repo in repos:
