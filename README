@@ -7,11 +7,19 @@ pepper is a flexible statistics generator for source code management
 repositories. It can be used to create graphical or textual reports,
 independent from the actual SCM software used.
 
+It comes with several built-in reports, but custom reports can be easily
+written using the Lua scripting language. A basic Lua interface to
+Gnuplot is provided and can be used to plot repository data graphically.
+
+This README file contains brief installation and usage
+instructions. Additional documentation is available at
+http://scm-pepper.sourceforge.net.
+
 
 Requirements
 ------------
-Besides from a working C++ compiler, pepper depends on the following
-third-party software:
+First, you need a working C++ compiler and standard library. Furthermore,
+pepper depends on the following third-party software:
 
 	* zlib
 	* POSIX threads
@@ -27,7 +35,7 @@ Additionally, the following programs may be required at runtime:
 	* The standard Git command line client (for the Git backend)
 	* Gnuplot (for scripts producing plots)
 
-pepper has been written in hopefully platform-independent manner,
+pepper has been written in a hopefully platform-independent manner,
 and should compile and run on all major Unix platforms, e.g. Linux,
 BSD and Mac OS X. I'm not planning to work too hard on a Windows port.
 
@@ -126,3 +134,22 @@ Here's a brief listing:
 
 	* filetypes
 	Plots a histogram visualizing the number of files per type.
+
+
+License
+-------
+pepper - SCM statistics report generator
+Copyright (C) 2010-2011 Jonas Gehring
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
