@@ -1,3 +1,18 @@
+2010-01-31  --  version 0.1.5
+
+	* Added filetypes report
+	* New Lua API functions: gnuplot:plot_histogram() and
+	  repository:tree()
+	* The cache can be checked by running the "check_cache"
+	  report now, which replaces the "--check-cache" flag
+	* If the repository argument is omitted, the current
+	  directory will be used now
+	* Fixed gnuplot invocation with some non-US locales
+	  (#3162914, reported by Dominik Geyer)
+	* Fixed possible segmentation fault when reading from cache
+	  (#3162922, reported by Dominik Geyer)
+	* Fixed help screen for reports without meta.title
+
 2010-01-20  --  version 0.1.4
 
 	* Added additional arguments for controlling the output of
