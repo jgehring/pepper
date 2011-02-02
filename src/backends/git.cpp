@@ -468,9 +468,6 @@ Revision *GitBackend::revision(const std::string &id)
 	while (i < lines.size() && !lines[i].empty()) {
 		++i;
 	}
-	if (i >= lines.size()) {
-		throw PEX(utils::strprintf("Unable to parse commit message for revision '%s' (%d, %s)", rev.c_str(), ret, header.c_str()));
-	}
 	std::string msg;
 	++i;
 	while (i < lines.size()) {
