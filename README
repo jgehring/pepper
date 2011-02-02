@@ -66,8 +66,7 @@ pepper ships with the following backends. The respective command line
 switches for the configuration script are given in brackets.
 
 	* Git (--[en|dis]able-git)
-	The Git backend uses popen() to communicate with the git command 
-	line client.
+	The Git backend uses uses the standard git command line client.
 
 	* Subversion (--[en|dis]able-svn)
 	This backend uses the Subversion C API to access the respective
@@ -88,12 +87,6 @@ file for more information about the respective libraries)
 	A Lua interface to Gnuplot. Reports can use it to plot data
 	graphically.
 	This feature is enabled by default.
-
-	* popen-noshell (--[en|dis]able-popen-noshell)
-	A faster version of popen() for Linux 2.6. Its used in pepper
-	is considered experimental, but it increases the performance of
-	the Git backend.
-	This feature is disabled by default.
 
 
 Built-in reports

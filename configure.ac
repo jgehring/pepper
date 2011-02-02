@@ -39,7 +39,6 @@ AC_PROG_INSTALL()
 
 FEATURES_CHECK()
 
-AM_CONDITIONAL([POPEN_NOSHELL], [test "x$popen_noshell" = "xyes"])
 AM_CONDITIONAL([GNUPLOT], [test "x$gnuplot" = "xyes"])
 
 # Build unit tests?
@@ -67,11 +66,6 @@ AC_CHECK_HEADER([CoreServices/CoreServices.h],
 
 AC_TYPE_UINT64_T()
 
-if test "x$popen_noshell" = "xyes"; then
-	AC_TYPE_PID_T()
-	AC_TYPE_SIZE_T()
-fi
-
 
 #
 # Checks for headers
@@ -79,10 +73,6 @@ fi
 
 AC_CHECK_HEADERS([sys/time.h])
 AC_HEADER_STDBOOL()
-
-if test "x$popen_noshell" = "xyes"; then
-	AC_CHECK_HEADERS([fcntl.h])
-fi
 
 
 #

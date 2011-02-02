@@ -18,9 +18,6 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <signal.h>
-#include <fcntl.h>
-
 #include <sys/wait.h>
 
 #include "logger.h"

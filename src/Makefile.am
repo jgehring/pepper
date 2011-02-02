@@ -93,13 +93,6 @@ AM_LDFLAGS += \
 	$(APR_LIBS)
 endif
 
-if POPEN_NOSHELL
-pepper_SOURCES += \
-	3rdparty/popen-noshell/popen_noshell.h 3rdparty/popen-noshell/popen_noshell.c
-AM_CPPFLAGS += \
-	-DUSE_POPEN_NOSHELL
-endif
-
 if GNUPLOT
 pepper_SOURCES += \
 	plot.h plot.cpp \
