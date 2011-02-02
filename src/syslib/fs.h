@@ -37,6 +37,7 @@ void unlink(const std::string &path);
 
 bool exists(const std::string &path);
 bool fileExists(const std::string &path);
+bool fileExecutable(const std::string &path);
 bool dirExists(const std::string &path);
 size_t filesize(const std::string &path);
 

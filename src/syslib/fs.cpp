@@ -17,6 +17,8 @@
 #include <cstring>
 
 #include <dirent.h>
+#include <unistd.h>
+
 #include <sys/stat.h>
 
 #include "utils.h"
@@ -149,6 +151,12 @@ bool fileExists(const std::string &path)
 {
 	struct stat statbuf;
 	return (stat(path.c_str(), &statbuf) == 0 && S_ISREG(statbuf.st_mode));
+}
+
+// Checks if the given regular file exists and is executable
+bool fileExecutable(const std::string &path)
+{
+	return (access(path.c_str(), X_OK) == 0);
 }
 
 // Checks if the given directory exists
