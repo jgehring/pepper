@@ -38,7 +38,7 @@ namespace io
 static int forkread(const char *cmd, const char * const *argv, int *pid = NULL)
 {
 	int fds[2];
-	if (pipe2(fds, O_CLOEXEC) == -1) {
+	if (pipe(fds) == -1) {
 		throw PEX_ERRNO();
 	}
 
