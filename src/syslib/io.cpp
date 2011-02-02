@@ -42,7 +42,10 @@ static int forkread(const char *cmd, const char * const *argv, int *pid = NULL)
 		throw PEX_ERRNO();
 	}
 
-	int cpid = vfork();
+	// NOTE: fork() is slow if the application allocated a large
+	// amount of memory, but all child calls after vfork() other than
+	// exec*() result in undefined behavior.
+	int cpid = fork();
 	if (cpid < 0) {
 		throw PEX_ERRNO();
 	} else if (cpid == 0) {
@@ -54,7 +57,8 @@ static int forkread(const char *cmd, const char * const *argv, int *pid = NULL)
 		}
 		close(fds[1]);
 		::execv(cmd, (char * const *)argv);
-		_exit(255);
+		// NOTE: Needs to be changed to _exit() if vfork() is being used above
+		exit(127);
 	}
 
 	// Parent process: close write end
