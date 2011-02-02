@@ -471,7 +471,7 @@ Revision *GitBackend::revision(const std::string &id)
 	std::string msg;
 	++i;
 	while (i < lines.size()) {
-		if (!lines[i].empty()) {
+		if (lines[i].length() > 4) {
 			msg += lines[i].substr(4);
 		}
 		if (i < lines.size()-1) {
