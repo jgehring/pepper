@@ -14,14 +14,16 @@
 #include "main.h"
 
 #include <cerrno>
-#include <cstring>
 #include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
+#include <signal.h>
+#include <fcntl.h>
+
+#include <sys/wait.h>
 
 #include "logger.h"
-
-#ifdef USE_POPEN_NOSHELL
- #include "popen-noshell/popen_noshell.h"
-#endif
 
 #include "io.h"
 
@@ -32,6 +34,39 @@ namespace sys
 namespace io
 {
 
+// Forks the process, running the given command and returning a file descriptor for reading
+static int forkread(const char *cmd, const char * const *argv, int *pid = NULL)
+{
+	int fds[2];
+	if (pipe2(fds, O_CLOEXEC) == -1) {
+		throw PEX_ERRNO();
+	}
+
+	int cpid = vfork();
+	if (cpid < 0) {
+		throw PEX_ERRNO();
+	} else if (cpid == 0) {
+		// Child process: close read end
+		close(fds[0]);
+		if (dup2(fds[1], STDOUT_FILENO) == -1) {
+			perror("Error duplicating pipe");
+			_exit(255);
+		}
+		close(fds[1]);
+		::execv(cmd, (char * const *)argv);
+		_exit(255);
+	}
+
+	// Parent process: close write end
+	close(fds[1]);
+
+	if (pid != NULL) {
+		*pid = cpid;
+	}
+	return fds[0];
+}
+
+
 // Checks whether the given file is a terminal
 bool isterm(FILE *f)
 {
@@ -39,59 +74,26 @@ bool isterm(FILE *f)
 }
 
 // Runs the specified command line and returns the output
-std::string execv(int *ret, const char * const *argv)
+std::string execv(int *ret, const char *cmd, const char * const *argv)
 {
-	FILE *pipe = NULL;
-#ifdef USE_POPEN_NOSHELL
-	struct popen_noshell_pass_to_pclose pclose_arg;
-	pipe = popen_noshell(argv[0], argv, "r", &pclose_arg, 0);
-#else
-	// Concatenate arguments, put possible meta characters in quotes
-	std::string cmd;
-	const char * const *ptr = argv;
-	const char *metachars = "!\\$`\n|&;()<>";
-	while (*ptr) {
-		bool quote = false;
-		for (unsigned int i = 0; i < strlen(metachars); i++) {
-			if (strchr(*ptr, metachars[i]) != NULL) {
-				quote = true;
-				break;
-			}
-		}
+	int pid;
+	int fd = forkread(cmd, argv, &pid);
 
-		if (quote) {
-			cmd += "\"";
-			cmd += *ptr;
-			cmd += "\"";
-		} else {
-			cmd += *ptr;
-		}
-		cmd += " ";
-		++ptr;
-	}
-	pipe = popen(cmd.c_str(), "r");
-#endif
-	if (pipe == NULL) {
-		throw (errno != 0 ? PEX_ERRNO() : PEX(std::string("Unable to open pipe for command ")+argv[0]));
-	}
-
-	char buffer[128];
+	// Read child output from pipe
+	char buf[512];
 	std::string result;
-	while (!feof(pipe)) {
-		if (fgets(buffer, 128, pipe) != NULL) {
-			result += buffer;
-		}
+	int n;
+	while ((n = read(fd, buf, sizeof(buf))) > 0) {
+		result.append(buf, n);
+	}
+	if (n < 0) {
+		throw PEX_ERRNO();
 	}
 
-	int r = -1;
-#ifdef USE_POPEN_NOSHELL
-	r = pclose_noshell(&pclose_arg);
-#else
-	r = pclose(pipe);
-#endif
-	if (ret != NULL) {
-		*ret = r;
-	}
+	close(fd);
+
+	// Wait for child
+	waitpid(pid, ret, 0);
 	return result;
 }
 
@@ -111,7 +113,7 @@ std::string exec(int *ret, const char *cmd, const char *arg1, const char *arg2, 
 		<< (arg5 ? arg5 : "") << " "
 		<< (arg6 ? arg6 : "") << " "
 		<< (arg7 ? arg7 : "") << endl;
-	std::string out = execv(ret, argv);
+	std::string out = execv(ret, cmd, argv);
 	delete[] argv;
 	return out;
 }
@@ -121,11 +123,9 @@ std::string exec(int *ret, const char *cmd, const char *arg1, const char *arg2, 
 class PopenStreambufData
 {
 public:
-	FILE *pipe;
+	int fd;
+	int pid;
 	const char *argv[9];
-#ifdef USE_POPEN_NOSHELL
-	struct popen_noshell_pass_to_pclose pclose_arg;
-#endif
 };
 
 // Constructor
@@ -146,54 +146,31 @@ PopenStreambuf::PopenStreambuf(const char *cmd, const char *arg1, const char *ar
 		<< (arg6 ? arg6 : "") << " "
 		<< (arg7 ? arg7 : "") << endl;
 
-#ifdef USE_POPEN_NOSHELL
-	d->pipe = popen_noshell(d->argv[0], d->argv, "r", &(d->pclose_arg), 0);
-#else
-	// Concatenate arguments, put possible meta characters in quotes
-	std::string concat;
-	const char * const *ptr = d->argv;
-	const char *metachars = "!\\$`\n|&;()<>";
-	while (*ptr) {
-		bool quote = false;
-		for (unsigned int i = 0; i < strlen(metachars); i++) {
-			if (strchr(*ptr, metachars[i]) != NULL) {
-				quote = true;
-				break;
-			}
-		}
-
-		if (quote) {
-			concat += "\"";
-			concat += *ptr;
-			concat += "\"";
-		} else {
-			concat += *ptr;
-		}
-		concat += " ";
-		++ptr;
-	}
-	d->pipe = popen(concat.c_str(), "r");
-#endif
-
-	if (!d->pipe) {
-		throw (errno != 0 ? PEX_ERRNO() : PEX(std::string("Unable to open pipe for command ")+cmd));
-	}
+	d->fd = forkread(cmd, d->argv, &d->pid);
 }
 
 // Destructor
 PopenStreambuf::~PopenStreambuf()
 {
+	if (d->fd >= 0) {
+		close();
+	}
 	delete d;
 }
 
 // Closes the process and returns its exit code
 int PopenStreambuf::close()
 {
-#ifdef USE_POPEN_NOSHELL
-	return pclose_noshell(&(d->pclose_arg));
-#else
-	return pclose(d->pipe);
-#endif
+	if (::close(d->fd) == -1)  {
+		throw PEX_ERRNO();
+	}
+	d->fd = -1;
+
+	int status;
+	if (waitpid(d->pid, &status, 0) == -1) {
+		throw PEX_ERRNO();
+	}
+	return status;
 }
 
 // Actual data fetching from pipe
@@ -212,15 +189,11 @@ PopenStreambuf::int_type PopenStreambuf::underflow()
 		start += m_putback;
 	}
 
-	if (feof(d->pipe)) {
-		return traits_type::eof();
-	}
-
 	// start is now the start of the buffer, proper.
 	// Read from fptr_ in to the provided buffer
 	size_t n = m_buffer.size() - (start - base);
-	n = fread(start, 1, n, d->pipe);
-	if (n == 0) {
+	n = read(d->fd, start, n);
+	if (n <= 0) { // TODO: Error if n < 0
 		return traits_type::eof();
 	}
 
