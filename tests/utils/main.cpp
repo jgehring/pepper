@@ -46,7 +46,8 @@ static int test_trim()
 		{ " ab", "ab" },
 		{ "ab  ", "ab" },
 		{ " ab ", "ab" },
-		{ "\tab  \n", "ab" }
+		{ "\tab  \n", "ab" },
+		{ "   \t", "" }
 	};
 
 	for (unsigned int i = 0; i < sizeof(inout) / sizeof(inout_t); i++) {

@@ -32,11 +32,12 @@ void trim(std::string *str)
 {
 	int start = 0;
 	int end = str->length()-1;
+	const char *data = str->c_str();
 
-	while (start < end && isspace(str->at(start))) {
+	while (start <= end && isspace(data[start])) {
 		++start;
 	}
-	while (end > start && isspace(str->at(end))) {
+	while (end >= start && isspace(data[end])) {
 		--end;
 	}
 
