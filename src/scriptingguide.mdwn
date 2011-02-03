@@ -102,6 +102,57 @@ Here, `main_branch()` will return the branch that is currently checked out
 for local repositories.
 
 
+### Graphical reports
+
+Reports can use the built-in [GNUPlot
+interface](../documentation/api/modules/pepper.gnuplot.html) to produce
+graphical output. In order to support common plot options, it's advised
+to set the global variable `meta.graphical` to `true` and use the
+[setup()](../documentation/api/modules/pepper.gnuplot.html#setup)
+function.
+
+The following report plots a histogram of commits by week days.
+
+[[!format lua """
+meta.title = "Commits by Week Days"
+meta.graphical = true
+
+-- This function will be called for every revision
+function callback(revision)
+    -- Determine week day of commit
+    local day = os.date("*t", revision:date())["wday"]
+
+    -- Update commit count
+    commits[day] = commits[day] + 1
+end
+
+-- Entry point
+function main()
+    local repository = pepper.report.repository()
+    -- Global table of commit counts with an entry for each day
+    commits = {0, 0, 0, 0, 0, 0, 0}
+
+    local branch = repository:main_branch()
+    pepper.report.walk_branch(callback, branch)
+
+    -- Setup the plot
+    local plot = pepper.gnuplot:new()
+    plot:setup()
+    plot:set_title("Commits by Week Days (on " .. branch .. ")")
+
+    -- Week day names used by Lua's wday
+    local days = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}
+
+    -- Run the plot
+    plot:plot_histogram(days, commits)
+end
+"""]]
+
+If you pass `--help` as a main option to the program when you run this
+report, common graph options like output filename and image size will
+be shown.
+
+
 ### Option handling
 
 Users can specify report options at the command line after defining
