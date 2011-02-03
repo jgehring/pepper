@@ -288,7 +288,7 @@ public:
 
 	struct DirBaton
 	{
-		const char *path, *wcpath;
+		const char *path;
 		DirBaton *dir_baton;
 
 		Baton *edit_baton;
@@ -302,14 +302,13 @@ public:
 			dir_baton->edit_baton = edit_baton;
 			dir_baton->pool = pool;
 			dir_baton->path = apr_pstrdup(pool, path);
-			dir_baton->wcpath = svn_path_join(edit_baton->target, path, pool);
 			return dir_baton;
 		}
 	};
 
 	struct FileBaton
 	{
-		const char *path, *wcpath;
+		const char *path;
 		const char *path_start_revision;
 		apr_file_t *file_start_revision;
 		apr_hash_t *pristine_props;
@@ -330,7 +329,6 @@ public:
 			file_baton->edit_baton = eb;
 			file_baton->pool = pool;
 			file_baton->path = apr_pstrdup(pool, path);
-			file_baton->wcpath = svn_path_join(eb->target, path, pool);
 			file_baton->propchanges  = apr_array_make(pool, 1, sizeof(svn_prop_t));
 			return file_baton;
 		}
@@ -363,14 +361,53 @@ public:
 		Baton *eb = static_cast<Baton *>(edit_baton);
 		DirBaton *b = DirBaton::make("", NULL, eb, pool);
 
-		b->wcpath = apr_pstrdup(pool, eb->target);
-
 		*root_baton = b;
 		return SVN_NO_ERROR;
 	}
 
-	static svn_error_t *delete_entry(const char *path, svn_revnum_t base_revision, void *parent_baton, apr_pool_t *pool)
+	static svn_error_t *get_file_from_ra(FileBaton *b, svn_revnum_t revision)
 	{
+		PTRACE << b->path << "@" << revision << endl;
+		svn_stream_t *fstream;
+
+		SVN_ERR(svn_stream_open_unique(&fstream, &(b->path_start_revision), NULL, svn_io_file_del_on_pool_cleanup, b->pool, b->pool));
+		SVN_ERR(svn_ra_get_file(b->edit_baton->ra, b->path, revision, fstream, NULL, &(b->pristine_props), b->pool));
+		return svn_stream_close(fstream);
+	}
+
+	static svn_error_t *delete_entry(const char *path, svn_revnum_t target_revision, void *parent_baton, apr_pool_t *pool)
+	{
+		DirBaton *pb = static_cast<DirBaton *>(parent_baton);
+		Baton *eb = pb->edit_baton;
+
+		// File or directory?
+		svn_dirent_t *dirent;
+		SVN_ERR(svn_ra_stat(eb->ra, path, target_revision-1, &dirent, pool));
+		if (dirent == NULL) {
+			PDEBUG << "Error: Unable to stat " << path << "@" << target_revision-1 << endl;
+			return SVN_NO_ERROR;
+		}
+
+		PTRACE << path << "@" << target_revision-1 <<" is a " << (dirent->kind == svn_node_dir ? "dir" : "file") << endl;
+
+		if (dirent->kind == svn_node_file) {
+			FileBaton *b = FileBaton::make(path, eb, pool);
+			SVN_ERR(get_file_from_ra(b, target_revision-1));
+			SVN_ERR(svn_io_open_unique_file3(&(b->file_end_revision), &(b->path_end_revision), NULL, svn_io_file_del_on_pool_cleanup, b->pool, b->pool));
+			SVN_ERR(close_file(b, "", pool));
+		} else {
+			PTRACE << "Listing " << path << "@" << target_revision-1 << endl;
+			apr_hash_t *dirents;
+			SVN_ERR(svn_ra_get_dir2(eb->ra, &dirents, NULL, NULL, path, target_revision-1, 0, pool));
+			// "Delete" directory recursively
+			for (apr_hash_index_t *hi = apr_hash_first(pool, dirents); hi; hi = apr_hash_next(hi)) {
+				const char *entry;
+				svn_dirent_t *dirent;
+				apr_hash_this(hi, (const void **)(void *)&entry, NULL, (void **)(void *)&dirent);
+				SVN_ERR(delete_entry((const char *)svn_path_join(path, entry, pool), target_revision, parent_baton, pool));
+			}
+		}
+
 		return SVN_NO_ERROR;
 	}
 
@@ -378,7 +415,6 @@ public:
 	{
 		PTRACE << path << endl;
 		DirBaton *pb = static_cast<DirBaton *>(parent_baton);
-		Baton *eb = pb->edit_baton;
 
 		DirBaton *b = DirBaton::make(path, pb, pb->edit_baton, pool);
 		*child_baton = b;
@@ -409,16 +445,6 @@ public:
 		return svn_io_open_unique_file3(&(b->file_start_revision), &(b->path_start_revision), NULL, svn_io_file_del_on_pool_cleanup, b->pool, b->pool);
 	}
 
-	static svn_error_t *get_file_from_ra(FileBaton *b, svn_revnum_t revision)
-	{
-		PTRACE << b->path << "@" << revision << endl;
-		svn_stream_t *fstream;
-
-		SVN_ERR(svn_stream_open_unique(&fstream, &(b->path_start_revision), NULL, svn_io_file_del_on_pool_cleanup, b->pool, b->pool));
-		SVN_ERR(svn_ra_get_file(b->edit_baton->ra, b->path, revision, fstream, NULL, &(b->pristine_props), b->pool));
-		return svn_stream_close(fstream);
-	}
-
 	static svn_error_t *open_file(const char *path, void *parent_baton, svn_revnum_t base_revision, apr_pool_t *pool, void **file_baton)
 	{
 		PTRACE << path << ", base = " << base_revision << endl;
@@ -434,8 +460,7 @@ public:
 	{
 		FileBaton *b = static_cast<FileBaton *>(window_baton);
 		SVN_ERR(b->apply_handler(window, b->apply_baton));
-		if (!window)
-		{
+		if (!window) {
 			SVN_ERR(svn_io_file_close(b->file_start_revision, b->pool));
 			SVN_ERR(svn_io_file_close(b->file_end_revision, b->pool));
 		}
