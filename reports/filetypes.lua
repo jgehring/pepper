@@ -6,11 +6,9 @@
 -- Script meta-data
 meta.title = "File types histogram"
 meta.description = "Histogram of the file types distribution"
+meta.graphical = true
 meta.options = {{"-rARG, --revision=ARG", "Select revision (defaults to HEAD)"},
-                {"-nARG", "Show the ARG most frequent file types"},
-                {"-oARG, --output=ARG", "Select output file (defaults to stdout)"},
-                {"-tARG, --type=ARG", "Explicitly set image type"},
-                {"-sW[xH], --size=W[xH]", "Set image size to width W and height H"}}
+                {"-nARG", "Show the ARG most frequent file types"}}
 
 -- Maps file extensions to languages
 extmap = {
@@ -52,32 +50,6 @@ extmap = {
 	[".vbs"] = "Visual Basic",
 	[".go"] = "Go"
 }
-
--- Sets up the plot according to the command line arguments
-function setup_plot(id)
-	local p = pepper.gnuplot:new()
-	if #id > 0 then
-		p:set_title("File types (at " .. id .. ")")
-	else
-		p:set_title("File types")
-	end
-
-	local file = pepper.report.getopt("o, output", "")
-	local size = pepper.utils.split(pepper.report.getopt("s, size", "600"), "x")
-	local terminal = pepper.report.getopt("t, type")
-	local width = tonumber(size[1])
-	local height = width * 0.5
-	if (#size > 1) then
-		height = tonumber(size[2])
-	end
-
-	if terminal ~= nil then
-		p:set_output(file, width, height, terminal)
-	else
-		p:set_output(file, width, height)
-	end
-	return p
-end
 
 -- Returns the extension of a file
 function extension(filename)
@@ -150,7 +122,13 @@ function main()
 		table.insert(values, count["unknown"])
 	end
 
-	local p = setup_plot(rev)
+	local p = pepper.gnuplot:new()
+	p:setup(600, 300)
+	if #rev > 0 then
+		p:set_title("File types (at " .. rev .. ")")
+	else
+		p:set_title("File types")
+	end
 
 	p:cmd([[
 set style fill solid border -1

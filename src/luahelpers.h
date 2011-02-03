@@ -22,6 +22,8 @@
 
 #include "main.h"
 
+#include "utils.h"
+
 #include "lunar/lunar.h"
 
 
@@ -230,6 +232,30 @@ inline void call(lua_State *L, const T1 &arg1, const T2 &arg2, const T3 &arg3, i
 	push(L, arg2);
 	push(L, arg3);
 	lua_call(L, 3, nresults);
+}
+
+template<typename T1, typename T2>
+inline void calls(lua_State *L, const std::string &name, const T1 &arg1, const T2 &arg2) {
+	// Find function
+	std::vector<std::string> parts = utils::split(name, ".");
+
+	lua_getglobal(L, parts[0].c_str());
+	if (parts.size() > 1) {
+		for (size_t i = 1; i < parts.size(); i++) {
+			if (lua_type(L, -1) != LUA_TTABLE) {
+				throw PEX("No such module");
+			}
+			lua_getfield(L, -1, parts[i].c_str());
+			lua_remove(L, -2);
+		}
+	}
+
+	if (lua_type(L, -1) != LUA_TFUNCTION) {
+		throw PEX("No such function");
+	}
+	push(L, arg1);
+	push(L, arg2);
+	lua_call(L, 2, 1);
 }
 
 

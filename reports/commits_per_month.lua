@@ -6,10 +6,8 @@
 -- Script meta-data
 meta.title = "Commits per Month"
 meta.description = "Histogramm of commit counts during the last twelve months"
-meta.options = {{"-bARG, --branch=ARG", "Select branch"},
-                {"-oARG, --output=ARG", "Select output file (defaults to stdout)"},
-                {"-tARG, --type=ARG", "Explicitly set image type"},
-                {"-sW[xH], --size=W[xH]", "Set image size to width W and height H"}}
+meta.graphical = true
+meta.options = {{"-bARG, --branch=ARG", "Select branch"}}
 
 -- Revision callback function
 function callback(r)
@@ -25,28 +23,6 @@ function callback(r)
 	end
 	commits[date["month"]] = commits[date["month"]] + 1
 	changes[date["month"]] = changes[date["month"]] + #r:diffstat():files()
-end
-
--- Sets up the plot according to the command line arguments
-function setup_plot(branch)
-	local p = pepper.gnuplot:new()
-	p:set_title("Commits per Month (on " .. branch .. ")")
-
-	local file = pepper.report.getopt("o, output", "")
-	local size = pepper.utils.split(pepper.report.getopt("s, size", "800"), "x")
-	local terminal = pepper.report.getopt("t, type")
-	local width = tonumber(size[1])
-	local height = width * 0.6
-	if (#size > 1) then
-		height = tonumber(size[2])
-	end
-
-	if terminal ~= nil then
-		p:set_output(file, width, height, terminal)
-	else
-		p:set_output(file, width, height)
-	end
-	return p
 end
 
 -- Main report function
@@ -89,8 +65,10 @@ function main()
 		i = i + 1
 	end
 
-	-- Generate graphs
-	local p = setup_plot(branch)
+	-- Generate graph
+	local p = pepper.gnuplot:new()
+	p:setup(800, 480)
+	p:set_title("Commits per Month (on " .. branch .. ")")
 
 	p:cmd([[
 set format y "%.0f"

@@ -6,11 +6,10 @@
 -- Script meta-data
 meta.title = "LOC"
 meta.description = "Lines of code"
+meta.graphical = true
 meta.options = {{"-bARG, --branch=ARG", "Select branch"},
-                {"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with a regular expression"},
-                {"-oARG, --output=ARG", "Select output file (defaults to stdout)"},
-                {"-tARG, --type=ARG", "Explicitly set image type"},
-                {"-sW[xH], --size=W[xH]", "Set image size to width W and height H"}}
+                {"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with Lua pattern ARG"}}
+
 
 -- Revision callback function
 function count(r)
@@ -60,28 +59,6 @@ function add_tagmarks(plot)
 	end
 end
 
--- Sets up the plot according to the command line arguments
-function setup_plot(branch)
-	local p = pepper.gnuplot:new()
-	p:set_title("Lines of Code (on " .. branch .. ")")
-
-	local file = pepper.report.getopt("o, output", "")
-	local size = pepper.utils.split(pepper.report.getopt("s, size", "600"), "x")
-	local terminal = pepper.report.getopt("t, type")
-	local width = tonumber(size[1])
-	local height = width * 0.8
-	if (#size > 1) then
-		height = tonumber(size[2])
-	end
-
-	if terminal ~= nil then
-		p:set_output(file, width, height, terminal)
-	else
-		p:set_output(file, width, height)
-	end
-	return p
-end
-
 -- Main report function
 function main()
 	locdeltas = {}
@@ -104,13 +81,15 @@ function main()
 		table.insert(loc, total)
 	end
 
-	local p = setup_plot(branch)
+	p = pepper.gnuplot:new()
+	p:setup(600, 480)
+	p:set_title("Lines of Code (on " .. branch .. ")")
 
 	if pepper.report.getopt("tags") ~= nil then
 		add_tagmarks(p)
 	end
 
-	-- Generate graphs
+	-- Generate graph
 	p:cmd([[
 set xdata time
 set timefmt "%s"

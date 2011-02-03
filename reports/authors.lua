@@ -6,12 +6,10 @@
 -- Script meta-data
 meta.title = "Code contribution by authors"
 meta.description = "Contributed lines of code by authors"
+meta.graphical = true
 meta.options = {{"-bARG, --branch=ARG", "Select branch"},
                 {"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with a regular expression"},
-                {"-nARG", "Show the ARG busiest authors"},
-                {"-oARG, --output=ARG", "Select output file (defaults to stdout)"},
-                {"-tARG, --type=ARG", "Explicitly set image type"},
-                {"-sW[xH], --size=W[xH]", "Set image size to width W and height H"}}
+                {"-nARG", "Show the ARG busiest authors"}}
 
 -- Revision callback function
 function callback(r)
@@ -77,28 +75,6 @@ function add_tagmarks(plot)
 	end
 end
 
--- Sets up the plot according to the command line arguments
-function setup_plot(branch)
-	local p = pepper.gnuplot:new()
-	p:set_title("Contributed Lines of Code by Author (on " .. branch .. ")")
-
-	local file = pepper.report.getopt("o, output", "")
-	local size = pepper.utils.split(pepper.report.getopt("s, size", "600"), "x")
-	local terminal = pepper.report.getopt("t, type")
-	local width = tonumber(size[1])
-	local height = width * 0.8
-	if (#size > 1) then
-		height = tonumber(size[2])
-	end
-
-	if terminal ~= nil then
-		p:set_output(file, width, height, terminal)
-	else
-		p:set_output(file, width, height)
-	end
-	return p
-end
-
 -- Main script function
 function main()
 	commits = {}   -- Commit list by timestamp with LOC delta
@@ -147,7 +123,9 @@ function main()
 		table.insert(authors, a[1])
 	end
 
-	local p = setup_plot(branch)
+	local p = pepper.gnuplot:new()
+	p:setup(600, 480)
+	p:set_title("Contributed Lines of Code by Author (on " .. branch .. ")")
 
 	if pepper.report.getopt("tags") ~= nil then
 		add_tagmarks(p)

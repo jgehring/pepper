@@ -7,10 +7,17 @@ module "pepper.gnuplot"
 -- @param str The command string
 function cmd(str)
 
+--- Performs a common plot setup.
+-- This function uses the report options to set up the plot size, type
+-- and output filename.
+-- @param width Optional image width (defaults to 640)
+-- @param height Optional image height (defaults to 480)
+function setup(width, height)
+
 --- Sets the output file for plotting
 -- @param filename Output filename
 -- @param width Optional image width (defaults to 640)
--- @param height Optional image height (defaults to 400)
+-- @param height Optional image height (defaults to 480)
 -- @param terminal Optional explicit terminal type. This is normally
 -- inferred from the filename.
 function set_output(filename, width, height, terminal)

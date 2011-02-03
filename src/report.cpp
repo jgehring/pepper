@@ -62,7 +62,7 @@ static int repository(lua_State *L)
 	return LuaHelpers::push(L, repo);
 }
 
-// Returns a script option (or the default value)
+// Returns a report option (or the default value)
 static int getopt(lua_State *L)
 {
 	if (lua_gettop(L) != 1 && lua_gettop(L) != 2) {
@@ -455,11 +455,18 @@ void printHelp(const std::string &script)
 			}
 			lua_pop(L, 1);
 		}
-		lua_pop(L, 1);
 
 		for (unsigned int i = 0; i < std::min(switches.size(), text.size()); i++) {
 			Options::print(switches[i], text[i]);
 		}
+	}
+	lua_pop(L, 1);
+
+	// If the report is a graphical one, print extra options related
+	// to the plot output
+	lua_getfield(L, -1, "graphical");
+	if (lua_type(L, -1) == LUA_TBOOLEAN && LuaHelpers::topb(L)) {
+		Plot::printOptions();
 	}
 	lua_pop(L, 1);
 
