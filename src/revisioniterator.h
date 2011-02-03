@@ -30,6 +30,8 @@ class RevisionIterator
 		bool atEnd();
 		std::string next();
 
+		int progress() const;
+
 	private:
 		void fetchLogs();
 

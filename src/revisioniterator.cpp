@@ -70,6 +70,15 @@ std::string RevisionIterator::next()
 	return (m_index < m_buffer.size() ? m_buffer[m_index++] : std::string());
 }
 
+// Returns a progress estimate (percejjjge)
+int RevisionIterator::progress() const
+{
+	if (m_logIterator->running()) {
+		return 0;
+	}
+	return int((100.0f * m_index) / m_buffer.size());
+}
+
 // Fetches new logs
 void RevisionIterator::fetchLogs()
 {

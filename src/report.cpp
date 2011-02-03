@@ -130,6 +130,7 @@ static int walk_branch(lua_State *L)
 	}
 	Logger::status() << "done" << endl;
 
+	int progress = 0;
 	if (Logger::level() < Logger::Info) {
 		Logger::status() << "Fetching revisions... " << flush;
 	}
@@ -149,8 +150,16 @@ static int walk_branch(lua_State *L)
 		lua_call(L, 1, 1);
 		lua_pop(L, 1);
 
-		Logger::info() << "\r\033[0K";
-		Logger::info() << "Fetching revisions... " << revision->id() << flush;
+		if (Logger::level() > Logger::Info) {
+			Logger::info() << "\r\033[0K";
+			Logger::info() << "Fetching revisions... " << revision->id() << flush;
+		} else {
+			if (progress != it->progress()) {
+				progress = it->progress();
+				Logger::info() << "\r\033[0K";
+				Logger::info() << "Fetching revisions... " << progress << "%" << flush;
+			}
+		}
 		delete revision;
 	}
 
