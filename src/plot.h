@@ -29,6 +29,8 @@ class Plot
 		int cmd(lua_State *L);
 		int set_output(lua_State *L);
 		int set_title(lua_State *L);
+		int set_xrange(lua_State *L);
+		int set_xrange_time(lua_State *L);
 
 		int plot_series(lua_State *L);
 		int plot_histogram(lua_State *L);

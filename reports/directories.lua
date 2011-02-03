@@ -172,12 +172,6 @@ function main()
 		add_tagmarks(p)
 	end
 
-	-- Determine time range: 5% spacing at start and end, rounded to 1000 seconds
-	-- This is imporant for aligning the xaxis and x2axis (when using tags)
-	local range = keys[#keys] - keys[1]
-	local tstart = convepoch(1000 * math.floor((keys[1] - 0.05 * range) / 1000))
-	local tend = convepoch(1000 * math.ceil((keys[#keys] + 0.05 * range) / 1000))
-
 	p:cmd([[
 set xdata time
 set timefmt "%s"
@@ -190,8 +184,8 @@ set grid ytics
 set grid x2tics
 set rmargin 8
 set key box
-set key below]])
-	p:cmd("set xrange [" .. tstart .. ":" .. tend .. "]")
-	p:cmd("set x2range [" .. tstart .. ":" .. tend .. "]")
+set key below
+]])
+	p:set_xrange_time(keys[1], keys[#keys])
 	p:plot_series(keys, series, directories)
 end

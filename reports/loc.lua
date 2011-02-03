@@ -110,12 +110,6 @@ function main()
 		add_tagmarks(p)
 	end
 
-	-- Determine time range: 5% spacing at start and end, rounded to 1000 seconds
-	-- This is imporant for aligning the xaxis and x2axis (when using tags)
-	local range = dates[#dates] - dates[1]
-	local tstart = convepoch(1000 * math.floor((dates[1] - 0.05 * range) / 1000))
-	local tend = convepoch(1000 * math.ceil((dates[#dates] + 0.05 * range) / 1000))
-
 	-- Generate graphs
 	p:cmd([[
 set xdata time
@@ -129,7 +123,6 @@ set rmargin 8
 set grid ytics
 set grid x2tics
 ]])
-	p:cmd("set xrange [" .. tstart .. ":" .. tend .. "]")
-	p:cmd("set x2range [" .. tstart .. ":" .. tend .. "]")
+	p:set_xrange_time(dates[1], dates[#dates])
 	p:plot_series(dates, loc)
 end

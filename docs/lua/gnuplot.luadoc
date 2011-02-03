@@ -19,6 +19,16 @@ function set_output(filename, width, height, terminal)
 -- @param title The plot title
 function set_title(title)
 
+--- Sets the X and X2 axis range
+-- @param min Minimum X value
+-- @param max Maximum X value
+function set_xrange(min, max)
+
+--- Sets the X and X2 axis range
+-- @param min Minimum X timestamp
+-- @param max Maximum X timestamp
+function set_xrange_time(min, max)
+
 --- Plots one or more data series.
 -- The <code>values</code> parameter may contain multiple Y values per
 -- entry, i.e. it can be a two-dimensional array.

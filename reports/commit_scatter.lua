@@ -66,6 +66,7 @@ set xtics nomirror
 set xtics rotate by -45
 set rmargin 8
 set grid
-set pointsize 0.1]])
+set pointsize 0.1
+]])
 	p:plot_series(dates, daytimes, {}, "dots")
 end

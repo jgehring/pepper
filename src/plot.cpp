@@ -13,6 +13,8 @@
 
 #include "main.h"
 
+#include <cmath>
+
 #include "logger.h"
 #include "luahelpers.h"
 #include "utils.h"
@@ -24,12 +26,21 @@
 #include "plot.h"
 
 
+// Converts from UNIX to Gnuplot epoch
+static inline int64_t convepoch(int64_t t)
+{
+	return t - 946684800;
+}
+
+
 // Static variables for the lua bindings
 const char Plot::className[] = "gnuplot";
 Lunar<Plot>::RegType Plot::methods[] = {
 	LUNAR_DECLARE_METHOD(Plot, cmd),
 	LUNAR_DECLARE_METHOD(Plot, set_output),
 	LUNAR_DECLARE_METHOD(Plot, set_title),
+	LUNAR_DECLARE_METHOD(Plot, set_xrange),
+	LUNAR_DECLARE_METHOD(Plot, set_xrange_time),
 	LUNAR_DECLARE_METHOD(Plot, plot_series),
 	LUNAR_DECLARE_METHOD(Plot, plot_histogram),
 	LUNAR_DECLARE_METHOD(Plot, flush),
@@ -121,6 +132,38 @@ int Plot::set_output(lua_State *L)
 int Plot::set_title(lua_State *L)
 {
 	g->set_title(LuaHelpers::pops(L));
+	return 0;
+}
+
+// Sets the xaxis and x2axis range
+int Plot::set_xrange(lua_State *L)
+{
+	double end = LuaHelpers::popd(L);
+	double start = LuaHelpers::popd(L);
+	double d = end - start;
+
+	double range[2];
+	range[0] = 1000 * floor(double(start) - 0.05 * d) / 1000;
+	range[1] = 1000 * ceil(double(end) + 0.05 * d) / 1000;
+
+	g->cmd(utils::strprintf("set xrange [%f:%f]", range[0], range[1]));
+	g->cmd(utils::strprintf("set x2range [%f:%f]", range[0], range[1]));
+	return 0;
+}
+
+// Sets the xaxis and x2axis range
+int Plot::set_xrange_time(lua_State *L)
+{
+	int64_t end = LuaHelpers::popi(L);
+	int64_t start = LuaHelpers::popi(L);
+	int64_t d = end - start;
+
+	int64_t range[2];
+	range[0] = convepoch(1000 * floor(double(start) - 0.05 * d) / 1000);
+	range[1] = convepoch(1000 * ceil(double(end) + 0.05 * d) / 1000);
+
+	g->cmd(utils::strprintf("set xrange [%ld:%ld]", range[0], range[1]));
+	g->cmd(utils::strprintf("set x2range [%ld:%ld]", range[0], range[1]));
 	return 0;
 }
 
