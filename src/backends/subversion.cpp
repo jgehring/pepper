@@ -426,6 +426,7 @@ public:
 		FileBaton *b = FileBaton::make(path, db->edit_baton, pool);
 		*file_baton = b;
 
+		// TODO: No need to get the whole file if it is binary...
 		return get_file_from_ra(b, base_revision);
 	}
 
