@@ -288,20 +288,18 @@ public:
 
 	struct DirBaton
 	{
-		bool added;
 		const char *path, *wcpath;
 		DirBaton *dir_baton;
 
 		Baton *edit_baton;
 		apr_pool_t *pool;
 
-		static DirBaton *make(const char *path, DirBaton *parent_baton, Baton *edit_baton, bool added, apr_pool_t *pool)
+		static DirBaton *make(const char *path, DirBaton *parent_baton, Baton *edit_baton, apr_pool_t *pool)
 		{
 			DirBaton *dir_baton = (DirBaton *)apr_pcalloc(pool, sizeof(DirBaton));
 
 			dir_baton->dir_baton = parent_baton;
 			dir_baton->edit_baton = edit_baton;
-			dir_baton->added = added;
 			dir_baton->pool = pool;
 			dir_baton->path = apr_pstrdup(pool, path);
 			dir_baton->wcpath = svn_path_join(edit_baton->target, path, pool);
@@ -311,7 +309,6 @@ public:
 
 	struct FileBaton
 	{
-		bool added;
 		const char *path, *wcpath;
 		const char *path_start_revision;
 		apr_file_t *file_start_revision;
@@ -325,13 +322,12 @@ public:
 		Baton *edit_baton;
 		apr_pool_t *pool;
 
-		static FileBaton *make(const char *path, bool added, void *edit_baton, apr_pool_t *pool)
+		static FileBaton *make(const char *path, void *edit_baton, apr_pool_t *pool)
 		{
 			FileBaton *file_baton = (FileBaton *)apr_pcalloc(pool, sizeof(FileBaton));
 			Baton *eb = static_cast<Baton *>(edit_baton);
 
 			file_baton->edit_baton = eb;
-			file_baton->added = added;
 			file_baton->pool = pool;
 			file_baton->path = apr_pstrdup(pool, path);
 			file_baton->wcpath = svn_path_join(eb->target, path, pool);
@@ -365,7 +361,7 @@ public:
 		PTRACE << endl;
 
 		Baton *eb = static_cast<Baton *>(edit_baton);
-		DirBaton *b = DirBaton::make("", NULL, eb, false, pool);
+		DirBaton *b = DirBaton::make("", NULL, eb, pool);
 
 		b->wcpath = apr_pstrdup(pool, eb->target);
 
@@ -384,7 +380,7 @@ public:
 		DirBaton *pb = static_cast<DirBaton *>(parent_baton);
 		Baton *eb = pb->edit_baton;
 
-		DirBaton *b = DirBaton::make(path, pb, pb->edit_baton, true, pool);
+		DirBaton *b = DirBaton::make(path, pb, pb->edit_baton, pool);
 		*child_baton = b;
 
 		return SVN_NO_ERROR;
@@ -396,7 +392,7 @@ public:
 		DirBaton *pb = static_cast<DirBaton *>(parent_baton);
 		Baton *eb = pb->edit_baton;
 
-		DirBaton *b = DirBaton::make(path, pb, pb->edit_baton, false, pool);
+		DirBaton *b = DirBaton::make(path, pb, pb->edit_baton, pool);
 		*child_baton = b;
 
 		return SVN_NO_ERROR;
@@ -406,7 +402,7 @@ public:
 	{
 		PTRACE << path << endl;
 		DirBaton *db = static_cast<DirBaton *>(parent_baton);
-		FileBaton *b = FileBaton::make(path, true, db->edit_baton, pool);
+		FileBaton *b = FileBaton::make(path, db->edit_baton, pool);
 		*file_baton = b;
 
 		b->pristine_props = apr_hash_make(pool);
@@ -427,7 +423,7 @@ public:
 	{
 		PTRACE << path << ", base = " << base_revision << endl;
 		DirBaton *db = static_cast<DirBaton *>(parent_baton);
-		FileBaton *b = FileBaton::make(path, false, db->edit_baton, pool);
+		FileBaton *b = FileBaton::make(path, db->edit_baton, pool);
 		*file_baton = b;
 
 		return get_file_from_ra(b, base_revision);
@@ -523,8 +519,12 @@ public:
 		return SVN_NO_ERROR;
 	}
 
-	static svn_error_t *change_file_prop(void *, const char *, const svn_string_t *, apr_pool_t *)
+	static svn_error_t *change_file_prop(void *file_baton, const char *name, const svn_string_t *value, apr_pool_t *pool)
 	{
+		FileBaton *b = static_cast<FileBaton *>(file_baton);
+		svn_prop_t *propchange = (svn_prop_t *)apr_array_push(b->propchanges);
+		propchange->name = apr_pstrdup(b->pool, name);
+		propchange->value = value ? svn_string_dup(value, b->pool) : NULL;
 		return SVN_NO_ERROR;
 	}
 
@@ -605,12 +605,9 @@ public:
 		editor->absent_directory = absent_directory;
 		editor->absent_file = absent_file;
 
-		svn_error_t *err;
-#if 1
 		const svn_ra_reporter3_t *reporter;
 		void *report_baton;
-		err = svn_ra_do_diff3(c->ra, &reporter, &report_baton, rev2.value.number, "", svn_depth_infinity, TRUE, TRUE, c->url, editor, baton, pool);
-//		svn_error_t *err = svn_client_diff4(apr_array_make(pool, 0, 1), c->root, &rev1, c->root, &rev2, NULL, svn_depth_infinity, FALSE, FALSE, FALSE, APR_LOCALE_CHARSET, outfile, errfile, NULL, c->ctx, pool);
+		svn_error_t *err = svn_ra_do_diff3(c->ra, &reporter, &report_baton, rev2.value.number, "", svn_depth_infinity, TRUE, TRUE, c->url, editor, baton, pool);
 		if (err != NULL) {
 			apr_file_close(outfile);
 			apr_file_close(infile);
@@ -630,14 +627,7 @@ public:
 			apr_file_close(infile);
 			throw PEX(utils::strprintf("Diffstat fetching of revision %ld failed: %s", revision, SvnConnection::strerr(err).c_str()));
 		}
-#else
-		err = svn_ra_replay(c->ra, revision, revision - 1, TRUE, editor, baton, pool);
-		if (err != NULL) {
-			apr_file_close(outfile);
-			apr_file_close(infile);
-			throw PEX(utils::strprintf("Diffstat fetching of revision %ld failed: %s", revision, SvnConnection::strerr(err).c_str()));
-		}
-#endif
+
 		apr_file_close(outfile);
 		parser.wait();
 		apr_file_close(infile);
