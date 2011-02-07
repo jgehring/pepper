@@ -588,6 +588,7 @@ public:
 		rev1.kind = rev2.kind = svn_opt_revision_number;
 		rev2.value.number = revision;
 		rev1.value.number = rev2.value.number - 1;
+		svn_error_t *err;
 
 		apr_file_t *infile = NULL, *outfile = NULL, *errfile = NULL;
 		apr_file_open_stderr(&errfile, pool);
@@ -608,12 +609,19 @@ public:
 		Baton *baton = (Baton *)apr_palloc(subpool, sizeof(Baton));
 
 		baton->target = "";
-		baton->ra = c->ra;
 		baton->revision = revision;
 		baton->empty_file = NULL;
 		baton->deleted_paths = apr_hash_make(subpool);
 		baton->out = outfile;
 		baton->pool = subpool;
+
+		// Open RA session for extra calls during diff
+		err = svn_client_open_ra_session(&baton->ra, c->url, c->ctx, pool);
+		if (err != NULL) {
+			apr_file_close(outfile);
+			apr_file_close(infile);
+			throw PEX(utils::strprintf("Diffstat fetching of revision %ld failed: %s", revision, SvnConnection::strerr(err).c_str()));
+		}
 
 		editor->set_target_revision = set_target_revision;
 		editor->open_root = open_root;
@@ -633,7 +641,7 @@ public:
 
 		const svn_ra_reporter3_t *reporter;
 		void *report_baton;
-		svn_error_t *err = svn_ra_do_diff3(c->ra, &reporter, &report_baton, rev2.value.number, "", svn_depth_infinity, TRUE, TRUE, c->url, editor, baton, pool);
+		err = svn_ra_do_diff3(c->ra, &reporter, &report_baton, rev2.value.number, "", svn_depth_infinity, TRUE, TRUE, c->url, editor, baton, pool);
 		if (err != NULL) {
 			apr_file_close(outfile);
 			apr_file_close(infile);
