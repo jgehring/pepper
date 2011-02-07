@@ -23,3 +23,15 @@ function branches()
 --- Returns a list of all files in the repository
 -- @param id Optional revision ID, defaults to current (i.e., the HEAD revision)
 function tree(id)
+
+--- Fetches a specific revision
+-- @param id The revision ID
+-- @return The revision object
+-- @see pepper.revision
+function revision(id)
+
+--- Calls <code>callback</code> for every revision in the given
+--  <code>branch</code>.
+--  @param callback The callback function
+--  @param branch The name of the branch
+function walk_branch(callback, branch)

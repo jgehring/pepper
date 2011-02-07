@@ -3,24 +3,21 @@
 module "pepper.report"
 
 
---- Returns a command line option for the report script
+--- Returns a command line option for the report script.
 -- @param option The command line flags, seperated with commas
 -- @param default An optional default option value
 function getopt(option, default)
 
---- Returns the current repository
+--- Returns the current repository.
 -- @return A repository instance
 -- @see pepper.repository
 function repository()
 
---- Fetches a specific revision
--- @param id The revision ID
--- @return The revision object
--- @see pepper.revision
+--- Fetches a specific revision.
+-- @deprecated Plese use pepper.repository:revision()
 function revision(id)
 
 --- Calls <code>callback</code> for every revision in the given
 --  <code>branch</code>.
---  @param callback The callback function
---  @param branch The name of the branch
+--  @deprecated Please use pepper.repository:walk_branch()
 function walk_branch(callback, branch)
