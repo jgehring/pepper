@@ -26,8 +26,9 @@ function main()
 	messages = {}
 
 	-- Gather data
-	branch = pepper.report.getopt("b,branch", pepper.report.repository():main_branch())
-	pepper.report.walk_branch(callback, branch)
+	local repo = pepper.report.repository()
+	local branch = pepper.report.getopt("b,branch", repo:main_branch())
+	repo:walk_branch(callback, branch)
 
 	-- Sort commit dictionary by name
 	local authors = {}

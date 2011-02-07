@@ -59,7 +59,7 @@ function add_tagmarks(plot)
 		x2tics = "("
 		for k,v in ipairs(tags) do
 			if v:name():find(regex) ~= nil then
-				x2tics = x2tics .. "\"" .. v:name() .. "\" " .. convepoch(pepper.report.revision(v:id()):date()) .. ","
+				x2tics = x2tics .. "\"" .. v:name() .. "\" " .. convepoch(repo:revision(v:id()):date()) .. ","
 			end
 		end
 		if #x2tics == 1 then
@@ -81,8 +81,9 @@ function main()
 	authors = {}   -- Total LOC by author
 
 	-- Gather data
-	local branch = pepper.report.getopt("b,branch", pepper.report.repository():main_branch())
-	pepper.report.walk_branch(callback, branch)
+	local repo = pepper.report.repository()
+	local branch = pepper.report.getopt("b,branch", repo:main_branch())
+	repo:walk_branch(callback, branch)
 
 	-- Determine the 6 "busiest" authors (by LOC)
 	local authorloc = {}

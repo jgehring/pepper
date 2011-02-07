@@ -26,8 +26,9 @@ function main()
 	daytimes = {}  -- Time in hours and hour fractions
 
 	-- Gather data
-	local branch = pepper.report.getopt("b,branch", pepper.report.repository():main_branch())
-	pepper.report.walk_branch(callback, branch)
+	local repo = pepper.report.repository()
+	local branch = pepper.report.getopt("b,branch", repo:main_branch())
+	repo:walk_branch(callback, branch)
 
 	-- Generate graph
 	local p = pepper.gnuplot:new()

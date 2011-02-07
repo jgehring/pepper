@@ -57,7 +57,7 @@ function add_tagmarks(plot)
 		x2tics = "("
 		for k,v in ipairs(tags) do
 			if v:name():find(regex) ~= nil then
-				x2tics = x2tics .. "\"" .. v:name() .. "\" " .. convepoch(pepper.report.revision(v:id()):date()) .. ","
+				x2tics = x2tics .. "\"" .. v:name() .. "\" " .. convepoch(repo:revision(v:id()):date()) .. ","
 			end
 		end
 		if #x2tics == 1 then
@@ -89,8 +89,9 @@ function main()
 	directories = {} -- Total LOC by directory
 
 	-- Gather data
-	local branch = pepper.report.getopt("b, branch", pepper.report.repository():main_branch())
-	pepper.report.walk_branch(count, branch)
+	local repo = pepper.report.repository()
+	local branch = pepper.report.getopt("b, branch", repo:main_branch())
+	repo:walk_branch(count, branch)
 
 	-- Determine the largest directories (by current LOC)
 	local dirloc = {}
@@ -142,7 +143,9 @@ function main()
 		end
 	end
 
-	local p = setup_plot(branch)
+	local p = pepper.gnuplot:new()
+	p:setup(600, 480)
+	p:set_title("Directory Sizes (on " .. branch .. ")")
 
 	if pepper.report.getopt("tags") ~= nil then
 		add_tagmarks(p)

@@ -32,9 +32,10 @@ function main()
 	changes = {}
 
 	-- Gather data
-	local branch = pepper.report.getopt("b,branch", pepper.report.repository():main_branch())
+	local repo = pepper.report.repository()
+	local branch = pepper.report.getopt("b,branch", repo:main_branch())
 	-- TODO: Restrict to last twelve months
-	pepper.report.walk_branch(callback, branch)
+	repo:walk_branch(callback, branch)
 
 	-- Generate a data file
 	local names = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"}

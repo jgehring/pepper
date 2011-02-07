@@ -59,7 +59,7 @@ function main()
 	local id = pepper.report.getopt("r,revision")
 	assert(id ~= nil, "Please specify a revision ID")
 
-	local stat = pepper.report.revision(id):diffstat()
+	local stat = pepper.report.repository():revision(id):diffstat()
 
 	-- Determine maximum filename length and amount of change
 	local width = 80
