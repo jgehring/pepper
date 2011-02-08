@@ -82,7 +82,7 @@ function main()
 
 	-- Gather data
 	local repo = pepper.report.repository()
-	local branch = pepper.report.getopt("b,branch", repo:main_branch())
+	local branch = pepper.report.getopt("b,branch", repo:default_branch())
 	repo:walk_branch(callback, branch)
 
 	-- Determine the 6 "busiest" authors (by LOC)

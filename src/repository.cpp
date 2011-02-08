@@ -52,12 +52,14 @@ Lunar<Repository>::RegType Repository::methods[] = {
 	LUNAR_DECLARE_METHOD(Repository, url),
 	LUNAR_DECLARE_METHOD(Repository, type),
 	LUNAR_DECLARE_METHOD(Repository, head),
-	LUNAR_DECLARE_METHOD(Repository, main_branch),
 	LUNAR_DECLARE_METHOD(Repository, branches),
+	LUNAR_DECLARE_METHOD(Repository, default_branch),
 	LUNAR_DECLARE_METHOD(Repository, tags),
 	LUNAR_DECLARE_METHOD(Repository, tree),
 	LUNAR_DECLARE_METHOD(Repository, revision),
 	LUNAR_DECLARE_METHOD(Repository, walk_branch),
+
+	LUNAR_DECLARE_METHOD(Repository, main_branch),
 	{0,0}
 };
 
@@ -88,7 +90,7 @@ int Repository::head(lua_State *L) {
 	return LuaHelpers::push(L, h);
 }
 
-int Repository::main_branch(lua_State *L) {
+int Repository::default_branch(lua_State *L) {
 	if (m_backend == NULL) return LuaHelpers::pushNil(L);
 	return LuaHelpers::push(L, m_backend->mainBranch());
 }
@@ -217,4 +219,8 @@ int Repository::walk_branch(lua_State *L) {
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
 	}
 	return 0;
+}
+
+int Repository::main_branch(lua_State *L) {
+	return default_branch(L);
 }

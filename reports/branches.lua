@@ -10,7 +10,7 @@ meta.title = "Branches"
 function main()
 	local repo = pepper.report.repository()
 	local branches = repo:branches()
-	local main = repo:main_branch()
+	local main = repo:default_branch()
 	local maxlen = 0
 	for i,v in ipairs(branches) do
 		if #v > maxlen then
