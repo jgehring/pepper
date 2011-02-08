@@ -1,20 +1,28 @@
---- This object represents a single revision
+--- This object represents a single revision.
 
 module "pepper.revision"
 
 
---- Returns the id of the revision
+--- Returns the id of the revision.
+--  For Git and Mercurial repositories, this is the commit hash. For Subversion,
+--  this is the revision number (as a string).
 function id()
 
---- Returns the author of the revision
+--- Returns the id of the parent revision, if any.
+--  When examining a revision range, the repository history will need be linarized
+--  for repositories like Git and Mercurial. Thus, a revision might have an explicit
+--  parent revision that is being used when retrieving the diffstat.
+function parent_id()
+
+--- Returns the author of the revision.
 function author()
 
---- Returns the data of the revision
+--- Returns the data of the revision.
 function data()
 
---- Returns the commit message of the revision
+--- Returns the commit message of the revision.
 function message()
 
---- Returns the diffstat of the revision
--- @see pepper.diffstat
+--- Returns the diffstat of the revision.
+--  @see pepper.diffstat
 function diffstat()

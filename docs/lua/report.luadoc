@@ -1,23 +1,27 @@
---- The report interface
+--- Stand-alone functions for report scripts.
+--  This module provides functions for retrieving the current repository
+--  as well as command-line option handling.
 
 module "pepper.report"
 
 
 --- Returns a command line option for the report script.
--- @param option The command line flags, seperated with commas
--- @param default An optional default option value
+--  @param option The command line flags, seperated with commas
+--  @param default An optional default option value
 function getopt(option, default)
 
 --- Returns the current repository.
--- @return A repository instance
--- @see pepper.repository
+--  @return A repository instance
+--  @see pepper.repository
 function repository()
 
 --- Fetches a specific revision.
--- @deprecated Plese use pepper.repository:revision()
+--  @deprecated Plese use pepper.repository:revision()
+--  @see pepper.repository
 function revision(id)
 
 --- Calls <code>callback</code> for every revision in the given
 --  <code>branch</code>.
 --  @deprecated Please use pepper.repository:walk_branch()
+--  @see pepper.repository
 function walk_branch(callback, branch)

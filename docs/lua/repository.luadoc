@@ -1,33 +1,40 @@
---- Repository interface
+--- Repository interface.
+--  This class can used to examine a repository and gather statistics.
 
 module "pepper.repository"
 
 
---- Returns the repository URL
+--- Returns the repository URL.
 function url()
 
---- Returns the repository type, i.e. the name of the current backend
+--- Returns the repository type.
+--  This is actually the name of the current backend, e.g. "git",
+--  "subversion" or "mercurial".
 function type()
 
---- Determines and returns the current HEAD revision
--- @param branch An optional branch name
+--- Determines and returns the current HEAD revision.
+--  @param branch An optional branch name
 function head(branch)
 
---- Returns the main branch of the repository
--- For working copies, this is the branch that is curently checked out
-function main_branch()
+--- Returns the standard branch of the repository.
+--  For working copies, this is the branch that is curently checked out.
+function default_branch()
 
---- Determines and returns a table listing all branches
+--- Determines and returns a table listing all branches.
 function branches()
 
---- Returns a list of all files in the repository
--- @param id Optional revision ID, defaults to current (i.e., the HEAD revision)
+--- Determines and returns a table listing all tags as tag objects.
+--  @see pepper.tag
+function tags()
+
+--- Returns a list of all files in the repository.
+--  @param id Optional revision ID, defaults to current (i.e., the HEAD revision)
 function tree(id)
 
---- Fetches a specific revision
--- @param id The revision ID
--- @return The revision object
--- @see pepper.revision
+--- Fetches a specific revision.
+--  @param id The revision ID
+--  @return The revision object
+--  @see pepper.revision
 function revision(id)
 
 --- Calls <code>callback</code> for every revision in the given

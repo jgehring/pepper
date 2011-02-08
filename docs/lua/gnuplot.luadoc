@@ -1,58 +1,59 @@
---- Gnuplot interface
+--- Gnuplot interface.
+--  This class can be used to generate graphical reports
 
 module "pepper.gnuplot"
 
 
 --- Sends a command to Gnuplot
--- @param str The command string
+--  @param str The command string
 function cmd(str)
 
 --- Performs a common plot setup.
--- This function uses the report options to set up the plot size, type
--- and output filename.
--- @param width Optional image width (defaults to 640)
--- @param height Optional image height (defaults to 480)
+--  This function uses the report options to set up the plot size, type
+--  and output filename.
+--  @param width Optional image width (defaults to 640)
+--  @param height Optional image height (defaults to 480)
 function setup(width, height)
 
 --- Sets the output file for plotting
--- @param filename Output filename
--- @param width Optional image width (defaults to 640)
--- @param height Optional image height (defaults to 480)
--- @param terminal Optional explicit terminal type. This is normally
--- inferred from the filename.
+--  @param filename Output filename
+--  @param width Optional image width (defaults to 640)
+--  @param height Optional image height (defaults to 480)
+--  @param terminal Optional explicit terminal type. This is normally
+--  inferred from the filename.
 function set_output(filename, width, height, terminal)
 
 --- Sets the plot title
--- @param title The plot title
+--  @param title The plot title
 function set_title(title)
 
 --- Sets the X and X2 axis range
--- @param min Minimum X value
--- @param max Maximum X value
+--  @param min Minimum X value
+--  @param max Maximum X value
 function set_xrange(min, max)
 
 --- Sets the X and X2 axis range
--- @param min Minimum X timestamp
--- @param max Maximum X timestamp
+--  @param min Minimum X timestamp
+--  @param max Maximum X timestamp
 function set_xrange_time(min, max)
 
 --- Plots one or more data series.
--- The <code>values</code> parameter may contain multiple Y values per
--- entry, i.e. it can be a two-dimensional array.
--- @param keys The array of X values
--- @param values The array of Y values
--- @param titles Optional titles for the series
--- @param style Optional style for plotting (defaults to "lines")
+--  The <code>values</code> parameter may contain multiple Y values per
+--  entry, i.e. it can be a two-dimensional array.
+--  @param keys The array of X values
+--  @param values The array of Y values
+--  @param titles Optional titles for the series
+--  @param style Optional style for plotting (defaults to "lines")
 function plot_series(keys, values, titles, style)
 
 --- Plots a histogram bar chart from data sequences.
--- The <code>values</code> parameter may contain multiple Y values per
--- entry, i.e. it can be a two-dimensional array.
--- @param keys The array of X values, used as the X-axis keys
--- @param values The array of Y values
--- @param titles Optional titles for the series
--- @param style Optional style for plotting (defaults to none)
+--  The <code>values</code> parameter may contain multiple Y values per
+--  entry, i.e. it can be a two-dimensional array.
+--  @param keys The array of X values, used as the X-axis keys
+--  @param values The array of Y values
+--  @param titles Optional titles for the series
+--  @param style Optional style for plotting (defaults to none)
 function plot_histogram(keys, values, titles, style)
 
---- Finish plotting and restart the Gnuplot process
+--- Finish plotting and restart the Gnuplot process.
 function flush()
