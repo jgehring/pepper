@@ -72,6 +72,7 @@ bool Revision::load(BIStream &in)
 const char Revision::className[] = "revision";
 Lunar<Revision>::RegType Revision::methods[] = {
 	LUNAR_DECLARE_METHOD(Revision, id),
+	LUNAR_DECLARE_METHOD(Revision, parent_id),
 	LUNAR_DECLARE_METHOD(Revision, date),
 	LUNAR_DECLARE_METHOD(Revision, author),
 	LUNAR_DECLARE_METHOD(Revision, message),
@@ -83,7 +84,15 @@ Revision::Revision(lua_State *) {
 }
 
 int Revision::id(lua_State *L) {
-	return LuaHelpers::push(L, m_id);
+	return LuaHelpers::push(L, utils::split(m_id, ":").back());
+}
+
+int Revision::parent_id(lua_State *L) {
+	std::vector<std::string> ids = utils::split(m_id, ":");
+	if (ids.size() > 1) {
+		return LuaHelpers::push(L, ids.front());
+	}
+	return LuaHelpers::pushNil(L);
 }
 
 int Revision::date(lua_State *L) {

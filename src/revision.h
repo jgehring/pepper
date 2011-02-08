@@ -52,6 +52,7 @@ class Revision
 		Revision(lua_State *L);
 
 		int id(lua_State *L);
+		int parent_id(lua_State *L);
 		int date(lua_State *L);
 		int author(lua_State *L);
 		int message(lua_State *L);
