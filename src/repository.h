@@ -18,6 +18,7 @@
 #include "lunar/lunar.h"
 
 class Backend;
+class RevisionIterator;
 
 
 class Repository

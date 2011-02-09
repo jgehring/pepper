@@ -24,7 +24,7 @@
 class RevisionIterator
 {
 	public:
-		RevisionIterator(const std::string &branch, Backend *backend);
+		RevisionIterator(Backend *backend, const std::string &branch = std::string(), int64_t start = -1, int64_t end = -1);
 		~RevisionIterator();
 
 		bool atEnd();

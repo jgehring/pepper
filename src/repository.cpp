@@ -63,19 +63,23 @@ Lunar<Repository>::RegType Repository::methods[] = {
 	{0,0}
 };
 
-Repository::Repository(lua_State *) {
+Repository::Repository(lua_State *)
+{
 	m_backend = NULL;
 }
 
-int Repository::url(lua_State *L) {
+int Repository::url(lua_State *L)
+{
 	return (m_backend ? LuaHelpers::push(L, m_backend->options().repository()) : LuaHelpers::pushNil(L));
 }
 
-int Repository::type(lua_State *L) {
+int Repository::type(lua_State *L)
+{
 	return (m_backend ? LuaHelpers::push(L, m_backend->name()) : LuaHelpers::pushNil(L));
 }
 
-int Repository::head(lua_State *L) {
+int Repository::head(lua_State *L)
+{
 	if (m_backend == NULL) return LuaHelpers::pushNil(L);
 	std::string branch;
 	if (lua_gettop(L) > 0) {
@@ -90,12 +94,14 @@ int Repository::head(lua_State *L) {
 	return LuaHelpers::push(L, h);
 }
 
-int Repository::default_branch(lua_State *L) {
+int Repository::default_branch(lua_State *L)
+{
 	if (m_backend == NULL) return LuaHelpers::pushNil(L);
 	return LuaHelpers::push(L, m_backend->mainBranch());
 }
 
-int Repository::branches(lua_State *L) {
+int Repository::branches(lua_State *L)
+{
 	if (m_backend == NULL) return LuaHelpers::pushNil(L);
 	std::vector<std::string> b;
 	try {
@@ -106,7 +112,8 @@ int Repository::branches(lua_State *L) {
 	return LuaHelpers::push(L, b);
 }
 
-int Repository::tags(lua_State *L) {
+int Repository::tags(lua_State *L)
+{
 	if (m_backend == NULL) return LuaHelpers::pushNil(L);
 	std::vector<Tag> t;
 	try {
@@ -124,7 +131,8 @@ int Repository::tags(lua_State *L) {
 	return 1;
 }
 
-int Repository::tree(lua_State *L) {
+int Repository::tree(lua_State *L)
+{
 	if (m_backend == NULL) return LuaHelpers::pushNil(L);
 
 	std::string id = LuaHelpers::pops(L);
@@ -137,7 +145,8 @@ int Repository::tree(lua_State *L) {
 	return LuaHelpers::push(L, t);
 }
 
-int Repository::revision(lua_State *L) {
+int Repository::revision(lua_State *L)
+{
 	if (m_backend == NULL) return LuaHelpers::pushNil(L);
 
 	std::string id = LuaHelpers::pops(L);
@@ -150,15 +159,24 @@ int Repository::revision(lua_State *L) {
 	return LuaHelpers::push(L, rev); // TODO: Memory leak!
 }
 
-int Repository::walk_branch(lua_State *L) {
+int Repository::walk_branch(lua_State *L)
+{
 	if (m_backend == NULL) return LuaHelpers::pushNil(L);
 
-	if (lua_gettop(L) != 2) {
-		return luaL_error(L, "Invalid number of arguments (2 expected)");
+	if (lua_gettop(L) < 2 || lua_gettop(L) > 4) {
+		return luaL_error(L, "Invalid number of arguments (2 to 4 expected)");
 	}
 
-	luaL_checktype(L, -2, LUA_TFUNCTION);
-	std::string branch = LuaHelpers::pops(L);
+	std::string branch;
+	int64_t start = -1, end = -1;
+	switch (lua_gettop(L)) {
+		case 4: end = LuaHelpers::popi(L);
+		case 3: start = LuaHelpers::popi(L);
+		case 2: branch = LuaHelpers::pops(L);
+		default: break;
+	}
+
+	luaL_checktype(L, -1, LUA_TFUNCTION);
 	int callback = luaL_ref(L, LUA_REGISTRYINDEX);
 	lua_pop(L, 1);
 
@@ -166,7 +184,7 @@ int Repository::walk_branch(lua_State *L) {
 
 	RevisionIterator *it = NULL;
 	try {
-		it = new RevisionIterator(branch, m_backend);
+		it = new RevisionIterator(m_backend, branch, start, end);
 	} catch (const PepperException &ex) {
 		Logger::status() << "failed" << endl;
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
@@ -221,6 +239,7 @@ int Repository::walk_branch(lua_State *L) {
 	return 0;
 }
 
-int Repository::main_branch(lua_State *L) {
+int Repository::main_branch(lua_State *L)
+{
 	return default_branch(L);
 }

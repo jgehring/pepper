@@ -418,8 +418,9 @@ private:
 
 
 // Constructor
-SubversionBackend::SvnLogIterator::SvnLogIterator(SvnConnection *connection, const std::string &prefix, svn_revnum_t head)
-	: Backend::LogIterator(), d(new SvnConnection()), m_prefix(prefix), m_head(head), m_index(0), m_finished(false)
+SubversionBackend::SvnLogIterator::SvnLogIterator(SvnConnection *connection, const std::string &prefix, int64_t startrev, int64_t endrev)
+	: Backend::LogIterator(), d(new SvnConnection()), m_prefix(prefix), m_startrev(startrev), m_endrev(endrev),
+	  m_index(0), m_finished(false)
 {
 	d->open(connection);
 }
@@ -494,15 +495,15 @@ void SubversionBackend::SvnLogIterator::run()
 	baton.latest = -1;
 
 	// Determine revisions, but not at once
-	int64_t start = 0;
-	while (start < m_head-1) {
-		PDEBUG << "Fetching log from " << start << " to " << m_head << " with window size " << windowSize << endl;
-		svn_error_t *err = svn_ra_get_log2(d->ra, path, start, m_head, windowSize, FALSE, FALSE /* otherwise, copy history will be ignored */, FALSE, props, &logReceiver, &baton, subpool);
+	int64_t wstart = m_startrev;
+	while (wstart < m_endrev-1) {
+		PDEBUG << "Fetching log from " << wstart << " to " << m_endrev << " with window size " << windowSize << endl;
+		svn_error_t *err = svn_ra_get_log2(d->ra, path, wstart, m_endrev, windowSize, FALSE, FALSE /* otherwise, copy history will be ignored */, FALSE, props, &logReceiver, &baton, subpool);
 		if (err != NULL) {
 			throw PEX(SvnConnection::strerr(err));
 		}
 
-		start = baton.latest + 1;
+		wstart = baton.latest + 1;
 		svn_pool_clear(subpool);
 	}
 
@@ -796,7 +797,7 @@ std::vector<std::string> SubversionBackend::tree(const std::string &id)
 }
 
 // Returns a log iterator for the given branch
-Backend::LogIterator *SubversionBackend::iterator(const std::string &branch)
+Backend::LogIterator *SubversionBackend::iterator(const std::string &branch, int64_t start, int64_t end)
 {
 	std::string prefix;
 	if (branch == "trunk") {
@@ -823,11 +824,28 @@ Backend::LogIterator *SubversionBackend::iterator(const std::string &branch)
 			throw PEX(utils::strprintf("No such branch: %s", branch.c_str()));
 		}
 	}
-	svn_pool_destroy(pool);
 
-	long int headrev;
-	utils::str2int(head(branch), &headrev);
-	return new SvnLogIterator(d, prefix, headrev);
+	svn_revnum_t startrev = 0, endrev;
+	apr_time_t time;
+	if (start >= 0) {
+		apr_time_ansi_put(&time, start);
+		if ((err = svn_ra_get_dated_revision(d->ra, &startrev, time, pool)) != NULL) {
+			throw PEX(SvnConnection::strerr(err));
+		}
+	}
+	if (end >= 0) {
+		apr_time_ansi_put(&time, end);
+		if ((err = svn_ra_get_dated_revision(d->ra, &endrev, time, pool)) != NULL) {
+			throw PEX(SvnConnection::strerr(err));
+		}
+	} else {
+		utils::str2int(head(branch), &endrev);
+	}
+
+	PDEBUG << "Revision range: [ " << start << " : " << end << " -> [" << startrev << " : " << endrev << "]" << endl;
+
+	svn_pool_destroy(pool);
+	return new SvnLogIterator(d, prefix, startrev, endrev);
 }
 
 // Adds the given revision IDs to the diffstat scheduler

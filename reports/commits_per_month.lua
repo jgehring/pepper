@@ -12,10 +12,6 @@ meta.options = {{"-bARG, --branch=ARG", "Select branch"}}
 -- Revision callback function
 function callback(r)
 	local date = os.date("*t", r:date())
-	-- Ignore commits older than 1 year
-	if (now["year"] - date["year"] > 1) or (now["year"] - date["year"] == 1 and date["month"] <= now["month"]) then
-		return
-	end
 
 	if commits[date["month"]] == nil then
 		commits[date["month"]] = 0
@@ -27,15 +23,28 @@ end
 
 -- Main report function
 function main()
-	now = os.date("*t", os.time())
+	local nowt = os.time()
+	now = os.date("*t", nowt)
 	commits = {}
 	changes = {}
+
+	-- Determine start of data collection: Twelve months ago
+	local start = os.date("*t", nowt)
+	if start["month"] == 12 then
+		start["month"] = 1
+	else
+		start["year"] = start["year"] - 1
+		start["month"] = start["month"] + 1
+	end
+	start["day"] = 1
+	start["hour"] = 0
+	start["min"] = 0
+	start["sec"] = 0
 
 	-- Gather data
 	local repo = pepper.report.repository()
 	local branch = pepper.report.getopt("b,branch", repo:default_branch())
-	-- TODO: Restrict to last twelve months
-	repo:walk_branch(callback, branch)
+	repo:walk_branch(callback, branch, os.time(start))
 
 	-- Generate a data file
 	local names = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"}

@@ -166,10 +166,19 @@ std::vector<std::string> MercurialBackend::tree(const std::string &id)
 }
 
 // Returns a revision iterator for the given branch
-Backend::LogIterator *MercurialBackend::iterator(const std::string &branch)
+Backend::LogIterator *MercurialBackend::iterator(const std::string &branch, int64_t start, int64_t end)
 {
+	std::string date = "None";
+	if (start >= 0) {
+		if (end >= 0) {
+			date = utils::strprintf("\"%ld 0 to %ld 0\"", start, end);
+		} else {
+			date = utils::strprintf("\">%ld 0\"", start);
+		}
+	}
+
 	// Request log from HEAD to 0, so follow_first is effective
-	std::string out = hgcmd("log", utils::strprintf("date=None, user=None, follow_first=True, quiet=None, rev=[\"%s:0\"]", (head(branch)).c_str()));
+	std::string out = hgcmd("log", utils::strprintf("date=%s, user=None, follow_first=True, quiet=None, rev=[\"%s:0\"]", date.c_str(), (head(branch)).c_str()));
 	std::vector<std::string> revisions = utils::split(out, "\n");
 	if (!revisions.empty()) {
 		revisions.pop_back();

@@ -41,4 +41,6 @@ function revision(id)
 --  <code>branch</code>.
 --  @param callback The callback function
 --  @param branch The name of the branch
-function walk_branch(callback, branch)
+--  @param start Optional minimum timestamp for commits
+--  @param end Optional maximum timestamp for commits
+function walk_branch(callback, branch, start, end)

@@ -389,10 +389,21 @@ std::vector<std::string> GitBackend::tree(const std::string &id)
 }
 
 // Returns a revision iterator for the given branch
-Backend::LogIterator *GitBackend::iterator(const std::string &branch)
+Backend::LogIterator *GitBackend::iterator(const std::string &branch, int64_t start, int64_t end)
 {
 	int ret;
-	std::string out = sys::io::exec(&ret, m_git.c_str(), "rev-list", "--first-parent", "--reverse", branch.c_str(), "--");
+	std::string out;
+	if (start >= 0) {
+		std::string minage = utils::strprintf("--min-age=%ld", start);
+		if (end >= 0) {
+			std::string maxage = utils::strprintf("--max-age=%ld", end);
+			out = sys::io::exec(&ret, m_git.c_str(), "rev-list", "--first-parent", "--reverse", minage.c_str(), maxage.c_str(), branch.c_str(), "--");
+		} else {
+			out = sys::io::exec(&ret, m_git.c_str(), "rev-list", "--first-parent", "--reverse", minage.c_str(), branch.c_str(), "--");
+		}
+	} else {
+		out = sys::io::exec(&ret, m_git.c_str(), "rev-list", "--first-parent", "--reverse", branch.c_str(), "--");
+	}
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retrieve log for branch '%s' (%d)", branch.c_str(), ret));
 	}
@@ -402,7 +413,7 @@ Backend::LogIterator *GitBackend::iterator(const std::string &branch)
 	}
 
 	// Add parent revisions, so diffstat fetching will give correct results
-	for (int i = revisions.size()-1; i > 0; i--) {
+	for (ssize_t i = revisions.size()-1; i > 0; i--) {
 		revisions[i] = revisions[i-1] + ":" + revisions[i];
 	}
 

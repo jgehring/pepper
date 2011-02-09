@@ -31,10 +31,10 @@
 
 
 // Constructor
-RevisionIterator::RevisionIterator(const std::string &branch, Backend *backend)
+RevisionIterator::RevisionIterator(Backend *backend, const std::string &branch, int64_t start, int64_t end)
 	: m_backend(backend), m_index(0), m_atEnd(false)
 {
-	m_logIterator = backend->iterator(branch);
+	m_logIterator = backend->iterator(branch, start, end);
 	m_logIterator->start();
 }
 

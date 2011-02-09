@@ -27,7 +27,7 @@ class SubversionBackend : public Backend
 		class SvnLogIterator : public LogIterator
 		{
 			public:
-				SvnLogIterator(SvnConnection *connection, const std::string &prefix, long int head);
+				SvnLogIterator(SvnConnection *connection, const std::string &prefix, int64_t startrev, int64_t endrev);
 				~SvnLogIterator();
 
 				std::vector<std::string> nextIds();
@@ -38,7 +38,7 @@ class SubversionBackend : public Backend
 			private:
 				SvnConnection *d;
 				std::string m_prefix;
-				int64_t m_head;
+				int64_t m_startrev, m_endrev;
 				sys::parallel::Mutex m_mutex;
 				sys::parallel::WaitCondition m_cond;
 				std::vector<std::string>::size_type m_index;
@@ -62,7 +62,7 @@ class SubversionBackend : public Backend
 		Diffstat diffstat(const std::string &id);
 		std::vector<std::string> tree(const std::string &id = std::string());
 
-		LogIterator *iterator(const std::string &branch = std::string());
+		LogIterator *iterator(const std::string &branch = std::string(), int64_t start = -1, int64_t end = -1);
 		void prefetch(const std::vector<std::string> &ids);
 		Revision *revision(const std::string &id);
 		void finalize();
