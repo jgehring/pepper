@@ -49,10 +49,37 @@ ul {
 	display: none;
 }
 
+table.news {
+	padding-top: 0px;
+	margin-top: 0px;
+	border: none;
+}
+
+td.news {
+	vertical-align: top;
+	border-right: 1px solid black;
+	padding-right: 1em;
+}
+
+td.news h4 {
+	margin-top: 0px;
+}
+
+td.commits {
+	vertical-align: top;
+	padding-left: 1em;
+	border: 1px solid left;
+	width: 20%;
+}
+
+td.commits h4 {
+	margin-top: 0px;
+}
+
 div.inlinepage {
 	border: none;
 	padding: 0em;
-	padding-left: 2.5em;
+	padding-left: 1em;
 	margin-bottom: 1.12em;
 }
 
@@ -89,3 +116,58 @@ pre.hl {
 .hl.kwa { color: #AF5F00; }
 .hl.kwb, .hl.kwc, .hl.kwd { color: #000000}
 */
+
+/* libgithub style defitions */
+div #commits {
+	border: none;
+	padding: 0em;
+	padding-left: 1em;
+	margin-bottom: 1.12em;
+	font-size: 0.9em;
+}
+
+div.libgithub-badge-outline {
+	display: list-item;
+	padding-bottom: 10px;
+}
+
+div.libgithub-badge-username {
+	display: none;
+}
+
+img.libgithub-badge-gravatar {
+	display: none;
+}
+
+span.libgithub-badge-diffadded {
+	color: green;
+	background-color: transparent;
+}
+
+span.libgithub-badge-diffremoved {
+	color: red;
+	background-color: transparent;
+}
+
+span.libgithub-badge-diffmodified {
+	color: purple;
+	background-color: transparent;
+}
+
+div.libgithub-badge-filelist {
+	margin-top: 10px;
+}
+
+div.libgithub-badge-filelist ul {
+	list-style-type: square;
+	list-style-position: inside;
+	margin: 0px;
+}
+
+div.libgithub-badge-diffstat {
+	font-weight: normal;
+	font-size: 0.9em;
+}
+
+div.libgithub-badge-commitmessage {
+}

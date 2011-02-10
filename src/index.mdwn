@@ -30,7 +30,7 @@
 ---
 
 
-###<a name="about">About</a>
+### <a name="about">About</a>
 
 pepper is a flexible statistics generator for source code management
 software. It can be used to create graphical or textual reports of code
@@ -50,18 +50,49 @@ bug reports as well as report and code contributions [are
 welcome](https://sourceforge.net/tracker/?group_id=386093)!
 
 
-####Feature overview:
+#### Feature overview:
 
-* Custom report scripts can be written in [Lua](http://www.lua.org)
-* Support for multiple repository types. As of version 0.1,
-  [Git](http://ww.git-scm.com), [Subversion](http://subversion.apache.org)
+* Many [[built-in reports|Gallery]], including lines of code, author contribution and
+  other activity charts.
+* Custom report scripts can be written in [Lua](http://www.lua.org). A
+  simple but functional [Gnuplot](http://www.gnuplot.info) interface
+  is provided.
+* Support for multiple repository types. As of version 0.1.5,
+  [Git](http://ww.git-scm.com), [Subversion](http://subversion.apache.org).
   and [Mercurial](http://mercurial.selenic.com/) are supported
-* [Gnuplot](http://www.gnuplot.info) interface for report scripts
-* Fast local diffstat and meta-data cache using zlib compression
+* Fast repository access by using native libraries if possible (i.e.,
+  the SVN backend uses the Subversion C API, and the Python C API is used
+  by the Mercurial backend).
+* Fast local diffstat and meta-data cache using zlib compression.
 
 ---
 
 
-###<a name="news">News</a>
+### <a name="news">News</a>
 
-[[!inline pages="news/*" and !"*/Discussion" show=5 description="pepper news" rss="yes" feedfile="news" timeformat="%B %d, %Y, %H:%M %Z"]]
+<table class="news"><tr>
+	<td class="news">
+		<h4>Project news <a href="index/news.rss"><img src="feedicon.png"></a></h4>
+		[[!inline pages="news/*" and !"*/Discussion" show=5 description="pepper news" rss="yes" feedfile="news" timeformat="%B %d, %Y, %H:%M %Z"]]
+	</td>
+	<td class="commits">
+		<h4>Latest commits <a href="https://github.com/jgehring/pepper/commits/master.atom"><img src="feedicon.png"></a></h4>
+		<script type="text/javascript" src="js/jquery.js"></script>
+		<script type="text/javascript" src="js/strftime-min.js"></script>
+		<script type="text/javascript" src="js/libgithub.js"></script>
+		<script type="text/javascript">
+			$(window).load(function () {
+				var c = new libgithub.Badge('jgehring', 'pepper');
+				c.numCommitsIs(10);
+				c.targetIs('#commits');
+			});
+			document.write("<div id=\"commits\"></div>");
+		</script>
+		<noscript>
+			<p>In order to display the latest commits on
+			the master branch, please turn on JavaScript or go
+			to the <a href="http://github.com/jgehring/pepper/commits/master">commits
+			page</a> at github.com.</p>
+		</noscript>
+	</td>
+</tr></table>
