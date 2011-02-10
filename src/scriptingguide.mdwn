@@ -82,7 +82,7 @@ function main()
 	authors = {} -- Global dictionary of authors
 
 	local branch = repository:main_branch()
-	pepper.report.walk_branch(callback, branch)
+	repository:walk_branch(callback, branch)
 
 	-- Count the number of authors and the number of commits
 	local num_authors = 0
@@ -133,7 +133,7 @@ function main()
     commits = {0, 0, 0, 0, 0, 0, 0}
 
     local branch = repository:main_branch()
-    pepper.report.walk_branch(callback, branch)
+    repository:walk_branch(callback, branch)
 
     -- Setup the plot
     local plot = pepper.gnuplot:new()
