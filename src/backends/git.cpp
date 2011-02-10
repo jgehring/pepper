@@ -394,12 +394,12 @@ Backend::LogIterator *GitBackend::iterator(const std::string &branch, int64_t st
 	int ret;
 	std::string out;
 	if (start >= 0) {
-		std::string minage = utils::strprintf("--min-age=%ld", start);
+		std::string maxage = utils::strprintf("--max-age=%ld", start);
 		if (end >= 0) {
-			std::string maxage = utils::strprintf("--max-age=%ld", end);
-			out = sys::io::exec(&ret, m_git.c_str(), "rev-list", "--first-parent", "--reverse", minage.c_str(), maxage.c_str(), branch.c_str(), "--");
+			std::string minage = utils::strprintf("--min-age=%ld", end);
+			out = sys::io::exec(&ret, m_git.c_str(), "rev-list", "--first-parent", "--reverse", maxage.c_str(), minage.c_str(), branch.c_str(), "--");
 		} else {
-			out = sys::io::exec(&ret, m_git.c_str(), "rev-list", "--first-parent", "--reverse", minage.c_str(), branch.c_str(), "--");
+			out = sys::io::exec(&ret, m_git.c_str(), "rev-list", "--first-parent", "--reverse", maxage.c_str(), branch.c_str(), "--");
 		}
 	} else {
 		out = sys::io::exec(&ret, m_git.c_str(), "rev-list", "--first-parent", "--reverse", branch.c_str(), "--");
