@@ -47,12 +47,16 @@ AC_DEFUN([BACKENDS_CHECK], [
 				subversion="no"
 			else
 				OLD_LDFLAGS=$LDFLAGS
+				OLD_LIBS=$LIBS
 				LDFLAGS="-L$SVN_PREFIX/lib"
+				LIBS=""
 				AC_CHECK_LIB([svn_fs-1], [svn_fs_initialize], ,[AC_MSG_ERROR([Neccessary Subversion libraries are missing])]) 
 				AC_CHECK_LIB([svn_client-1], [svn_client_diff4], ,[AC_MSG_ERROR([Neccessary Subversion libraries are missing])]) 
 				AC_CHECK_LIB([svn_ra-1], [svn_ra_get_uuid2], ,[AC_MSG_ERROR([Neccessary Subversion libraries are missing])]) 
 				AC_CHECK_LIB([svn_subr-1], [svn_cmdline_setup_auth_baton], ,[AC_MSG_ERROR([Neccessary Subversion libraries are missing])]) 
 				LDFLAGS=$OLD_LDFLAGS
+				SVN_LDFLAGS=$LIBS
+				LIBS=$OLD_LIBS
 				AC_SUBST(SVN_CFLAGS)
 				AC_SUBST(SVN_LDFLAGS)
 				AC_SUBST(SVN_LIBS)
