@@ -14,10 +14,10 @@ dnl Run checks for the features
 AC_DEFUN([FEATURES_CHECK], [
 ])
 
-
 dnl Print a feature configuration report
 AC_DEFUN([FEATURES_REPORT], [
 	echo
-	echo "    Enabled features:"
-	if test "x$gnuplot" = "xyes"; then echo "      * gnuplot"; fi
+	echo "    Enabled(+) / disabled(-) features:"
+	if test "x$gnuplot" = "xyes"; then echo "      + Gnuplot"; fi
+	if test "x$gnuplot" = "xno"; then echo "      - Gnuplot"; fi
 ])
