@@ -32,7 +32,7 @@
 
 // Constructor
 RevisionIterator::RevisionIterator(Backend *backend, const std::string &branch, int64_t start, int64_t end)
-	: m_backend(backend), m_index(0), m_atEnd(false)
+	: m_backend(backend), m_total(0), m_consumed(0), m_atEnd(false)
 {
 	m_logIterator = backend->iterator(branch, start, end);
 	m_logIterator->start();
@@ -48,13 +48,13 @@ RevisionIterator::~RevisionIterator()
 // Returns whether the iterator is at its end
 bool RevisionIterator::atEnd()
 {
-	if (m_buffer.empty()) {
+	if (m_total == 0) {
 		// Iteration has just started, and we don't know whether there are
 		// any revisions at all
 		fetchLogs();
 	}
 
-	return m_atEnd;
+	return m_queue.empty();
 }
 
 // Returns the next revision
@@ -64,10 +64,17 @@ std::string RevisionIterator::next()
 	if (atEnd()) {
 		return std::string();
 	}
-	if (m_index >= m_buffer.size()-1) {
+	if (m_queue.size() <= 1) {
 		fetchLogs();
+		if (m_queue.empty()) {
+			return std::string();
+		}
 	}
-	return (m_index < m_buffer.size() ? m_buffer[m_index++] : std::string());
+
+	++m_consumed;
+	std::string id = m_queue.front();
+	m_queue.pop();
+	return id;
 }
 
 // Returns a progress estimate (percejjjge)
@@ -76,19 +83,18 @@ int RevisionIterator::progress() const
 	if (m_logIterator->running()) {
 		return 0;
 	}
-	return int((100.0f * m_index) / m_buffer.size());
+	return int((100.0f * m_consumed) / m_total);
 }
 
 // Fetches new logs
 void RevisionIterator::fetchLogs()
 {
 	std::vector<std::string> next = m_logIterator->nextIds();
-	if (next.empty()) {
-		m_atEnd = true;
-	} else {
+	if (!next.empty()) {
 		m_backend->prefetch(next);
 		for (unsigned int i = 0; i < next.size(); i++) {
-			m_buffer.push_back(next[i]);
+			m_queue.push(next[i]);
+			++m_total;
 		}
 	}
 }

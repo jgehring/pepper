@@ -16,7 +16,7 @@
 
 
 #include <string>
-#include <vector>
+#include <queue>
 
 #include "backend.h"
 
@@ -38,8 +38,8 @@ class RevisionIterator
 	protected:
 		Backend *m_backend;
 		Backend::LogIterator *m_logIterator;
-		std::vector<std::string> m_buffer;
-		std::vector<std::string>::size_type m_index;
+		std::queue<std::string> m_queue;
+		std::queue<std::string>::size_type m_total, m_consumed;
 		bool m_atEnd;
 };
 
