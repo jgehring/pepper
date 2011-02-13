@@ -24,3 +24,5 @@ LUADOCS = \
 	docs/lua/utils.luadoc
 luadoc: $(LUADOCS)
 	luadoc -d luadoc --nofiles $(LUADOCS)
+
+DISTCHECK_CONFIGURE_FLAGS = --enable-tests

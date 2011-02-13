@@ -7,16 +7,21 @@
 # terms and conditions, or see http://www.gnu.org/licenses/.
 #
 
-noinst_PROGRAMS = poptions
-poptions_SOURCES = \
+noinst_PROGRAMS = units
+units_SOURCES = \
 	main.cpp \
+	test_bstream.h \
+	test_options.h \
+	test_utils.h \
 	\
+	$(top_srcdir)/src/bstream.cpp \
 	$(top_srcdir)/src/logger.cpp \
 	$(top_srcdir)/src/options.cpp \
 	$(top_srcdir)/src/pex.cpp \
 	$(top_srcdir)/src/utils.cpp \
+	\
 	$(top_srcdir)/src/syslib/fs.cpp \
-	$(top_srcdir)/src/syslib/parallel.cpp
+	$(top_srcdir)/src/syslib/parallel.cpp 
 
 AM_CXXFLAGS = \
 	-Wall -W -pipe \
@@ -24,6 +29,7 @@ AM_CXXFLAGS = \
 AM_CPPFLAGS = \
 	-DPEPPER_UNIT_TESTS
 INCLUDES = \
+	-I$(top_srcdir)/tests/catch \
 	-I$(top_srcdir)/src \
 	-I$(top_srcdir)/src/3rdparty
 LIBS += \

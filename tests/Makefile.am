@@ -25,7 +25,7 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 		echo '  [@PACKAGE_URL@])'; \
 	} >'$(srcdir)/package.m4'
 
-SUBDIRS = diffstat options utils bstreams
+SUBDIRS = diffstat units
 
 EXTRA_DIST = \
 	testsuite.at \
@@ -35,8 +35,7 @@ EXTRA_DIST = \
 	\
 	test_diffstat.at \
 	test_diffstat.pl \
-	test_options.at \
-	test_utils.at \
+	test_units.at \
 	\
 	diffstat/data/git-add.pat \
 	diffstat/data/git-add.ref \
@@ -51,7 +50,41 @@ EXTRA_DIST = \
 	diffstat/data/svn-del.pat \
 	diffstat/data/svn-del.ref \
 	diffstat/data/svn-mod.pat \
-	diffstat/data/svn-mod.ref
+	diffstat/data/svn-mod.ref \
+	\
+	catch/catch.hpp \
+	catch/catch_reporter_basic.hpp \
+	catch/catch_reporter_junit.hpp \
+	catch/catch_reporter_xml.hpp \
+	catch/catch_runner.hpp \
+	catch/catch_with_main.hpp \
+	catch/LICENSE_1_0.txt \
+	catch/internal/catch_common.h \
+	catch/internal/catch_hub.h \
+	catch/internal/catch_interfaces_capture.h \
+	catch/internal/catch_interfaces_reporter.h \
+	catch/internal/catch_interfaces_runner.h \
+	catch/internal/catch_interfaces_testcase.h \
+	catch/internal/catch_result_type.h \
+	catch/internal/catch_capture.hpp \
+	catch/internal/catch_commandline.hpp \
+	catch/internal/catch_config.hpp \
+	catch/internal/catch_debugger.hpp \
+	catch/internal/catch_generators.hpp \
+	catch/internal/catch_generators_impl.hpp \
+	catch/internal/catch_hub_impl.hpp \
+	catch/internal/catch_list.hpp \
+	catch/internal/catch_reporter_registrars.hpp \
+	catch/internal/catch_reporter_registry.hpp \
+	catch/internal/catch_resultinfo.hpp \
+	catch/internal/catch_runner_impl.hpp \
+	catch/internal/catch_section.hpp \
+	catch/internal/catch_self_test.hpp \
+	catch/internal/catch_stream.hpp \
+	catch/internal/catch_test_case_info.hpp \
+	catch/internal/catch_test_case_registry_impl.hpp \
+	catch/internal/catch_test_registry.hpp \
+	catch/internal/catch_xmlwriter.hpp
 
 TESTSUITE = $(srcdir)/testsuite
 
