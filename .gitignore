@@ -29,3 +29,4 @@ install-sh
 massif.out.*
 missing
 stamp-h1
+luadoc/
