@@ -143,11 +143,15 @@ format:
 		switch (*ptr) {
 			case 'd':
 			case 'i':
-				os << (lmod ? va_arg(vl, long int) : va_arg(vl, int));
+				if (lmod > 1)  os << va_arg(vl, int64_t);
+				else if (lmod > 0) os << va_arg(vl, long int);
+				else os << va_arg(vl, int);
 				break;
 
 			case 'u':
-				os << (lmod ? va_arg(vl, unsigned long) : va_arg(vl, unsigned));
+				if (lmod > 1)  os << va_arg(vl, uint64_t);
+				else if (lmod > 0) os << va_arg(vl, long unsigned int);
+				else os << va_arg(vl, unsigned int);
 				break;
 
 			case 'c':
@@ -172,7 +176,7 @@ format:
 				break;
 
 			case 'l':
-				lmod = true;
+				++lmod;
 				goto format;
 				break;
 
@@ -183,7 +187,7 @@ format:
 				break;
 		}
 
-		lmod = false;
+		lmod = 0;
 	}
 
 	va_end(vl);

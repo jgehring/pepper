@@ -171,9 +171,9 @@ Backend::LogIterator *MercurialBackend::iterator(const std::string &branch, int6
 	std::string date = "None";
 	if (start >= 0) {
 		if (end >= 0) {
-			date = utils::strprintf("\"%ld 0 to %ld 0\"", start, end);
+			date = utils::strprintf("\"%lld 0 to %lld 0\"", start, end);
 		} else {
-			date = utils::strprintf("\">%ld 0\"", start);
+			date = utils::strprintf("\">%lld 0\"", start);
 		}
 	}
 
