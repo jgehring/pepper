@@ -1208,7 +1208,13 @@ Backend::LogIterator *SubversionBackend::iterator(const std::string &branch, int
 void SubversionBackend::prefetch(const std::vector<std::string> &ids)
 {
 	if (m_prefetcher == NULL) {
+		std::string numthreads = m_opts.value("threads", "10");
 		int nthreads = 10;
+		if (!utils::str2int(numthreads, &nthreads)) {
+			throw PEX(std::string("Expected number for --threads parameter: ") + numthreads);
+		}
+
+		// Don't use that many threads for local repositories
 		if (!strncmp(d->url, "file://", strlen("file://"))) {
 			nthreads = std::max(1, sys::parallel::idealThreadCount() / 2);
 		}
@@ -1238,6 +1244,7 @@ void SubversionBackend::printHelp() const
 	Options::print("--trunk=ARG", "Trunk is at subdirectory ARG");
 	Options::print("--branches=ARG", "Branches are in subdirectory ARG");
 	Options::print("--tags=ARG", "Tags are in subdirectory ARG");
+	Options::print("--threads=ARG", "Use ARG threads for requesting diffstats");
 }
 
 // Returns the revision data for the given ID
