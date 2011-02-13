@@ -78,6 +78,20 @@ class Logger
 			s_mutex.unlock();
 			return *this;
 		}
+		inline Logger &operator<<(std::ios& (* pf)(std::ios &)) {
+			if (m_level > s_level) return *this;
+			s_mutex.lock();
+			*m_out << pf;
+			s_mutex.unlock();
+			return *this;
+		}
+		inline Logger &operator<<(std::ostream& (* pf)(std::ostream &)) {
+			if (m_level > s_level) return *this;
+			s_mutex.lock();
+			*m_out << pf;
+			s_mutex.unlock();
+			return *this;
+		}
 
 		inline Logger &operator<<(LogModifier mod) {
 			if (m_level > s_level) return *this;
