@@ -109,7 +109,8 @@ TEST_CASE("utils/strprintf", "utils::strprintf()")
 		{ "Strings: %c and %s", "Strings: a and abc", "" },
 		{ "Floats: %e, %E, %f, %F, %g, %G", "Floats: 3.14, 1.41421, -1, 1, 3, -3", ""},
 		{ "Escaping %% works", "Escaping % works", ""},
-		{ "Longs for %ld and %lu are ok", "Longs for -23 and 100 are ok", ""}
+		{ "Longs for %ld and %lu are ok", "Longs for -23 and 100 are ok", ""},
+		{ "64bit integers are working: %lld and %llu", "64bit integers are working: -4294967296 and 4294967296", ""}
 	};
 	inout[0].gen = utils::strprintf(inout[0].src);
 	REQUIRE(inout[0].gen == inout[0].out);
@@ -123,6 +124,8 @@ TEST_CASE("utils/strprintf", "utils::strprintf()")
 	REQUIRE(inout[4].gen == inout[4].out);
 	inout[5].gen = utils::strprintf(inout[5].src, (long)-23, (unsigned long)100);
 	REQUIRE(inout[5].gen == inout[5].out);
+	inout[6].gen = utils::strprintf(inout[6].src, -4294967296LL, 4294967296ULL);
+	REQUIRE(inout[6].gen == inout[6].out);
 }
 
 TEST_CASE("utils/compress", "utils::compress() and utils::uncompress()")
