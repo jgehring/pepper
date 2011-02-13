@@ -60,6 +60,11 @@ std::vector<std::string> split(const std::string &str, const std::string &token,
 	std::vector<std::string> parts;
 	size_t index = 0;
 
+	if (str.length() == 0) {
+		parts.push_back(str);
+		return parts;
+	}
+
 	if (token.length() == 0) {
 		for (size_t i = 0; i < str.length(); i++) {
 			parts.push_back(trim ? utils::trim(str.substr(i, 1)) : str.substr(i, 1));

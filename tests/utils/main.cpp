@@ -75,8 +75,11 @@ static int test_split()
 		{ "abc1abc2abc3abc", "abc", std::vector<std::string>() }, // ",1,2,3,"
 		{ "1abc2abc3abc ", "abc", std::vector<std::string>() }, // "1,2,3, "
 		{ "defdef", "def", std::vector<std::string>() }, // ",,"
-		{ "defdef", "", std::vector<std::string>() } // ",,"
+		{ "defdef", "", std::vector<std::string>() }, // ",,"
+		{ "1,2,3", "-", std::vector<std::string>() }
 	};
+	inout[0].out.push_back("");
+	inout[1].out.push_back("");
 	inout[2].out.push_back("1");
 	inout[2].out.push_back("2");
 	inout[2].out.push_back("3");
@@ -99,6 +102,7 @@ static int test_split()
 	inout[7].out.push_back("d");
 	inout[7].out.push_back("e");
 	inout[7].out.push_back("f");
+	inout[8].out.push_back("1,2,3");
 
 	for (unsigned int i = 0; i < sizeof(inout) / sizeof(inout_t); i++) {
 		std::vector<std::string> out = utils::split(inout[i].in, inout[i].token);
