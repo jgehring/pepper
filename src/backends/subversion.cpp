@@ -426,7 +426,6 @@ public:
 	{
 		PTRACE << path << endl;
 		DirBaton *pb = static_cast<DirBaton *>(parent_baton);
-		Baton *eb = pb->edit_baton;
 
 		DirBaton *b = DirBaton::make(path, pb, pb->edit_baton, pool);
 		*child_baton = b;
@@ -487,7 +486,7 @@ public:
 		Baton *eb = b->edit_baton;
 
 		if (b->path_start_revision == NULL || b->path_end_revision == NULL) {
-			PDEBUG << "Insufficient diff data" << endl;
+			PDEBUG << b->path << "@" << eb->target_revision << " Insufficient diff data (nothing has changed)" << endl;
 			return SVN_NO_ERROR;
 		}
 
@@ -522,7 +521,6 @@ public:
 			return SVN_NO_ERROR;
 		}
 
-
 		// Finally, perform the diff
 		static const char equal_string[] =
 			"===================================================================";
@@ -532,15 +530,22 @@ public:
 		os = svn_stream_from_aprfile2(eb->out, TRUE, b->pool);
 		svn_diff_file_options_t *opts = svn_diff_file_options_create(b->pool);
 		SVN_ERR(svn_diff_file_diff_2(&diff, b->path_start_revision, b->path_end_revision, opts, b->pool));
-		/* Print out the diff header. */
+		// Print out the diff header
 		SVN_ERR(svn_stream_printf_from_utf8(os, APR_LOCALE_CHARSET, b->pool, "Index: %s" APR_EOL_STR "%s" APR_EOL_STR, b->path, equal_string));
-		/* Output the actual diff */
+		// Output the actual diff
 		SVN_ERR(svn_diff_file_output_unified3(os, diff, b->path_start_revision, b->path_end_revision, b->path, b->path, APR_LOCALE_CHARSET, NULL, FALSE, b->pool));
 
+		// Remove the actual files
+		if (b->file_start_revision) {
+			apr_file_close(b->file_start_revision);
+		}
+		if (b->file_end_revision) {
+			apr_file_close(b->file_end_revision);
+		}
 		return SVN_NO_ERROR;
 	}
 
-	static svn_error_t *close_directory(void *dir_baton, apr_pool_t *pool)
+	static svn_error_t *close_directory(void *, apr_pool_t *)
 	{
 		return SVN_NO_ERROR;
 	}
