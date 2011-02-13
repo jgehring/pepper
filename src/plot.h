@@ -45,6 +45,9 @@ class Plot
 		static Lunar<Plot>::RegType methods[];
 
 	private:
+		void gcmd(const std::string &c);
+
+	private:
 		Gnuplot *g;
 };
 

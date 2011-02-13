@@ -81,7 +81,7 @@ Plot::~Plot()
 // Writes a Gnuplot command
 int Plot::cmd(lua_State *L)
 {
-	g->cmd(LuaHelpers::pops(L));
+	gcmd(LuaHelpers::pops(L));
 	return 0;
 }
 
@@ -163,11 +163,11 @@ int Plot::set_output(lua_State *L)
 	}
 
 	if (!file.empty()) {
-		g->cmd(utils::strprintf("set output \"%s\"", file.c_str()));
+		gcmd(utils::strprintf("set output \"%s\"", file.c_str()));
 	} else {
-		g->cmd(utils::strprintf("set output"));
+		gcmd(utils::strprintf("set output"));
 	}
-	g->cmd(utils::strprintf("set terminal %s size %d,%d", terminal.c_str(), width, height));
+	gcmd(utils::strprintf("set terminal %s size %d,%d", terminal.c_str(), width, height));
 	return 0;
 }
 
@@ -189,8 +189,8 @@ int Plot::set_xrange(lua_State *L)
 	range[0] = 1000 * floor(double(start) - 0.05 * d) / 1000;
 	range[1] = 1000 * ceil(double(end) + 0.05 * d) / 1000;
 
-	g->cmd(utils::strprintf("set xrange [%f:%f]", range[0], range[1]));
-	g->cmd(utils::strprintf("set x2range [%f:%f]", range[0], range[1]));
+	gcmd(utils::strprintf("set xrange [%f:%f]", range[0], range[1]));
+	gcmd(utils::strprintf("set x2range [%f:%f]", range[0], range[1]));
 	return 0;
 }
 
@@ -205,8 +205,8 @@ int Plot::set_xrange_time(lua_State *L)
 	range[0] = convepoch(1000 * floor(double(start) - 0.05 * d) / 1000);
 	range[1] = convepoch(1000 * ceil(double(end) + 0.05 * d) / 1000);
 
-	g->cmd(utils::strprintf("set xrange [%ld:%ld]", range[0], range[1]));
-	g->cmd(utils::strprintf("set x2range [%ld:%ld]", range[0], range[1]));
+	gcmd(utils::strprintf("set xrange [%lld:%lld]", range[0], range[1]));
+	gcmd(utils::strprintf("set x2range [%lld:%lld]", range[0], range[1]));
 	return 0;
 }
 
@@ -294,7 +294,7 @@ int Plot::plot_series(lua_State *L)
 		}
 	}
 	PDEBUG << "Running plot with command: " << cmd.str() << endl;
-	g->cmd(cmd.str());
+	gcmd(cmd.str());
 	return 0;
 }
 
@@ -367,7 +367,7 @@ int Plot::plot_histogram(lua_State *L)
 		titles = LuaHelpers::topvs(L, index);
 	}
 
-	g->cmd("set style data histogram");
+	gcmd("set style data histogram");
 	std::ostringstream cmd;
 	cmd << "plot ";
 	for (size_t i = 0; i < nseries; i++) {
@@ -384,8 +384,7 @@ int Plot::plot_histogram(lua_State *L)
 			cmd << ", ";
 		}
 	}
-	PDEBUG << "Running plot with command: " << cmd.str() << endl;
-	g->cmd(cmd.str());
+	gcmd(cmd.str());
 	return 0;
 }
 
@@ -408,4 +407,11 @@ void Plot::printOptions()
 	Options::print("-oARG, --output=ARG", "Select output file");
 	Options::print("-tARG, --type=ARG", "Explicitly set image type");
 	Options::print("-sW[xH], --size=W[xH]", "Set image size to width W and height H");
+}
+
+// Sends a command to GNUPlot (and logs it)
+void Plot::gcmd(const std::string &c)
+{
+	PDEBUG << c << endl;
+	g->cmd(c);
 }
