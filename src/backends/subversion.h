@@ -30,7 +30,7 @@ class SubversionBackend : public Backend
 				SvnLogIterator(SvnConnection *connection, const std::string &prefix, int64_t startrev, int64_t endrev);
 				~SvnLogIterator();
 
-				std::vector<std::string> nextIds();
+				bool nextIds(std::queue<std::string> *queue);
 
 			protected:
 				void run();

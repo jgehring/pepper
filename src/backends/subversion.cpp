@@ -432,19 +432,22 @@ SubversionBackend::SvnLogIterator::~SvnLogIterator()
 }
 
 // Returns the next revision IDs, or an empty vector
-std::vector<std::string> SubversionBackend::SvnLogIterator::nextIds()
+bool SubversionBackend::SvnLogIterator::nextIds(std::queue<std::string> *queue)
 {
 	m_mutex.lock();
 	while (m_index >= m_ids.size() && !m_finished) {
 		m_cond.wait(&m_mutex);
 	}
 
-	std::vector<std::string> next;
+	if (m_index == m_ids.size()) {
+		return false;
+	}
+
 	while (m_index < m_ids.size()) {
-		next.push_back(m_ids[m_index++]);
+		queue->push(m_ids[m_index++]);
 	}
 	m_mutex.unlock();
-	return next;
+	return true;
 }
 
 struct logReceiverBaton

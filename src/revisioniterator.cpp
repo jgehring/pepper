@@ -89,12 +89,18 @@ int RevisionIterator::progress() const
 // Fetches new logs
 void RevisionIterator::fetchLogs()
 {
-	std::vector<std::string> next = m_logIterator->nextIds();
-	if (!next.empty()) {
-		m_backend->prefetch(next);
-		for (unsigned int i = 0; i < next.size(); i++) {
-			m_queue.push(next[i]);
-			++m_total;
-		}
+	// We need to ask the backend to prefetch the next revision, so
+	// a temporary queue is used for fetching the next IDs
+	std::queue<std::string> tq;
+	m_logIterator->nextIds(&tq);
+
+	m_total += tq.size();
+	std::vector<std::string> ids;
+	while (!tq.empty()) {
+		ids.push_back(tq.front());
+		m_queue.push(tq.front());
+		tq.pop();
 	}
+
+	m_backend->prefetch(ids);
 }

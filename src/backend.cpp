@@ -41,14 +41,19 @@ Backend::LogIterator::~LogIterator()
 
 }
 
-// Returns the next revision IDs, or an empty vector
-std::vector<std::string> Backend::LogIterator::nextIds()
+// Adds the next revision IDs to the queue or returns false
+bool Backend::LogIterator::nextIds(std::queue<std::string> *queue)
 {
 	if (m_atEnd) {
-		return std::vector<std::string>();
+		return false;
+	}
+
+	for (unsigned int i = 0; i < m_ids.size(); i++) {
+		queue->push(m_ids[i]);
 	}
 	m_atEnd = true;
-	return m_ids;
+	m_ids.clear();
+	return true;
 }
 
 // Main thread loop

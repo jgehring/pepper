@@ -16,6 +16,7 @@
 
 
 #include <iostream>
+#include <queue>
 #include <string>
 #include <vector>
 
@@ -39,7 +40,7 @@ class Backend
 				LogIterator(const std::vector<std::string> &ids = std::vector<std::string>());
 				virtual ~LogIterator();
 
-				virtual std::vector<std::string> nextIds();
+				virtual bool nextIds(std::queue<std::string> *queue);
 
 			protected:
 				virtual void run();

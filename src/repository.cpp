@@ -217,18 +217,15 @@ int Repository::walk_branch(lua_State *L)
 		} else {
 			if (progress != it->progress()) {
 				progress = it->progress();
-				Logger::info() << "\r\033[0K";
-				Logger::info() << "Fetching revisions... " << progress << "%" << flush;
+				Logger::status() << "\r\033[0K";
+				Logger::status() << "Fetching revisions... " << progress << "%" << flush;
 			}
 		}
 		delete revision;
 	}
 
-	Logger::info() << "\r\033[0K";
-	Logger::info() << "Fetching revisions... done" << endl;
-	if (Logger::level() < Logger::Info) {
-		Logger::status() << "done" << endl;
-	}
+	Logger::status() << "\r\033[0K";
+	Logger::status() << "Fetching revisions... done" << endl;
 
 	delete it;
 	try {
