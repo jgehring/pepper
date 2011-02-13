@@ -1,0 +1,24 @@
+#
+# pepper - SCM statistics report generator
+# Copyright (C) 2010-2011 Jonas Gehring
+#
+# Released under the GNU General Public License, version 3.
+# Please see the COPYING file in the source distribution for license
+# terms and conditions, or see http://www.gnu.org/licenses/.
+#
+# Test group for unit tests
+#
+
+AT_BANNER([Unit tests])
+
+AT_SETUP([Binary streams])
+AT_CHECK([units -t 'bstream/*'], [0], [ignore])
+AT_CLEANUP()
+
+AT_SETUP([Command line option parsing])
+AT_CHECK([units -t 'options/*'], [0], [ignore])
+AT_CLEANUP()
+
+AT_SETUP([Utility functions])
+AT_CHECK([units -t 'utils/*'], [0], [ignore])
+AT_CLEANUP()
