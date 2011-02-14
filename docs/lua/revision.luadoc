@@ -17,8 +17,9 @@ function parent_id()
 --- Returns the author of the revision.
 function author()
 
---- Returns the data of the revision.
-function data()
+--- Returns the date of the revision.
+--  The date will be returned as a UNIX timestamp (in seconds).
+function date()
 
 --- Returns the commit message of the revision.
 function message()
