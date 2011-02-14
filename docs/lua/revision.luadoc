@@ -9,7 +9,7 @@ module "pepper.revision"
 function id()
 
 --- Returns the id of the parent revision, if any.
---  When examining a revision range, the repository history will need be linarized
+--  When examining a revision range, the repository history will need be linearized
 --  for repositories like Git and Mercurial. Thus, a revision might have an explicit
 --  parent revision that is being used when retrieving the diffstat.
 function parent_id()
