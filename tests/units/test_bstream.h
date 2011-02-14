@@ -24,25 +24,77 @@ namespace test_bstream
 TEST_CASE("bstream/readwrite", "Reading and writing with memory streams using read() and write()")
 {
 	std::vector<char> in, out;
-	for (int i = 0; i < 4098; i++) {
+	int n = 258;
+	for (int i = 0; i < n; i++) {
 		in.resize(i);
 		out.resize(i);
 
 		int s = rand();
 		for (int j = 0; j < i; j++) {
-			in[j] = (i+s) & 0xFF;
+			out[j] = (i+s) & 0xFF;
 		}
 
+		int t = n-i;
+		MOStream sout;
+		for (int j = 0; j < t; j++) {
+			sout.write(&(out[0]), i);
+		}
+		MIStream sin(sout.data());
+		for (int j = 0; j < t; j++) {
+			sin.read(&(in[0]), i);
+			REQUIRE(!memcmp(&(in[0]), &(out[0]), i));
+		}
+	}
+}
+
+TEST_CASE("bstream/rw_large", "Reading and writing of large blocks")
+{
+	std::vector<char> in, out;
+	int64_t max = 1024*1024*10;
+	for (int64_t i = 1; i < max; i *= 2) {
+		in.resize(i);
+		out.resize(i);
 		MOStream sout;
 		sout.write(&(out[0]), i);
 		MIStream sin(sout.data());
 		sin.read(&(in[0]), i);
-
-		REQUIRE(in == out);
+		INFO("Testing with " << i << " bytes");
+		REQUIRE(!memcmp(&(in[0]), &(out[0]), i));
 	}
 }
 
-TEST_CASE("bstream/operators", "Memory stream operators")
+TEST_CASE("bstream/seek", "Seek and tell for memory streams")
+{
+	std::vector<char> in(10), out(1);
+	MOStream sout;
+	sout.write(&(out[0]), out.size());
+	MIStream sin(sout.data());
+
+	REQUIRE(sin.seek(0) == true);
+	REQUIRE(sin.seek(100) == false);
+	REQUIRE(sin.seek(1) == true);
+	REQUIRE(sin.seek(0) == true);
+	REQUIRE(sout.seek(100) == false);
+	REQUIRE(sout.seek(0) == true);
+
+	out.resize(400);
+	sout.write(&(out[0]), out.size());
+	REQUIRE(sout.tell() == out.size());
+	sout.write(&(out[0]), out.size());
+	REQUIRE(sout.tell() == 2*out.size());
+}
+
+TEST_CASE("bstream/checks", "Corner cases for memory streams")
+{
+	std::vector<char> in(10), out(1);
+	MOStream sout;
+	sout.write(&(out[0]), out.size());
+	MIStream sin(sout.data());
+	ssize_t n = sin.read(&(in[0]), in.size());
+	REQUIRE(n == ssize_t(out.size()));
+}
+
+TEST_CASE("bstream/operators", "Stream operators")
 {
 	SECTION("Characters", "char operators")
 	{
