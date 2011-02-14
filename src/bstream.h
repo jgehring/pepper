@@ -37,8 +37,8 @@ class BStream
 				virtual bool eof() const = 0;
 				virtual size_t tell() const = 0;
 				virtual bool seek(size_t offset) = 0;
-				virtual int read(void *ptr, size_t n) = 0;
-				virtual int write(const void *ptr, size_t n) = 0;
+				virtual ssize_t read(void *ptr, size_t n) = 0;
+				virtual ssize_t write(const void *ptr, size_t n) = 0;
 		};
 
 		BStream(RawStream *stream) : m_stream(stream) { }
@@ -48,8 +48,8 @@ class BStream
 		inline bool eof() const { return m_stream == NULL || m_stream->eof(); }
 		inline size_t tell() const { return (m_stream ? m_stream->tell() : 0); }
 		inline bool seek(size_t offset) { return (m_stream ? m_stream->seek(offset) : false); }
-		inline int read(void *ptr, size_t n) { return (m_stream ? m_stream->read(ptr, n) : 0); }
-		inline int write(const void *ptr, size_t n) { return (m_stream ? m_stream->write(ptr, n) : 0); }
+		inline ssize_t read(void *ptr, size_t n) { return (m_stream ? m_stream->read(ptr, n) : 0); }
+		inline ssize_t write(const void *ptr, size_t n) { return (m_stream ? m_stream->write(ptr, n) : 0); }
 
 		// Byte swapping (from Qt)
 		static inline uint32_t bswap(uint32_t source) {

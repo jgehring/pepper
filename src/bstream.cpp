@@ -41,10 +41,13 @@ public:
 	bool seek(size_t offset) {
 		return (fseek(f, offset, SEEK_SET) >= 0);
 	}
-	int read(void *ptr, size_t n) {
+	ssize_t read(void *ptr, size_t n) {
+		if (feof(f)) {
+			return 0;
+		}
 		return fread(ptr, 1, n, f);
 	}
-	int write(const void *ptr, size_t n) {
+	ssize_t write(const void *ptr, size_t n) {
 		return fwrite(ptr, 1, n, f);
 	}
 
@@ -74,19 +77,22 @@ public:
 		return p;
 	}
 	bool seek(size_t offset) {
-		if (offset >= size) {
+		if (offset > size) {
 			return false;
 		}
 		p = offset;
 		return true;
 	}
-	int read(void *ptr, size_t n) {
+	ssize_t read(void *ptr, size_t n) {
+		if (p == size) {
+			return 0;
+		}
 		size_t nr = std::min(size - p, n);
 		memcpy(ptr, m_buffer + p, nr);
 		p += nr;
 		return nr;
 	}
-	int write(const void *ptr, size_t n) {
+	ssize_t write(const void *ptr, size_t n) {
 		if (p + n >= asize) {
 			size_t oldsize = size;
 			do {
@@ -128,10 +134,10 @@ public:
 	bool seek(size_t offset) {
 		return (gzseek(f, offset, SEEK_SET) >= 0);
 	}
-	int read(void *ptr, size_t n) {
+	ssize_t read(void *ptr, size_t n) {
 		return gzread(f, ptr, n);
 	}
-	int write(const void *ptr, size_t n) {
+	ssize_t write(const void *ptr, size_t n) {
 		return gzwrite(f, ptr, n);
 	}
 
