@@ -20,7 +20,7 @@
 #define _XOPEN_SOURCE 600
 #include <cstring>
 
-#if defined(_GNU_SOURCE)
+#if defined(__GNUG__)
  #include <cxxabi.h>
  #include <execinfo.h>
 #endif
