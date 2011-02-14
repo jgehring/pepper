@@ -55,8 +55,8 @@ public:
 class MemoryStream : public BStream::RawStream
 {
 public:
-	MemoryStream() : p(0), size(512) {
-		m_buffer = new char[size];
+	MemoryStream() : p(0), size(0), asize(512) {
+		m_buffer = new char[asize];
 	}
 	MemoryStream(const char *data, size_t n) : p(0), size(n) {
 		m_buffer = new char[n];
@@ -87,23 +87,24 @@ public:
 		return nr;
 	}
 	int write(const void *ptr, size_t n) {
-		if (p + n >= size) {
+		if (p + n >= asize) {
 			size_t oldsize = size;
 			do {
-				size *= 2;
-			} while (p + n >= size);
-			char *newbuf = new char[size];
+				asize *= 2;
+			} while (p + n >= asize);
+			char *newbuf = new char[asize];
 			memcpy(newbuf, m_buffer, oldsize);
 			delete[] m_buffer;
 			m_buffer = newbuf;
 		}
 		memcpy(m_buffer + p, ptr, n);
 		p += n;
+		size += n;
 		return n;
 	}
 
 	char *m_buffer;
-	size_t p, size;
+	size_t p, size, asize;
 };
 
 #ifdef HAVE_LIBZ
@@ -189,7 +190,7 @@ MOStream::MOStream()
 std::vector<char> MOStream::data() const
 {
 	MemoryStream *ms = (MemoryStream *)m_stream;
-	return std::vector<char>(ms->m_buffer, ms->m_buffer + ms->p);
+	return std::vector<char>(ms->m_buffer, ms->m_buffer + ms->size);
 }
 
 
