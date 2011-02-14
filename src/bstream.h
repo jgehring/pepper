@@ -15,12 +15,22 @@
 #define BSTREAM_H_
 
 
+#include <cassert>
+#include <cstdio>
 #include <string>
 #include <vector>
-#include <cstdio>
 
 #include "main.h"
 
+
+// read()/write() macros with assertions
+#ifdef NDEBUG
+ #define ASSERT_READ(p, n) do { read(p, n); } while (0)
+ #define ASSERT_WRITE(p, n) do { write(p, n); } while (0)
+#else
+ #define ASSERT_READ(p, n) do { assert(read(p, n) == (ssize_t)n); } while (0)
+ #define ASSERT_WRITE(p, n) do { assert(write(p, n) == (ssize_t)n); } while (0)
+#endif
 
 // Base class for all streams
 class BStream
@@ -157,7 +167,7 @@ class GZOStream : public BOStream
 
 // Inlined functions
 inline BOStream &BOStream::operator<<(char c) {
-	write((char *)&c, 1);
+	ASSERT_WRITE((char *)&c, 1);
 	return *this;
 }
 
@@ -165,7 +175,7 @@ inline BOStream &BOStream::operator<<(uint32_t i) {
 #ifndef WORDS_BIGENDIAN
 	i = bswap(i);
 #endif
-	write((char *)&i, 4);
+	ASSERT_WRITE((char *)&i, 4);
 	return *this;
 }
 
@@ -173,28 +183,28 @@ inline BOStream &BOStream::operator<<(uint64_t i) {
 #ifndef WORDS_BIGENDIAN
 	i = bswap(i);
 #endif
-	write((char *)&i, 8);
+	ASSERT_WRITE((char *)&i, 8);
 	return *this;
 }
 
 inline BOStream &BOStream::operator<<(const std::string &s) {
-	write(s.data(), s.length());
+	ASSERT_WRITE(s.data(), s.length());
 	return (*this << '\0');
 }
 
 inline BOStream &BOStream::operator<<(const std::vector<char> &v) {
 	(*this) << (uint32_t)v.size();
-	write(&v[0], v.size());
+	ASSERT_WRITE(&(v[0]), v.size());
 	return *this;
 }
 
 inline BIStream &BIStream::operator>>(char &c) {
-	read((char *)&c, 1);
+	ASSERT_READ((char *)&c, 1);
 	return *this;
 }
 
 inline BIStream &BIStream::operator>>(uint32_t &i) {
-	read((char *)&i, 4);
+	ASSERT_READ((char *)&i, 4);
 #ifndef WORDS_BIGENDIAN
 	i = bswap(i);
 #endif
@@ -202,7 +212,7 @@ inline BIStream &BIStream::operator>>(uint32_t &i) {
 }
 
 inline BIStream &BIStream::operator>>(uint64_t &i) {
-	read((char *)&i, 8);
+	ASSERT_READ((char *)&i, 8);
 #ifndef WORDS_BIGENDIAN
 	i = bswap(i);
 #endif
@@ -245,7 +255,7 @@ inline BIStream &BIStream::operator>>(std::vector<char> &v) {
 	uint32_t size;
 	*this >> size;
 	v.resize(size);
-	read(&v[0], size);
+	ASSERT_READ(&v[0], size);
 	return *this;
 }
 
