@@ -15,6 +15,9 @@
 
 #include <cstdio>
 #include <cstdlib>
+
+// Enforce XSI-compliant strerror_r()
+#define _XOPEN_SOURCE 600
 #include <cstring>
 
 #if defined(_GNU_SOURCE)
@@ -48,12 +51,8 @@ PepperException::PepperException(int code, const char *file, int line, const std
 
 	char buf[512];
 #if HAVE_STRERROR_R
-#if (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && !defined(_GNU_SOURCE)
 	strerror_r(code, buf, sizeof(buf));
 	m_str = std::string(buf);
-#else
-	m_str = std::string(strerror_r(code, buf, sizeof(buf)));
-#endif
 #else
 	sprintf(buf, "System error code %d", code);
 	m_str = std::string(buf);
