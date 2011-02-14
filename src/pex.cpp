@@ -17,7 +17,10 @@
 #include <cstdlib>
 
 // Enforce XSI-compliant strerror_r()
-#define _XOPEN_SOURCE 600
+#if !defined(_XOPEN_SOURCE) || _XOPEN_SOURCE<600
+ #undef _XOPEN_SOURCE
+ #define _XOPEN_SOURCE 600
+#endif
 #include <cstring>
 
 #if defined(__GNUG__)
