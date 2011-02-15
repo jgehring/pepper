@@ -183,13 +183,15 @@ Diffstat DiffParser::stat() const
 // Static diff parsing function for unified diffs
 Diffstat DiffParser::parse(std::istream &in)
 {
+	static const char marker[] = "===================================================================";
+
 	std::string str, file;
 	Diffstat ds;
 	Diffstat::Stat stat;
 	int chunk[2] = {0, 0};
 	while (in.good()) {
 		std::getline(in, str);
-		if (!str.compare(0, 4, "--- ") && chunk[0] <= 0 && chunk[0] <= 0) {
+		if (!str.compare(0, 4, "--- ") && chunk[0] <= 0 && chunk[1] <= 0) {
 			if (!file.empty() && !stat.empty()) {
 				ds.m_stats[file] = stat;
 				file = std::string();
@@ -255,9 +257,11 @@ Diffstat DiffParser::parse(std::istream &in)
 			stat.cadd += str.length();
 			++stat.ladd;
 			--chunk[1];
+		} else if (str == marker) {
+			chunk[0] = chunk[1] = 0;
 		} else {
-			--chunk[0];
-			--chunk[1];
+			if (chunk[0] > 0) --chunk[0];
+			if (chunk[1] > 0) --chunk[1];
 		}
 	}
 	if (!file.empty() && !stat.empty()) {
