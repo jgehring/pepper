@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <stack>
 
 #include "backend.h"
 #include "cache.h"
@@ -39,9 +40,42 @@
 namespace report
 {
 
-// Global variables
-static Repository *repo;
-static std::map<std::string, std::string> options;
+// A local stack of repository contexts
+struct ReportContext;
+static const int maxStackSize = 64;
+static std::stack<ReportContext *> contextStack;
+
+// Context of current report
+struct ReportContext
+{
+	Repository *repo;
+	std::string script;
+	std::map<std::string, std::string> options;
+
+	ReportContext(const std::string &script, Backend *backend)
+		: script(script)
+	{
+		repo = new Repository(backend);
+		options = backend->options().reportOptions();
+	}
+
+	ReportContext(const std::string &script, const std::map<std::string, std::string> &options, Backend *backend)
+		: script(script), options(options)
+	{
+		repo = new Repository(backend);
+	}
+
+	~ReportContext()
+	{
+		delete repo;
+	}
+
+	// Returns the current context
+	static ReportContext *current()
+	{
+		return (contextStack.empty() ? NULL : contextStack.top());
+	}
+};
 
 
 // Prints a backtrace if Lua is panicking
@@ -55,10 +89,14 @@ static int atpanic(lua_State *L)
 }
 
 
+// Prototypes
+static std::string findScript(const std::string &script);
+static int run(ReportContext *ctx);
+
 // Returns the current repository
 static int repository(lua_State *L)
 {
-	return LuaHelpers::push(L, repo);
+	return LuaHelpers::push(L, ReportContext::current()->repo);
 }
 
 // Returns a report option (or the default value)
@@ -72,12 +110,13 @@ static int getopt(lua_State *L)
 
 	std::vector<std::string> keys = utils::split(LuaHelpers::tops(L, (narg == 1 ? -1 : -2)), ",", true);
 	std::string defaultValue = (narg == 2 ? LuaHelpers::tops(L, -1) : std::string());
+	const std::map<std::string, std::string> options = ReportContext::current()->options;
 
 	std::string value;
 	bool valueFound = false;
 	for (unsigned int i = 0; i < keys.size(); i++) {
 		if (options.find(keys[i]) != options.end()) {
-			value = options[keys[i]];
+			value = options.find(keys[i])->second;
 			valueFound = true;
 			break;
 		}
@@ -95,13 +134,13 @@ static int getopt(lua_State *L)
 // Backwards compability with 0.1
 static int revision(lua_State *L)
 {
-	return repo->revision(L);
+	return ReportContext::current()->repo->revision(L);
 }
 
 // Backwards compability with 0.1
 static int walk_branch(lua_State *L)
 {
-	return repo->walk_branch(L);
+	return ReportContext::current()->repo->walk_branch(L);
 }
 
 // Function table of the report library
@@ -221,7 +260,7 @@ static const struct luaL_reg internal[] = {
 
 
 // Sets up the lua context
-lua_State *setupLua()
+static lua_State *setupLua()
 {
 	// Setup lua context
 	lua_State *L = lua_open();
@@ -250,6 +289,42 @@ lua_State *setupLua()
 	return L;
 }
 
+// The actual report execution function
+static int run(ReportContext *ctx)
+{
+	if (contextStack.size() == maxStackSize) {
+		std::cerr << "Error running report: maximum stack size (";
+		std::cerr << maxStackSize << ") exceeded" << std::endl;
+		return EXIT_FAILURE;
+	}
+
+	// Push the context on top of the stack
+	contextStack.push(ctx);
+
+	lua_State *L = setupLua();
+
+	// Run the script
+	int ret = EXIT_SUCCESS;
+	if (luaL_dofile(L, ctx->script.c_str()) != 0) {
+		std::cerr << "Error opening report: " << lua_tostring(L, -1) << std::endl;
+		ret = EXIT_FAILURE;
+	} else {
+		// Call the report function
+		lua_getglobal(L, "main");
+		if (lua_pcall(L, 0, 1, 0) != 0) {
+			std::cerr << "Error running report: " << lua_tostring(L, -1) << std::endl;
+			ret = EXIT_FAILURE;
+		}
+	}
+
+	// Clean up
+	lua_gc(L, LUA_GCCOLLECT, 0);
+	lua_close(L);
+
+	contextStack.pop();
+	return ret;
+}
+
 // Returns all paths that may contains reports
 static std::vector<std::string> reportDirs()
 {
@@ -275,7 +350,7 @@ static std::vector<std::string> reportDirs()
 }
 
 // Returns the full path to the given script
-std::string findScript(const std::string &script)
+static std::string findScript(const std::string &script)
 {
 	if (sys::fs::exists(script)) {
 		return script;
@@ -301,32 +376,9 @@ std::string findScript(const std::string &script)
 // Runs a scripted report using the given backend
 int run(const std::string &script, Backend *backend)
 {
-	lua_State *L = setupLua();
-
-	// Setup global variables
-	report::repo = new Repository(backend);
-	report::options = backend->options().reportOptions();
-
-	// Run the script
-	int ret = EXIT_SUCCESS;
-	std::string path = findScript(script);
-	if (luaL_dofile(L, path.c_str()) != 0) {
-		std::cerr << "Error opening report: " << lua_tostring(L, -1) << std::endl;
-		ret = EXIT_FAILURE;
-	} else {
-		// Call the report function
-		lua_getglobal(L, "main");
-		if (lua_pcall(L, 0, 1, 0) != 0) {
-			std::cerr << "Error running report: " << lua_tostring(L, -1) << std::endl;
-			ret = EXIT_FAILURE;
-		}
-	}
-
-	// Clean up
-	lua_gc(L, LUA_GCCOLLECT, 0);
-	lua_close(L);
-	delete report::repo;
-	return ret;
+	// Create the new report context
+	ReportContext context(findScript(script), backend);
+	return run(&context);
 }
 
 // Opens a script, calls the "options()" function and pretty-prints some help
