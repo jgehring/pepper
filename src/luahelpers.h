@@ -99,6 +99,17 @@ inline int push(lua_State *L, const std::vector<std::string> &v) {
 	return 1;
 }
 
+inline int push(lua_State *L, const std::map<std::string, std::string> &m) {
+	lua_createtable(L, m.size(), 0);
+	int table = lua_gettop(L);
+	for (std::map<std::string, std::string>::const_iterator it = m.begin(); it != m.end(); ++it) {
+		lua_pushstring(L, it->first.c_str());
+		lua_pushstring(L, it->second.c_str());
+		lua_settable(L, table);
+	}
+	return 1;
+}
+
 template <class T>
 inline int push(lua_State *L, T *i, bool gc = false)
 {
@@ -204,12 +215,29 @@ inline std::vector<std::string> topvs(lua_State *L, int index = -1) {
 	return t;
 }
 
+inline std::map<std::string, std::string> topms(lua_State *L, int index = -1) {
+	std::map<std::string, std::string> t;
+	luaL_checktype(L, index, LUA_TTABLE);
+	lua_pushvalue(L, index);
+	lua_pushnil(L);
+	while (lua_next(L, -2) != 0) {
+		t[tops(L, -2)] = tops(L, -1);
+		lua_pop(L, 1);
+	}
+	lua_pop(L, 1);
+	return t;
+}
+
 inline std::vector<double> popvd(lua_State *L) {
 	std::vector<double> t = topvd(L, -1); lua_pop(L, 1); return t;
 }
 
 inline std::vector<std::string> popvs(lua_State *L) {
 	std::vector<std::string> t = topvs(L, -1); lua_pop(L, 1); return t;
+}
+
+inline std::map<std::string, std::string> popms(lua_State *L) {
+	std::map<std::string, std::string> t = topms(L, -1); lua_pop(L, 1); return t;
 }
 
 

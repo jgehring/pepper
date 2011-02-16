@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <sstream>
 #include <stack>
 
 #include "backend.h"
@@ -42,7 +43,7 @@ namespace report
 
 // A local stack of repository contexts
 struct ReportContext;
-static const int maxStackSize = 64;
+static const size_t maxStackSize = 64;
 static std::stack<ReportContext *> contextStack;
 
 // Context of current report
@@ -77,6 +78,12 @@ struct ReportContext
 	}
 };
 
+// Prototypes for local non-API functions
+static lua_State *setupLua();
+static int run(ReportContext *ctx, std::ostream &err = std::cerr);
+static std::vector<std::string> reportDirs();
+static std::string findScript(const std::string &script);
+
 
 // Prints a backtrace if Lua is panicking
 static int atpanic(lua_State *L)
@@ -88,10 +95,6 @@ static int atpanic(lua_State *L)
 	return 0;
 }
 
-
-// Prototypes
-static std::string findScript(const std::string &script);
-static int run(ReportContext *ctx);
 
 // Returns the current repository
 static int repository(lua_State *L)
@@ -106,10 +109,9 @@ static int getopt(lua_State *L)
 		return luaL_error(L, "Invalid number of arguments (1 or 2 expected)");
 	}
 
-	int narg = lua_gettop(L);
-
-	std::vector<std::string> keys = utils::split(LuaHelpers::tops(L, (narg == 1 ? -1 : -2)), ",", true);
-	std::string defaultValue = (narg == 2 ? LuaHelpers::tops(L, -1) : std::string());
+	bool defaultProvided = (lua_gettop(L) == 2);
+	std::string defaultValue = (lua_gettop(L) == 2 ? LuaHelpers::pops(L) : std::string());
+	std::vector<std::string> keys = utils::split(LuaHelpers::pops(L), ",", true);
 	const std::map<std::string, std::string> options = ReportContext::current()->options;
 
 	std::string value;
@@ -122,11 +124,37 @@ static int getopt(lua_State *L)
 		}
 	}
 
-	lua_pop(L, narg);
 	if (valueFound) {
 		return LuaHelpers::push(L, value);
-	} else if (narg == 2) {
+	} else if (defaultProvided) {
 		return LuaHelpers::push(L, defaultValue);
+	}
+	return LuaHelpers::pushNil(L);
+}
+
+// Runs another report
+static int run_fromscript(lua_State *L)
+{
+	if (lua_gettop(L) != 1 && lua_gettop(L) != 2) {
+		return luaL_error(L, "Invalid number of arguments (1 or 2 expected)");
+	}
+
+	std::map<std::string, std::string> options = ReportContext::current()->options;
+	if (lua_gettop(L) == 2) {
+		options = LuaHelpers::popms(L);
+	}
+	std::string script = LuaHelpers::pops(L);
+
+	ReportContext context(findScript(script), options, ReportContext::current()->repo->backend());
+	try {
+		std::stringstream oss;
+		if (run(&context, oss) != 0) {
+			return LuaHelpers::pushError(L, utils::trim(oss.str()));
+		}
+	} catch (const PepperException &ex) {
+		return LuaHelpers::pushError(L, ex.what(), ex.where());
+	} catch (const std::exception &ex) {
+		return LuaHelpers::pushError(L, ex.what());
 	}
 	return LuaHelpers::pushNil(L);
 }
@@ -149,6 +177,7 @@ static const struct luaL_reg report[] = {
 	{"repository", repository},
 	{"revision", revision},
 	{"walk_branch", walk_branch},
+	{"run", run_fromscript},
 	{NULL, NULL}
 };
 
@@ -290,29 +319,33 @@ static lua_State *setupLua()
 }
 
 // The actual report execution function
-static int run(ReportContext *ctx)
+// Error messages will be written to the given stream
+static int run(ReportContext *ctx, std::ostream &err)
 {
 	if (contextStack.size() == maxStackSize) {
-		std::cerr << "Error running report: maximum stack size (";
-		std::cerr << maxStackSize << ") exceeded" << std::endl;
+		err << "Error running report: maximum stack size (";
+		err << maxStackSize << ") exceeded" << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	// Push the context on top of the stack
+	std::string script = ctx->script;
+	PTRACE << "Pushing report context for " << script << endl;
 	contextStack.push(ctx);
+	PDEBUG << "Stack size is " << contextStack.size() << endl;
 
 	lua_State *L = setupLua();
 
 	// Run the script
 	int ret = EXIT_SUCCESS;
-	if (luaL_dofile(L, ctx->script.c_str()) != 0) {
-		std::cerr << "Error opening report: " << lua_tostring(L, -1) << std::endl;
+	if (luaL_dofile(L, script.c_str()) != 0) {
+		err << "Error opening report: " << lua_tostring(L, -1) << std::endl;
 		ret = EXIT_FAILURE;
 	} else {
 		// Call the report function
 		lua_getglobal(L, "main");
 		if (lua_pcall(L, 0, 1, 0) != 0) {
-			std::cerr << "Error running report: " << lua_tostring(L, -1) << std::endl;
+			err << "Error running report: " << lua_tostring(L, -1) << std::endl;
 			ret = EXIT_FAILURE;
 		}
 	}
@@ -321,6 +354,7 @@ static int run(ReportContext *ctx)
 	lua_gc(L, LUA_GCCOLLECT, 0);
 	lua_close(L);
 
+	PTRACE << "Popping report context for " << script <<  endl;
 	contextStack.pop();
 	return ret;
 }
@@ -372,6 +406,7 @@ static std::string findScript(const std::string &script)
 	}
 	return script;
 }
+
 
 // Runs a scripted report using the given backend
 int run(const std::string &script, Backend *backend)
