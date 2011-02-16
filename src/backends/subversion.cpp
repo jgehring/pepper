@@ -469,7 +469,7 @@ public:
 	static svn_error_t *apply_textdelta(void *file_baton, const char *base_checksum, apr_pool_t *pool, svn_txdelta_window_handler_t *handler, void **handler_baton)
 	{
 		FileBaton *b = static_cast<FileBaton *>(file_baton);
-		PTRACE << "base is " << b->file_start_revision << endl;
+		PTRACE << "base is " << b->path_start_revision << endl;
 		SVN_ERR(svn_io_file_open(&(b->file_start_revision), b->path_start_revision, APR_READ, APR_OS_DEFAULT, b->pool));
 
 		SVN_ERR(svn_io_open_unique_file3(&(b->file_end_revision), &(b->path_end_revision), NULL, svn_io_file_del_on_pool_cleanup, b->pool, b->pool));
