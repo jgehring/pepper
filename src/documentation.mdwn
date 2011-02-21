@@ -16,10 +16,10 @@ page and extract it using tar:
 	$ tar xvzf pepper-0.1.5.tar.gz
 	$ cd pepper-0.1.5
 
-Next, you should make sure that your all compile-time dependencies are
-satisfied. You'll need a C++ compiler and Lua 5.1 (e.g., provided by
-`lua5.1` and `liblua5.1-dev` on Debian). Some backends have additional
-dependencies that can be found in the [README](README) file.
+Next, you should make sure that all compile-time dependencies are
+satisfied. In general, you'll need a C++ compiler and Lua 5.1 (e.g.,
+provided by `lua5.1` and `liblua5.1-dev` on Debian). Some backends have
+additional dependencies that can be found in the [README](README) file.
 
 pepper's build system uses
 [Autoconf](http://www.gnu.org/software/autoconf) and
@@ -87,9 +87,7 @@ pepper's [Git](http://git-scm.com) repository is hosted at
 [GitHub](http://github.com/jgehring/pepper). Public read-only access is
 provided, so you can get your local copy using
 
-[[!format sh """
-$ git clone git://github.com/jgehring/pepper
-"""]]
+	$ git clone git://github.com/jgehring/pepper
 
 <!-- TODO
 #### Implementing a new SCM backend
