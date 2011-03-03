@@ -123,7 +123,14 @@ Thread::Thread()
 // Destructor
 Thread::~Thread()
 {
-	assert(!running());
+	m_mutex.lock();
+	assert(m_running == 0);
+	if (m_running != 0) {
+		m_mutex.unlock();
+		pthread_cancel(m_pth);
+		pthread_join(m_pth, 0);
+	}
+	m_mutex.unlock();
 }
 
 // Starts the thread
@@ -134,6 +141,7 @@ void Thread::start()
 	if (m_running != 0) {
 		return;
 	}
+	m_running = 1;
 	m_mutex.unlock();
 	pthread_create(&m_pth, NULL, &Thread::main, this);
 }
@@ -209,7 +217,7 @@ void Thread::cleanup(void *obj)
 void Thread::setupAndRun()
 {
 	m_mutex.lock();
-	m_running = 1;
+	m_running = 2;
 	pthread_cleanup_push(Thread::cleanup, this);
 	m_mutex.unlock();
 	run();
