@@ -20,7 +20,7 @@
 class Backend;
 
 
-namespace report
+namespace Report
 {
 
 int run(const std::string &script, Backend *backend);

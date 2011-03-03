@@ -39,7 +39,7 @@
 #include "report.h"
 
 
-namespace report
+namespace Report
 {
 
 // A local stack of repository contexts
