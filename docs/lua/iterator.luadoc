@@ -1,0 +1,16 @@
+--- Revision log iterator.
+--  This class is used for iterating over a given revision range.
+--  Use pepper.repository:iterator to construct a revision iterator.
+
+module "pepper.iterator"
+
+
+--- Returns the next revision, or <code>nil</code> if there are no more revisions.
+function next()
+
+--- Returns an iterator for the remaining revisions.
+function iterator()
+
+--- Calls <code>callback</code> for all remaining revisions.
+--  @param callback The callback function
+function map(callback)

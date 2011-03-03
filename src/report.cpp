@@ -27,6 +27,7 @@
 #include "options.h"
 #include "repository.h"
 #include "revision.h"
+#include "revisioniterator.h"
 #include "tag.h"
 #include "utils.h"
 #ifdef USE_GNUPLOT
@@ -305,6 +306,7 @@ static lua_State *setupLua()
 	// Register binding classes
 	Lunar<Repository>::Register(L, "pepper");
 	Lunar<Revision>::Register(L, "pepper");
+	Lunar<RevisionIterator>::Register(L, "pepper");
 	Lunar<Diffstat>::Register(L, "pepper");
 	Lunar<Tag>::Register(L, "pepper");
 #ifdef USE_GNUPLOT

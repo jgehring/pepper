@@ -89,6 +89,11 @@ inline int push(lua_State *L, const std::string &s) {
 	return 1;
 }
 
+inline int push(lua_State *L, int (*f)(lua_State *L)) {
+	lua_pushcfunction(L, f);
+	return 1;
+}
+
 inline int push(lua_State *L, const std::vector<std::string> &v) {
 	lua_createtable(L, v.size(), 0);
 	int table = lua_gettop(L);

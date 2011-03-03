@@ -20,6 +20,7 @@ LUADOCS = \
 	docs/lua/report.luadoc \
 	docs/lua/repository.luadoc \
 	docs/lua/revision.luadoc \
+	docs/lua/iterator.luadoc \
 	docs/lua/tag.luadoc \
 	docs/lua/utils.luadoc
 luadoc: $(LUADOCS)

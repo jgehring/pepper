@@ -27,6 +27,10 @@
 
 #include "main.h"
 
+#include "logger.h"
+#include "luahelpers.h"
+#include "revision.h"
+
 #include "revisioniterator.h"
 
 
@@ -103,4 +107,110 @@ void RevisionIterator::fetchLogs()
 	}
 
 	m_backend->prefetch(ids);
+}
+
+/*
+ * Lua binding
+ */
+
+const char RevisionIterator::className[] = "iterator";
+Lunar<RevisionIterator>::RegType RevisionIterator::methods[] = {
+	LUNAR_DECLARE_METHOD(RevisionIterator, next),
+	LUNAR_DECLARE_METHOD(RevisionIterator, revisions),
+	LUNAR_DECLARE_METHOD(RevisionIterator, map),
+	{0,0}
+};
+
+RevisionIterator::RevisionIterator(lua_State *)
+{
+	m_backend = NULL;
+	m_logIterator = NULL;
+}
+
+int RevisionIterator::next(lua_State *L)
+{
+	if (atEnd()) {
+		return LuaHelpers::pushNil(L);
+	}	
+
+	Revision *revision = NULL;
+	try {
+		revision = m_backend->revision(next());
+	} catch (const PepperException &ex) {
+		return LuaHelpers::pushError(L, ex.what(), ex.where());
+	}
+
+	PTRACE << "Fetched revision " << revision->id() << endl;
+	return LuaHelpers::push(L, revision);
+}
+
+// Static function that will call the next() function from above. It is being
+// used as an iterator in RevisionIterator::revisions()
+static int callnext(lua_State *L)
+{
+	RevisionIterator *it = LuaHelpers::topl<RevisionIterator>(L, -2);
+	return it->next(L);
+}
+
+int RevisionIterator::revisions(lua_State *L)
+{
+	LuaHelpers::push(L, callnext);
+	LuaHelpers::push(L, this);
+	LuaHelpers::pushNil(L);
+	return 3;
+}
+
+int RevisionIterator::map(lua_State *L)
+{
+	if (m_backend == NULL) return LuaHelpers::pushNil(L);
+
+	if (lua_gettop(L) != 1) {
+		return luaL_error(L, "Invalid number of arguments (1 expected)");
+	}
+
+	luaL_checktype(L, -1, LUA_TFUNCTION);
+	int callback = luaL_ref(L, LUA_REGISTRYINDEX);
+	lua_pop(L, 1);
+
+	int progress = 0;
+	if (Logger::level() < Logger::Info) {
+		Logger::status() << "Fetching revisions... " << flush;
+	}
+	while (!atEnd()) {
+		Revision *revision = NULL;
+		try {
+			revision = m_backend->revision(next());
+		} catch (const PepperException &ex) {
+			return LuaHelpers::pushError(L, ex.what(), ex.where());
+		}
+
+		PTRACE << "Fetched revision " << revision->id() << endl;
+
+		lua_rawgeti(L, LUA_REGISTRYINDEX, callback);
+		LuaHelpers::push(L, revision);
+		lua_call(L, 1, 1);
+		lua_pop(L, 1);
+
+		if (Logger::level() > Logger::Info) {
+			Logger::info() << "\r\033[0K";
+			Logger::info() << "Fetching revisions... " << revision->id() << flush;
+		} else {
+			if (progress != this->progress()) {
+				progress = this->progress();
+				Logger::status() << "\r\033[0K";
+				Logger::status() << "Fetching revisions... " << progress << "%" << flush;
+			}
+		}
+		delete revision;
+	}
+
+	Logger::status() << "\r\033[0K";
+	Logger::status() << "Fetching revisions... done" << endl;
+
+	try {
+		m_backend->finalize();
+	} catch (const PepperException &ex) {
+		return LuaHelpers::pushError(L, ex.what(), ex.where());
+	}
+	return 0;
 }

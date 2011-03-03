@@ -57,9 +57,10 @@ Lunar<Repository>::RegType Repository::methods[] = {
 	LUNAR_DECLARE_METHOD(Repository, tags),
 	LUNAR_DECLARE_METHOD(Repository, tree),
 	LUNAR_DECLARE_METHOD(Repository, revision),
-	LUNAR_DECLARE_METHOD(Repository, walk_branch),
+	LUNAR_DECLARE_METHOD(Repository, iterator),
 
 	LUNAR_DECLARE_METHOD(Repository, main_branch),
+	LUNAR_DECLARE_METHOD(Repository, walk_branch),
 	{0,0}
 };
 
@@ -159,6 +160,35 @@ int Repository::revision(lua_State *L)
 	return LuaHelpers::push(L, rev); // TODO: Memory leak!
 }
 
+int Repository::iterator(lua_State *L)
+{
+	if (lua_gettop(L) < 1 || lua_gettop(L) > 3) {
+		return luaL_error(L, "Invalid number of arguments (1 to 3 expected)");
+	}
+
+	std::string branch;
+	int64_t start = -1, end = -1;
+	switch (lua_gettop(L)) {
+		case 3: end = LuaHelpers::popi(L);
+		case 2: start = LuaHelpers::popi(L);
+		case 1: branch = LuaHelpers::pops(L);
+		default: break;
+	}
+
+	RevisionIterator *it = NULL;
+	try {
+		it = new RevisionIterator(m_backend, branch, start, end);
+	} catch (const PepperException &ex) {
+		return LuaHelpers::pushError(L, ex.what(), ex.where());
+	}
+	return LuaHelpers::push(L, it);
+}
+
+int Repository::main_branch(lua_State *L)
+{
+	return default_branch(L);
+}
+
 int Repository::walk_branch(lua_State *L)
 {
 	if (m_backend == NULL) return LuaHelpers::pushNil(L);
@@ -234,9 +264,4 @@ int Repository::walk_branch(lua_State *L)
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
 	}
 	return 0;
-}
-
-int Repository::main_branch(lua_State *L)
-{
-	return default_branch(L);
 }

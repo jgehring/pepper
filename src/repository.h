@@ -44,10 +44,11 @@ class Repository
 		int tags(lua_State *L);
 		int tree(lua_State *L);
 		int revision(lua_State *L);
-		int walk_branch(lua_State *L);
+		int iterator(lua_State *L);
 
 		// Compability methods
 		int main_branch(lua_State *L);
+		int walk_branch(lua_State *L);
 
 		static const char className[];
 		static Lunar<Repository>::RegType methods[];

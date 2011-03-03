@@ -37,10 +37,9 @@ function tree(id)
 --  @see pepper.revision
 function revision(id)
 
---- Calls <code>callback</code> for every revision in the given
---  <code>branch</code>.
---  @param callback The callback function
+--- Returns a revision iterator for the given branch.
 --  @param branch The name of the branch
 --  @param start Optional minimum timestamp for commits
 --  @param end Optional maximum timestamp for commits
-function walk_branch(callback, branch, start, end)
+--  @see pepper.iterator
+function iterator(branch, start, end)

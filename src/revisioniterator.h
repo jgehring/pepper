@@ -20,6 +20,8 @@
 
 #include "backend.h"
 
+#include "lunar/lunar.h"
+
 
 class RevisionIterator
 {
@@ -41,6 +43,17 @@ class RevisionIterator
 		std::queue<std::string> m_queue;
 		std::queue<std::string>::size_type m_total, m_consumed;
 		bool m_atEnd;
+
+	// Lua binding
+	public:
+		RevisionIterator(lua_State *L);
+
+		int next(lua_State *L);
+		int revisions(lua_State *L);
+		int map(lua_State *L);
+
+		static const char className[];
+		static Lunar<RevisionIterator>::RegType methods[];
 };
 
 
