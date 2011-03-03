@@ -44,7 +44,7 @@ function main()
 	-- Gather data
 	local repo = pepper.report.repository()
 	local branch = pepper.report.getopt("b,branch", repo:default_branch())
-	repo:walk_branch(callback, branch, os.time(start))
+	repo:iterator(branch, os.time(start)):map(callback)
 
 	-- Generate a data file
 	local names = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"}

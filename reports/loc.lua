@@ -66,7 +66,7 @@ function main()
 	-- Gather data
 	local repo = pepper.report.repository()
 	local branch = pepper.report.getopt("b, branch", repo:default_branch())
-	repo:walk_branch(count, branch)
+	repo:iterator(branch):map(count)
 
 	-- Sort loc data by date
 	local dates = {}

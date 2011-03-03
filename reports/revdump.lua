@@ -34,6 +34,6 @@ function main()
 		revdump(repo:revision(rev))
 	else
 		local branch = pepper.report.getopt("b,branch", repo:default_branch())
-		repo:walk_branch(revdump, branch)
+		repo:iterator(branch):map(revdump)
 	end
 end

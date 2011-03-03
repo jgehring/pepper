@@ -91,7 +91,7 @@ function main()
 	-- Gather data
 	local repo = pepper.report.repository()
 	local branch = pepper.report.getopt("b, branch", repo:default_branch())
-	repo:walk_branch(count, branch)
+	repo:iterator(branch):map(count)
 
 	-- Determine the largest directories (by current LOC)
 	local dirloc = {}
