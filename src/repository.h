@@ -48,7 +48,6 @@ class Repository
 
 		// Compability methods
 		int main_branch(lua_State *L);
-		int walk_branch(lua_State *L);
 
 		static const char className[];
 		static Lunar<Repository>::RegType methods[];

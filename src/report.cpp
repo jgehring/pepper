@@ -169,7 +169,35 @@ static int revision(lua_State *L)
 // Backwards compability with 0.1
 static int walk_branch(lua_State *L)
 {
-	return ReportContext::current()->repo->walk_branch(L);
+	if (lua_gettop(L) < 2 || lua_gettop(L) > 4) {
+		return luaL_error(L, "Invalid number of arguments (2 to 4 expected)");
+	}
+
+	std::string branch;
+	int64_t start = -1, end = -1;
+	switch (lua_gettop(L)) {
+		case 4: end = LuaHelpers::popi(L);
+		case 3: start = LuaHelpers::popi(L);
+		case 2: branch = LuaHelpers::pops(L);
+		default: break;
+	}
+
+	luaL_checktype(L, -1, LUA_TFUNCTION);
+	int callback = luaL_ref(L, LUA_REGISTRYINDEX);
+
+	// First, get an iterator
+	LuaHelpers::push(L, branch);
+	LuaHelpers::push(L, start);
+	LuaHelpers::push(L, end);
+	ReportContext::current()->repo->iterator(L);
+	RevisionIterator *it = LuaHelpers::popl<RevisionIterator>(L);
+
+	// Map callback function
+	lua_rawgeti(L, LUA_REGISTRYINDEX, callback);
+	it->map(L);
+
+	delete it;
+	return 0;
 }
 
 // Function table of the report library

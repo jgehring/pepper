@@ -60,7 +60,6 @@ Lunar<Repository>::RegType Repository::methods[] = {
 	LUNAR_DECLARE_METHOD(Repository, iterator),
 
 	LUNAR_DECLARE_METHOD(Repository, main_branch),
-	LUNAR_DECLARE_METHOD(Repository, walk_branch),
 	{0,0}
 };
 
@@ -187,81 +186,4 @@ int Repository::iterator(lua_State *L)
 int Repository::main_branch(lua_State *L)
 {
 	return default_branch(L);
-}
-
-int Repository::walk_branch(lua_State *L)
-{
-	if (m_backend == NULL) return LuaHelpers::pushNil(L);
-
-	if (lua_gettop(L) < 2 || lua_gettop(L) > 4) {
-		return luaL_error(L, "Invalid number of arguments (2 to 4 expected)");
-	}
-
-	std::string branch;
-	int64_t start = -1, end = -1;
-	switch (lua_gettop(L)) {
-		case 4: end = LuaHelpers::popi(L);
-		case 3: start = LuaHelpers::popi(L);
-		case 2: branch = LuaHelpers::pops(L);
-		default: break;
-	}
-
-	luaL_checktype(L, -1, LUA_TFUNCTION);
-	int callback = luaL_ref(L, LUA_REGISTRYINDEX);
-	lua_pop(L, 1);
-
-	Logger::status() << "Initializing iterator... " << flush;
-
-	RevisionIterator *it = NULL;
-	try {
-		it = new RevisionIterator(m_backend, branch, start, end);
-	} catch (const PepperException &ex) {
-		Logger::status() << "failed" << endl;
-		return LuaHelpers::pushError(L, ex.what(), ex.where());
-	}
-	Logger::status() << "done" << endl;
-
-	int progress = 0;
-	if (Logger::level() < Logger::Info) {
-		Logger::status() << "Fetching revisions... " << flush;
-	}
-	while (!it->atEnd()) {
-		Revision *revision = NULL;
-		try {
-			revision = m_backend->revision(it->next());
-		} catch (const PepperException &ex) {
-			delete it;
-			return LuaHelpers::pushError(L, ex.what(), ex.where());
-		}
-
-		PTRACE << "Fetched revision " << revision->id() << endl;
-
-		lua_rawgeti(L, LUA_REGISTRYINDEX, callback);
-		LuaHelpers::push(L, revision);
-		lua_call(L, 1, 1);
-		lua_pop(L, 1);
-
-		if (Logger::level() > Logger::Info) {
-			Logger::info() << "\r\033[0K";
-			Logger::info() << "Fetching revisions... " << revision->id() << flush;
-		} else {
-			if (progress != it->progress()) {
-				progress = it->progress();
-				Logger::status() << "\r\033[0K";
-				Logger::status() << "Fetching revisions... " << progress << "%" << flush;
-			}
-		}
-		delete revision;
-	}
-
-	Logger::status() << "\r\033[0K";
-	Logger::status() << "Fetching revisions... done" << endl;
-
-	delete it;
-	try {
-		m_backend->finalize();
-	} catch (const PepperException &ex) {
-		return LuaHelpers::pushError(L, ex.what(), ex.where());
-	}
-	return 0;
 }
