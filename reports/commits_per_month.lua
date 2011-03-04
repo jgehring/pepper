@@ -11,35 +11,27 @@ meta.options = {{"-bARG, --branch=ARG", "Select branch"}}
 
 -- Revision callback function
 function callback(r)
-	local date = os.date("*t", r:date())
-
-	if commits[date["month"]] == nil then
-		commits[date["month"]] = 0
-		changes[date["month"]] = 0
-	end
-	commits[date["month"]] = commits[date["month"]] + 1
-	changes[date["month"]] = changes[date["month"]] + #r:diffstat():files()
+	local month = os.date("*t", r:date())["month"]
+	commits[month] = commits[month] + 1
+	changes[month] = changes[month] + #r:diffstat():files()
 end
 
 -- Main report function
 function main()
-	local nowt = os.time()
-	now = os.date("*t", nowt)
-	commits = {}
-	changes = {}
+	local time = os.time()
+	local now = os.date("*t", time)
+	commits = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	changes = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 
 	-- Determine start of data collection: Twelve months ago
-	local start = os.date("*t", nowt)
+	local start = os.date("*t", time)
 	if start["month"] == 12 then
 		start["month"] = 1
 	else
 		start["year"] = start["year"] - 1
 		start["month"] = start["month"] + 1
 	end
-	start["day"] = 1
-	start["hour"] = 0
-	start["min"] = 0
-	start["sec"] = 0
+	start["day"] = 1; start["hour"] = 0; start["min"] = 0; start["sec"] = 0
 
 	-- Gather data
 	local repo = pepper.report.repository()
@@ -47,39 +39,33 @@ function main()
 	repo:iterator(branch, os.time(start)):map(callback)
 
 	-- Generate a data file
-	local names = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"}
-	local month = (now["month"] % 12) + 1
+	local date = start
+	date["month"] = (now["month"] % 12) + 1
 	local keys = {}
 	local values = {}
-	local i = 1
 	while true do
-		ncommits = 0
-		nchanges = 0
-		if commits[month] ~= nil then
-			ncommits = commits[month]
-			nchanges = changes[month]
-		end
+		ncommits = commits[date["month"]]
+		nchanges = changes[date["month"]]
+		print(date["month"])
 
 		-- Workaround: Place labels at every 2nd month only
-		if (i % 2) == 1 then
-			table.insert(keys, names[month])
+		if #keys == 0 or keys[#keys] == "" then
+			table.insert(keys, os.date("%B", os.time(date)))
 		else
 			table.insert(keys, "")
 		end
 		table.insert(values, {ncommits, nchanges})
 
-		if month == now["month"] then
+		if date["month"] == now["month"] then
 			break
 		end
-		month = (month % 12) + 1
-		i = i + 1
+		date["month"] = (date["month"] % 12) + 1
 	end
 
 	-- Generate graph
 	local p = pepper.gnuplot:new()
 	p:setup(800, 480)
 	p:set_title("Commits per Month (on " .. branch .. ")")
-
 	p:cmd([[
 set format y "%.0f"
 set yrange [0:*]
