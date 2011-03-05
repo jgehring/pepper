@@ -341,6 +341,20 @@ static lua_State *setupLua()
 	Lunar<Plot>::Register(L, "pepper");
 #endif
 
+	// Setup package path to include built-in modules
+	lua_getglobal(L, "package");
+	lua_getfield(L, -1, "path");
+	std::string path = LuaHelpers::pops(L);
+	std::vector<std::string> dirs = reportDirs();
+	for (size_t i = 0; i < dirs.size(); i++) {
+		path += ";";
+		path += dirs[i] + "/?.lua";
+	}
+	LuaHelpers::push(L, path);
+	lua_setfield(L, -2, "path");
+	lua_pop(L, 1);
+	PDEBUG << "Lua package path has been set to " << path << endl;
+
 	// Setup meta table
 	luaL_newmetatable(L, "meta");
 	lua_setglobal(L, "meta");
