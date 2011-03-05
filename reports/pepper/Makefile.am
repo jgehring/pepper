@@ -7,16 +7,8 @@
 # terms and conditions, or see http://www.gnu.org/licenses/.
 #
 
-SUBDIRS = pepper
+pkgdatadir = $(datadir)/@PACKAGE@/pepper
 
-# Bundled scripts
+# Bundled modules
 dist_pkgdata_DATA = \
-	authors.lua \
-	branches.lua \
-	commit_scatter.lua \
-	commits_per_month.lua \
-	diffstat.lua \
-	directories.lua \
-	filetypes.lua \
-	loc.lua \
-	shortlog.lua
+	plotutils.lua

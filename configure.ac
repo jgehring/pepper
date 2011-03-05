@@ -171,6 +171,7 @@ AC_CONFIG_FILES([
 	tests/diffstat/Makefile
 	tests/units/Makefile
 	reports/Makefile
+	reports/pepper/Makefile
 ])
 AC_OUTPUT()
 

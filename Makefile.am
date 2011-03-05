@@ -22,7 +22,8 @@ LUADOCS = \
 	docs/lua/revision.luadoc \
 	docs/lua/iterator.luadoc \
 	docs/lua/tag.luadoc \
-	docs/lua/utils.luadoc
+	docs/lua/utils.luadoc \
+	reports/pepper/plotutils.lua
 luadoc: $(LUADOCS)
 	luadoc -d luadoc --nofiles $(LUADOCS)
 
