@@ -348,6 +348,15 @@ static lua_State *setupLua()
 	return L;
 }
 
+// Checks if the given report is "executable", i.e. contains a main() function
+static bool isExecutable(lua_State *L)
+{
+	lua_getglobal(L, "main");
+	bool hasmain = (lua_type(L, -1) == LUA_TFUNCTION);
+	lua_pop(L, 1);
+	return hasmain;
+}
+
 // The actual report execution function
 // Error messages will be written to the given stream
 static int run(ReportContext *ctx, std::ostream &err)
@@ -371,11 +380,14 @@ static int run(ReportContext *ctx, std::ostream &err)
 	if (luaL_dofile(L, script.c_str()) != 0) {
 		err << "Error opening report: " << lua_tostring(L, -1) << std::endl;
 		ret = EXIT_FAILURE;
+	} else if (!isExecutable(L)) {
+		err << "Error opening report '" << script << "': Not executable" << std::endl;
+		ret = EXIT_FAILURE;
 	} else {
 		// Call the report function
 		lua_getglobal(L, "main");
 		if (lua_pcall(L, 0, 1, 0) != 0) {
-			err << "Error running report: " << lua_tostring(L, -1) << std::endl;
+			err << "Error running report '" << script << "': " << lua_tostring(L, -1) << std::endl;
 			ret = EXIT_FAILURE;
 		}
 	}
@@ -537,6 +549,13 @@ void listReports(std::ostream &out)
 			std::string path = builtin + "/" + reports[i];
 			if (luaL_dofile(L, path.c_str()) != 0) {
 				PDEBUG << "Error opening report at " << path << ": " << lua_tostring(L, -1) << endl;
+				lua_gc(L, LUA_GCCOLLECT, 0);
+				lua_close(L);
+				continue;
+			}
+
+			if (!isExecutable(L)) {
+				PDEBUG << "Skipping unexecutable report " << path << endl;
 				lua_gc(L, LUA_GCCOLLECT, 0);
 				lua_close(L);
 				continue;
