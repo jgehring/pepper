@@ -393,9 +393,6 @@ static int run(ReportContext *ctx, std::ostream &err)
 static std::vector<std::string> reportDirs()
 {
 	std::vector<std::string> dirs;
-#ifdef DATADIR
-	dirs.push_back(DATADIR);
-#endif
 
 	// Read the PEPPER_REPORTS environment variable
 	char *env = getenv("PEPPER_REPORTS");
@@ -410,6 +407,9 @@ static std::vector<std::string> reportDirs()
 		}
 	}
 
+#ifdef DATADIR
+	dirs.push_back(DATADIR);
+#endif
 	return dirs;
 }
 
