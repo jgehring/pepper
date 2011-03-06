@@ -6,9 +6,12 @@
 -- Script meta-data
 meta.title = "File types histogram"
 meta.description = "Histogram of the file types distribution"
-meta.graphical = true
 meta.options = {{"-rARG, --revision=ARG", "Select revision (defaults to HEAD)"},
                 {"-nARG", "Show the ARG most frequent file types"}}
+
+require "pepper.plotutils"
+pepper.plotutils.add_plot_options()
+
 
 -- Maps file extensions to languages
 extmap = {
@@ -123,7 +126,7 @@ function main()
 	end
 
 	local p = pepper.gnuplot:new()
-	p:setup(600, 300)
+	pepper.plotutils.setup_output(p, 600, 300)
 	if #rev > 0 then
 		p:set_title("File types (at " .. rev .. ")")
 	else

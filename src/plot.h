@@ -27,7 +27,6 @@ class Plot
 		~Plot();
 
 		int cmd(lua_State *L);
-		int setup(lua_State *L);
 		int set_output(lua_State *L);
 		int set_title(lua_State *L);
 		int set_xrange(lua_State *L);
@@ -37,8 +36,6 @@ class Plot
 		int plot_histogram(lua_State *L);
 
 		int flush(lua_State *L);
-
-		static void printOptions();
 
 	public:
 		static const char className[];

@@ -6,8 +6,11 @@
 -- Script meta-data
 meta.title = "Commits per Month"
 meta.description = "Histogramm of commit counts during the last twelve months"
-meta.graphical = true
 meta.options = {{"-bARG, --branch=ARG", "Select branch"}}
+
+require "pepper.plotutils"
+pepper.plotutils.add_plot_options()
+
 
 -- Revision callback function
 function callback(r)
@@ -64,10 +67,10 @@ function main()
 
 	-- Generate graph
 	local p = pepper.gnuplot:new()
-	p:setup(800, 480)
+	pepper.plotutils.setup_output(p, 800, 480)
 	p:set_title("Commits per Month (on " .. branch .. ")")
 	p:cmd([[
-set format y "%.0f"
+set format y "%'.0f"
 set yrange [0:*]
 set grid ytics
 set ytics scale 0 

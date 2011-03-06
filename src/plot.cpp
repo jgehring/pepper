@@ -38,7 +38,6 @@ static inline int64_t convepoch(int64_t t)
 const char Plot::className[] = "gnuplot";
 Lunar<Plot>::RegType Plot::methods[] = {
 	LUNAR_DECLARE_METHOD(Plot, cmd),
-	LUNAR_DECLARE_METHOD(Plot, setup),
 	LUNAR_DECLARE_METHOD(Plot, set_output),
 	LUNAR_DECLARE_METHOD(Plot, set_title),
 	LUNAR_DECLARE_METHOD(Plot, set_xrange),
@@ -82,47 +81,6 @@ Plot::~Plot()
 int Plot::cmd(lua_State *L)
 {
 	gcmd(LuaHelpers::pops(L));
-	return 0;
-}
-
-// Setup the plot, using commong plot options
-int Plot::setup(lua_State *L)
-{
-	int dwidth = 640, dheight = 480;
-	switch (lua_gettop(L)) {
-		case 2: dheight = LuaHelpers::popi(L);
-		case 1: dwidth = LuaHelpers::popi(L);
-		default: break;
-	}
-
-	// Use the report API to get the relevant option values
-	LuaHelpers::calls(L, "pepper.report.getopt", "o, output", "");
-	std::string file = LuaHelpers::pops(L);
-
-	LuaHelpers::calls(L, "pepper.report.getopt", "s, size", "");
-	std::vector<std::string> size = utils::split(LuaHelpers::pops(L), "x");
-
-	LuaHelpers::calls(L, "pepper.report.getopt", "t, type", "");
-	std::string terminal = LuaHelpers::pops(L);
-
-	int width = dwidth, height = dheight;
-	if (!size.empty()) {
-		utils::str2int(size[0], &width);
-		if (size.size() > 1) {
-			utils::str2int(size[1], &height);
-		} else {
-			float ratio = float(dheight) / float(dwidth);
-			height = int(ratio * width);
-		}
-	}
-
-	LuaHelpers::push(L, file);
-	LuaHelpers::push(L, width);
-	LuaHelpers::push(L, height);
-	if (!terminal.empty()) {
-		LuaHelpers::push(L, terminal);
-	}
-	set_output(L);
 	return 0;
 }
 
@@ -399,14 +357,6 @@ int Plot::flush(lua_State *L)
 		return LuaHelpers::pushError(L, ex.what());
 	}
 	return 0;
-}
-
-// Prints common plot-related command-line options
-void Plot::printOptions()
-{
-	Options::print("-oARG, --output=ARG", "Select output file");
-	Options::print("-tARG, --type=ARG", "Explicitly set image type");
-	Options::print("-sW[xH], --size=W[xH]", "Set image size to width W and height H");
 }
 
 // Sends a command to GNUPlot (and logs it)

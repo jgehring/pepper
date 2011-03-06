@@ -531,14 +531,6 @@ void printHelp(const std::string &script)
 	}
 	lua_pop(L, 1);
 
-	// If the report is a graphical one, print extra options related
-	// to the plot output
-	lua_getfield(L, -1, "graphical");
-	if (lua_type(L, -1) == LUA_TBOOLEAN && LuaHelpers::topb(L)) {
-		Plot::printOptions();
-	}
-	lua_pop(L, 1);
-
 	lua_gc(L, LUA_GCCOLLECT, 0);
 	lua_close(L);
 }

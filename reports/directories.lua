@@ -6,12 +6,12 @@
 -- Script meta-data
 meta.title = "Directories"
 meta.description = "Directory sizes"
-meta.graphical = true
 meta.options = {{"-bARG, --branch=ARG", "Select branch"},
                 {"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with a regular expression"},
                 {"-nARG", "Show the ARG largest directories"}}
 
 require "pepper.plotutils"
+pepper.plotutils.add_plot_options()
 
 
 -- Returns the dirname() of a file
@@ -61,7 +61,7 @@ function main()
 
 	-- Gather data
 	local repo = pepper.report.repository()
-	local branch = pepper.report.getopt("b, branch", repo:default_branch())
+	local branch = pepper.report.getopt("b,branch", repo:default_branch())
 	repo:iterator(branch):map(count)
 
 	-- Determine the largest directories (by current LOC)
@@ -115,14 +115,14 @@ function main()
 	end
 
 	local p = pepper.gnuplot:new()
-	p:setup(600, 480)
+	pepper.plotutils.setup_output(p)
+	pepper.plotutils.setup_std_time(p, {key = "below"})
 	p:set_title("Directory Sizes (on " .. branch .. ")")
 
 	if pepper.report.getopt("tags") ~= nil then
 		pepper.plotutils.add_tagmarks(p, repo, pepper.report.getopt("tags", "*"))
 	end
 
-	pepper.plotutils.setup_std_time(p, {key = "below"})
 	p:set_xrange_time(keys[1], keys[#keys])
 	p:plot_series(keys, series, directories)
 end

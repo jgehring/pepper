@@ -6,8 +6,10 @@
 -- Script meta-data
 meta.title = "Commit Scatter"
 meta.description = "Scatter plot of commit activity"
-meta.graphical = true
 meta.options = {{"-bARG, --branch=ARG", "Select branch"}}
+
+require "pepper.plotutils"
+pepper.plotutils.add_plot_options()
 
 -- Revision callback function
 function callback(r)
@@ -32,21 +34,15 @@ function main()
 
 	-- Generate graph
 	local p = pepper.gnuplot:new()
-	p:setup(600, 200)
-	p:set_title("Commit Activity (on " .. branch .. ")")
+	pepper.plotutils.setup_output(p, 640, 240)
+	pepper.plotutils.setup_std_time(p)
+	p:set_title("Commit Times (on " .. branch .. ")")
 
 	p:cmd([[
-set xdata time
-set timefmt "%s"
-set format x "%b %y"
-set format y "%'.0f"
 set yrange [0:24]
 set ytics 6
-set xtics nomirror
-set xtics rotate by -45
-set rmargin 8
 set grid
-set pointsize 0.1
+set pointsize 1
 ]])
 	p:set_xrange_time(dates[1], dates[#dates])
 	p:plot_series(dates, daytimes, {}, "dots")

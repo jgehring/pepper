@@ -6,12 +6,12 @@
 -- Script meta-data
 meta.title = "Code contribution by authors"
 meta.description = "Contributed lines of code by authors"
-meta.graphical = true
 meta.options = {{"-bARG, --branch=ARG", "Select branch"},
                 {"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with a regular expression"},
                 {"-nARG", "Show the ARG busiest authors"}}
 
 require "pepper.plotutils"
+pepper.plotutils.add_plot_options()
 
 
 -- Revision callback function
@@ -96,14 +96,14 @@ function main()
 	end
 
 	local p = pepper.gnuplot:new()
-	p:setup(600, 480)
+	pepper.plotutils.setup_output(p)
+	pepper.plotutils.setup_std_time(p, {key = "below"})
 	p:set_title("Contributed Lines of Code by Author (on " .. branch .. ")")
 
 	if pepper.report.getopt("tags") ~= nil then
 		pepper.plotutils.add_tagmarks(p, repo, pepper.report.getopt("tags", "*"))
 	end
 
-	pepper.plotutils.setup_std_time(p, {key = "below"})
 	p:set_xrange_time(keys[1], keys[#keys])
 	p:plot_series(keys, series, authors)
 end
