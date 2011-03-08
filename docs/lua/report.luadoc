@@ -34,6 +34,6 @@ function revision(id)
 
 --- Calls <code>callback</code> for every revision in the given
 --  <code>branch</code>.
---  @deprecated Please use pepper.repository:walk_branch()
+--  @deprecated Please use pepper.repository:iterator()
 --  @see pepper.repository
 function walk_branch(callback, branch)

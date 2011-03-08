@@ -7,8 +7,16 @@
 module("pepper.plotutils", package.seeall)
 
 
---- Adds common options for graphical reports to <code>meta.options</code>
+--- Adds common options for graphical reports to <code>meta.options</code>.
+--  The following options will be added:
+--  <table>
+--  <tr><th>Option</th><th>Description</th></tr>
+--  <tr><td>-oARG, --output=ARG</td><td>Select output file</td></tr>
+--  <tr><td>-tARG, --type=ARG</td><td>Explicitly set image type</td></tr>
+--  <tr><td>-sW[xH], --size=W[xH]</td><td>Set image size to width W and height H</td></tr>
+--  </table>
 function add_plot_options()
+	if meta.options == nil then meta.options = {} end
 	table.insert(meta.options, {"-oARG, --output=ARG", "Select output file"})
 	table.insert(meta.options, {"-tARG, --type=ARG", "Explicitly set image type"})
 	table.insert(meta.options, {"-sW[xH], --size=W[xH]", "Set image size to width W and height H"})
