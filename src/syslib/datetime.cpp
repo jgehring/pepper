@@ -13,6 +13,8 @@
 
 #include "main.h"
 
+#include <cstring>
+
 #include <sys/time.h>
 
 #include "datetime.h"
@@ -67,13 +69,13 @@ int Watch::elapsedMSecs() const
 // Wrapper for strptime()
 int64_t ptime(const std::string &str, const std::string &format)
 {
-	struct tm tm;
-	if (strptime(str.c_str(), format.c_str(), &tm) == NULL) {
-		return -1;
+	struct tm time;
+	memset(&time, 0x00, sizeof(struct tm));
+	if (strptime(str.c_str(), format.c_str(), &time) == NULL) {
+		throw PEX(std::string("Error parsing time '" + str + "' with format '" + format + "'"));
 	}
-	return mktime(&tm);
+	return mktime(&time);
 }
-
 
 } // namespace datetime
 
