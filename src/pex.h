@@ -15,6 +15,7 @@
 #define PEX_H_
 
 
+#include <cerrno>
 #include <exception>
 #include <string>
 
