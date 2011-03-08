@@ -401,7 +401,7 @@ static int run(ReportContext *ctx, std::ostream &err)
 		// Call the report function
 		lua_getglobal(L, "main");
 		if (lua_pcall(L, 0, 1, 0) != 0) {
-			err << "Error running report '" << script << "': " << lua_tostring(L, -1) << std::endl;
+			err << "Error running report: " << lua_tostring(L, -1) << std::endl;
 			ret = EXIT_FAILURE;
 		}
 	}
