@@ -175,6 +175,8 @@ Backend::LogIterator *MercurialBackend::iterator(const std::string &branch, int6
 		} else {
 			date = utils::strprintf("\">%lld 0\"", start);
 		}
+	} else if (end >= 0) {
+		date = utils::strprintf("\"<%lld 0\"", end);
 	}
 
 	// Request log from HEAD to 0, so follow_first is effective

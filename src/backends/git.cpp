@@ -402,7 +402,12 @@ Backend::LogIterator *GitBackend::iterator(const std::string &branch, int64_t st
 			out = sys::io::exec(&ret, m_git.c_str(), "rev-list", "--first-parent", "--reverse", maxage.c_str(), branch.c_str(), "--");
 		}
 	} else {
-		out = sys::io::exec(&ret, m_git.c_str(), "rev-list", "--first-parent", "--reverse", branch.c_str(), "--");
+		if (end >= 0) {
+			std::string minage = utils::strprintf("--min-age=%lld", end);
+			out = sys::io::exec(&ret, m_git.c_str(), "rev-list", "--first-parent", "--reverse", minage.c_str(), branch.c_str(), "--");
+		} else {
+			out = sys::io::exec(&ret, m_git.c_str(), "rev-list", "--first-parent", "--reverse", branch.c_str(), "--");
+		}
 	}
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retrieve log for branch '%s' (%d)", branch.c_str(), ret));
