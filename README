@@ -101,8 +101,12 @@ being passed as a program option.
 
 Here's a brief listing:
 
+	* activity
+	A port of the Mercurial activity extension by Thomas Capricelli.
+	Plots a smooth curve to visualize the activity of the repository.
+
 	* authors
-	Plots the contributed lines of code of the 6 busiest authors.
+	Plots the contributed lines of code of the busiest authors.
 
 	* branches
 	Prints all repository branches, similar to "git branch -a".
@@ -113,20 +117,20 @@ Here's a brief listing:
 	* commits_per_month
 	Plots a histogram of the commits during the last 12 months.
 	
+	* diffstat
+	Prints a diffstat of a given revision.
+
+	* directories
+	Plots the directory sizes for the largest directories.
+
+	* filetypes
+	Plots a histogram visualizing the number of files per type.
+
 	* loc
 	Plots the lines of code for a given branch.
 
 	* shortlog
 	Prints a revision log to stdout, similar to "git shortlog".
-
-	* diffstat
-	Prints a diffstat of a given revision.
-
-	* directories
-	Plots the directory sizes for the 6 largest directories.
-
-	* filetypes
-	Plots a histogram visualizing the number of files per type.
 
 
 License

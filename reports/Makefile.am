@@ -11,6 +11,7 @@ SUBDIRS = pepper
 
 # Bundled scripts
 dist_pkgdata_DATA = \
+	activity.lua \
 	authors.lua \
 	branches.lua \
 	commit_scatter.lua \
