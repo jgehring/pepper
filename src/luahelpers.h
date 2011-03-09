@@ -142,7 +142,8 @@ inline int pushNil(lua_State *L) {
 }
 
 inline int pushError(lua_State *L, const std::string &e) {
-	return luaL_error(L, e.c_str());
+	// Make sure that the string is passed properly
+	return luaL_error(L, "%s", e.c_str());
 }
 
 inline int pushError(lua_State *L, const char *what, const char *where) {
