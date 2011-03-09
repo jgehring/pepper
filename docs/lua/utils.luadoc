@@ -3,16 +3,26 @@
 module "pepper.utils"
 
 
---- Opens a unique temporary file
+--- Opens a unique temporary file.
 -- @param template An optional filename template
 -- @return A pair containing the file handle and the file name
 function mkstemp(template)
 
---- Removes a file
+--- Removes a file.
 -- @param path The path to the file
 function unlink(path)
 
---- Splits the given string
+--- Splits the given string.
 -- @param string The string
 -- @param pattern A pattern specifying the split points (not a regular expression)
 function split(string, pattern)
+
+--- Wrapper for strptime(3).
+--  The C function strprime(3) can parse string representations of time. The
+--  time format will be passed directly to strptime(3), so you can check the
+--  <a href="http://www.kernel.org/doc/man-pages/online/pages/man3/strptime.3.html">corresponding man page</a>
+--  for a possible field specifiers.
+--  @param s String describing a time
+--  @param format Time format
+--  @return A UNIX timestamp
+function strptime(s, format)

@@ -34,6 +34,7 @@
  #include "plot.h"
 #endif
 
+#include "syslib/datetime.h"
 #include "syslib/fs.h"
 
 #include "report.h"
@@ -279,12 +280,25 @@ static int utils_split(lua_State *L)
 	return LuaHelpers::push(L, utils::split(string, pattern));
 }
 
+// Wrapper for strptime
+static int utils_strptime(lua_State *L)
+{
+	if (lua_gettop(L) != 2) {
+		return luaL_error(L, "Invalid number of arguments (2 expected)");
+	}
+
+	std::string format = LuaHelpers::pops(L);
+	std::string str = LuaHelpers::pops(L);
+	return LuaHelpers::push(L, sys::datetime::ptime(str, format));
+}
+
 // Function table of the utils library
 static const struct luaL_reg utils[] = {
 	// TODO: Error handling for all functions
 	{"mkstemp", utils_mkstemp},
 	{"unlink", utils_unlink},
 	{"split", utils_split},
+	{"strptime", utils_strptime},
 	{NULL, NULL}
 };
 
