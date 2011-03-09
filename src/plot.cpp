@@ -347,7 +347,7 @@ int Plot::plot_histogram(lua_State *L)
 	// Validate arguments
 	int index = -1;
 	if (lua_gettop(L) > 4) {
-		return LuaHelpers::pushError(L, utils::strprintf("Invalid number of arguments (expected 2-3, got %d)", lua_gettop(L)));
+		return LuaHelpers::pushError(L, utils::strprintf("Invalid number of arguments (expected 2-4, got %d)", lua_gettop(L)));
 	}
 	std::string style = "";
 	switch (lua_gettop(L)) {

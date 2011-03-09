@@ -56,7 +56,7 @@ function main()
 	local branch = pepper.report.getopt("b,branch", repo:default_branch())
 	repo:iterator(branch):map(callback)
 
-	-- Determine the 6 "busiest" authors (by LOC)
+	-- Determine the "busiest" authors (by LOC)
 	local authorloc = {}
 	for k,v in pairs(authors) do
 		table.insert(authorloc, {k, v})
