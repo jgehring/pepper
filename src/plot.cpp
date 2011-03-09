@@ -43,6 +43,7 @@ Lunar<Plot>::RegType Plot::methods[] = {
 	LUNAR_DECLARE_METHOD(Plot, set_xrange),
 	LUNAR_DECLARE_METHOD(Plot, set_xrange_time),
 	LUNAR_DECLARE_METHOD(Plot, plot_series),
+	LUNAR_DECLARE_METHOD(Plot, plot_multi_series),
 	LUNAR_DECLARE_METHOD(Plot, plot_histogram),
 	LUNAR_DECLARE_METHOD(Plot, flush),
 	{0,0}
@@ -253,6 +254,90 @@ int Plot::plot_series(lua_State *L)
 	}
 	PDEBUG << "Running plot with command: " << cmd.str() << endl;
 	gcmd(cmd.str());
+	return 0;
+}
+
+// Plots multiple XY series
+int Plot::plot_multi_series(lua_State *L)
+{
+	// Validate arguments
+	int index = -1;
+	if (lua_gettop(L) > 4) {
+		return LuaHelpers::pushError(L, utils::strprintf("Invalid number of arguments (expected 2-4, got %d)", lua_gettop(L)));
+	}
+	std::string style = "lines";
+	switch (lua_gettop(L)) {
+		case 4: style = LuaHelpers::pops(L);
+		case 3: luaL_checktype(L, index--, LUA_TTABLE);
+		default:
+			luaL_checktype(L, index--, LUA_TTABLE);
+			luaL_checktype(L, index--, LUA_TTABLE);
+			break;
+	}
+
+	// First, read the keys (at index)
+	++index;
+	size_t nseries = LuaHelpers::tablesize(L, index);
+
+	std::string *files = new std::string[nseries];
+
+	for (size_t i = 0; i < nseries; i++) {
+		std::ofstream out;
+		files[i] = g->create_tmpfile(out);
+
+		// Read keys
+		lua_rawgeti(L, index, i+1);
+		std::vector<double> keys = LuaHelpers::popvd(L);
+
+		// Check number of values
+		++index;
+		lua_rawgeti(L, index, i+1);
+		if (LuaHelpers::tablesize(L) != keys.size()) {
+			return LuaHelpers::pushError(L, utils::strprintf("Number of keys and values doesn't match (%d != %d)", LuaHelpers::tablesize(L, index), keys.size()));
+		}
+
+		// Avoid copying values via popvd() and read the directly
+		luaL_checktype(L, -1, LUA_TTABLE);
+		lua_pushvalue(L, -1);
+		lua_pushnil(L);
+		size_t j = 0;
+		while (lua_next(L, -2) != 0) {
+			out << keys[j++] << " " << LuaHelpers::popd(L) << std::endl;
+		}
+		lua_pop(L, 2);
+
+		out.flush();
+		out.close();
+
+		// Reset index back to keys
+		--index;
+	}
+
+	// Read titles (if any)
+	index += 2;
+	std::vector<std::string> titles;
+	if (index < 0) {
+		titles = LuaHelpers::topvs(L, index);
+	}
+
+	std::ostringstream cmd;
+	cmd << "plot ";
+	for (size_t i = 0; i < nseries; i++) {
+		cmd << "\"" << files[i] << "\" using 1:2";
+		if (titles.size() > i) {
+			cmd << " title \"" << titles[i] << "\"";
+		} else {
+			cmd << " notitle";
+		}
+		cmd << " with " << style;
+		if (i < nseries-1) {
+			cmd << ", ";
+		}
+	}
+	PDEBUG << "Running plot with command: " << cmd.str() << endl;
+	gcmd(cmd.str());
+
+	delete[] files;
 	return 0;
 }
 

@@ -33,6 +33,7 @@ class Plot
 		int set_xrange_time(lua_State *L);
 
 		int plot_series(lua_State *L);
+		int plot_multi_series(lua_State *L);
 		int plot_histogram(lua_State *L);
 
 		int flush(lua_State *L);

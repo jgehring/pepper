@@ -39,6 +39,16 @@ function set_xrange_time(min, max)
 --  @param style Optional style for plotting (defaults to "lines")
 function plot_series(keys, values, titles, style)
 
+--- Plots multiple data series.
+--  The <code>keys</code> and <code>values</code> are arrays of the same
+--  size, each containing the same number of series. Each series (a pair
+--  of keys and values) will be plotted into the same graph.
+--  @param keys The series array with X values
+--  @param values The series array with Y values
+--  @param titles Optional titles for the series
+--  @param style Optional style for plotting (defaults to "lines")
+function plot_multi_series(keys, values, titles, style)
+
 --- Plots a histogram bar chart from data sequences.
 --  The <code>values</code> parameter may contain multiple Y values per
 --  entry, i.e. it can be a two-dimensional array.
