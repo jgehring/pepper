@@ -289,7 +289,13 @@ static int utils_strptime(lua_State *L)
 
 	std::string format = LuaHelpers::pops(L);
 	std::string str = LuaHelpers::pops(L);
-	return LuaHelpers::push(L, sys::datetime::ptime(str, format));
+	int64_t time;
+	try {
+		time = sys::datetime::ptime(str, format);
+	} catch (const std::exception &ex) {
+		return LuaHelpers::pushError(L, ex.what());
+	}
+	return LuaHelpers::push(L, time);
 }
 
 // Function table of the utils library
