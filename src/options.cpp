@@ -157,7 +157,7 @@ void Options::printHelp(std::ostream &out)
 	print("-bARG, --backend=ARG", "Force usage of backend named ARG", out);
 	print("--no-cache", "Disable revision cache usage", out);
 	out << std::endl;
-	print("--list-reports", "List built-in report scrtips", out);
+	print("-l, --list-reports", "List built-in report scrtips", out);
 	print("--list-backends", "List available backends", out);
 }
 
@@ -242,10 +242,21 @@ void Options::parse(const std::vector<std::string> &args)
 
 	// Parse report options
 	while (i < args.size()) {
-		if (parseOpt(args[i], &key, &value)) {
-			m_reportOptions[key] = value;
-		} else {
-			break;
+		bool ok = false;
+		for (unsigned int j = 0; j < sizeof(mainopts) / sizeof(option_t); j++) {
+			if (args[i] == mainopts[j].flag) {
+				m_options[mainopts[j].key] = mainopts[j].value;
+				ok = true;
+				break;
+			}
+		}
+
+		if (!ok) {
+			if (parseOpt(args[i], &key, &value)) {
+				m_reportOptions[key] = value;
+			} else {
+				break;
+			}
 		}
 		++i;
 	}
@@ -257,6 +268,16 @@ void Options::parse(const std::vector<std::string> &args)
 		} catch (...) {
 			m_options["repository"] = args[i];
 		}
+	}
+
+	// Parse additional options
+	while (i < args.size()) {
+		for (unsigned int j = 0; j < sizeof(mainopts) / sizeof(option_t); j++) {
+			if (args[i] == mainopts[j].flag) {
+				m_options[mainopts[j].key] = mainopts[j].value;
+			}
+		}
+		++i;
 	}
 }
 

@@ -144,6 +144,21 @@ TEST_CASE("options/cmdlines", "Command line parsing")
 	norepo.options["repository"] = sys::fs::cwd();
 	tests.push_back(norepo);
 
+	data_t rhelp(defaults);
+	rhelp.setupArgs(2, "loc", "-h");
+	rhelp.options["report"] = "loc";
+	rhelp.options["repository"] = sys::fs::cwd();
+	rhelp.options["help"] = "true";
+	tests.push_back(rhelp);
+
+	data_t rhelp2(defaults);
+	rhelp2.setupArgs(4, "-bsvn", "loc", "http://svn.example.org", "-h");
+	rhelp2.options["backend"] = "svn";
+	rhelp2.options["report"] = "loc";
+	rhelp2.options["repository"] = "http://svn.example.org";
+	rhelp2.options["help"] = "true";
+	tests.push_back(rhelp2);
+
 	// Run tests
 	for (std::vector<data_t>::size_type i = 0;  i < tests.size(); i++) {
 		Options opts;
