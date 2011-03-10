@@ -80,7 +80,9 @@ endif
 
 if SVN_BACKEND
 pepper_SOURCES += \
-	backends/subversion.h backends/subversion.cpp
+	backends/subversion.h backends/subversion.cpp \
+	backends/subversion_p.h \
+	backends/subversion_delta.cpp
 AM_CPPFLAGS += \
 	-DUSE_SUBVERSION $(APR_CPPFLAGS) $(APR_INCLUDES)
 AM_CXXFLAGS += \

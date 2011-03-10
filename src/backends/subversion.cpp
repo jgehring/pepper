@@ -24,7 +24,6 @@
 #include <svn_fs.h>
 #include <svn_path.h>
 #include <svn_pools.h>
-#include <svn_props.h>
 #include <svn_ra.h>
 #include <svn_sorts.h>
 #include <svn_time.h>
@@ -40,665 +39,164 @@
 #include "syslib/parallel.h"
 
 #include "backends/subversion.h"
+#include "backends/subversion_p.h"
 
 
-// Private Subversion repository connection class
-class SvnConnection
+// Constructor
+SvnConnection::SvnConnection()
+	: pool(NULL), ctx(NULL), ra(NULL), url(NULL), root(NULL)
 {
-public:
-	SvnConnection()
-		: pool(NULL), ctx(NULL), ra(NULL), url(NULL), root(NULL)
-	{
-	}
+}
 
-	~SvnConnection()
-	{
-		if (pool) {
-			svn_pool_destroy(pool);
-		}
-	}
-
-	// Opens the connection to the Subversion repository
-	void open(const std::string &url, const std::map<std::string, std::string> &options)
-	{
-		PTRACE << "Opening connection to " << url << endl;
-
-		pool = svn_pool_create(NULL);
-		init();
-
-		// Canoicalize the repository URL
-		this->url = svn_path_uri_encode(svn_path_canonicalize(url.c_str(), pool), pool);
-
-		svn_error_t *err;
-		// Create the client context
-		if ((err = svn_client_create_context(&ctx, pool))) {
-			throw PEX(strerr(err));
-		}
-		if ((err = svn_config_get_config(&(ctx->config), NULL, pool))) {
-			throw PEX(strerr(err));
-		}
-
-		// Setup the authentication data
-		svn_auth_baton_t *auth_baton;
-		svn_config_t *config = hashget<svn_config_t *>(ctx->config, SVN_CONFIG_CATEGORY_CONFIG);
-		const char *user = NULL, *pass = NULL;
-		if (options.find("username") != options.end()) {
-			user = apr_pstrdup(pool, options.find("username")->second.c_str());
-		}
-		if (options.find("password") != options.end()) {
-			pass = apr_pstrdup(pool, options.find("password")->second.c_str());
-		}
-		if ((err = svn_cmdline_setup_auth_baton(&auth_baton, (options.find("non-interactive") != options.end()), user, pass, NULL, (options.find("no-auth-cache") != options.end()), config, NULL, NULL, pool))) {
-			throw PEX(strerr(err));
-		}
-		ctx->auth_baton = auth_baton;
-
-		// Setup the RA session
-		if ((err = svn_client_open_ra_session(&ra, this->url, ctx, pool))) {
-			throw PEX(strerr(err));
-		}
-
-		// Determine the repository root
-		if ((err = svn_ra_get_repos_root2(ra, &root, pool))) {
-			throw PEX(strerr(err));
-		}
-	}
-
-	// Opens the connection to the Subversion repository, using the client context
-	// of the given parent connection
-	void open(SvnConnection *parent)
-	{
-		if (parent->ctx == NULL) {
-			throw PEX("Parent connection not open yet.");
-		}
-
-		PTRACE << "Opening child connection to " << parent->url << endl;
-
-		pool = svn_pool_create(NULL);
-		init();
-
-		// Copy connection data from parent
-		ctx = parent->ctx;
-		url = apr_pstrdup(pool, parent->url);
-		root = apr_pstrdup(pool, parent->root);
-
-		// Setup the RA session
-		svn_error_t *err;
-		if ((err = svn_client_open_ra_session(&ra, url, ctx, pool))) {
-			throw PEX(strerr(err));
-		}
-	}
-
-	static std::string strerr(svn_error_t *err)
-	{
-		// Similar to svn_handle_error2(), but returns the error description as a std::string
-		apr_pool_t *subpool;
-		svn_error_t *tmp_err;
-		apr_array_header_t *empties;
-
-		apr_pool_create(&subpool, NULL);
-		empties = apr_array_make(subpool, 0, sizeof(apr_status_t));
-
-		std::string str;
-		tmp_err = err;
-		while (tmp_err) {
-			int i;
-			bool printed_already = false;
-
-			if (!tmp_err->message) {
-				for (i = 0; i < empties->nelts; i++) {
-					if (tmp_err->apr_err == APR_ARRAY_IDX(empties, i, apr_status_t)) {
-						printed_already = true;
-						break;
-					}
-				}
-			}
-
-			if (!printed_already) {
-				char errbuf[256];
-				const char *err_string;
-				svn_error_t *tmp_err2 = NULL;
-
-				if (tmp_err->message) {
-					if (!str.empty()) {
-						str += ", ";
-					}
-					str += std::string(tmp_err->message);
-				} else {
-					if ((tmp_err->apr_err > APR_OS_START_USEERR) && (tmp_err->apr_err <= APR_OS_START_CANONERR)) {
-						err_string = svn_strerror(tmp_err->apr_err, errbuf, sizeof(errbuf));
-					} else if ((tmp_err2 = svn_utf_cstring_from_utf8(&err_string, apr_strerror(tmp_err->apr_err, errbuf, sizeof(errbuf)), tmp_err->pool))) {
-						svn_error_clear(tmp_err2);
-						err_string = "Can't recode error string from APR";
-					}
-					if (!str.empty()) {
-						str += ", ";
-					}
-					str += std::string(err_string);
-					APR_ARRAY_PUSH(empties, apr_status_t) = tmp_err->apr_err;
-				}
-			}
-
-			tmp_err = tmp_err->child;
-		}
-
-		apr_pool_destroy(subpool);
-		return str;
-	}
-
-private:
-	void init()
-	{
-		svn_error_t *err;
-		if ((err = svn_fs_initialize(pool))) {
-			throw PEX(strerr(err));
-		}
-		if ((err = svn_ra_initialize(pool))) {
-			throw PEX(strerr(err));
-		}
-		if ((err = svn_config_ensure(NULL, pool))) {
-			throw PEX(strerr(err));
-		}
-	}
-
-	template <typename T>
-	static T hashget(apr_hash_t *hash, const char *key)
-	{
-		return static_cast<T>(apr_hash_get(hash, key, APR_HASH_KEY_STRING));
-	}
-
-public:
-	apr_pool_t *pool;
-	svn_client_ctx_t *ctx;
-	svn_ra_session_t *ra;
-	const char *url, *root;
-};
-
-
-// streambuf implementation for apr_file_t
-class AprStreambuf : public std::streambuf
+// Destructor
+SvnConnection::~SvnConnection()
 {
-public:
-	explicit AprStreambuf(apr_file_t *file) 
-		: std::streambuf(), f(file), m_putback(8), m_buffer(4096 + 8)
-	{
-		char *end = &m_buffer.front() + m_buffer.size();
-		setg(end, end, end);
+	if (pool) {
+		svn_pool_destroy(pool);
 	}
+}
 
-private:
-	int_type underflow()
-	{
-		if (gptr() < egptr()) // buffer not exhausted
-			return traits_type::to_int_type(*gptr());
-
-		char *base = &m_buffer.front();
-		char *start = base;
-
-		if (eback() == base) // true when this isn't the first fill
-		{
-			// Make arrangements for putback characters
-			memmove(base, egptr() - m_putback, m_putback);
-			start += m_putback;
-		}
-
-		// start is now the start of the buffer, proper.
-		// Read from fptr_ in to the provided buffer
-		size_t n = m_buffer.size() - (start - base);
-		apr_file_read(f, start, &n);
-		if (n == 0)
-			return traits_type::eof();
-
-		// Set buffer pointers
-		setg(base, start, start + n);
-
-		return traits_type::to_int_type(*gptr());
-	}
-
-private:
-	apr_file_t *f;
-	const std::size_t m_putback;
-	std::vector<char> m_buffer;
-
-private:
-	// Not allowed
-	AprStreambuf(const AprStreambuf &);
-	AprStreambuf &operator=(const AprStreambuf &);
-};
-
-
-// Diffstat generator thread
-class SvnDiffstatThread : public sys::parallel::Thread
+// Opens the connection to the Subversion repository
+void SvnConnection::open(const std::string &url, const std::map<std::string, std::string> &options)
 {
-public:
-	// Baton for delta editor
-	struct Baton
-	{
-		const char *target;
-		apr_file_t *out;
+	PTRACE << "Opening connection to " << url << endl;
 
-		svn_ra_session_t *ra;
-		svn_revnum_t revision;
-		svn_revnum_t target_revision;
-		const char *empty_file;
-		apr_hash_t *deleted_paths;
+	pool = svn_pool_create(NULL);
+	init();
 
-		apr_pool_t *pool;
-	};
+	// Canoicalize the repository URL
+	this->url = svn_path_uri_encode(svn_path_canonicalize(url.c_str(), pool), pool);
 
-	struct DirBaton
-	{
-		const char *path;
-		DirBaton *dir_baton;
-
-		Baton *edit_baton;
-		apr_pool_t *pool;
-
-		static DirBaton *make(const char *path, DirBaton *parent_baton, Baton *edit_baton, apr_pool_t *pool)
-		{
-			DirBaton *dir_baton = (DirBaton *)apr_pcalloc(pool, sizeof(DirBaton));
-
-			dir_baton->dir_baton = parent_baton;
-			dir_baton->edit_baton = edit_baton;
-			dir_baton->pool = pool;
-			dir_baton->path = apr_pstrdup(pool, path);
-			return dir_baton;
-		}
-	};
-
-	struct FileBaton
-	{
-		const char *path;
-		const char *path_start_revision;
-		apr_file_t *file_start_revision;
-		apr_hash_t *pristine_props;
-		apr_array_header_t *propchanges;
-		const char *path_end_revision;
-		apr_file_t *file_end_revision;
-		svn_txdelta_window_handler_t apply_handler;
-		void *apply_baton;
-
-		Baton *edit_baton;
-		apr_pool_t *pool;
-
-		static FileBaton *make(const char *path, void *edit_baton, apr_pool_t *pool)
-		{
-			FileBaton *file_baton = (FileBaton *)apr_pcalloc(pool, sizeof(FileBaton));
-			Baton *eb = static_cast<Baton *>(edit_baton);
-
-			file_baton->edit_baton = eb;
-			file_baton->pool = pool;
-			file_baton->path = apr_pstrdup(pool, path);
-			file_baton->propchanges  = apr_array_make(pool, 1, sizeof(svn_prop_t));
-			return file_baton;
-		}
-	};
-
-public:
-	SvnDiffstatThread(SvnConnection *connection, JobQueue<svn_revnum_t, Diffstat> *queue)
-		: d(new SvnConnection()), m_queue(queue)
-	{
-		d->open(connection);
+	svn_error_t *err;
+	// Create the client context
+	if ((err = svn_client_create_context(&ctx, pool))) {
+		throw PEX(strerr(err));
+	}
+	if ((err = svn_config_get_config(&(ctx->config), NULL, pool))) {
+		throw PEX(strerr(err));
 	}
 
-	~SvnDiffstatThread()
-	{
-		delete d;
+	// Setup the authentication data
+	svn_auth_baton_t *auth_baton;
+	svn_config_t *config = hashget<svn_config_t *>(ctx->config, SVN_CONFIG_CATEGORY_CONFIG);
+	const char *user = NULL, *pass = NULL;
+	if (options.find("username") != options.end()) {
+		user = apr_pstrdup(pool, options.find("username")->second.c_str());
+	}
+	if (options.find("password") != options.end()) {
+		pass = apr_pstrdup(pool, options.find("password")->second.c_str());
+	}
+	if ((err = svn_cmdline_setup_auth_baton(&auth_baton, (options.find("non-interactive") != options.end()), user, pass, NULL, (options.find("no-auth-cache") != options.end()), config, NULL, NULL, pool))) {
+		throw PEX(strerr(err));
+	}
+	ctx->auth_baton = auth_baton;
+
+	// Setup the RA session
+	if ((err = svn_client_open_ra_session(&ra, this->url, ctx, pool))) {
+		throw PEX(strerr(err));
 	}
 
-	// Delta editor callback functions
-	static svn_error_t *set_target_revision(void *edit_baton, svn_revnum_t target_revision, apr_pool_t *pool)
-	{
-		Baton *eb = static_cast<Baton *>(edit_baton);
-		eb->target_revision = target_revision;
-		return SVN_NO_ERROR;
+	// Determine the repository root
+	if ((err = svn_ra_get_repos_root2(ra, &root, pool))) {
+		throw PEX(strerr(err));
+	}
+}
+
+// Opens the connection to the Subversion repository, using the client context
+// of the given parent connection
+void SvnConnection::open(SvnConnection *parent)
+{
+	if (parent->ctx == NULL) {
+		throw PEX("Parent connection not open yet.");
 	}
 
-	static svn_error_t *open_root(void *edit_baton, svn_revnum_t base_revision, apr_pool_t *pool, void **root_baton)
-	{
-		PTRACE << endl;
+	PTRACE << "Opening child connection to " << parent->url << endl;
 
-		Baton *eb = static_cast<Baton *>(edit_baton);
-		DirBaton *b = DirBaton::make("", NULL, eb, pool);
+	pool = svn_pool_create(NULL);
+	init();
 
-		*root_baton = b;
-		return SVN_NO_ERROR;
+	// Copy connection data from parent
+	ctx = parent->ctx;
+	url = apr_pstrdup(pool, parent->url);
+	root = apr_pstrdup(pool, parent->root);
+
+	// Setup the RA session
+	svn_error_t *err;
+	if ((err = svn_client_open_ra_session(&ra, url, ctx, pool))) {
+		throw PEX(strerr(err));
 	}
+}
 
-	static svn_error_t *get_file_from_ra(FileBaton *b, svn_revnum_t revision)
-	{
-		PTRACE << b->path << "@" << revision << endl;
-		svn_stream_t *fstream;
+// Similar to svn_handle_error2(), but returns the error description as a std::string
+std::string SvnConnection::strerr(svn_error_t *err)
+{
+	apr_pool_t *subpool;
+	svn_error_t *tmp_err;
+	apr_array_header_t *empties;
 
-		SVN_ERR(svn_stream_open_unique(&fstream, &(b->path_start_revision), NULL, svn_io_file_del_on_pool_cleanup, b->pool, b->pool));
-		SVN_ERR(svn_ra_get_file(b->edit_baton->ra, b->path, revision, fstream, NULL, &(b->pristine_props), b->pool));
-		return svn_stream_close(fstream);
-	}
+	apr_pool_create(&subpool, NULL);
+	empties = apr_array_make(subpool, 0, sizeof(apr_status_t));
 
-	static svn_error_t *delete_entry(const char *path, svn_revnum_t target_revision, void *parent_baton, apr_pool_t *pool)
-	{
-		DirBaton *pb = static_cast<DirBaton *>(parent_baton);
-		Baton *eb = pb->edit_baton;
+	std::string str;
+	tmp_err = err;
+	while (tmp_err) {
+		int i;
+		bool printed_already = false;
 
-		// File or directory?
-		svn_dirent_t *dirent;
-		SVN_ERR(svn_ra_stat(eb->ra, path, target_revision-1, &dirent, pool));
-		if (dirent == NULL) {
-			PDEBUG << "Error: Unable to stat " << path << "@" << target_revision-1 << endl;
-			return SVN_NO_ERROR;
-		}
-
-		PTRACE << path << "@" << target_revision-1 <<" is a " << (dirent->kind == svn_node_dir ? "dir" : "file") << endl;
-
-		if (dirent->kind == svn_node_file) {
-			FileBaton *b = FileBaton::make(path, eb, pool);
-			SVN_ERR(get_file_from_ra(b, target_revision-1));
-			SVN_ERR(svn_io_open_unique_file3(&(b->file_end_revision), &(b->path_end_revision), NULL, svn_io_file_del_on_pool_cleanup, b->pool, b->pool));
-			SVN_ERR(close_file(b, "", pool));
-		} else {
-			PTRACE << "Listing " << path << "@" << target_revision-1 << endl;
-			apr_hash_t *dirents;
-			SVN_ERR(svn_ra_get_dir2(eb->ra, &dirents, NULL, NULL, path, target_revision-1, 0, pool));
-			// "Delete" directory recursively
-			for (apr_hash_index_t *hi = apr_hash_first(pool, dirents); hi; hi = apr_hash_next(hi)) {
-				const char *entry;
-				svn_dirent_t *dirent;
-				apr_hash_this(hi, (const void **)(void *)&entry, NULL, (void **)(void *)&dirent);
-				SVN_ERR(delete_entry((const char *)svn_path_join(path, entry, pool), target_revision, parent_baton, pool));
-			}
-		}
-
-		return SVN_NO_ERROR;
-	}
-
-	static svn_error_t *add_directory(const char *path, void *parent_baton, const char *, svn_revnum_t, apr_pool_t *pool, void **child_baton)
-	{
-		PTRACE << path << endl;
-		DirBaton *pb = static_cast<DirBaton *>(parent_baton);
-
-		DirBaton *b = DirBaton::make(path, pb, pb->edit_baton, pool);
-		*child_baton = b;
-
-		return SVN_NO_ERROR;
-	}
-
-	static svn_error_t *open_directory(const char *path, void *parent_baton, svn_revnum_t base_revision, apr_pool_t *pool, void **child_baton)
-	{
-		PTRACE << path << endl;
-		DirBaton *pb = static_cast<DirBaton *>(parent_baton);
-
-		DirBaton *b = DirBaton::make(path, pb, pb->edit_baton, pool);
-		*child_baton = b;
-
-		return SVN_NO_ERROR;
-	}
-
-	static svn_error_t *add_file(const char *path, void *parent_baton, const char *copyfrom_path, svn_revnum_t copyfrom_revision, apr_pool_t *pool, void **file_baton)
-	{
-		PTRACE << path << endl;
-		DirBaton *db = static_cast<DirBaton *>(parent_baton);
-		FileBaton *b = FileBaton::make(path, db->edit_baton, pool);
-		*file_baton = b;
-
-		b->pristine_props = apr_hash_make(pool);
-		return svn_io_open_unique_file3(&(b->file_start_revision), &(b->path_start_revision), NULL, svn_io_file_del_on_pool_cleanup, b->pool, b->pool);
-	}
-
-	static svn_error_t *open_file(const char *path, void *parent_baton, svn_revnum_t base_revision, apr_pool_t *pool, void **file_baton)
-	{
-		PTRACE << path << ", base = " << base_revision << endl;
-		DirBaton *db = static_cast<DirBaton *>(parent_baton);
-		FileBaton *b = FileBaton::make(path, db->edit_baton, pool);
-		*file_baton = b;
-
-		// TODO: No need to get the whole file if it is binary...
-		return get_file_from_ra(b, base_revision);
-	}
-
-	static svn_error_t *window_handler(svn_txdelta_window_t *window, void *window_baton)
-	{
-		FileBaton *b = static_cast<FileBaton *>(window_baton);
-		SVN_ERR(b->apply_handler(window, b->apply_baton));
-		if (!window) {
-			SVN_ERR(svn_io_file_close(b->file_start_revision, b->pool));
-			SVN_ERR(svn_io_file_close(b->file_end_revision, b->pool));
-		}
-		return SVN_NO_ERROR;
-	}
-
-	static svn_error_t *apply_textdelta(void *file_baton, const char *base_checksum, apr_pool_t *pool, svn_txdelta_window_handler_t *handler, void **handler_baton)
-	{
-		FileBaton *b = static_cast<FileBaton *>(file_baton);
-		PTRACE << "base is " << b->path_start_revision << endl;
-		SVN_ERR(svn_io_file_open(&(b->file_start_revision), b->path_start_revision, APR_READ, APR_OS_DEFAULT, b->pool));
-
-		SVN_ERR(svn_io_open_unique_file3(&(b->file_end_revision), &(b->path_end_revision), NULL, svn_io_file_del_on_pool_cleanup, b->pool, b->pool));
-
-		svn_txdelta_apply(svn_stream_from_aprfile2(b->file_start_revision, TRUE, b->pool), svn_stream_from_aprfile2(b->file_end_revision, TRUE, b->pool), NULL, b->path, b->pool, &(b->apply_handler), &(b->apply_baton));
-		*handler = window_handler;
-		*handler_baton = file_baton;
-		return SVN_NO_ERROR;
-	}
-
-	static svn_error_t *close_file(void *file_baton, const char *text_checksum, apr_pool_t *pool)
-	{
-		FileBaton *b = static_cast<FileBaton *>(file_baton);
-		Baton *eb = b->edit_baton;
-
-		if (b->path_start_revision == NULL || b->path_end_revision == NULL) {
-			PDEBUG << b->path << "@" << eb->target_revision << " Insufficient diff data (nothing has changed)" << endl;
-			return SVN_NO_ERROR;
-		}
-
-		PTRACE << b->path_start_revision << " -> " << b->path_end_revision << endl;
-
-		// Skip binary diffs
-		const char *mimetype1 = NULL, *mimetype2 = NULL;
-		if (b->pristine_props) {
-			svn_string_t *pristine_val;
-			pristine_val = (svn_string_t *)apr_hash_get(b->pristine_props, SVN_PROP_MIME_TYPE, strlen(SVN_PROP_MIME_TYPE));
-			if (pristine_val) {
-				mimetype1 = pristine_val->data;
-			}
-		}
-		if (b->propchanges) {
-			int i;
-			svn_prop_t *propchange;
-			for (i = 0; i < b->propchanges->nelts; i++) {
-				propchange = &APR_ARRAY_IDX(b->propchanges, i, svn_prop_t);
-				if (strcmp(propchange->name, SVN_PROP_MIME_TYPE) == 0) {
-					if (propchange->value) {
-						mimetype2 = propchange->value->data;
-					}
+		if (!tmp_err->message) {
+			for (i = 0; i < empties->nelts; i++) {
+				if (tmp_err->apr_err == APR_ARRAY_IDX(empties, i, apr_status_t)) {
+					printed_already = true;
 					break;
 				}
 			}
 		}
 
-		// TODO: Proper handling of mime-type changes
-		if ((mimetype1 && svn_mime_type_is_binary(mimetype1)) || (mimetype2 && svn_mime_type_is_binary(mimetype2))) {
-			PDEBUG << "Skipping binary files" << endl;
-			return SVN_NO_ERROR;
-		}
+		if (!printed_already) {
+			char errbuf[256];
+			const char *err_string;
+			svn_error_t *tmp_err2 = NULL;
 
-		// Finally, perform the diff
-		static const char equal_string[] =
-			"===================================================================";
-
-		svn_diff_t *diff;
-		svn_stream_t *os;
-		os = svn_stream_from_aprfile2(eb->out, TRUE, b->pool);
-		svn_diff_file_options_t *opts = svn_diff_file_options_create(b->pool);
-		SVN_ERR(svn_diff_file_diff_2(&diff, b->path_start_revision, b->path_end_revision, opts, b->pool));
-		// Print out the diff header
-		SVN_ERR(svn_stream_printf_from_utf8(os, APR_LOCALE_CHARSET, b->pool, "Index: %s" APR_EOL_STR "%s" APR_EOL_STR, b->path, equal_string));
-		// Output the actual diff
-		SVN_ERR(svn_diff_file_output_unified3(os, diff, b->path_start_revision, b->path_end_revision, b->path, b->path, APR_LOCALE_CHARSET, NULL, FALSE, b->pool));
-
-		// Remove the actual files
-		if (b->file_start_revision) {
-			apr_file_close(b->file_start_revision);
-		}
-		if (b->file_end_revision) {
-			apr_file_close(b->file_end_revision);
-		}
-		return SVN_NO_ERROR;
-	}
-
-	static svn_error_t *close_directory(void *, apr_pool_t *)
-	{
-		return SVN_NO_ERROR;
-	}
-
-	static svn_error_t *change_file_prop(void *file_baton, const char *name, const svn_string_t *value, apr_pool_t *pool)
-	{
-		FileBaton *b = static_cast<FileBaton *>(file_baton);
-		svn_prop_t *propchange = (svn_prop_t *)apr_array_push(b->propchanges);
-		propchange->name = apr_pstrdup(b->pool, name);
-		propchange->value = value ? svn_string_dup(value, b->pool) : NULL;
-		return SVN_NO_ERROR;
-	}
-
-	static svn_error_t *change_dir_prop(void *, const char *, const svn_string_t *, apr_pool_t *)
-	{
-		return SVN_NO_ERROR;
-	}
-
-	static svn_error_t *absent_directory(const char *path, void *parent_baton, apr_pool_t *pool)
-	{
-		return SVN_NO_ERROR;
-	}
-
-	static svn_error_t *absent_file(const char *path, void *parent_baton, apr_pool_t *pool)
-	{
-		return SVN_NO_ERROR;
-	}
-
-	static svn_error_t *close_edit(void *edit_baton, apr_pool_t *pool)
-	{
-		Baton *eb = static_cast<Baton *>(edit_baton);
-		svn_pool_destroy(eb->pool);
-		return SVN_NO_ERROR;
-	}
-
-	// This function will always perform a diff on the full repository in
-	// order to avoid errors due to non-existent paths and to cache consistency.
-	static Diffstat diffstat(SvnConnection *c, svn_revnum_t revision, apr_pool_t *pool)
-	{
-		if (revision <= 0) {
-			return Diffstat();
-		}
-
-		svn_opt_revision_t rev1, rev2;
-		rev1.kind = rev2.kind = svn_opt_revision_number;
-		rev2.value.number = revision;
-		rev1.value.number = rev2.value.number - 1;
-		svn_error_t *err;
-
-		apr_file_t *infile = NULL, *outfile = NULL, *errfile = NULL;
-		apr_file_open_stderr(&errfile, pool);
-		if (apr_file_pipe_create(&infile, &outfile, pool) != APR_SUCCESS) {
-			throw PEX("Unable to create pipe for reading diff data");
-		}
-
-		AprStreambuf buf(infile);
-		std::istream in(&buf);
-		DiffParser parser(in);
-		parser.start();
-
-		PTRACE << "Fetching diffstat for revision " << revision << endl;
-
-		// Setup the diff editor
-		apr_pool_t *subpool = svn_pool_create(pool);
-		svn_delta_editor_t *editor = svn_delta_default_editor(subpool);
-		Baton *baton = (Baton *)apr_palloc(subpool, sizeof(Baton));
-
-		baton->target = "";
-		baton->revision = revision;
-		baton->empty_file = NULL;
-		baton->deleted_paths = apr_hash_make(subpool);
-		baton->out = outfile;
-		baton->pool = subpool;
-
-		// Open RA session for extra calls during diff
-		err = svn_client_open_ra_session(&baton->ra, c->url, c->ctx, pool);
-		if (err != NULL) {
-			apr_file_close(outfile);
-			apr_file_close(infile);
-			throw PEX(utils::strprintf("Diffstat fetching of revision %ld failed: %s", revision, SvnConnection::strerr(err).c_str()));
-		}
-
-		editor->set_target_revision = set_target_revision;
-		editor->open_root = open_root;
-		editor->delete_entry = delete_entry;
-		editor->add_directory = add_directory;
-		editor->open_directory = open_directory;
-		editor->add_file = add_file;
-		editor->open_file = open_file;
-		editor->apply_textdelta = apply_textdelta;
-		editor->close_file = close_file;
-		editor->close_directory = close_directory;
-		editor->change_file_prop = change_file_prop;
-		editor->change_dir_prop = change_dir_prop;
-		editor->close_edit = close_edit;
-		editor->absent_directory = absent_directory;
-		editor->absent_file = absent_file;
-
-		const svn_ra_reporter3_t *reporter;
-		void *report_baton;
-		err = svn_ra_do_diff3(c->ra, &reporter, &report_baton, rev2.value.number, "", svn_depth_infinity, TRUE, TRUE, c->url, editor, baton, pool);
-		if (err != NULL) {
-			apr_file_close(outfile);
-			apr_file_close(infile);
-			throw PEX(utils::strprintf("Diffstat fetching of revision %ld failed: %s", revision, SvnConnection::strerr(err).c_str()));
-		}
-
-		err = reporter->set_path(report_baton, "", rev1.value.number, svn_depth_infinity, FALSE, NULL, pool);
-		if (err != NULL) {
-			apr_file_close(outfile);
-			apr_file_close(infile);
-			throw PEX(utils::strprintf("Diffstat fetching of revision %ld failed: %s", revision, SvnConnection::strerr(err).c_str()));
-		}
-
-		err = reporter->finish_report(report_baton, pool);
-		if (err != NULL) {
-			apr_file_close(outfile);
-			apr_file_close(infile);
-			throw PEX(utils::strprintf("Diffstat fetching of revision %ld failed: %s", revision, SvnConnection::strerr(err).c_str()));
-		}
-
-		apr_file_close(outfile);
-		parser.wait();
-		apr_file_close(infile);
-		return parser.stat();
-	}
-
-protected:
-	void run()
-	{
-		apr_pool_t *pool = svn_pool_create(d->pool);
-		svn_revnum_t revision;
-		while (m_queue->getArg(&revision)) {
-			apr_pool_t *subpool = svn_pool_create(pool);
-
-			Diffstat stat;
-			try {
-				stat = diffstat(d, revision, subpool);
-				m_queue->done(revision, stat);
-			} catch (const PepperException &ex) {
-				Logger::err() << "Error: " << ex.where() << ": " << ex.what() << endl;
-				m_queue->failed(revision);
+			if (tmp_err->message) {
+				if (!str.empty()) {
+					str += ", ";
+				}
+				str += std::string(tmp_err->message);
+			} else {
+				if ((tmp_err->apr_err > APR_OS_START_USEERR) && (tmp_err->apr_err <= APR_OS_START_CANONERR)) {
+					err_string = svn_strerror(tmp_err->apr_err, errbuf, sizeof(errbuf));
+				} else if ((tmp_err2 = svn_utf_cstring_from_utf8(&err_string, apr_strerror(tmp_err->apr_err, errbuf, sizeof(errbuf)), tmp_err->pool))) {
+					svn_error_clear(tmp_err2);
+					err_string = "Can't recode error string from APR";
+				}
+				if (!str.empty()) {
+					str += ", ";
+				}
+				str += std::string(err_string);
+				APR_ARRAY_PUSH(empties, apr_status_t) = tmp_err->apr_err;
 			}
-
-			svn_pool_destroy(subpool);
 		}
-		svn_pool_destroy(pool);
+
+		tmp_err = tmp_err->child;
 	}
 
-private:
-	SvnConnection *d;
-	JobQueue<svn_revnum_t, Diffstat> *m_queue;
-};
+	apr_pool_destroy(subpool);
+	return str;
+}
+
+void SvnConnection::init()
+{
+	svn_error_t *err;
+	if ((err = svn_fs_initialize(pool))) {
+		throw PEX(strerr(err));
+	}
+	if ((err = svn_ra_initialize(pool))) {
+		throw PEX(strerr(err));
+	}
+	if ((err = svn_config_ensure(NULL, pool))) {
+		throw PEX(strerr(err));
+	}
+}
 
 
 // Handles the prefetching of diffstats
