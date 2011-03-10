@@ -22,10 +22,10 @@ function callback(r)
 
 	if locdeltas[r:date()] == nil then
 		locdeltas[r:date()] = delta
+		table.insert(dates, r:date())
 	else
 		locdeltas[r:date()] = locdeltas[r:date()] + delta
 	end
-	table.insert(dates, r:date())
 end
 
 -- Main report function
