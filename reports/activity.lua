@@ -60,7 +60,6 @@ function count(r)
 	end
 
 	-- Track date range
-	table.insert(dates, date)
 	if date < first then first = date end
 	if date > last then last = date end
 end
@@ -120,7 +119,6 @@ function main()
 	activity = {}
 	first = os.time()
 	last = 0
-	dates = {}
 
 	-- Parse date range
 	local datemin = pepper.report.getopt("datemin")
