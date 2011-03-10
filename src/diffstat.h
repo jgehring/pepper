@@ -52,6 +52,8 @@ class Diffstat
 
 		std::map<std::string, Stat> stats() const;
 
+		void filter(const std::string &prefix);
+
 		void write(BOStream &out) const;
 		bool load(BIStream &in);
 

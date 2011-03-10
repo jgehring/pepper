@@ -100,6 +100,9 @@ void SvnConnection::open(const std::string &url, const std::map<std::string, std
 	if ((err = svn_ra_get_repos_root2(ra, &root, pool))) {
 		throw PEX(strerr(err));
 	}
+	prefix = apr_pstrdup(pool, this->url + strlen(root));
+
+	PTRACE << "Root is " << root << " -> prefix is " << prefix << endl;
 }
 
 // Opens the connection to the Subversion repository, using the client context
@@ -590,6 +593,15 @@ Diffstat SubversionBackend::diffstat(const std::string &id)
 	Diffstat stat = SvnDiffstatThread::diffstat(d, revision, subpool);
 	svn_pool_destroy(subpool);
 	return stat;
+}
+
+// Filters a diffstat by prefix
+void SubversionBackend::filterDiffstat(Diffstat *stat)
+{
+	// Strip prefix
+	if (strlen(d->prefix) > 1) {
+		stat->filter(d->prefix + 1);
+	}
 }
 
 // Returns a file listing for the given revision (defaults to HEAD)

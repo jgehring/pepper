@@ -113,6 +113,12 @@ void Backend::prefetch(const std::vector<std::string> &)
 	// The default implementation does nothing
 }
 
+// Optional diffstat filtering before it is presented to the report script
+void Backend::filterDiffstat(Diffstat *)
+{
+	// The default implementation does nothing
+}
+
 // Cleans up the backend after iteration has finished
 void Backend::finalize()
 {

@@ -40,6 +40,7 @@ class Cache : public Backend
 		std::vector<std::string> branches() { return m_backend->branches(); }
 		std::vector<Tag> tags() { return m_backend->tags(); }
 		Diffstat diffstat(const std::string &id);
+		void filterDiffstat(Diffstat *stat) { m_backend->filterDiffstat(stat); }
 		std::vector<std::string> tree(const std::string &id = std::string()) { return m_backend->tree(id); }
 
 		LogIterator *iterator(const std::string &branch = std::string(), int64_t start = -1, int64_t end = -1) { return m_backend->iterator(branch, start, end); }

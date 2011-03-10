@@ -14,6 +14,7 @@
 #include "main.h"
 
 #include "bstream.h"
+#include "logger.h"
 #include "luahelpers.h"
 #include "utils.h"
 
@@ -36,6 +37,20 @@ Diffstat::~Diffstat()
 std::map<std::string, Diffstat::Stat> Diffstat::stats() const
 {
 	return m_stats;
+}
+
+// Removes all paths not matching the given filter
+void Diffstat::filter(const std::string &prefix)
+{
+	std::map<std::string, Stat>::iterator it = m_stats.begin();
+	while (it != m_stats.end()) {
+		if (it->first.compare(0, prefix.length(), prefix)) {
+			PTRACE << "Removed " << it->first << " from diffstat" << endl;
+			m_stats.erase(it++);
+		} else {
+			++it;
+		}
+	}
 }
 
 // Writes the stat to a binary stream

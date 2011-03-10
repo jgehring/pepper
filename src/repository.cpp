@@ -153,6 +153,7 @@ int Repository::revision(lua_State *L)
 	Revision *rev = NULL;
 	try {
 		rev = m_backend->revision(id);
+		m_backend->filterDiffstat(&(rev->m_diffstat));
 	} catch (const PepperException &ex) {
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
 	}

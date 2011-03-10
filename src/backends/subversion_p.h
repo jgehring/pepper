@@ -48,7 +48,7 @@ class SvnConnection
 		apr_pool_t *pool;
 		svn_client_ctx_t *ctx;
 		svn_ra_session_t *ra;
-		const char *url, *root;
+		const char *url, *root, *prefix;
 };
 
 

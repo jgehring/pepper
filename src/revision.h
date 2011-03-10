@@ -29,6 +29,9 @@ class BOStream;
 
 class Revision
 {
+	friend class Repository;
+	friend class RevisionIterator;
+
 	public:
 		Revision(const std::string &id);
 		Revision(const std::string &id, int64_t date, const std::string &author, const std::string &message, const Diffstat &diffstat);

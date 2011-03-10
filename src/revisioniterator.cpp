@@ -136,6 +136,7 @@ int RevisionIterator::next(lua_State *L)
 	Revision *revision = NULL;
 	try {
 		revision = m_backend->revision(next());
+		m_backend->filterDiffstat(&(revision->m_diffstat));
 	} catch (const PepperException &ex) {
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
 	}
@@ -180,6 +181,7 @@ int RevisionIterator::map(lua_State *L)
 		Revision *revision = NULL;
 		try {
 			revision = m_backend->revision(next());
+			m_backend->filterDiffstat(&(revision->m_diffstat));
 		} catch (const PepperException &ex) {
 			return LuaHelpers::pushError(L, ex.what(), ex.where());
 		}
