@@ -44,48 +44,49 @@ void Options::parse(int argc, char **argv)
 // Queries
 bool Options::helpRequested() const
 {
-	return m_options["help"] == "true";
+	return (value("help") == "true");
 }
 
 bool Options::versionRequested() const
 {
-	return m_options["version"] == "true";
+	return (value("version") == "true");
 }
 
 bool Options::backendListRequested() const
 {
-	return m_options["list_backends"] == "true";
+	return (value("list_backends") == "true");
 }
 
 bool Options::reportListRequested() const
 {
-	return m_options["list_reports"] == "true";
+	return (value("list_reports") == "true");
 }
 
 bool Options::useCache() const
 {
-	return m_options["cache"] == "true";
+	return (value("cache") == "true");
 }
 
 std::string Options::cacheDir() const
 {
-	return m_options["cache_dir"];
+	return value("cache_dir");
 }
 
 std::string Options::forcedBackend() const
 {
-	return m_options["backend"];
+	return value("backend");
 }
 
 std::string Options::repository() const
 {
-	return m_options["repository"];
+	return value("repository");
 }
 
 std::string Options::value(const std::string &key, const std::string &defvalue) const
 {
-	if (m_options.find(key) != m_options.end()) {
-		return m_options[key];
+	std::map<std::string, std::string>::const_iterator it = m_options.find(key);
+	if (it != m_options.end()) {
+		return it->second;
 	}
 	return defvalue;
 }
@@ -97,7 +98,7 @@ std::map<std::string, std::string> Options::options() const
 
 std::string Options::report() const
 {
-	return m_options["report"];
+	return value("report");
 }
 
 std::map<std::string, std::string> Options::reportOptions() const
