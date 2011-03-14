@@ -237,36 +237,21 @@ public:
 
 	void prefetch(const std::vector<std::string> &revisions)
 	{
-		std::vector<svn_revnum_t> revnums;
-		svn_revnum_t rev;
-		for (unsigned int i = 0; i < revisions.size(); i++) {
-			if (utils::str2int(revisions[i], &rev)) {
-				revnums.push_back(rev);
-			}
-		}
-		m_queue.put(revnums);
+		m_queue.put(revisions);
 	}
 
 	bool get(const std::string &revision, Diffstat *dest)
 	{
-		svn_revnum_t rev;
-		if (utils::str2int(revision, &rev)) {
-			return m_queue.getResult(rev, dest);
-		}
-		return false;
+		return m_queue.getResult(revision, dest);
 	}
 
 	bool willFetch(const std::string &revision)
 	{
-		svn_revnum_t rev;
-		if (utils::str2int(revision, &rev)) {
-			return m_queue.hasArg(rev);
-		}
-		return false;
+		return m_queue.hasArg(revision);
 	}
 
 private:
-	JobQueue<svn_revnum_t, Diffstat> m_queue;
+	JobQueue<std::string, Diffstat> m_queue;
 	std::vector<SvnDiffstatThread *> m_threads;
 };
 
@@ -582,15 +567,24 @@ Diffstat SubversionBackend::diffstat(const std::string &id)
 		return stat;
 	}
 
-	svn_revnum_t revision;
-	if (!utils::str2int(id, &revision)) {
-		throw PEX(std::string("Error parsing revision number ") + id);
+
+	std::vector<std::string> revs = utils::split(id, ":");
+	svn_revnum_t r1, r2;
+	if (revs.size() > 1) {
+		if (!utils::str2int(revs[0], &r1) || !utils::str2int(revs[1], &r2)) {
+			throw PEX(std::string("Error parsing revision number ") + id);
+		}
+	} else {
+		if (!utils::str2int(revs[0], &r2)) {
+			throw PEX(std::string("Error parsing revision number ") + id);
+		}
+		r1 = r2 - 1;
 	}
 
 	PDEBUG << "Fetching revision " << id << " manually" << endl;
 
 	apr_pool_t *subpool = svn_pool_create(d->pool);
-	Diffstat stat = SvnDiffstatThread::diffstat(d, revision, subpool);
+	Diffstat stat = SvnDiffstatThread::diffstat(d, r1, r2, subpool);
 	svn_pool_destroy(subpool);
 	return stat;
 }
@@ -761,9 +755,10 @@ void SubversionBackend::printHelp() const
 Revision *SubversionBackend::revision(const std::string &id)
 {
 	std::map<std::string, std::string> data;
+	std::string rev = utils::split(id, ":").back();
 
 	svn_revnum_t revnum;
-	if (!utils::str2int(id, &(revnum))) {
+	if (!utils::str2int(rev, &(revnum))) {
 		throw PEX(std::string("Error parsing revision number ") + id);
 	}
 

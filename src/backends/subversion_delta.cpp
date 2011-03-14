@@ -391,7 +391,7 @@ svn_error_t *close_edit(void *edit_baton, apr_pool_t * /*pool*/)
 
 
 // Constructor
-SvnDiffstatThread::SvnDiffstatThread(SvnConnection *connection, JobQueue<svn_revnum_t, Diffstat> *queue)
+SvnDiffstatThread::SvnDiffstatThread(SvnConnection *connection, JobQueue<std::string, Diffstat> *queue)
 	: d(new SvnConnection()), m_queue(queue)
 {
 	d->open(connection);
@@ -405,16 +405,16 @@ SvnDiffstatThread::~SvnDiffstatThread()
 
 // This function will always perform a diff on the full repository in
 // order to avoid errors due to non-existent paths and to cache consistency.
-Diffstat SvnDiffstatThread::diffstat(SvnConnection *c, svn_revnum_t revision, apr_pool_t *pool)
+Diffstat SvnDiffstatThread::diffstat(SvnConnection *c, svn_revnum_t r1, svn_revnum_t r2, apr_pool_t *pool)
 {
-	if (revision <= 0) {
+	if (r2 <= 0) {
 		return Diffstat();
 	}
 
 	svn_opt_revision_t rev1, rev2;
 	rev1.kind = rev2.kind = svn_opt_revision_number;
-	rev2.value.number = revision;
-	rev1.value.number = rev2.value.number - 1;
+	rev1.value.number = r1;
+	rev2.value.number = r2;
 	svn_error_t *err;
 
 	apr_file_t *infile = NULL, *outfile = NULL, *errfile = NULL;
@@ -428,7 +428,7 @@ Diffstat SvnDiffstatThread::diffstat(SvnConnection *c, svn_revnum_t revision, ap
 	DiffParser parser(in);
 	parser.start();
 
-	PTRACE << "Fetching diffstat for revision " << revision << endl;
+	PTRACE << "Fetching diffstat for revision " << r1 << ":" << r2 << endl;
 
 	// Setup the diff editor
 	apr_pool_t *subpool = svn_pool_create(pool);
@@ -436,7 +436,7 @@ Diffstat SvnDiffstatThread::diffstat(SvnConnection *c, svn_revnum_t revision, ap
 	SvnDelta::Baton *baton = (SvnDelta::Baton *)apr_palloc(subpool, sizeof(SvnDelta::Baton));
 
 	baton->target = "";
-	baton->revision = revision;
+	baton->revision = r2;
 	baton->empty_file = NULL;
 	baton->deleted_paths = apr_hash_make(subpool);
 	baton->out = outfile;
@@ -447,7 +447,7 @@ Diffstat SvnDiffstatThread::diffstat(SvnConnection *c, svn_revnum_t revision, ap
 	if (err != NULL) {
 		apr_file_close(outfile);
 		apr_file_close(infile);
-		throw PEX(utils::strprintf("Diffstat fetching of revision %ld failed: %s", revision, SvnConnection::strerr(err).c_str()));
+		throw PEX(utils::strprintf("Diffstat fetching of revision %ld:%ld failed: %s", r1, r2, SvnConnection::strerr(err).c_str()));
 	}
 
 	editor->set_target_revision = SvnDelta::set_target_revision;
@@ -472,21 +472,21 @@ Diffstat SvnDiffstatThread::diffstat(SvnConnection *c, svn_revnum_t revision, ap
 	if (err != NULL) {
 		apr_file_close(outfile);
 		apr_file_close(infile);
-		throw PEX(utils::strprintf("Diffstat fetching of revision %ld failed: %s", revision, SvnConnection::strerr(err).c_str()));
+		throw PEX(utils::strprintf("Diffstat fetching of revision %ld:%ld failed: %s", r1, r2, SvnConnection::strerr(err).c_str()));
 	}
 
 	err = reporter->set_path(report_baton, "", rev1.value.number, svn_depth_infinity, FALSE, NULL, pool);
 	if (err != NULL) {
 		apr_file_close(outfile);
 		apr_file_close(infile);
-		throw PEX(utils::strprintf("Diffstat fetching of revision %ld failed: %s", revision, SvnConnection::strerr(err).c_str()));
+		throw PEX(utils::strprintf("Diffstat fetching of revision %ld:%ld failed: %s", r1, r2, SvnConnection::strerr(err).c_str()));
 	}
 
 	err = reporter->finish_report(report_baton, pool);
 	if (err != NULL) {
 		apr_file_close(outfile);
 		apr_file_close(infile);
-		throw PEX(utils::strprintf("Diffstat fetching of revision %ld failed: %s", revision, SvnConnection::strerr(err).c_str()));
+		throw PEX(utils::strprintf("Diffstat fetching of revision %ld:%ld failed: %s", r1, r2, SvnConnection::strerr(err).c_str()));
 	}
 
 	apr_file_close(outfile);
@@ -499,19 +499,36 @@ Diffstat SvnDiffstatThread::diffstat(SvnConnection *c, svn_revnum_t revision, ap
 void SvnDiffstatThread::run()
 {
 	apr_pool_t *pool = svn_pool_create(d->pool);
-	svn_revnum_t revision;
+	std::string revision;
 	while (m_queue->getArg(&revision)) {
 		apr_pool_t *subpool = svn_pool_create(pool);
 
-		Diffstat stat;
+		std::vector<std::string> revs = utils::split(revision, ":");
+		svn_revnum_t r1, r2;
+		if (revs.size() > 1) {
+			if (!utils::str2int(revs[0], &r1) || !utils::str2int(revs[1], &r2)) {
+				goto parse_error;
+			}
+		} else {
+			if (!utils::str2int(revs[0], &r2)) {
+				goto parse_error;
+			}
+			r1 = r2 - 1;
+		}
+
 		try {
-			stat = diffstat(d, revision, subpool);
+			Diffstat stat = diffstat(d, r1, r2, subpool);
 			m_queue->done(revision, stat);
 		} catch (const PepperException &ex) {
 			Logger::err() << "Error: " << ex.where() << ": " << ex.what() << endl;
 			m_queue->failed(revision);
 		}
+		goto next;
 
+parse_error:
+		PEX(std::string("Error parsing revision number ") + revision);
+		m_queue->failed(revision);
+next:
 		svn_pool_destroy(subpool);
 	}
 	svn_pool_destroy(pool);

@@ -56,17 +56,17 @@ class SvnConnection
 class SvnDiffstatThread : public sys::parallel::Thread
 {
 	public:
-		SvnDiffstatThread(SvnConnection *connection, JobQueue<svn_revnum_t, Diffstat> *queue);
+		SvnDiffstatThread(SvnConnection *connection, JobQueue<std::string, Diffstat> *queue);
 		~SvnDiffstatThread();
 
-		static Diffstat diffstat(SvnConnection *c, svn_revnum_t revision, apr_pool_t *pool);
+		static Diffstat diffstat(SvnConnection *c, svn_revnum_t r1, svn_revnum_t r2, apr_pool_t *pool);
 
 	protected:
 		void run();
 
 	private:
 		SvnConnection *d;
-		JobQueue<svn_revnum_t, Diffstat> *m_queue;
+		JobQueue<std::string, Diffstat> *m_queue;
 };
 
 
