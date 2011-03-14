@@ -58,7 +58,7 @@ static void printFooter()
 // Prints program usage information
 static void printHelp(const Options &opts)
 {
-	std::cout << "USAGE: " << PACKAGE_NAME << " [options] [report] [report options] [repository]" << std::endl << std::endl;
+	std::cout << "USAGE: " << PACKAGE_NAME << " [options] <report> [report options] [repository]" << std::endl << std::endl;
 
 	std::cout << "Main options:" << std::endl;
 	Options::printHelp();
