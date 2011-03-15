@@ -6,7 +6,7 @@
 
 -- Script meta-data
 meta.title = "Activity"
-meta.description = "Commit activity"
+meta.description = "General repository activity"
 meta.options = {{"-bARG, --branch=ARG", "Select branch"},
                 {"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with a regular expression"},
                 {"-c,--changes,-l", "Count line changes instead of commit counts"},

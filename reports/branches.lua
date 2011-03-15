@@ -5,6 +5,7 @@
 
 -- Script meta-data
 meta.title = "Branches"
+meta.description = "Lists all repository branches"
 
 -- Main script function
 function main()
