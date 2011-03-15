@@ -16,6 +16,7 @@ dist_pkgdata_DATA = \
 	branches.lua \
 	commit_scatter.lua \
 	commits_per_month.lua \
+	csv.lua \
 	diffstat.lua \
 	directories.lua \
 	filetypes.lua \

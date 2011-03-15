@@ -116,6 +116,9 @@ Here's a brief listing:
 
 	* commits_per_month
 	Plots a histogram of the commits during the last 12 months.
+
+	* csv
+	Dumps revision data in CSV format.
 	
 	* diffstat
 	Prints a diffstat of a given revision.
