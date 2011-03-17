@@ -45,16 +45,6 @@ function callback(r)
 	end
 end
 
--- Checks whether author a has more LOC than b
-function authorcmp(a, b)
-	return (a[2] > b[2])
-end
-
--- Checks whether commit a has been earlier than b
-function commitcmp(a, b)
-	return (a[1] < b[1])
-end
-
 -- Main script function
 function main()
 	commits = {}   -- Commit list by timestamp with LOC delta
@@ -70,7 +60,7 @@ function main()
 	for k,v in pairs(authors) do
 		table.insert(authorloc, {k, v})
 	end
-	table.sort(authorloc, authorcmp)
+	table.sort(authorloc, function (a,b) return (a[2] > b[2]) end)
 	local i = 1 + tonumber(pepper.report.getopt("n", 6))
 	while i <= #authorloc do
 		authors[authorloc[i][1]] = nil
@@ -79,7 +69,7 @@ function main()
 	end
 
 	-- Sort commits by time
-	table.sort(commits, commitcmp)
+	table.sort(commits, function (a,b) return (a[1] < b[1]) end)
 
 	-- Generate data arrays for the authors
 	local keys = {}

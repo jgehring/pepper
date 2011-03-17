@@ -62,12 +62,8 @@ function count(r)
 	end
 
 	-- Track date range
-	if date < first then first = date end
-	if date > last then last = date end
-end
-
-function days(t)
-	return math.floor(t / (60*60*24))
+	if date < firstdate then firstdate = date end
+	if date > lastdate then lastdate = date end
 end
 
 -- This is mostly from hg's activity extension
@@ -119,8 +115,8 @@ end
 -- Main report function
 function main()
 	activity = {}
-	first = os.time()
-	last = 0
+	firstdate = os.time()
+	lastdate = 0
 
 	-- Parse date range
 	local datemin = pepper.report.getopt("datemin")
@@ -161,10 +157,10 @@ function main()
 	end
 
 	-- Generate graphs
-	p:set_xrange_time(first, last)
+	p:set_xrange_time(firstdate, lastdate)
 
 	if split == "none" then
-		local dates, values = convolution(first, last, activity)
+		local dates, values = convolution(firstdate, lastdate, activity)
 		p:plot_series(dates, values, {}, "lines smooth bezier")
 	else 
 		-- Determine contributions (i.e. frequent entries)
@@ -180,7 +176,7 @@ function main()
 		local values = {}
 		local keys = {}
 		while i <= #freqs and i < n do
-			vdates[i], values[i] = convolution(first, last, activity[freqs[i][1]])
+			vdates[i], values[i] = convolution(firstdate, lastdate, activity[freqs[i][1]])
 			keys[i] = freqs[i][1]
 			i = i + 1
 		end

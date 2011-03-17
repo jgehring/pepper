@@ -28,12 +28,20 @@ function callback(r)
 	local date = os.date("*t", r:date())
 	table.insert(dates, r:date())
 	table.insert(daytimes, date["hour"] + date["min"] / 60)
+
+	-- Track date range
+	if r:date() < firstdate then firstdate = r:date() end
+	if r:date() > lastdate then lastdate = r:date() end
 end
 
 -- Main report function
 function main()
 	dates = {}     -- Commit timestamps
 	daytimes = {}  -- Time in hours and hour fractions
+
+	-- Date range
+	firstdate = os.time()
+	lastdate = 0
 
 	-- Gather data
 	local repo = pepper.report.repository()
@@ -52,6 +60,6 @@ set ytics 6
 set grid
 set pointsize 1
 ]])
-	p:set_xrange_time(dates[1], dates[#dates])
+	p:set_xrange_time(firstdate, lastdate)
 	p:plot_series(dates, daytimes, {}, "dots")
 end
