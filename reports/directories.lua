@@ -14,16 +14,6 @@ require "pepper.plotutils"
 pepper.plotutils.add_plot_options()
 
 
--- Returns the dirname() of a file
-function dirname(filename) 
-	local dir,n = string.gsub(filename, "(.*/)(.*)", "%1")
-	if n == 0 then
-		return "/"
-	else
-		return "/" .. dir
-	end
-end 
-
 -- Revision callback function
 function count(r)
 	local s = r:diffstat()
@@ -33,7 +23,7 @@ function count(r)
 
 	-- Update directory sizes
 	for i,v in ipairs(s:files()) do
-		local dir = dirname(v)
+		local dir = pepper.utils.dirname("/" .. v)
 		local old = 0
 		if directories[dir] == nil then
 			directories[dir] = s:lines_added(v) - s:lines_removed(v)
@@ -94,7 +84,7 @@ function main()
 		-- Update directory sizes
 		local s = v[2];
 		for i,v in ipairs(s:files()) do
-			local dir = dirname(v)
+			local dir = pepper.utils.dirname("/" .. v)
 			if loc[dir] ~= nil then
 				loc[dir] = loc[dir] + s:lines_added(v) - s:lines_removed(v)
 			end

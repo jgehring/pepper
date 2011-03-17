@@ -19,13 +19,6 @@ require "pepper.plotutils"
 pepper.plotutils.add_plot_options()
 
 
--- Returns the dirname() of a file
-function dirname(filename) 
-	local dir,n = string.gsub(filename, "(.*/)(.*)", "%1")
-	if n == 0 then return "/"
-	else return "/" .. dir end
-end 
-
 -- Revision callback function
 function count(r)
 	local date = r:date()
@@ -49,7 +42,7 @@ function count(r)
 			if count_changes ~= nil then
 				n = s:lines_added(v) + s:lines_removed(v)
 			end
-			if dir then v = dirname(v) end
+			if dir then v = pepper.utils.dirname("/" .. v) end
 			if activity[v] == nil then activity[v] = {} end
 			if activity[v][date] == nil then
 				activity[v][date] = n

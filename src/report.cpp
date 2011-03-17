@@ -298,6 +298,18 @@ static int utils_strptime(lua_State *L)
 	return LuaHelpers::push(L, time);
 }
 
+// Wrapper for dirname()
+static int utils_dirname(lua_State *L)
+{
+	return LuaHelpers::push(L, sys::fs::dirname(LuaHelpers::pops(L)));
+}
+
+// Wrapper for basename()
+static int utils_basename(lua_State *L)
+{
+	return LuaHelpers::push(L, sys::fs::basename(LuaHelpers::pops(L)));
+}
+
 // Function table of the utils library
 static const struct luaL_reg utils[] = {
 	// TODO: Error handling for all functions
@@ -305,6 +317,8 @@ static const struct luaL_reg utils[] = {
 	{"unlink", utils_unlink},
 	{"split", utils_split},
 	{"strptime", utils_strptime},
+	{"dirname", utils_dirname},
+	{"basename", utils_basename},
 	{NULL, NULL}
 };
 

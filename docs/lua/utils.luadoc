@@ -26,3 +26,13 @@ function split(string, pattern)
 --  @param format Time format
 --  @return A UNIX timestamp
 function strptime(s, format)
+
+--- Returns the directory portion of a pathname.
+--  This function acts like <a href="http://en.wikipedia.org/wiki/Dirname">dirname(1)</a>,
+--  i.e. it also returns a dot if the given path contains no slash.
+function dirname(path)
+
+--- Returns the  non-directory portion of a pathname.
+--  This function acts like <a href="http://en.wikipedia.org/wiki/Basename">basename(1)</a>,
+--  but doesn't strip suffixes.
+function basename(path)
