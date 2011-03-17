@@ -14,11 +14,11 @@ dist_pkgdata_DATA = \
 	activity.lua \
 	authors.lua \
 	branches.lua \
-	commit_scatter.lua \
 	commits_per_month.lua \
 	csv.lua \
 	diffstat.lua \
 	directories.lua \
 	filetypes.lua \
 	loc.lua \
-	shortlog.lua
+	shortlog.lua \
+	times.lua
