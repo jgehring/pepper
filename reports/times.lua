@@ -1,15 +1,23 @@
 --[[
-	Generates a scatter plot visualizing the commit activity per daytime.
+	pepper - SCM statistics report generator
+	Copyright (C) 2010-2011 Jonas Gehring
+
+	Released under the GNU General Public License, version 3.
+	Please see the COPYING file in the source distribution for license
+	terms and conditions, or see http://www.gnu.org/licenses/.
+
+	file: times.lua
+	Visualizes commit times using a scatter plot.
 --]]
 
-
 -- Script meta-data
-meta.title = "Commit Scatter"
-meta.description = "Scatter plot of commit activity"
+meta.title = "Times"
+meta.description = "Scatter plot of commit times"
 meta.options = {{"-bARG, --branch=ARG", "Select branch"}}
 
 require "pepper.plotutils"
 pepper.plotutils.add_plot_options()
+
 
 -- Revision callback function
 function callback(r)

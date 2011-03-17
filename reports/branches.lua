@@ -1,11 +1,19 @@
 --[[
-	Shows all branches and their current heads, similar to "git branch -v"
---]]
+	pepper - SCM statistics report generator
+	Copyright (C) 2010-2011 Jonas Gehring
 
+	Released under the GNU General Public License, version 3.
+	Please see the COPYING file in the source distribution for license
+	terms and conditions, or see http://www.gnu.org/licenses/.
+
+	file: branches.lua
+	Shows all branches and their current heads, similar to "git branch -v".
+--]]
 
 -- Script meta-data
 meta.title = "Branches"
 meta.description = "Lists all repository branches"
+
 
 -- Main script function
 function main()

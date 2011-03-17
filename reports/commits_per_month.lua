@@ -1,7 +1,14 @@
 --[[
+	pepper - SCM statistics report generator
+	Copyright (C) 2010-2011 Jonas Gehring
+
+	Released under the GNU General Public License, version 3.
+	Please see the COPYING file in the source distribution for license
+	terms and conditions, or see http://www.gnu.org/licenses/.
+
+	file: commits_per_month.lua
 	Generates a histogram using commits per month and the amount of files touched.
 --]]
-
 
 -- Script meta-data
 meta.title = "Commits per Month"

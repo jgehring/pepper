@@ -1,14 +1,23 @@
 --[[
-	Generates a graph, representing directory sizes over time.
---]]
+    pepper - SCM statistics report generator
+    Copyright (C) 2010-2011 Jonas Gehring
 
+    Released under the GNU General Public License, version 3.
+    Please see the COPYING file in the source distribution for license
+    terms and conditions, or see http://www.gnu.org/licenses/.
+
+    file: diffstat.lua
+	Visualizes directory size changes on a given branch.
+--]]
 
 -- Script meta-data
 meta.title = "Directories"
 meta.description = "Directory sizes"
-meta.options = {{"-bARG, --branch=ARG", "Select branch"},
-                {"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with a regular expression"},
-                {"-nARG", "Show the ARG largest directories"}}
+meta.options = {
+	{"-bARG, --branch=ARG", "Select branch"},
+	{"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with a regular expression"},
+	{"-nARG", "Show the ARG largest directories"}
+}
 
 require "pepper.plotutils"
 pepper.plotutils.add_plot_options()

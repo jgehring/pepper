@@ -1,12 +1,23 @@
 --[[
-	Dumps a revision
---]]
+	pepper - SCM statistics report generator
+	Copyright (C) 2010-2011 Jonas Gehring
 
+	Released under the GNU General Public License, version 3.
+	Please see the COPYING file in the source distribution for license
+	terms and conditions, or see http://www.gnu.org/licenses/.
+
+	file: revdump.lua
+	Dumps a revision
+	NOTE: This report is mainly used for testing purposes
+--]]
 
 -- Script meta-data
 meta.title = "Revision dump"
-meta.options = {{"-bARG, --branch=ARG", "Select branch"},
-                {"-rARG, --revision=ARG", "Select revision"}}
+meta.options = {
+	{"-bARG, --branch=ARG", "Select branch"},
+	{"-rARG, --revision=ARG", "Select revision"}
+}
+
 
 -- Revision dump function
 function revdump(r)

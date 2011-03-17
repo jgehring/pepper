@@ -1,13 +1,22 @@
 --[[
+	pepper - SCM statistics report generator
+	Copyright (C) 2010-2011 Jonas Gehring
+
+	Released under the GNU General Public License, version 3.
+	Please see the COPYING file in the source distribution for license
+	terms and conditions, or see http://www.gnu.org/licenses/.
+
+	file: shortlog.lua
 	Generates a summarized revision log (like "git shortlog")
 --]]
-
 
 -- Script meta-data
 meta.title = "Shortlog"
 meta.description = "Summarized revision log"
-meta.options = {{"-bARG, --branch=ARG", "Select branch"},
-                {"-s, --summary", "Print commit count summary only"}}
+meta.options = {
+	{"-bARG, --branch=ARG", "Select branch"},
+	{"-s, --summary", "Print commit count summary only"}
+}
 
 
 -- Revision callback function

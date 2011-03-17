@@ -1,20 +1,29 @@
 --[[
+	pepper - SCM statistics report generator
+	Copyright (C) 2010-2011 Jonas Gehring
+
+	Released under the GNU General Public License, version 3.
+	Please see the COPYING file in the source distribution for license
+	terms and conditions, or see http://www.gnu.org/licenses/.
+
+	file: csv.lua
 	Dumps commits in a CSV format
 --]]
-
 
 -- Script meta-data
 meta.title = "CSV"
 meta.description = "Dumps commits in CSV format"
-meta.options = {{"-bARG, --branch=ARG", "Select branch"},
-                {"-cARG, --columns=ARG",
-"Comma-seperated list of columns. " ..
-"Possible values (and abbreviations) are 'id', " ..
-"'author' (a), 'added' (+), 'removed' (-), " ..
-"'delta' (d), 'total' (t), 'files' (f), " ..
-"'message' (m)"},
-				{"--datemin=ARG", "Start date (format is YYYY-MM-DD)"},
-				{"--datemax=ARG", "End date (format is YYYY-MM-DD)"}}
+meta.options = {
+	{"-bARG, --branch=ARG", "Select branch"},
+	{"-cARG, --columns=ARG",
+		"Comma-seperated list of columns. " ..
+		"Possible values (and abbreviations) are 'id', " ..
+		"'author' (a), 'added' (+), 'removed' (-), " ..
+		"'delta' (d), 'total' (t), 'files' (f), " ..
+		"'message' (m)"},
+	{"--datemin=ARG", "Start date (format is YYYY-MM-DD)"},
+	{"--datemax=ARG", "End date (format is YYYY-MM-DD)"}
+}
 
 
 -- Returns the name of the given code

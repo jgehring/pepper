@@ -1,19 +1,28 @@
 --[[
-	Generates an activity graph.
+	pepper - SCM statistics report generator
+	Copyright (C) 2010-2011 Jonas Gehring
+
+	Released under the GNU General Public License, version 3.
+	Please see the COPYING file in the source distribution for license
+	terms and conditions, or see http://www.gnu.org/licenses/.
+
+	file: activity.lua
+	Visualizes several repository activity metrics using a smoothed curve.
 	This is a port of http://labs.freehackers.org/wiki/hgactivity
 --]]
-
 
 -- Script meta-data
 meta.title = "Activity"
 meta.description = "General repository activity"
-meta.options = {{"-bARG, --branch=ARG", "Select branch"},
-                {"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with a regular expression"},
-                {"-c,--changes,-l", "Count line changes instead of commit counts"},
-                {"--split=ARG", "Split the graph by 'authors', 'files', 'directories', or 'none' (the default)"},
-                {"-nARG", "Maximum number of series when using --split"},
-				{"--datemin=ARG", "Start date (format is YYYY-MM-DD)"},
-				{"--datemax=ARG", "End date (format is YYYY-MM-DD)"}}
+meta.options = {
+	{"-bARG, --branch=ARG", "Select branch"},
+	{"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with a regular expression"},
+	{"-c,--changes,-l", "Count line changes instead of commit counts"},
+	{"--split=ARG", "Split the graph by 'authors', 'files', 'directories', or 'none' (the default)"},
+	{"-nARG", "Maximum number of series when using --split"},
+	{"--datemin=ARG", "Start date (format is YYYY-MM-DD)"},
+	{"--datemax=ARG", "End date (format is YYYY-MM-DD)"}
+}
 
 require "pepper.plotutils"
 pepper.plotutils.add_plot_options()

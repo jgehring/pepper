@@ -1,13 +1,22 @@
 --[[
-	Generates a histogram visualizing type file type distribution
---]]
+	pepper - SCM statistics report generator
+	Copyright (C) 2010-2011 Jonas Gehring
 
+	Released under the GNU General Public License, version 3.
+	Please see the COPYING file in the source distribution for license
+	terms and conditions, or see http://www.gnu.org/licenses/.
+
+	file: filetypes.lua
+	Visualizes the file type distribution using a histogram.
+--]]
 
 -- Script meta-data
 meta.title = "File types histogram"
 meta.description = "Histogram of the file types distribution"
-meta.options = {{"-rARG, --revision=ARG", "Select revision (defaults to HEAD)"},
-                {"-nARG", "Show the ARG most frequent file types"}}
+meta.options = {
+	{"-rARG, --revision=ARG", "Select revision (defaults to HEAD)"},
+	{"-nARG", "Show the ARG most frequent file types"}
+}
 
 require "pepper.plotutils"
 pepper.plotutils.add_plot_options()

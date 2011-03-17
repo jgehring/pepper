@@ -1,14 +1,21 @@
 --[[
-	Prints diffstat for a specified revision
+    pepper - SCM statistics report generator
+    Copyright (C) 2010-2011 Jonas Gehring
 
-	The histogram rendering is inspired by the git implementation
+    Released under the GNU General Public License, version 3.
+    Please see the COPYING file in the source distribution for license
+    terms and conditions, or see http://www.gnu.org/licenses/.
+
+    file: diffstat.lua
+	Pretty-prints a diffstat for a specified revision.
+	The histogram rendering is inspired by the git implementation.
 --]]
-
 
 -- Script meta-data
 meta.title = "Diffstat"
 meta.description = "Print diffstat of given revision"
 meta.options = {{"-rARG, --revision=ARG", "Revision ID"}}
+
 
 -- Graph scaling
 function scale(i, width, max)

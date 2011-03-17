@@ -1,13 +1,22 @@
 --[[
-	Generates a graph, representing lines of code over time.
---]]
+	pepper - SCM statistics report generator
+	Copyright (C) 2010-2011 Jonas Gehring
 
+	Released under the GNU General Public License, version 3.
+	Please see the COPYING file in the source distribution for license
+	terms and conditions, or see http://www.gnu.org/licenses/.
+
+	file: loc.lua
+	Visualizes lines of code changes on a given branch.
+--]]
 
 -- Script meta-data
 meta.title = "LOC"
 meta.description = "Lines of code"
-meta.options = {{"-bARG, --branch=ARG", "Select branch"},
-                {"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with Lua pattern ARG"}}
+meta.options = {
+	{"-bARG, --branch=ARG", "Select branch"},
+	{"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with Lua pattern ARG"}
+}
 
 require "pepper.plotutils"
 pepper.plotutils.add_plot_options()

@@ -1,14 +1,23 @@
 --[[
-	Plots a graph visualizing the code contribution by author
---]]
+	pepper - SCM statistics report generator
+	Copyright (C) 2010-2011 Jonas Gehring
 
+	Released under the GNU General Public License, version 3.
+	Please see the COPYING file in the source distribution for license
+	terms and conditions, or see http://www.gnu.org/licenses/.
+
+	file: authors.lua
+	Visualizes code contribution by author.
+--]]
 
 -- Script meta-data
 meta.title = "Code contribution by authors"
 meta.description = "Contributed lines of code by authors"
-meta.options = {{"-bARG, --branch=ARG", "Select branch"},
-                {"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with a regular expression"},
-                {"-nARG", "Show the ARG busiest authors"}}
+meta.options = {
+	{"-bARG, --branch=ARG", "Select branch"},
+	{"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with a regular expression"},
+	{"-nARG", "Show the ARG busiest authors"}
+}
 
 require "pepper.plotutils"
 pepper.plotutils.add_plot_options()
