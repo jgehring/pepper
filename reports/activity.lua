@@ -17,7 +17,7 @@ meta.description = "General repository activity"
 meta.options = {
 	{"-bARG, --branch=ARG", "Select branch"},
 	{"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with a regular expression"},
-	{"-c,--changes,-l", "Count line changes instead of commit counts"},
+	{"-c, --changes, -l", "Count line changes instead of commit counts"},
 	{"--split=ARG", "Split the graph by 'authors', 'files', 'directories', or 'none' (the default)"},
 	{"-nARG", "Maximum number of series when using --split"},
 	{"--datemin=ARG", "Start date (format is YYYY-MM-DD)"},

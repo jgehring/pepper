@@ -16,8 +16,8 @@ meta.title = "Commit counts"
 meta.description = "Histogramm of commit counts"
 meta.options = {
 	{"-bARG, --branch=ARG", "Select branch"},
-	{"-pARG,--period=ARG", "Show counts for the last 'Ndays', 'Nweeks', 'Nmonths' or 'Nyears'. The default is '12months'"},
-	{"-rARG,--resolution=ARG", "Set histogram resolution to 'days', 'weeks', 'months', 'years' or 'auto' (the default)"}
+	{"-pARG, --period=ARG", "Show counts for the last 'Ndays', 'Nweeks', 'Nmonths' or 'Nyears'. The default is '12months'"},
+	{"-rARG, --resolution=ARG", "Set histogram resolution to 'days', 'weeks', 'months', 'years' or 'auto' (the default)"}
 }
 
 require "pepper.plotutils"
