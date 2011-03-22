@@ -29,8 +29,6 @@ a short description and command-line options.
 A skeleton script might look light the following:
 
 [[!format lua """
--- Skeleton script
-
 -- Meta-data
 meta.title = "Skeleton"
 meta.description = "Just a skeleton"
@@ -44,9 +42,12 @@ end
 
 ### Using repository information
 
-Report scripts can use the global `pepper.report` table to access the current
-environment. The following code will print the repository's type, its location
-and the current head revision.
+Report scripts can use the global `pepper.report`
+table to access the current environment. The
+[`repository`](../documentation/api/modules/pepper.repository.html)
+object provides numerous functions to access the source code repository
+selected by the user. The following code will print the repository's type,
+its location and the current head revision.
 
 [[!format lua """
 function main()
@@ -59,37 +60,38 @@ end
 
 ### Examining a revision range
 
-The function `pepper.report.walk_branch` function can be used to iterate
-over all revisions on a given branch. The following code will gather
-information about the number of commits and the number of authors on
-a branch.
+A revision range can be accessed using a [revision
+iterator](../documentation/api/modules/pepper.iterator.html),
+that can be obtained by calling the repository's
+[`iterator()`](../documentation/api/modules/pepper.repository.html#iterator)
+function. The iterator's `revisions()` function can be used as a standard
+Lua iterator wrapping `next()`. Furthermore, a `map()` function is
+provided that maps a callback function to every revision. When using
+`map()`, the iterator will also write progress information to `stderr`.
+
+The following code will gather information about the number of commits
+and the number of authors on a branch.
 
 [[!format lua """
--- This function will be called for every revision
-function callback(revision)
-	-- Initialize the author's commit count if necessary
-	if authors[revision:author()] == nil then
-		authors[revision:author()] = 0
-	end
-
-	-- Update commit count
-	authors[revision:author()] = authors[revision:author()] + 1
-end
-
 -- Entry point
 function main()
 	local repository = pepper.report.repository()
-	authors = {} -- Global dictionary of authors
-
 	local branch = repository:main_branch()
-	repository:walk_branch(callback, branch)
 
-	-- Count the number of authors and the number of commits
+	local authors = {} -- Dictionary to mark authors
 	local num_authors = 0
 	local num_commits = 0
-	for k,v in pairs(authors) do
-		num_authors = num_authors + 1
-		num_commits = num_commits + v
+
+	-- Initialize iterator and loop over all revisions
+	local iterator = repository:iterator(branch)
+	for revision in iterator:revisions() do
+		-- Check if the author has already been counted
+		if authors[revision:author()] == nil then
+			num_authors = num_authors + 1
+			authors[revision:author()] = true
+		end
+
+		num_commits = num_commits + 1
 	end
 
 	-- Print result
@@ -98,59 +100,28 @@ function main()
 end
 """]]
 
-Here, `main_branch()` will return the branch that is currently checked out
-for local repositories.
+Here,
+[`main_branch()`](../documentation/api/modules/pepper.repository.html#main_branch)
+will return the branch that is currently checked out for local
+repositories.
 
 
-### Graphical reports
+#### Technical information regarding revision iterators
 
-Reports can use the built-in [GNUPlot
-interface](../documentation/api/modules/pepper.gnuplot.html) to produce
-graphical output. In order to support common plot options, it's advised
-to set the global variable `meta.graphical` to `true` and use the
-[setup()](../documentation/api/modules/pepper.gnuplot.html#setup)
-function.
+Internally, revision iterators are designed in a asynchronous manner. The
+actual revisions on the branch and range selected don't need to be
+known at the time of construction since fetching this information
+from the repository may be time-consuming. Thus, the revision iterator
+will probably block during iteration when waiting for further revision
+identifiers from the backend. Currently, this kind of background
+log fetching is implemented for the Subversion backend only as it is
+the the only repository backend that operates on remote repositories.
 
-The following report plots a histogram of commits by week days.
-
-[[!format lua """
-meta.title = "Commits by Week Days"
-meta.graphical = true
-
--- This function will be called for every revision
-function callback(revision)
-    -- Determine week day of commit
-    local day = os.date("*t", revision:date())["wday"]
-
-    -- Update commit count
-    commits[day] = commits[day] + 1
-end
-
--- Entry point
-function main()
-    local repository = pepper.report.repository()
-    -- Global table of commit counts with an entry for each day
-    commits = {0, 0, 0, 0, 0, 0, 0}
-
-    local branch = repository:main_branch()
-    repository:walk_branch(callback, branch)
-
-    -- Setup the plot
-    local plot = pepper.gnuplot:new()
-    plot:setup()
-    plot:set_title("Commits by Week Days (on " .. branch .. ")")
-
-    -- Week day names used by Lua's wday
-    local days = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}
-
-    -- Run the plot
-    plot:plot_histogram(days, commits)
-end
-"""]]
-
-If you pass `--help` as a main option to the program when you run this
-report, common graph options like output filename and image size will
-be shown.
+Once a bunch of revision identifiers is known to be part of an iteration,
+meta-data and diffstats can be prefetched by the respective backend
+implementation in background threads. Most of the backends are using
+this kind of prefetching. Currently, the only exception is the Mercurial
+backend.
 
 
 ### Option handling
@@ -161,8 +132,9 @@ two parts:
 
 * Declaration of available options using the `meta` table. These options
   will be presented to the user if help is requested at the command line.
-* Retrieval of option values using `pepper.report.getopt()`. Default option
-  values can be specified, too.
+* Retrieval of option values using
+  [`pepper.report.getopt()`](../documentation/api/modules/pepper.report.html#getopt).
+  Default option values can be specified, too.
 
 Here's a short script that prints the head revision of a given branch for
 illustrative purposes:
@@ -177,3 +149,69 @@ function main()
 	print("Branch " .. branch .. " is at " .. repository:head(branch))
 end
 """]]
+
+
+### Graphical reports
+
+Reports can use the built-in [GNUPlot
+interface](../documentation/api/modules/pepper.gnuplot.html)
+to produce graphical output. Furthermore, the
+[pepper.plotutils](../documentation/api/modules/pepper.plotutils.html) Lua
+module provides support for common command-line options and plot setup.
+
+The following report plots a histogram of commits by week days.
+
+[[!format lua """
+meta.title = "Commits by Week Days"
+
+-- Include plotutils module and add common command-line options
+require "pepper.plotutils"
+pepper.plotutils.add_plot_options()
+
+-- This function will be called for every revision
+function callback(revision)
+    -- Determine week day of commit
+    local day = os.date("*t", revision:date())["wday"]
+
+    -- Update commit count
+    commits[day] = commits[day] + 1
+end
+
+-- Entry point
+function main()
+    local repository = pepper.report.repository()
+    local days = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}
+    -- Global table of commit counts with an entry for each day
+    commits = {0, 0, 0, 0, 0, 0, 0}
+
+	-- Gather data by iterating over the main branch
+    local branch = repository:main_branch()
+    repository:iterator(branch):map(callback)
+
+	-- Create a new plot with a title including the current branch
+    local plot = pepper.gnuplot:new()
+    plot:set_title("Commits by Week Days (on " .. branch .. ")")
+
+	-- This will setup the plot output according to the command-line
+	-- options added above
+    pepper.plotutils.setup_output(plot)
+
+	-- Make sure the Y axis starts at zero
+	plot:cmd("set yrange [0:*]")
+
+    -- Run the plot
+    plot:plot_histogram(days, commits)
+end
+"""]]
+
+This time, the iterator's `map()` function has been used with a
+corresponding callback function. The `commits` variable is global, so
+it can be accessed from within the callback function. However, we could
+have used a closure as well and kept the variable local.
+
+If you pass `--help` as a main option to the program when
+you run this report, common plot options like output file
+name and image size will be shown. Those have been added by calling
+[`add_plot_options()`](../documentation/api/modules/pepper.plotutils.html#add_plot_options).
+`setup_output(plot)` makes sure that these options are actually applied
+to the plot.
