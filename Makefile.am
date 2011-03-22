@@ -8,6 +8,9 @@
 #
 
 SUBDIRS = src reports
+if MANPAGE
+SUBDIRS += docs
+endif
 if TESTSUITE
 SUBDIRS += tests
 endif
@@ -26,5 +29,10 @@ LUADOCS = \
 	reports/pepper/plotutils.lua
 luadoc: $(LUADOCS)
 	luadoc -d luadoc --nofiles $(LUADOCS)
+
+if MANPAGE
+htmlman:
+	$(MAKE) $(AM_MAKEFLAGS) -C docs htmlman
+endif
 
 DISTCHECK_CONFIGURE_FLAGS = --enable-tests

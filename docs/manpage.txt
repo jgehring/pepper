@@ -1,0 +1,152 @@
+pepper(1)
+=========
+:doctype:       manpage
+:man source:    pepper
+:man version:   {version}
+:man manual:    User commands
+
+
+NAME
+----
+pepper - Repository statistics and report tool 
+
+
+SYNOPSIS
+--------
+*pepper* ['options'] 'report' ['report options'] ['repository']
+
+
+DESCRIPTION
+-----------
+*pepper* is a command-line tool for retrieving statistics and generating
+reports from source code repositories. If invoked with valid options,it
+runs a *lua*(1) script given by 'report' on the given 'repository',
+producing textual or graphical output.
+
+If the 'report' argument doesn't point to a *lua*(1) report script, a
+number of paths will be searched for a report with the given name (see
+*ENVIRONMENT VARIABLES*). Thus, the built-in reports can be launched
+by specifying their name only.  Report-specific options can be passed
+as 'report options' following the report script name. To retrieve a
+listing of options supported by the respective report, pass *--help*
+as described in *OPTIONS*.
+
+If no 'repository' argument is present, the current directory will be
+used. Normally, the type of the repository is automatically detected,
+and an appropriate backend implementation will be selected. Some
+backends provide additional options, e.g. user authentication for remote
+repositories. Those options will be listed if you pass the *--help*
+flag as described in *OPTIONS*.
+
+
+OPTIONS
+-------
+
+*-?*, *-h*, *--help*::
+Print a nice help screen. If the command line includes a report script name
+or path, report options will be shown. Additionally, backend options will
+be shown for the selected repository or backend.
+
+*-q*::
+*--quiet*::
+Set verbosity level to minimum. Only warnings and errors will be shown.
+
+*-v*::
+*--verbose*::
+Increase verbosity level. Can be specified multiple times.
+
+*--no-cache*::
+Neither read from nor write to the local revision cache.
+
+*--list-reports*::
+List all reports that can be found in the current report search
+directories.
+
+*--list-backends*::
+List all built-in repository backends.
+
+*-bARG, --backend=ARG*::
+Force usage of backend named *ARG*. Use *--list-backends* to retrieve a
+list of all available backends.
+
+
+REVISION CACHE
+--------------
+*pepper* uses a local revision cache, located at $HOME/.pepper/cache. It
+contains meta-data and diffstats of revisions that have been requested
+in previous invocations of the program.
+
+If the program complains that your revision cache may is invalid
+(probably because of abnormal program termination or power failure),
+please run the *check_cache* report to fix it and remove faulty revisions.
+
+
+ENVIRONMENT VARIABLES
+---------------------
+*PEPPER_REPORTS*::
+A colon-separated list of paths used to search for report scripts.
+
+*PEPPER_CACHEDIR*::
+A path that overrides the default cache location.
+
+
+EXAMPLES
+--------
+Let's assume that the current directory is the repository of interest.
+
+pepper --list-reports::
+This lists all reports in the current search path can be listed with their
+descriptions. The names from this listing can be used as the program's
+'report' argument.
+
+pepper loc::
+A classic "Lines of Code" graph will be generated, with the actual
+plotting done by *gnuplot*(1).  If the user is running X11, a detached
+window containing the plot will be shown. Else, output in SVG format
+will be written to 'stdout'.
+All meta-data and diffstats fetched during this session will be written
+to the revision cache.
+
+pepper loc --type=png --output=loc.png::
+The same as above, now probably significantly faster because the revisions
+of interest are already cached. This time, a PNG image will be generated
+and written to "loc.png".
+
+pepper authors -n4 --tags="2.6.[0-9]*$"::
+This time, the code contribution by the 4 busiest authors will be be
+plotted. Additionally, vertical tag marks will be show for all tags
+that look like releases (of the Linux kernel).
+
+pepper --username=user commit_counts --period=14d http://svn.example.org::
+This generates a histogram of commit frequencies for the last 14
+days. This time, a remote Subversion repository requiring authentication
+is being used. If a password is required, the program will prompt for it.a
+
+pepper shortlog --branch=stable --summary::
+This will print a simple commit summary from the "stable" branch to
+'stdout', looking like *git-shortlog*(1).
+
+
+CUSTOM REPORTS
+--------------
+*pepper* provides an API for writing custom report scripts in
+*lua*(1). The *pepper* homepage at http://scm-pepper.sourceforge.net
+contains more information about this topic, including a scripting tutorial
+covering common tasks and an API reference manual.
+
+
+EXIT STATUS
+-----------
+0 on success, 1 on failure. Any error messages, warnings and progress
+will be printed to 'stderr'.
+
+
+SEE ALSO
+--------
+*git*(1), *svn*(1), *hg*(1), *lua*(1), *gnuplot*(1)
+
+
+AUTHOR
+------
+Copyright (C) 2008-2011 Jonas Gehring {email}.
+Released under the GNU General Public License.

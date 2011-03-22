@@ -40,6 +40,7 @@ AC_PROG_INSTALL()
 FEATURES_CHECK()
 
 AM_CONDITIONAL([GNUPLOT], [test "x$gnuplot" = "xyes"])
+AM_CONDITIONAL([MANPAGE], [test "x$manpage" = "xyes"])
 
 # Build unit tests?
 AC_ARG_ENABLE([tests], [AS_HELP_STRING([--enable-tests], [Build the test suite])], [testsuite="$enableval"], [testsuite="ifdebug"])
@@ -172,6 +173,7 @@ AC_CONFIG_FILES([
 	tests/units/Makefile
 	reports/Makefile
 	reports/pepper/Makefile
+	docs/Makefile
 ])
 AC_OUTPUT()
 
