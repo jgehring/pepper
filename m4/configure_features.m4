@@ -15,65 +15,67 @@ dnl Run checks for manpage programs
 AC_DEFUN([CHECK_MANPROGS], [
 	dnl Check for Asciidoc
 	AC_ARG_VAR([ASCIIDOC], Asciidoc executable)
-	AC_PATH_PROG([ASCIIDOC], [asciidoc], [not_found])
-	if test "x$ASCIIDOC" == "xnot_found"; then
+	AC_PATH_PROG([ASCIIDOC], [asciidoc], [not found])
+	if test "x$ASCIIDOC" == "xnot found"; then
 		if test "x$manpage" == "xyes"; then
 			AC_MSG_ERROR([Asciidoc could not be located in your \$PATH])
 		else
 			manpage="no"
 		fi
-	fi
-	ver_info=`$ASCIIDOC --version`
-	ver_maj=`echo $ver_info | sed 's/^.* \([[0-9]]\)*\.\([[0-9]]\)*\.\([[0-9]]*\).*$/\1/'`
-	ver_min=`echo $ver_info | sed 's/^.* \([[0-9]]\)*\.\([[0-9]]\)*\.\([[0-9]]*\).*$/\2/'`
-	ver_rev=`echo $ver_info | sed 's/^.* \([[0-9]]\)*\.\([[0-9]]\)*\.\([[0-9]]*\).*$/\3/'`
-	prog_version_ok="yes"
-	if test $ver_maj -lt 8; then
-		prog_version_ok="no"
-	fi
-	if test $ver_min -lt 4; then
-		prog_version_ok="no"
-	fi
-	if test $ver_rev -lt 0; then
-		prog_version_ok="no"
-	fi
-	if test "$prog_version_ok" !=  "yes"; then
-		if test "x$manpage" == "xyes"; then
-			AC_MSG_ERROR([Asciidoc >= 8.4 is needed. Please upgrade your installation])
-		else
-			manpage="no"
+	else
+		ver_info=`$ASCIIDOC --version`
+		ver_maj=`echo $ver_info | sed 's/^.* \([[0-9]]\)*\.\([[0-9]]\)*\.\([[0-9]]*\).*$/\1/'`
+		ver_min=`echo $ver_info | sed 's/^.* \([[0-9]]\)*\.\([[0-9]]\)*\.\([[0-9]]*\).*$/\2/'`
+		ver_rev=`echo $ver_info | sed 's/^.* \([[0-9]]\)*\.\([[0-9]]\)*\.\([[0-9]]*\).*$/\3/'`
+		prog_version_ok="yes"
+		if test $ver_maj -lt 8; then
+			prog_version_ok="no"
+		fi
+		if test $ver_min -lt 4; then
+			prog_version_ok="no"
+		fi
+		if test $ver_rev -lt 0; then
+			prog_version_ok="no"
+		fi
+		if test "$prog_version_ok" !=  "yes"; then
+			if test "x$manpage" == "xyes"; then
+				AC_MSG_ERROR([Asciidoc >= 8.4 is needed. Please upgrade your installation])
+			else
+				manpage="no"
+			fi
 		fi
 	fi
 
 	dnl Check for xmlto
 	AC_ARG_VAR([XMLTO], Asciidoc executable)
-	AC_PATH_PROG([XMLTO], [xmlto], [not_found])
-	if test "x$XMLTO" == "xnot_found"; then
+	AC_PATH_PROG([XMLTO], [xmlto], [not found])
+	if test "x$XMLTO" == "xnot found"; then
 		if test "x$manpage" == "xyes"; then
 			AC_MSG_ERROR([xmlto could not be located in your \$PATH])
 		else
 			manpage="no"
 		fi
-	fi
-	ver_info=`$XMLTO --version`
-	ver_maj=`echo $ver_info | sed 's/^.* \([[0-9]]\)*\.\([[0-9]]\)*\.\([[0-9]]*\).*$/\1/'`
-	ver_min=`echo $ver_info | sed 's/^.* \([[0-9]]\)*\.\([[0-9]]\)*\.\([[0-9]]*\).*$/\2/'`
-	ver_rev=`echo $ver_info | sed 's/^.* \([[0-9]]\)*\.\([[0-9]]\)*\.\([[0-9]]*\).*$/\3/'`
-	prog_version_ok="yes"
-	if test $ver_maj -lt 0; then
-		prog_version_ok="no"
-	fi
-	if test $ver_min -lt 0; then
-		prog_version_ok="no"
-	fi
-	if test $ver_rev -lt 18; then
-		prog_version_ok="no"
-	fi
-	if test "$prog_version_ok" !=  "yes"; then
-		if test "x$manpage" == "xyes"; then
-			AC_MSG_ERROR([xmlto >= 0.0.18 is needed. Please upgrade your installation])
-		else
-			manpage="no"
+	else
+		ver_info=`$XMLTO --version`
+		ver_maj=`echo $ver_info | sed 's/^.* \([[0-9]]\)*\.\([[0-9]]\)*\.\([[0-9]]*\).*$/\1/'`
+		ver_min=`echo $ver_info | sed 's/^.* \([[0-9]]\)*\.\([[0-9]]\)*\.\([[0-9]]*\).*$/\2/'`
+		ver_rev=`echo $ver_info | sed 's/^.* \([[0-9]]\)*\.\([[0-9]]\)*\.\([[0-9]]*\).*$/\3/'`
+		prog_version_ok="yes"
+		if test $ver_maj -lt 0; then
+			prog_version_ok="no"
+		fi
+		if test $ver_min -lt 0; then
+			prog_version_ok="no"
+		fi
+		if test $ver_rev -lt 18; then
+			prog_version_ok="no"
+		fi
+		if test "$prog_version_ok" !=  "yes"; then
+			if test "x$manpage" == "xyes"; then
+				AC_MSG_ERROR([xmlto >= 0.0.18 is needed. Please upgrade your installation])
+			else
+				manpage="no"
+			fi
 		fi
 	fi
 ])
