@@ -93,10 +93,26 @@ struct Baton
 	svn_ra_session_t *ra;
 	svn_revnum_t revision;
 	svn_revnum_t target_revision;
-	const char *empty_file;
 	apr_hash_t *deleted_paths;
 
+	const char *tempdir;
+	const char *empty_file;
+
 	apr_pool_t *pool;
+
+	static Baton *make(svn_revnum_t rev, apr_file_t *outfile, apr_pool_t *pool)
+	{
+		Baton *baton = (Baton *)apr_pcalloc(pool, sizeof(Baton));
+
+		baton->target = "";
+		baton->out = outfile;
+		baton->revision = rev;
+		baton->deleted_paths = apr_hash_make(pool);
+		svn_io_temp_dir(&(baton->tempdir), pool);
+		baton->empty_file = NULL; // TODO
+		baton->pool = pool;
+		return baton;
+	}
 };
 
 struct DirBaton
@@ -147,6 +163,27 @@ struct FileBaton
 	}
 };
 
+
+// Utility funtions
+svn_error_t *open_tempfile(apr_file_t **file, const char **path, FileBaton *b)
+{
+	const char *temp = svn_path_join(b->edit_baton->tempdir, "tempfile", b->pool);
+	return svn_io_open_unique_file2(file, path, temp, ".tmp", svn_io_file_del_on_pool_cleanup, b->pool);
+}
+
+svn_error_t *get_file_from_ra(FileBaton *b, svn_revnum_t revision)
+{
+	PTRACE << b->path << "@" << revision << endl;
+	svn_stream_t *fstream;
+	apr_file_t *file;
+
+	SVN_ERR(open_tempfile(&file, &(b->path_start_revision), b));
+	fstream = svn_stream_from_aprfile2(file, FALSE, b->pool);
+	SVN_ERR(svn_ra_get_file(b->edit_baton->ra, b->path, revision, fstream, NULL, &(b->pristine_props), b->pool));
+	return svn_stream_close(fstream);
+}
+
+
 // Delta editor callback functions
 svn_error_t *set_target_revision(void *edit_baton, svn_revnum_t target_revision, apr_pool_t * /*pool*/)
 {
@@ -164,16 +201,6 @@ svn_error_t *open_root(void *edit_baton, svn_revnum_t /*base_revision*/, apr_poo
 
 	*root_baton = b;
 	return SVN_NO_ERROR;
-}
-
-svn_error_t *get_file_from_ra(FileBaton *b, svn_revnum_t revision)
-{
-	PTRACE << b->path << "@" << revision << endl;
-	svn_stream_t *fstream;
-
-	SVN_ERR(svn_stream_open_unique(&fstream, &(b->path_start_revision), NULL, svn_io_file_del_on_pool_cleanup, b->pool, b->pool));
-	SVN_ERR(svn_ra_get_file(b->edit_baton->ra, b->path, revision, fstream, NULL, &(b->pristine_props), b->pool));
-	return svn_stream_close(fstream);
 }
 
 // Prototype
@@ -197,7 +224,7 @@ svn_error_t *delete_entry(const char *path, svn_revnum_t target_revision, void *
 	if (dirent->kind == svn_node_file) {
 		FileBaton *b = FileBaton::make(path, eb, pool);
 		SVN_ERR(get_file_from_ra(b, target_revision-1));
-		SVN_ERR(svn_io_open_unique_file3(&(b->file_end_revision), &(b->path_end_revision), NULL, svn_io_file_del_on_pool_cleanup, b->pool, b->pool));
+		SVN_ERR(open_tempfile(&(b->file_end_revision), &(b->path_end_revision), b));
 		SVN_ERR(close_file(b, "", pool));
 	} else {
 		PTRACE << "Listing " << path << "@" << target_revision-1 << endl;
@@ -245,7 +272,7 @@ svn_error_t *add_file(const char *path, void *parent_baton, const char * /*copyf
 	*file_baton = b;
 
 	b->pristine_props = apr_hash_make(pool);
-	return svn_io_open_unique_file3(&(b->file_start_revision), &(b->path_start_revision), NULL, svn_io_file_del_on_pool_cleanup, b->pool, b->pool);
+	return open_tempfile(&(b->file_start_revision), &(b->path_start_revision), b);
 }
 
 svn_error_t *open_file(const char *path, void *parent_baton, svn_revnum_t base_revision, apr_pool_t *pool, void **file_baton)
@@ -276,7 +303,7 @@ svn_error_t *apply_textdelta(void *file_baton, const char * /*base_checksum*/, a
 	PTRACE << "base is " << b->path_start_revision << endl;
 	SVN_ERR(svn_io_file_open(&(b->file_start_revision), b->path_start_revision, APR_READ, APR_OS_DEFAULT, b->pool));
 
-	SVN_ERR(svn_io_open_unique_file3(&(b->file_end_revision), &(b->path_end_revision), NULL, svn_io_file_del_on_pool_cleanup, b->pool, b->pool));
+	SVN_ERR(open_tempfile(&(b->file_end_revision), &(b->path_end_revision), b));
 
 	svn_txdelta_apply(svn_stream_from_aprfile2(b->file_start_revision, TRUE, b->pool), svn_stream_from_aprfile2(b->file_end_revision, TRUE, b->pool), NULL, b->path, b->pool, &(b->apply_handler), &(b->apply_baton));
 	*handler = window_handler;
@@ -433,14 +460,7 @@ Diffstat SvnDiffstatThread::diffstat(SvnConnection *c, svn_revnum_t r1, svn_revn
 	// Setup the diff editor
 	apr_pool_t *subpool = svn_pool_create(pool);
 	svn_delta_editor_t *editor = svn_delta_default_editor(subpool);
-	SvnDelta::Baton *baton = (SvnDelta::Baton *)apr_palloc(subpool, sizeof(SvnDelta::Baton));
-
-	baton->target = "";
-	baton->revision = r2;
-	baton->empty_file = NULL;
-	baton->deleted_paths = apr_hash_make(subpool);
-	baton->out = outfile;
-	baton->pool = subpool;
+	SvnDelta::Baton *baton = SvnDelta::Baton::make(r2, outfile, subpool);
 
 	// Open RA session for extra calls during diff
 	err = svn_client_open_ra_session(&baton->ra, c->url, c->ctx, pool);
