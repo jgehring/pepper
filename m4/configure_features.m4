@@ -14,7 +14,7 @@ AC_ARG_ENABLE([man], [AS_HELP_STRING([--disable-man], [Generate the man page])],
 dnl Run checks for manpage programs
 AC_DEFUN([CHECK_MANPROGS], [
 	dnl Check for Asciidoc
-	AC_ARG_VAR([ASCIIDOC], Asciidoc executable)
+	AC_ARG_VAR([ASCIIDOC], AsciiDoc executable)
 	AC_PATH_PROG([ASCIIDOC], [asciidoc], [not found])
 	if test "x$ASCIIDOC" == "xnot found"; then
 		if test "x$manpage" == "xyes"; then
@@ -47,7 +47,7 @@ AC_DEFUN([CHECK_MANPROGS], [
 	fi
 
 	dnl Check for xmlto
-	AC_ARG_VAR([XMLTO], Asciidoc executable)
+	AC_ARG_VAR([XMLTO], xmlto executable)
 	AC_PATH_PROG([XMLTO], [xmlto], [not found])
 	if test "x$XMLTO" == "xnot found"; then
 		if test "x$manpage" == "xyes"; then
