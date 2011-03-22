@@ -575,6 +575,10 @@ void listReports(std::ostream &out)
 	std::vector<std::string> dirs = reportDirs();
 	for (size_t j = 0; j < dirs.size(); j++) {
 		std::string builtin = dirs[j];
+		if (!sys::fs::dirExists(builtin)) {
+			continue;
+		}
+
 		out << "Available reports in " << builtin << ":" << std::endl;
 
 		std::vector<std::string> reports = sys::fs::ls(builtin);
