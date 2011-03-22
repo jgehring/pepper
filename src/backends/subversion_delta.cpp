@@ -28,6 +28,15 @@
 #include "backends/subversion_p.h"
 
 
+// Statement macro for checking APR calls, similar to SVN_ERR
+#define APR_ERR(expr) \
+	do { \
+		apr_status_t apr_status__temp = (expr); \
+		if (apr_status__temp) \
+			return svn_error_wrap_apr(apr_status__temp, NULL); \
+	} while (0)
+
+
 // streambuf implementation for apr_file_t
 class AprStreambuf : public std::streambuf
 {
@@ -58,8 +67,8 @@ private:
 		// start is now the start of the buffer, proper.
 		// Read from fptr_ in to the provided buffer
 		size_t n = m_buffer.size() - (start - base);
-		apr_file_read(f, start, &n);
-		if (n == 0)
+		apr_status_t status = apr_file_read(f, start, &n);
+		if (n == 0 || status == APR_EOF)
 			return traits_type::eof();
 
 		// Set buffer pointers
@@ -366,13 +375,6 @@ svn_error_t *close_file(void *file_baton, const char * /*text_checksum*/, apr_po
 	// Output the actual diff
 	SVN_ERR(svn_diff_file_output_unified3(os, diff, b->path_start_revision, b->path_end_revision, b->path, b->path, APR_LOCALE_CHARSET, NULL, FALSE, b->pool));
 
-	// Remove the actual files
-	if (b->file_start_revision) {
-		apr_file_close(b->file_start_revision);
-	}
-	if (b->file_end_revision) {
-		apr_file_close(b->file_end_revision);
-	}
 	return SVN_NO_ERROR;
 }
 
@@ -445,7 +447,9 @@ Diffstat SvnDiffstatThread::diffstat(SvnConnection *c, svn_revnum_t r1, svn_revn
 	svn_error_t *err;
 
 	apr_file_t *infile = NULL, *outfile = NULL, *errfile = NULL;
-	apr_file_open_stderr(&errfile, pool);
+	if (apr_file_open_stderr(&errfile, pool) != APR_SUCCESS) {
+		throw PEX("Unable to open stderr");
+	}
 	if (apr_file_pipe_create(&infile, &outfile, pool) != APR_SUCCESS) {
 		throw PEX("Unable to create pipe for reading diff data");
 	}
@@ -509,9 +513,13 @@ Diffstat SvnDiffstatThread::diffstat(SvnConnection *c, svn_revnum_t r1, svn_revn
 		throw PEX(utils::strprintf("Diffstat fetching of revision %ld:%ld failed: %s", r1, r2, SvnConnection::strerr(err).c_str()));
 	}
 
-	apr_file_close(outfile);
+	if (apr_file_close(outfile) != APR_SUCCESS) {
+		throw PEX("Unable to close outfile");
+	}
 	parser.wait();
-	apr_file_close(infile);
+	if (apr_file_close(infile) != APR_SUCCESS) {
+		throw PEX("Unable to close infile");
+	}
 	return parser.stat();
 }
 
