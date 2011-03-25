@@ -1,0 +1,128 @@
+#!/usr/bin/ruby
+#
+#	Diffstat testing on real repositories
+#	
+#	USAGE: ./diffcmp <repo> [path-to-pepper]
+#
+
+require "tempfile"
+
+# Parse arguments
+raise "Missing argument" unless ARGV.length > 0
+repo = ARGV[0]
+pepper = "pepper"
+if ARGV.length > 1
+	pepper = ARGV[1]
+end
+
+# Get repository type by running a sample report 
+puts("Probing repository...")
+tmp = Tempfile.new('type')
+tmp << "function main()
+	print(pepper.report.repository():type())
+	print(pepper.report.repository():url())
+end"
+tmp.flush()
+pipe = IO.popen("#{pepper} -q #{tmp.path} #{repo}")
+out = pipe.readlines()
+pipe.close()
+exit 1 unless $? == 0
+
+type = out[0].strip()
+url = out[1].strip()
+if type == "subversion" and url.match(/^\//)
+	url = "file://" + url
+end
+tmp.close()
+
+# Diff commands for the different repository types, for a single and for
+# two revisions
+diffcmd = {
+	"subversion" => {
+		:log => "svn log -q %s",
+		:logregex => /^r([0-9]+)/,
+		:single => "svn diff -c %s %s",
+		:double => "svn diff -r %s:%s %s",
+		:passurl => true
+	},
+	"git" => {
+		:log => "git rev-list HEAD",
+		:single => "git diff-tree -U --no-renames --root %s",
+		:double => "git diff-tree -U --no-renames %s %s",
+		:passurl => false
+	},
+	"mercurial" => {
+		:log => "hg log -q",
+		:logregex => /^[0-9]+:(.*)/,
+		:single => "hg diff -c %s",
+		:double => "hg diff -r %s -r %s" ,
+		:passurl => false
+	}
+}
+olddir = Dir.pwd()
+Dir.chdir(url) unless diffcmd[type][:passurl]
+
+# Fetch repository log
+puts("Fetching logs...")
+if diffcmd[type][:passurl]
+	pipe = IO.popen(sprintf(diffcmd[type][:log], url))
+else
+	pipe = IO.popen(sprintf(diffcmd[type][:log]))
+end
+log = pipe.readlines
+if diffcmd[type][:logregex]
+	newlog = []
+	regex = diffcmd[type][:logregex]
+	log.each { |x|
+		match = regex.match(x)
+		if match
+			newlog << match.captures()[0]
+		end
+	}
+	log = newlog
+end
+
+# Generate diffstats with the native client and pepper
+tmp = Tempfile.new('diff')
+tmp << "function main()
+	d = pepper.report.repository():revision(pepper.report.getopt('r')):diffstat()
+	print('INSERTED,DELETED,MODIFIED,FILENAME')
+	for i,v in pairs(d:files()) do
+		print(tostring(d:lines_added(v)) .. ',' .. tostring(d:lines_removed(v)) .. ',0,' .. v)
+	end
+end"
+tmp.flush()
+
+print("Comparing diffstats... ")
+i = 0
+log.each { |rev|
+	rev = rev.strip()
+	i = i + 1
+	print("\e[0K\rComparing diffstats... #{i}/#{log.length}")
+	$stdout.flush()
+
+	pipe = IO.popen("#{pepper} --no-cache -q #{tmp.path} -r#{rev} #{repo}")
+	out_pepper = pipe.readlines().join()
+	pipe.close()
+
+	if diffcmd[type][:passurl]
+		pipe = IO.popen(sprintf(diffcmd[type][:single], rev, url))
+	else
+		pipe = IO.popen(sprintf(diffcmd[type][:single], rev))
+	end
+	diff_data = pipe.readlines()
+	pipe.close()
+
+	pipe = IO.popen("diffstat -t -p#{type == "subversion" ? "0" : "1"}", "r+")
+	pipe.puts(diff_data)
+	pipe.close_write()
+	out_native = pipe.readlines().join()
+	pipe.close()
+
+	if out_pepper != out_native
+		Dir.chdir(olddir)
+		File.open("diff.pepper", 'w') { |f| f.write(out_pepper) }
+		File.open("diff.native", 'w') { |f| f.write(out_native) }
+		raise "Error: Diffstats for revision #{rev} don't match! Check diff.pepper and diff.native"
+	end
+}
