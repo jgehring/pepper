@@ -120,10 +120,10 @@ log.each { |rev|
 	pipe.close()
 
 	if out_pepper != out_native
-		Dir.chdir(olddir)
-		File.open("diff.pepper", 'w') { |f| f.write(out_pepper) }
-		File.open("diff.native", 'w') { |f| f.write(out_native) }
-		raise "Error: Diffstats for revision #{rev} don't match! Check diff.pepper and diff.native"
+		File.open("#{olddir}/diff.pepper.#{rev}", 'w') { |f| f.write(out_pepper) }
+		File.open("#{olddir}/diff.native.#{rev}", 'w') { |f| f.write(out_native) }
+		puts("\n");
+		$stderr.puts("Warning: Diffstats for revision #{rev} don't match! Check diff.pepper.#{rev} and diff.native.#{rev}")
 	end
 }
 puts()

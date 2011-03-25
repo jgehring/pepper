@@ -1,0 +1,3 @@
+#!/bin/sh
+# Compare diffstats that didn't match
+for i in diff.native.*; do rev=`echo $i | sed 's/.*\.\([0-9[a-f]*\)$/\1/'`; echo "Compare evision $rev"; read;vimdiff diff.{native,pepper}.$rev; done
