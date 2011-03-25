@@ -12,7 +12,7 @@ raise "Missing argument" unless ARGV.length > 0
 repo = ARGV[0]
 pepper = "pepper"
 if ARGV.length > 1
-	pepper = ARGV[1]
+	pepper = File.absolute_path(ARGV[1])
 end
 
 # Get repository type by running a sample report 
@@ -126,3 +126,4 @@ log.each { |rev|
 		raise "Error: Diffstats for revision #{rev} don't match! Check diff.pepper and diff.native"
 	end
 }
+puts()
