@@ -3,11 +3,21 @@ body {
 	background-image: url("background.png");
 	background-position: top right;
 	background-repeat: no-repeat;
-	background-color: #E7E7E7;
+/*	background-color: #E7E7E7;*/
+	background-color: #6B5859;
 }
 
 .header {
 	padding-bottom: 0.6em;
+}
+
+a {
+	color: #008563;
+}
+
+.header a {
+	color: #008563;
+	text-decoration: none;
 }
 
 div #pagebody {
@@ -68,7 +78,6 @@ td.news h4 {
 td.commits {
 	vertical-align: top;
 	padding-left: 1em;
-	border: 1px solid left;
 	width: 20%;
 }
 

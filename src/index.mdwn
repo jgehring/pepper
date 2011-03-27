@@ -29,7 +29,7 @@
 ---
 
 
-### <a name="about">About</a>
+### <a name="about"></a>About
 
 pepper is a flexible command-line tool for retrieving statistics
 and generating reports from source code repositories. It ships with
@@ -67,7 +67,7 @@ welcome](https://sourceforge.net/tracker/?group_id=386093)!
 ---
 
 
-### <a name="news">News</a>
+### <a name="news"></a>News
 
 <table class="news"><tr>
 	<td class="news">
