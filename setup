@@ -30,7 +30,7 @@ use IkiWiki::Setup::Standard {
 	# rcs backend to use
 	rcs => '',
 	# plugins to add to the default configuration
-	add_plugins => [qw{toc highlight format}],
+	add_plugins => [qw{toc highlight format favicon}],
 	# plugins to disable
 	disable_plugins => [qw{htmlscrubber}],
 	# additional directory to search for template files
