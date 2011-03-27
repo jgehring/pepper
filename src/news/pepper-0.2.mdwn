@@ -1,0 +1,19 @@
+[[!meta title="pepper 0.2 released"]]
+
+Version 0.2 of pepper is now available. This release
+brings new and improved built-in reports, an overhauled
+report API and a man page.  The [Mercurial activity
+extension](http://labs.freehackers.org/wiki/hgactivity) has been ported to
+pepper. The `commits_per_month` report has been generalized and renamed to
+`commit_counts` and a report that dumps commit data in CSV format has been
+added. The new man page is also available [[here|documentation/manpage]].
+
+A more detailed listing of the changes can be found in the [change
+log](ChangeLog). As usual, source tarballs can be found at the
+[[Download]] section.
+
+The homepage has been updated as well. On the right, the latest commits
+from pepper's [GitHub repository](http://github.com/jgehring/pepper)
+are shown, and the [[scirpting guide|ScriptingGuide]] as well as the
+[[Gallery]] page have been updated. I've added a favicon representing
+a pepper box and changed some of the colors.

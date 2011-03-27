@@ -4,6 +4,12 @@ if [ -z "$PEPPER_SRCDIR" ]; then
 	PEPPER_SRCDIR=".."
 fi
 
+# Generate the man page
+(cd $PEPPER_SRCDIR/docs; make pepper.1.html &> /dev/null; cat pepper.1.html) > src/documentation/manpage.mdwn
+sed -i 's/jonas\.gehring/$FORENAME.$SURENAME/' src/documentation/manpage.mdwn
+sed -i 's/<html><head>.*<div class="refnamediv"/<div class="refnamediv"/' src/documentation/manpage.mdwn
+sed -i 's/<\/body>//' src/documentation/manpage.mdwn
+
 ikiwiki --setup setup
 
 # Copy static files from pepper's source code directory
