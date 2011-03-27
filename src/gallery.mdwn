@@ -17,9 +17,26 @@ has been used.
 ---
 
 
+##### Lines of Code
+
+The `loc` report shows the total lines of code in the repository. Like
+most graphical reports, tag marks can be added to the plot.
+
+<table width="100%">
+<tr>
+<td><a href="loc-pepper.png"><img src="loc-pepper-thumb.png" title="pepper" width="80%"></a></td>
+<td><a href="loc-git.png"><img src="loc-git-thumb.png" title="Git" width="80%"></a></td>
+<td><a href="loc-hg.png"><img src="loc-hg-thumb.png" title="Mercurial" width="80%"></a></td>
+<td><a href="loc-linux.png"><img src="loc-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
+</tr>
+</table>
+
+---
+
+
 #### Busiest authors
 
-The `authors` report plots the contributions of the 6 "busiest" authors.
+The `authors` report plots the contributions made by the "busiest" authors.
 
 <table width="100%">
 <tr>
@@ -33,29 +50,31 @@ The `authors` report plots the contributions of the 6 "busiest" authors.
 ---
 
 
-#### Directory sizes
+#### Smooth activity curve
 
-The `directories` report plots the evolution of directory sizes. The 6
-largest directories in the current head revision are used.
+The `activity` report is a port of the [activity
+extension](http://labs.freehackers.org/wiki/hgactivity) for Mercurial by
+Thomas Capricelli. These images visualize the general repository activity,
+splitted by directories.
 
 <table width="100%">
 <tr>
-<td><a href="directories-pepper.png"><img src="directories-pepper-thumb.png" title="pepper" width="80%"></a></td>
-<td><a href="directories-git.png"><img src="directories-git-thumb.png" title="Git" width="80%"></a></td>
-<td><a href="directories-hg.png"><img src="directories-hg-thumb.png" title="Mercurial" width="80%"></a></td>
-<td><a href="directories-linux.png"><img src="directories-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
+<td><a href="activity-pepper.png"><img src="activity-pepper-thumb.png" title="pepper" width="80%"></a></td>
+<td><a href="activity-git.png"><img src="activity-git-thumb.png" title="Git" width="80%"></a></td>
+<td><a href="activity-hg.png"><img src="activity-hg-thumb.png" title="Mercurial" width="80%"></a></td>
+<td><a href="activity-linux.png"><img src="activity-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
 </tr>
 </table>
 
 ---
 
 
-#### Commits of the last twelve months
+#### Commit counts
 
-The `commits_per_month` report plots a histogram of the commits during
-the last twelve months. The red bars represent the number of commits,
-while the green bars visualize the sum of the number of files touched
-per commit.
+The `commit_counts` report plots a histogram of the commits during a
+user-defined period which defaults to the last twelve months as shown
+here. The red bars represent the number of commits, while the green bars
+visualize the sum of the number of files touched per commit.
 
 <table width="100%">
 <tr>
@@ -73,13 +92,14 @@ per commit.
 
 This is a scatter plot of the commit times, similar to the one provided by
 [StatSVN](http://www.statsvn.org/statsvn/developers.html#Developer_Activity_).
+In pepper, this report is called `times`.
 
 <table width="100%">
 <tr>
-<td><a href="activity-pepper.png"><img src="activity-pepper-thumb.png" title="pepper" width="80%"></a></td>
-<td><a href="activity-git.png"><img src="activity-git-thumb.png" title="Git" width="80%"></a></td>
-<td><a href="activity-hg.png"><img src="activity-hg-thumb.png" title="Mercurial" width="80%"></a></td>
-<td><a href="activity-linux.png"><img src="activity-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
+<td><a href="times-pepper.png"><img src="times-pepper-thumb.png" title="pepper" width="80%"></a></td>
+<td><a href="times-git.png"><img src="times-git-thumb.png" title="Git" width="80%"></a></td>
+<td><a href="times-hg.png"><img src="times-hg-thumb.png" title="Mercurial" width="80%"></a></td>
+<td><a href="times-linux.png"><img src="times-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
 </tr>
 </table>
 
@@ -88,7 +108,8 @@ This is a scatter plot of the commit times, similar to the one provided by
 
 #### File types
 
-The file types report maps file extensions to types and plots a corresponding histogram.
+The `filetypes` report maps file extensions to types and plots a
+corresponding histogram.
 
 <table width="100%">
 <tr>
