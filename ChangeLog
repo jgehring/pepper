@@ -1,3 +1,34 @@
+2010-03-28  --  version 0.2
+
+	- Built-in reports:
+		* Added activity report, a port of Thomas Capricelli's
+		  activity extension for Mercurial
+		* Added commit_counts report, a general version of the former
+		  commits_per_month report with a variable time range
+		* Added CSV report to extract repository data for further
+		  processing
+		* Fixed possible bug in LOC report for simultaneous commits
+		* Renamed commit_scatter report to "times"
+	- Changes affecting the report API:
+		* Added plotutils Lua module that facilitates common
+		  plot setup tasks
+		* Added iterator class for flexible revision iteration, including
+		  specification of date ranges.
+		* Many new API functions, including the ability to run other
+		  reports
+		* Renamed API functions (note that the old ones are
+		  still available for compatibility reasons):
+			- repository.default_branch() (instead of main_branch())
+	- Documentation:
+		* Added man page, generated if AsciiDoc and xmlto are present
+	- Implementation:
+		* Rewrote diffstat fetching for the Subversion backend, and
+		  now diff data for deleted files is fetched, too.
+		* The number of threads for the Subversion backend can now
+		  be changed using the --threads command-line option
+		* Removed popen-noshell
+		* Now using Phil Nash's CATCH for unit testing
+
 2010-01-31  --  version 0.1.5
 
 	* Added filetypes report

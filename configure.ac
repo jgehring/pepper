@@ -8,7 +8,7 @@
 #
 
 AC_PREREQ([2.6])
-AC_INIT(pepper, 0.1.5, jonas.gehring@boolsoft.org)
+AC_INIT(pepper, 0.2, jonas.gehring@boolsoft.org)
 AM_INIT_AUTOMAKE()
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_TESTDIR([tests])

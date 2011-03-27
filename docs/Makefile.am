@@ -13,11 +13,12 @@ EXTRA_DIST = manpage.txt
 manpage.xml: $(srcdir)/manpage.txt 
 	$(ASCIIDOC) -b docbook -d manpage -o manpage.xml -a "version=$(VERSION)" -a "email=&lt;\$(PACKAGE_BUGREPORT)&gt;" $(srcdir)/manpage.txt
 
-manpage.html: $(srcdir)/manpage.txt
-	$(ASCIIDOC) -d manpage -o manpage.html -a "version=$(VERSION)" -a "email=&lt;\FORENAME.SURENAME@boolsoft.org&gt;" -a toc $(srcdir)/manpage.txt
-
 pepper.1: manpage.xml
 	$(XMLTO) man --skip-validation manpage.xml
+
+pepper.1.html: manpage.xml
+	$(XMLTO) html-nochunks --skip-validation manpage.xml
+	mv manpage.html pepper.1.html
 
 distclean-local:
 	$(RM) -f pepper.1
