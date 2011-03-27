@@ -14,6 +14,6 @@ log](ChangeLog). As usual, source tarballs can be found at the
 
 The homepage has been updated as well. On the right, the latest commits
 from pepper's [GitHub repository](http://github.com/jgehring/pepper)
-are shown, and the [[scirpting guide|ScriptingGuide]] as well as the
+are shown, and the [[scripting guide|ScriptingGuide]] as well as the
 [[Gallery]] page have been updated. I've added a favicon representing
 a pepper box and changed some of the colors.
