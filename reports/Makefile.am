@@ -14,6 +14,7 @@ dist_pkgdata_DATA = \
 	activity.lua \
 	authors.lua \
 	branches.lua \
+	check_cache.lua \
 	commit_counts.lua \
 	csv.lua \
 	diffstat.lua \
