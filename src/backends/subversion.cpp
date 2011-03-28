@@ -44,7 +44,7 @@
 
 // Constructor
 SvnConnection::SvnConnection()
-	: pool(NULL), ctx(NULL), ra(NULL), url(NULL), root(NULL)
+	: pool(NULL), ctx(NULL), ra(NULL), url(NULL), root(NULL), prefix(NULL)
 {
 }
 
@@ -122,6 +122,7 @@ void SvnConnection::open(SvnConnection *parent)
 	ctx = parent->ctx;
 	url = apr_pstrdup(pool, parent->url);
 	root = apr_pstrdup(pool, parent->root);
+	prefix = apr_pstrdup(pool, parent->prefix);
 
 	// Setup the RA session
 	svn_error_t *err;
