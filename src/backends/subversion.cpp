@@ -751,6 +751,9 @@ void SubversionBackend::prefetch(const std::vector<std::string> &ids)
 		if (!utils::str2int(numthreads, &nthreads)) {
 			throw PEX(std::string("Expected number for --threads parameter: ") + numthreads);
 		}
+		if (nthreads == 0) {
+			return;
+		}
 
 		// Don't use that many threads for local repositories
 		if (!strncmp(d->url, "file://", strlen("file://"))) {
