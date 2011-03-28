@@ -96,13 +96,20 @@ void SvnConnection::open(const std::string &url, const std::map<std::string, std
 		throw PEX(strerr(err));
 	}
 
-	// Determine the repository root
+	// Determine the repository root and reparent
 	if ((err = svn_ra_get_repos_root2(ra, &root, pool))) {
 		throw PEX(strerr(err));
 	}
 	prefix = apr_pstrdup(pool, this->url + strlen(root));
+	if (prefix && *prefix == '/') {
+		++prefix; // Original adress is tracked in pool
+	}
+	PDEBUG << "Root is " << root << " -> prefix is " << prefix << endl;
 
-	PTRACE << "Root is " << root << " -> prefix is " << prefix << endl;
+	PTRACE << "Reparent to " << root << endl;
+	if ((err = svn_ra_reparent(ra, root, pool))) {
+		throw PEX(strerr(err));
+	}
 }
 
 // Opens the connection to the Subversion repository, using the client context
@@ -112,8 +119,7 @@ void SvnConnection::open(SvnConnection *parent)
 	if (parent->ctx == NULL) {
 		throw PEX("Parent connection not open yet.");
 	}
-
-	PTRACE << "Opening child connection to " << parent->url << endl;
+	PTRACE << "Opening child connection to " << parent->root << endl;
 
 	pool = svn_pool_create(NULL);
 	init();
@@ -126,7 +132,7 @@ void SvnConnection::open(SvnConnection *parent)
 
 	// Setup the RA session
 	svn_error_t *err;
-	if ((err = svn_client_open_ra_session(&ra, url, ctx, pool))) {
+	if ((err = svn_client_open_ra_session(&ra, root, ctx, pool))) {
 		throw PEX(strerr(err));
 	}
 }
@@ -324,12 +330,15 @@ void SubversionBackend::SvnLogIterator::run()
 	apr_pool_t *pool = svn_pool_create(d->pool);
 	apr_pool_t *subpool = svn_pool_create(pool);
 	apr_array_header_t *path = apr_array_make(pool, 1, sizeof (const char *));
-	APR_ARRAY_PUSH(path, const char *) = svn_path_canonicalize(m_prefix.empty() ? "." : m_prefix.c_str(), pool);
+	std::string sessionPrefix = d->prefix;
+	APR_ARRAY_PUSH(path, const char *) = svn_path_canonicalize(m_prefix.empty() ? sessionPrefix.c_str() : (sessionPrefix+"/"+m_prefix).c_str(), pool);
 	apr_array_header_t *props = apr_array_make(pool, 1, sizeof (const char *)); // Intentionally empty
 	int windowSize = 1024;
 	if (!strncmp(d->url, "file://", strlen("file://"))) {
 		windowSize = 0;
 	}
+
+	PDEBUG << "Path is " << svn_path_canonicalize(m_prefix.empty() ? sessionPrefix.c_str() : (sessionPrefix+"/"+m_prefix).c_str(), pool) << endl;
 
 	logReceiverBaton baton;
 	baton.mutex = &m_mutex;
@@ -454,7 +463,7 @@ std::string SubversionBackend::head(const std::string &branch)
 
 	apr_pool_t *pool = svn_pool_create(d->pool);
 	svn_dirent_t *dirent;
-	svn_error_t *err = svn_ra_stat(d->ra, prefix.c_str(), SVN_INVALID_REVNUM, &dirent, pool);
+	svn_error_t *err = svn_ra_stat(d->ra, svn_path_join(d->prefix, prefix.c_str(), pool), SVN_INVALID_REVNUM, &dirent, pool);
 	if (err == NULL && dirent == NULL && branch == "trunk") {
 		err = svn_ra_stat(d->ra, "", SVN_INVALID_REVNUM, &dirent, pool);
 	}
@@ -484,10 +493,11 @@ std::vector<std::string> SubversionBackend::branches()
 	std::vector<std::string> branches;
 
 	apr_pool_t *pool = svn_pool_create(d->pool);
+	char *absPrefix = svn_path_join(d->prefix, prefix.c_str(), pool);
 
 	// Check if branches directoy is present
 	svn_dirent_t *dirent;
-	svn_error_t *err = svn_ra_stat(d->ra, prefix.c_str(), SVN_INVALID_REVNUM, &dirent, pool);
+	svn_error_t *err = svn_ra_stat(d->ra, absPrefix, SVN_INVALID_REVNUM, &dirent, pool);
 	if (err != NULL) {
 		throw PEX(SvnConnection::strerr(err));
 	}
@@ -500,7 +510,7 @@ std::vector<std::string> SubversionBackend::branches()
 
 	// Get directory entries
 	apr_hash_t *dirents;
-	err = svn_ra_get_dir2(d->ra, &dirents, NULL, NULL, prefix.c_str(), dirent->created_rev, SVN_DIRENT_KIND, pool);
+	err = svn_ra_get_dir2(d->ra, &dirents, NULL, NULL, absPrefix, dirent->created_rev, SVN_DIRENT_KIND, pool);
 	if (err != NULL) {
 		throw PEX(SvnConnection::strerr(err));
 	}
@@ -528,10 +538,11 @@ std::vector<Tag> SubversionBackend::tags()
 	std::vector<Tag> tags;
 
 	apr_pool_t *pool = svn_pool_create(d->pool);
+	char *absPrefix = svn_path_join(d->prefix, prefix.c_str(), pool);
 
 	// Check if tags directoy is present
 	svn_dirent_t *dirent;
-	svn_error_t *err = svn_ra_stat(d->ra, prefix.c_str(), SVN_INVALID_REVNUM, &dirent, pool);
+	svn_error_t *err = svn_ra_stat(d->ra, absPrefix, SVN_INVALID_REVNUM, &dirent, pool);
 	if (err != NULL) {
 		throw PEX(SvnConnection::strerr(err));
 	}
@@ -543,7 +554,7 @@ std::vector<Tag> SubversionBackend::tags()
 
 	// Get directory entries
 	apr_hash_t *dirents;
-	err = svn_ra_get_dir2(d->ra, &dirents, NULL, NULL, prefix.c_str(), dirent->created_rev, SVN_DIRENT_KIND | SVN_DIRENT_CREATED_REV, pool);
+	err = svn_ra_get_dir2(d->ra, &dirents, NULL, NULL, absPrefix, dirent->created_rev, SVN_DIRENT_KIND | SVN_DIRENT_CREATED_REV, pool);
 	if (err != NULL) {
 		throw PEX(SvnConnection::strerr(err));
 	}
@@ -599,8 +610,8 @@ Diffstat SubversionBackend::diffstat(const std::string &id)
 void SubversionBackend::filterDiffstat(Diffstat *stat)
 {
 	// Strip prefix
-	if (strlen(d->prefix) > 1) {
-		stat->filter(d->prefix + 1);
+	if (d->prefix && strlen(d->prefix)) {
+		stat->filter(d->prefix);
 	}
 }
 
@@ -679,7 +690,7 @@ Backend::LogIterator *SubversionBackend::iterator(const std::string &branch, int
 	// Check if the branch exists
 	apr_pool_t *pool = svn_pool_create(d->pool);
 	svn_dirent_t *dirent;
-	svn_error_t *err = svn_ra_stat(d->ra, prefix.c_str(), SVN_INVALID_REVNUM, &dirent, pool);
+	svn_error_t *err = svn_ra_stat(d->ra, svn_path_join(d->prefix, prefix.c_str(), pool), SVN_INVALID_REVNUM, &dirent, pool);
 	if (err != NULL) {
 		throw PEX(SvnConnection::strerr(err));
 	}

@@ -467,7 +467,7 @@ Diffstat SvnDiffstatThread::diffstat(SvnConnection *c, svn_revnum_t r1, svn_revn
 	SvnDelta::Baton *baton = SvnDelta::Baton::make(r2, outfile, subpool);
 
 	// Open RA session for extra calls during diff
-	err = svn_client_open_ra_session(&baton->ra, c->url, c->ctx, pool);
+	err = svn_client_open_ra_session(&baton->ra, c->root, c->ctx, pool);
 	if (err != NULL) {
 		apr_file_close(outfile);
 		apr_file_close(infile);
@@ -492,7 +492,7 @@ Diffstat SvnDiffstatThread::diffstat(SvnConnection *c, svn_revnum_t r1, svn_revn
 
 	const svn_ra_reporter3_t *reporter;
 	void *report_baton;
-	err = svn_ra_do_diff3(c->ra, &reporter, &report_baton, rev2.value.number, "", svn_depth_infinity, TRUE, TRUE, c->url, editor, baton, pool);
+	err = svn_ra_do_diff3(c->ra, &reporter, &report_baton, rev2.value.number, "", svn_depth_infinity, TRUE, TRUE, c->root, editor, baton, pool);
 	if (err != NULL) {
 		apr_file_close(outfile);
 		apr_file_close(infile);
