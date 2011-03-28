@@ -337,7 +337,7 @@ void SubversionBackend::SvnLogIterator::run()
 	baton.latest = -1;
 
 	// Determine revisions, but not at once
-	int64_t wstart = m_startrev;
+	int64_t wstart = m_startrev, lastStart = m_startrev;
 	while (wstart < m_endrev-1) {
 		PDEBUG << "Fetching log from " << wstart << " to " << m_endrev << " with window size " << windowSize << endl;
 		svn_error_t *err = svn_ra_get_log2(d->ra, path, wstart, m_endrev, windowSize, FALSE, FALSE /* otherwise, copy history will be ignored */, FALSE, props, &logReceiver, &baton, subpool);
@@ -345,7 +345,12 @@ void SubversionBackend::SvnLogIterator::run()
 			throw PEX(SvnConnection::strerr(err));
 		}
 
-		wstart = baton.latest + 1;
+		if (baton.latest + 1 > lastStart) {
+			lastStart = baton.latest + 1;
+		} else {
+			lastStart += windowSize;
+		}
+		wstart = lastStart;
 		svn_pool_clear(subpool);
 	}
 
