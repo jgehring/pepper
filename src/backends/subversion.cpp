@@ -413,7 +413,17 @@ void SubversionBackend::init()
 
 	std::string url = m_opts.repository();
 	if (!url.compare(0, 1, "/")) {
-		url = std::string("file://") + url;
+		// Detect working copy
+		apr_pool_t *pool = svn_pool_create(NULL);
+		const char *repo;
+		svn_error_t *err = svn_client_url_from_path(&repo, url.c_str(), pool);
+		if (err == NULL) {
+			url = std::string(repo);
+		} else {
+			// Local repository
+			url = std::string("file://") + url;
+		}
+		svn_pool_destroy(pool);
 	}
 	d->open(url, m_opts.options());
 }
@@ -427,10 +437,17 @@ bool SubversionBackend::handles(const std::string &url)
 			return true;
 		}
 	}
+
 	// Local repository without the 'file://' prefix
 	if (sys::fs::dirExists(url) && sys::fs::dirExists(url+"/locks") && sys::fs::exists(url+"/db/uuid")) {
 		return true;
 	}
+
+	// Working copy with .svn directory
+	if (sys::fs::dirExists(url+"/.svn")) {
+		return true;
+	}
+
 	return false;
 }
 
