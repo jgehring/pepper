@@ -358,7 +358,7 @@ void SubversionBackend::SvnLogIterator::run()
 		if (baton.latest + 1 > lastStart) {
 			lastStart = baton.latest + 1;
 		} else {
-			lastStart += windowSize;
+			lastStart += std::max(windowSize, 1);
 		}
 		wstart = lastStart;
 		svn_pool_clear(subpool);
