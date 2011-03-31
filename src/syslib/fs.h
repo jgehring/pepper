@@ -34,6 +34,7 @@ std::string cwd();
 void mkdir(const std::string &path);
 void mkpath(const std::string &path);
 void unlink(const std::string &path);
+void unlinkr(const std::string &path);
 
 bool exists(const std::string &path);
 bool fileExists(const std::string &path);

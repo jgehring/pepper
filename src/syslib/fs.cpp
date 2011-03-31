@@ -139,6 +139,36 @@ void unlink(const std::string &path)
 	}
 }
 
+// Recursive unlink()
+void unlinkr(const std::string &path)
+{
+	struct stat statbuf;
+	if (stat(path.c_str(), &statbuf) != 0) {
+		return;
+	}
+	if (!S_ISDIR(statbuf.st_mode)) {
+		unlink(path);
+		return;
+	}
+
+	DIR *dp;
+	if ((dp = opendir(path.c_str())) == NULL) {
+		throw PEX_ERRNO();
+	}
+
+	struct dirent *ep;
+	while ((ep = readdir(dp)) != NULL) {
+		if (strcmp(ep->d_name, ".") && strcmp(ep->d_name, "..")) {
+			unlinkr(path + "/" + ep->d_name);
+		}
+	}
+	closedir(dp);
+
+	if (::rmdir(path.c_str()) == -1) {
+		throw PEX_ERRNO();
+	}
+}
+
 // Checks if the given file (or directory) exists
 bool exists(const std::string &path)
 {
