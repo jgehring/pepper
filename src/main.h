@@ -32,9 +32,11 @@
 
 // Private variables can be declared like this to enable easy unit testing
 #ifdef PEPPER_UNIT_TESTS
- #define PEPPER_PVARS public:
+ #define PEPPER_PVARS public
+ #define PEPPER_PROTVARS public
 #else
- #define PEPPER_PVARS private:
+ #define PEPPER_PVARS private
+ #define PEPPER_PROTVARS protected
 #endif
 
 

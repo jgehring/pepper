@@ -54,7 +54,7 @@ class Options
 		void parse(const std::vector<std::string> &args);
 		bool parseOpt(const std::string &arg, std::string *key, std::string *value);
 
-	PEPPER_PVARS
+	PEPPER_PVARS:
 		std::map<std::string, std::string> m_options;
 		std::map<std::string, std::string> m_reportOptions;
 };
