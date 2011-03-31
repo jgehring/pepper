@@ -45,7 +45,7 @@ class Backend
 			protected:
 				virtual void run();
 
-			protected:
+			PEPPER_PROTVARS:
 				std::vector<std::string> m_ids;
 				bool m_atEnd;
 		};

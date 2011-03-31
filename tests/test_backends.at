@@ -6,10 +6,11 @@
 # Please see the COPYING file in the source distribution for license
 # terms and conditions, or see http://www.gnu.org/licenses/.
 #
+# Test group for backend tests
+#
 
-AT_INIT()
-AT_COPYRIGHT([Copyright (C) 2010-2011 Jonas Gehring])
+AT_BANNER([Backend tests])
 
-m4_include([test_diffstat.at])
-m4_include([test_units.at])
-m4_include([test_backends.at])
+AT_SETUP([Subversion backend])
+AT_CHECK([backends -t 'subversion/*'], [0], [ignore])
+AT_CLEANUP()

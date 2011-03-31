@@ -171,6 +171,7 @@ AC_CONFIG_FILES([
 	tests/atlocal
 	tests/diffstat/Makefile
 	tests/units/Makefile
+	tests/backends/Makefile
 	reports/Makefile
 	reports/pepper/Makefile
 	docs/Makefile

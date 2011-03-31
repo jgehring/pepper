@@ -25,7 +25,7 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 		echo '  [@PACKAGE_URL@])'; \
 	} >'$(srcdir)/package.m4'
 
-SUBDIRS = diffstat units
+SUBDIRS = diffstat units backends
 
 EXTRA_DIST = \
 	testsuite.at \
@@ -36,6 +36,7 @@ EXTRA_DIST = \
 	test_diffstat.at \
 	test_diffstat.pl \
 	test_units.at \
+	test_backends.at \
 	\
 	diffstat/data/git-add.pat \
 	diffstat/data/git-add.ref \
