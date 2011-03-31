@@ -11,16 +11,16 @@
  */
 
 
-#include "main.h"
-
-#include <cstdio>
-#include <cstdlib>
-
 // Enforce XSI-compliant strerror_r()
 #if !defined(_XOPEN_SOURCE) || _XOPEN_SOURCE<600
  #undef _XOPEN_SOURCE
  #define _XOPEN_SOURCE 600
 #endif
+
+#include "main.h"
+
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
 
 #if defined(__GNUG__)
@@ -53,9 +53,17 @@ PepperException::PepperException(int code, const char *file, int line, const std
 	}
 
 	char buf[512];
-#if HAVE_STRERROR_R
-	strerror_r(code, buf, sizeof(buf));
-	m_str = std::string(buf);
+#ifdef HAVE_STRERROR_R
+#ifdef _GNU_SOURCE
+	m_str = std::string(strerror_r(code, buf, sizeof(buf)));
+#else
+	if (strerror_r(code, buf, sizeof(buf)) == 0) {
+		m_str = std::string(buf);
+	} else {
+		sprintf(buf, "System error code %d", code);
+		m_str = std::string(buf);
+	}
+#endif
 #else
 	sprintf(buf, "System error code %d", code);
 	m_str = std::string(buf);
