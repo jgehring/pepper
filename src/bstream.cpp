@@ -30,7 +30,7 @@ public:
 	~FileStream() { if (f) fclose(f); }
 
 	bool ok() const {
-		return f != NULL;
+		return !(f == NULL || ferror(f) != 0);
 	}
 	bool eof() const {
 		return feof(f);
@@ -123,7 +123,12 @@ public:
 	~GzStream() { if (f) gzclose(f); }
 
 	bool ok() const {
-		return f != NULL;
+		if (f == NULL) {
+			return false;
+		}
+		int err;
+		gzerror(f, &err);
+		return (err == 0);
 	}
 	bool eof() const {
 		return gzeof(f);
