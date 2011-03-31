@@ -56,6 +56,8 @@ class Cache : public Backend
 		Revision *revision(const std::string &id);
 		void finalize() { m_backend->finalize(); }
 
+		static std::string cacheFile(Backend *backend, const std::string &name);
+
 		void flush();
 		void check();
 

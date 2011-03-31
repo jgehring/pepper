@@ -90,6 +90,16 @@ Revision *Cache::revision(const std::string &id)
 	return get(id);
 }
 
+// Returns the full path for a cache file for the given backend
+std::string Cache::cacheFile(Backend *backend, const std::string &name)
+{
+	std::string dir = backend->options().cacheDir() + "/" + backend->uuid();
+	if (!sys::fs::dirExists(dir)) {
+		sys::fs::mkdir(dir);
+	}
+	return dir + "/" + name;
+}
+
 // Flushes and closes the cache streams
 void Cache::flush()
 {
