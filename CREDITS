@@ -16,11 +16,6 @@ completeness, here's a brief alphabetical listing:
 	  License: Seems to be in public domain
 	  http://lua-users.org/wiki/CppBindingWithLunar
 
-	* popen-noshell, A much faster popen() and system() implementation for Liux
-	  Author: Ivan Zahariev (famzah)
-	  License: GNU General Public License v3
-	  http://code.google.com/p/popen-noshell
-
 The background image used on the pepper website
 (http://pepper-scm.sf.net) is derived work from
 http://en.wikipedia.org/wiki/File:4_color_mix_of_peppercorns.jpg, and

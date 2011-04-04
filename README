@@ -3,13 +3,13 @@ pepper - SCM statistics report generator
 
 About
 -----
-pepper is a flexible statistics generator for source code management
-repositories. It can be used to create graphical or textual reports,
-independent from the actual SCM software used.
-
-It comes with several built-in reports, but custom reports can be easily
-written using the Lua scripting language. A basic Lua interface to
-Gnuplot is provided and can be used to plot repository data graphically.
+pepper is a flexible command-line tool for retrieving statistics and
+generating reports from source code repositories. It ships with several
+graphical and textual reports, and is easily extendable using the Lua
+scripting language. pepper includes support for multiple version control
+systems, including Git and Subversion. Using native language bindings,
+multi-threading and a local revision cache, it provides fast access to
+repository data.
 
 This README file contains brief installation and usage
 instructions. Additional documentation is available at
@@ -53,13 +53,6 @@ should be fine. You can pass "--help" to the configuration script for
 a brief version of the next two sections.
 
 
-Usage notes
------------
-As of now, there is no man page for pepper. However, the command line
-syntax and a brief help screen are shown if you run the program with
-"--help" or invalid arguments.
-
-
 Available SCM backends
 ----------------------
 pepper ships with the following backends. The respective command line
@@ -81,59 +74,18 @@ switches for the configuration script are given in brackets.
 Optional features
 -----------------
 Several additional, optional features are available (see the CREDITS
-file for more information about the respective libraries)
+file for more information about the respective libraries, if any)
 
 	* Gnuplot interface (--[en|dis]able-gnuplot)
 	A Lua interface to Gnuplot. Reports can use it to plot data
 	graphically.
 	This feature is enabled by default.
 
-
-Built-in reports
-----------------
-When installing pepper, several report scripts will be copied to the
-respective shared folder (i.e. $prefix/share/pepper) and can be accessed
-by their filename. Reports producing a plot will open a X11 window if
-possible or print it to standard output by default.
-
-Report-specific command-line options will be printed if "--help" is
-being passed as a program option.
-
-Here's a brief listing:
-
-	* activity
-	A port of the Mercurial activity extension by Thomas Capricelli.
-	Plots a smooth curve to visualize the activity of the repository.
-
-	* authors
-	Plots the contributed lines of code of the busiest authors.
-
-	* branches
-	Prints all repository branches, similar to "git branch -a".
-
-	* commit_scatter
-	Generates a scatter plot visualizing commit activity per daytime.
-
-	* commits_per_month
-	Plots a histogram of the commits during the last 12 months.
-
-	* csv
-	Dumps revision data in CSV format.
-	
-	* diffstat
-	Prints a diffstat of a given revision.
-
-	* directories
-	Plots the directory sizes for the largest directories.
-
-	* filetypes
-	Plots a histogram visualizing the number of files per type.
-
-	* loc
-	Plots the lines of code for a given branch.
-
-	* shortlog
-	Prints a revision log to stdout, similar to "git shortlog".
+	* Man page (--[en|dis]able-man)
+	pepper ships with a comprehensive man page, but both AsciiDoc
+	and xmlto will be needed to generate it.
+	This feature is enabled by default if the necessary programs
+	are present.
 
 
 License
