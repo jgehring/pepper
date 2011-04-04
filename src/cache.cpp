@@ -27,7 +27,7 @@
 #include "cache.h"
 
 
-#define CACHE_VERSION (uint32_t)2
+#define CACHE_VERSION (uint32_t)3
 #define MAX_CACHEFILE_SIZE 4194304
 
 
@@ -229,20 +229,18 @@ void Cache::load()
 
 	uint32_t version;
 	*in >> version;
-	switch (version) {
-		case 1:
-			// The diffstats for Mercurial and Git have been flawed in version 1.
-			// The Subversion backend uses repository-wide diffstats now.
-			Logger::warn() << "Warning: Cache is out of date, clearing" << endl;
+	switch (checkVersion(version)) {
+		case Abort:
+			delete in;
+			return;
+		case Clear:
 			delete in;
 			clear();
 			return;
-
-		case CACHE_VERSION:
-			break;
-
+		case UnknownVersion:
+			throw PEX(utils::strprintf("Unknown cache version number %u", version));
 		default:
-			 throw PEX(utils::strprintf("Unkown cache version number %u", version));
+			break;
 	}
 
 	Logger::status() << "Loading cache index... " << ::flush;
@@ -284,6 +282,34 @@ void Cache::clear()
 	}
 }
 
+// Checks the cache version
+Cache::VersionCheckResult Cache::checkVersion(int version)
+{
+	switch (version) {
+		case 1:
+			// The diffstats for Mercurial and Git have been flawed in version 1.
+			// The Subversion backend uses repository-wide diffstats now.
+			Logger::warn() << "Warning: Cache is out of date, clearing" << endl;
+			return Clear;
+
+		case 2:
+			// Invalid diffstats for deleted files in version 2 (Subversion backend)
+			if (m_backend->name() == "subversion") {
+				Logger::warn() << "Warning: Cache is out of date, clearing" << endl;
+				return Clear;
+			}
+			break;
+
+		case CACHE_VERSION:
+			break;
+
+		default:
+			return UnknownVersion;
+	}
+
+	return Ok;
+}
+
 // Checks cache entries and removes invalid ones from the index file
 void Cache::check()
 {
@@ -321,6 +347,18 @@ void Cache::check()
 		delete in;
 		clear();
 		return;
+	}
+
+	switch (checkVersion(version)) {
+		case Abort:
+			delete in;
+			return;
+		case Clear:
+			delete in;
+			clear();
+			return;
+		default:
+			break;
 	}
 
 	Logger::status() << "Checking all indexed revisions... " << ::flush;

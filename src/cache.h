@@ -25,6 +25,14 @@ class Revision;
 // This cache should be transparent and inherits the wrapped class
 class Cache : public Backend
 {
+	private:
+		typedef enum {
+			Ok,
+			Abort,
+			Clear,
+			UnknownVersion
+		} VersionCheckResult;
+
 	public:
 		Cache(Backend *backend, const Options &options);
 		~Cache();
@@ -57,6 +65,7 @@ class Cache : public Backend
 		Revision *get(const std::string &id);
 		void load();
 		void clear();
+		VersionCheckResult checkVersion(int version);
 
 	private:
 		Backend *m_backend;
