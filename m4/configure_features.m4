@@ -8,7 +8,7 @@ dnl terms and conditions, or see http://www.gnu.org/licenses/.
 dnl
 
 AC_ARG_ENABLE([gnuplot], [AS_HELP_STRING([--disable-gnuplot], [Don't offer Gnuplot graphing to Lua scripts])], [gnuplot="$enableval"], [gnuplot="yes"])
-AC_ARG_ENABLE([man], [AS_HELP_STRING([--disable-man], [Generate the man page])], [manpage="$enableval"], [manpage="check"])
+AC_ARG_ENABLE([man], [AS_HELP_STRING([--disable-man], [Don't generate the man page])], [manpage="$enableval"], [manpage="check"])
 
 
 dnl Run checks for manpage programs
