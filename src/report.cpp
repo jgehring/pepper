@@ -233,6 +233,10 @@ static int utils_mkstemp(lua_State *L)
 
 	char *buf = strdup(templ.c_str());
 	int fd = mkstemp(buf);
+	if (fd == -1) {
+		free(buf);
+		return LuaHelpers::pushError(L, PepperException::strerror(errno));
+	}
 
 	FILE **pf = (FILE **)lua_newuserdata(L, sizeof *pf);
 	*pf = 0;
@@ -253,6 +257,11 @@ static int utils_mkstemp(lua_State *L)
 	lua_setfenv(L, -2);
 
 	*pf = fdopen(fd, "r+w");
+	if (pf == NULL) {
+		free(buf);
+		return LuaHelpers::pushError(L, PepperException::strerror(errno));
+	}
+
 	LuaHelpers::push(L, (const char *)buf);
 	free(buf);
 	return 2;
@@ -264,7 +273,11 @@ static int utils_unlink(lua_State *L)
 	if (lua_gettop(L) != 1) {
 		return luaL_error(L, "Invalid number of arguments (1 expected)");
 	}
-	unlink(LuaHelpers::tops(L).c_str());
+	try {
+		sys::fs::unlink(LuaHelpers::tops(L).c_str());
+	} catch (const std::exception &ex) {
+		return LuaHelpers::pushError(L, ex.what());
+	}
 	return 0;
 }
 
@@ -312,7 +325,6 @@ static int utils_basename(lua_State *L)
 
 // Function table of the utils library
 static const struct luaL_reg utils[] = {
-	// TODO: Error handling for all functions
 	{"mkstemp", utils_mkstemp},
 	{"unlink", utils_unlink},
 	{"split", utils_split},
