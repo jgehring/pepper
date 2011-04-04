@@ -230,7 +230,7 @@ svn_error_t *delete_entry(const char *path, svn_revnum_t target_revision, void *
 		return SVN_NO_ERROR;
 	}
 
-	PTRACE << path << "@" << eb->base_revision <<" is a " << (dirent->kind == svn_node_dir ? "dir" : "file") << endl;
+	PTRACE << path << "@" << eb->base_revision <<" is a " << (dirent->kind == svn_node_dir ? "directory" : "file") << endl;
 
 	if (dirent->kind == svn_node_file) {
 		FileBaton *b = FileBaton::make(path, eb, pool);
@@ -240,14 +240,18 @@ svn_error_t *delete_entry(const char *path, svn_revnum_t target_revision, void *
 	} else {
 		PTRACE << "Listing " << path << "@" << eb->base_revision << endl;
 		apr_hash_t *dirents;
+		apr_pool_t *subpool = svn_pool_create(pool);
+
 		SVN_ERR(svn_ra_get_dir2(eb->ra, &dirents, NULL, NULL, path, eb->base_revision, 0, pool));
 		// "Delete" directory recursively
 		for (apr_hash_index_t *hi = apr_hash_first(pool, dirents); hi; hi = apr_hash_next(hi)) {
 			const char *entry;
 			svn_dirent_t *dirent;
 			apr_hash_this(hi, (const void **)(void *)&entry, NULL, (void **)(void *)&dirent);
-			SVN_ERR(delete_entry((const char *)svn_path_join(path, entry, pool), target_revision, parent_baton, pool));
+			SVN_ERR(delete_entry((const char *)svn_path_join(path, entry, pool), target_revision, parent_baton, subpool));
+			svn_pool_clear(subpool);
 		}
+		svn_pool_destroy(subpool);
 	}
 
 	return SVN_NO_ERROR;
