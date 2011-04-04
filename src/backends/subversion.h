@@ -59,7 +59,7 @@ class SubversionBackend : public Backend
 				sys::parallel::WaitCondition m_cond;
 				std::vector<std::string>::size_type m_index;
 				std::vector<Interval> m_cachedIntervals;
-				bool m_finished;
+				bool m_finished, m_failed;
 
 				static sys::parallel::Mutex s_cacheMutex;
 		};

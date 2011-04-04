@@ -271,7 +271,7 @@ sys::parallel::Mutex SubversionBackend::SvnLogIterator::s_cacheMutex;
 // Constructor
 SubversionBackend::SvnLogIterator::SvnLogIterator(SubversionBackend *backend, const std::string &prefix, uint64_t startrev, uint64_t endrev)
 	: Backend::LogIterator(), m_backend(backend), d(new SvnConnection()), m_prefix(prefix), m_startrev(startrev), m_endrev(endrev),
-	  m_index(0), m_finished(false)
+	  m_index(0), m_finished(false), m_failed(false)
 {
 	d->open(m_backend->d);
 }
@@ -290,6 +290,9 @@ bool SubversionBackend::SvnLogIterator::nextIds(std::queue<std::string> *queue)
 		m_cond.wait(&m_mutex);
 	}
 
+	if (m_failed) {
+		throw PEX("Error fetching server log");
+	}
 	if (m_index == m_ids.size()) {
 		return false;
 	}
@@ -385,7 +388,14 @@ void SubversionBackend::SvnLogIterator::run()
 			PDEBUG << "Fetching log from " << wstart << " to " << fetch[i].end << " with window size " << windowSize << endl;
 			svn_error_t *err = svn_ra_get_log2(d->ra, path, wstart, fetch[i].end, windowSize, FALSE, FALSE /* otherwise, copy history will be ignored */, FALSE, props, &logReceiver, &baton, subpool);
 			if (err != NULL) {
-				throw PEX(SvnConnection::strerr(err));
+				Logger::err() << "Error: Unable to fetch server log: " << SvnConnection::strerr(err) << endl;
+				m_mutex.lock();
+				m_failed = true;
+				m_finished = true;
+				m_cond.wakeAll();
+				m_mutex.unlock();
+				svn_pool_destroy(pool);
+				return;
 			}
 
 			if (baton.latest + 1 > lastStart) {
