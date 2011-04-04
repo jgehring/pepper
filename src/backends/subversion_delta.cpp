@@ -101,6 +101,7 @@ struct Baton
 
 	svn_ra_session_t *ra;
 	svn_revnum_t revision;
+	svn_revnum_t base_revision;
 	svn_revnum_t target_revision;
 	apr_hash_t *deleted_paths;
 
@@ -109,12 +110,13 @@ struct Baton
 
 	apr_pool_t *pool;
 
-	static Baton *make(svn_revnum_t rev, apr_file_t *outfile, apr_pool_t *pool)
+	static Baton *make(svn_revnum_t baserev, svn_revnum_t rev, apr_file_t *outfile, apr_pool_t *pool)
 	{
 		Baton *baton = (Baton *)apr_pcalloc(pool, sizeof(Baton));
 
 		baton->target = "";
 		baton->out = outfile;
+		baton->base_revision = baserev;
 		baton->revision = rev;
 		baton->deleted_paths = apr_hash_make(pool);
 		svn_io_temp_dir(&(baton->tempdir), pool);
@@ -222,23 +224,23 @@ svn_error_t *delete_entry(const char *path, svn_revnum_t target_revision, void *
 
 	// File or directory?
 	svn_dirent_t *dirent;
-	SVN_ERR(svn_ra_stat(eb->ra, path, target_revision-1, &dirent, pool));
+	SVN_ERR(svn_ra_stat(eb->ra, path, eb->base_revision, &dirent, pool));
 	if (dirent == NULL) {
-		PDEBUG << "Error: Unable to stat " << path << "@" << target_revision-1 << endl;
+		PDEBUG << "Error: Unable to stat " << path << "@" << eb->base_revision << endl;
 		return SVN_NO_ERROR;
 	}
 
-	PTRACE << path << "@" << target_revision-1 <<" is a " << (dirent->kind == svn_node_dir ? "dir" : "file") << endl;
+	PTRACE << path << "@" << eb->base_revision <<" is a " << (dirent->kind == svn_node_dir ? "dir" : "file") << endl;
 
 	if (dirent->kind == svn_node_file) {
 		FileBaton *b = FileBaton::make(path, eb, pool);
-		SVN_ERR(get_file_from_ra(b, target_revision-1));
+		SVN_ERR(get_file_from_ra(b, eb->base_revision));
 		SVN_ERR(open_tempfile(&(b->file_end_revision), &(b->path_end_revision), b));
 		SVN_ERR(close_file(b, "", pool));
 	} else {
-		PTRACE << "Listing " << path << "@" << target_revision-1 << endl;
+		PTRACE << "Listing " << path << "@" << eb->base_revision << endl;
 		apr_hash_t *dirents;
-		SVN_ERR(svn_ra_get_dir2(eb->ra, &dirents, NULL, NULL, path, target_revision-1, 0, pool));
+		SVN_ERR(svn_ra_get_dir2(eb->ra, &dirents, NULL, NULL, path, eb->base_revision, 0, pool));
 		// "Delete" directory recursively
 		for (apr_hash_index_t *hi = apr_hash_first(pool, dirents); hi; hi = apr_hash_next(hi)) {
 			const char *entry;
@@ -464,7 +466,7 @@ Diffstat SvnDiffstatThread::diffstat(SvnConnection *c, svn_revnum_t r1, svn_revn
 	// Setup the diff editor
 	apr_pool_t *subpool = svn_pool_create(pool);
 	svn_delta_editor_t *editor = svn_delta_default_editor(subpool);
-	SvnDelta::Baton *baton = SvnDelta::Baton::make(r2, outfile, subpool);
+	SvnDelta::Baton *baton = SvnDelta::Baton::make(r1, r2, outfile, subpool);
 
 	// Open RA session for extra calls during diff
 	err = svn_client_open_ra_session(&baton->ra, c->root, c->ctx, pool);
