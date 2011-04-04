@@ -51,23 +51,7 @@ PepperException::PepperException(int code, const char *file, int line, const std
 	} else {
 		m_where[0] = 0;
 	}
-
-	char buf[512];
-#ifdef HAVE_STRERROR_R
-#ifdef _GNU_SOURCE
-	m_str = std::string(strerror_r(code, buf, sizeof(buf)));
-#else
-	if (strerror_r(code, buf, sizeof(buf)) == 0) {
-		m_str = std::string(buf);
-	} else {
-		sprintf(buf, "System error code %d", code);
-		m_str = std::string(buf);
-	}
-#endif
-#else
-	sprintf(buf, "System error code %d", code);
-	m_str = std::string(buf);
-#endif
+	m_str = strerror(code);
 }
 
 // Destructor
@@ -173,4 +157,27 @@ std::string PepperException::stackTrace()
 #else
 	return std::string();
 #endif
+}
+
+// Wrapper for strerror_r
+std::string PepperException::strerror(int code)
+{
+	std::string str;
+	char buf[512];
+#ifdef HAVE_STRERROR_R
+#ifdef _GNU_SOURCE
+	str = std::string(strerror_r(code, buf, sizeof(buf)));
+#else
+	if (strerror_r(code, buf, sizeof(buf)) == 0) {
+		str = std::string(buf);
+	} else {
+		sprintf(buf, "System error code %d", code);
+		str = std::string(buf);
+	}
+#endif
+#else
+	sprintf(buf, "System error code %d", code);
+	str = std::string(buf);
+#endif
+	return str;
 }

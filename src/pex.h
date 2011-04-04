@@ -32,6 +32,7 @@ public:
 	 const char *trace() const throw();
 
 	 static std::string stackTrace();
+	 static std::string strerror(int code);
 
 private:
 	 std::string m_str;
