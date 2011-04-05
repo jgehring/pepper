@@ -105,15 +105,23 @@ inline std::string toString
 {
     return value;
 }
+///////////////////////////////////////////////////////////////////////////////
+inline std::string toString
+(
+    const char* const value
+)
+{
+    return value ? "'" + std::string( value ) + "'" : std::string( "{null string}" );
+}    
 
 ///////////////////////////////////////////////////////////////////////////////
 inline std::string toString
 (
-    const char* value
+    char* const value
 )
 {
-    return value;
-}    
+    return toString( static_cast<const char* const>( value ) );
+}        
 
 ///////////////////////////////////////////////////////////////////////////////
 inline std::string toString
@@ -443,7 +451,7 @@ inline bool isTrue
 #define INTERNAL_CATCH_ACCEPT_RESULT( result, stopOnFailure ) \
     if( Catch::ResultAction::Value action = Catch::Hub::getResultCapture().acceptResult( result )  ) \
     { \
-        if( action == Catch::ResultAction::DebugFailed ) DebugBreak(); \
+        if( action == Catch::ResultAction::DebugFailed ) BreakIntoDebugger(); \
         if( Catch::isTrue( stopOnFailure ) ) throw Catch::TestFailureException(); \
     }
 
