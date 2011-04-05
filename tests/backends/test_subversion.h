@@ -35,11 +35,13 @@ namespace test_subversion
 extern unsigned char svnrepo_dump[];
 unsigned int svnrepo_dump_len = 7596;
 
+std::string repoPath;
+std::string cachePath;
+
 std::string setupTestRepo()
 {
-	static std::string path;
-	if (!path.empty()) {
-		return path;
+	if (!repoPath.empty()) {
+		return repoPath;
 	}
 
 	// Initialize the Subversion C library
@@ -79,23 +81,41 @@ std::string setupTestRepo()
 		throw PEX(SvnConnection::strerr(err));
 	}
 
-	path = std::string(templ);
+	repoPath = std::string(templ);
 	svn_pool_destroy(pool);
-
-	// TODO: Cleanup?
-	return path;
+	return repoPath;
 }
 
-
-TEST_CASE("subversion/logcache", "Revision log merging and caching")
+void makeCache()
 {
-	std::string repo = setupTestRepo();
+	if (!cachePath.empty()) {
+		sys::fs::unlinkr(cachePath);
+	}
 
 	char *templ = strdup("/tmp/pepper_cacheXXXXXX");
 	if (mkdtemp(templ) == NULL) {
 		throw PEX("Unable to create temporary directory");
 	}
 	setenv("PEPPER_CACHEDIR", templ, 1);
+	cachePath = std::string(templ);
+	free(templ);
+}
+
+void cleanup()
+{
+	if (!repoPath.empty()) {
+		sys::fs::unlinkr(repoPath);
+	}
+	if (!cachePath.empty()) {
+		sys::fs::unlinkr(cachePath);
+	}
+}
+
+
+TEST_CASE("subversion/logcache", "Revision log merging and caching")
+{
+	std::string repo = setupTestRepo();
+	makeCache();
 
 	Options options;
 	options.m_options["repository"] = repo;
@@ -120,8 +140,8 @@ TEST_CASE("subversion/logcache", "Revision log merging and caching")
 		REQUIRE(kt.m_ids == ids);
 	}
 
-	sys::fs::unlinkr(templ);
-	sys::fs::mkdir(templ);
+	makeCache();
+	options.m_options["cache_dir"] = cachePath;
 
 	{
 		SubversionBackend::SvnLogIterator it(&backend, "trunk", 3, 4);
