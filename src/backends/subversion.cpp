@@ -966,6 +966,9 @@ Backend::LogIterator *SubversionBackend::iterator(const std::string &branch, int
 		if ((err = svn_ra_get_dated_revision(d->ra, &startrev, time, pool)) != NULL) {
 			throw PEX(SvnConnection::strerr(err));
 		}
+		// startrev has been set to the HEAD revision at the given start time, but
+		// we're interested in all revisions after this date.
+		++startrev;
 	}
 	if (end >= 0) {
 		apr_time_ansi_put(&time, end);
