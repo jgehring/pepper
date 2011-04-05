@@ -29,6 +29,8 @@
 #include <svn_time.h>
 #include <svn_utf.h>
 
+#include "bstream.h"
+#include "cache.h"
 #include "jobqueue.h"
 #include "logger.h"
 #include "options.h"
@@ -263,12 +265,15 @@ private:
 };
 
 
+// Static mutex for reading and writing log interavals
+sys::parallel::Mutex SubversionBackend::SvnLogIterator::s_cacheMutex;
+
 // Constructor
-SubversionBackend::SvnLogIterator::SvnLogIterator(SvnConnection *connection, const std::string &prefix, int64_t startrev, int64_t endrev)
-	: Backend::LogIterator(), d(new SvnConnection()), m_prefix(prefix), m_startrev(startrev), m_endrev(endrev),
+SubversionBackend::SvnLogIterator::SvnLogIterator(SubversionBackend *backend, const std::string &prefix, uint64_t startrev, uint64_t endrev)
+	: Backend::LogIterator(), m_backend(backend), d(new SvnConnection()), m_prefix(prefix), m_startrev(startrev), m_endrev(endrev),
 	  m_index(0), m_finished(false)
 {
-	d->open(connection);
+	d->open(m_backend->d);
 }
 
 // Desctructor
@@ -302,11 +307,11 @@ struct logReceiverBaton
 	sys::parallel::WaitCondition *cond;
 	std::vector<std::string> temp;
 	std::vector<std::string> *ids;
-	int64_t latest;
+	uint64_t latest;
 };
 
 // Subversion callback for log messages
-static svn_error_t *logReceiver(void *baton, svn_log_entry_t *entry, apr_pool_t *) 
+static svn_error_t *logReceiver(void *baton, svn_log_entry_t *entry, apr_pool_t *)
 {
 	logReceiverBaton *b = static_cast<logReceiverBaton *>(baton);
 	b->latest = entry->revision;
@@ -314,7 +319,7 @@ static svn_error_t *logReceiver(void *baton, svn_log_entry_t *entry, apr_pool_t 
 
 	if (b->temp.size() > 64) {
 		b->mutex->lock();
-		for (unsigned int i = 0; i < b->temp.size(); i++) {
+		for (size_t i = 0; i < b->temp.size(); i++) {
 			b->ids->push_back(b->temp[i]);
 		}
 		b->temp.clear();
@@ -331,48 +336,273 @@ void SubversionBackend::SvnLogIterator::run()
 	apr_pool_t *subpool = svn_pool_create(pool);
 	apr_array_header_t *path = apr_array_make(pool, 1, sizeof (const char *));
 	std::string sessionPrefix = d->prefix;
-	APR_ARRAY_PUSH(path, const char *) = svn_path_canonicalize(m_prefix.empty() ? sessionPrefix.c_str() : (sessionPrefix+"/"+m_prefix).c_str(), pool);
+	if (m_prefix.empty()) {
+		APR_ARRAY_PUSH(path, const char *) = svn_path_canonicalize(sessionPrefix.c_str(), pool);
+	} else if (sessionPrefix.empty()) {
+		APR_ARRAY_PUSH(path, const char *) = svn_path_canonicalize(m_prefix.c_str(), pool);
+	} else {
+		APR_ARRAY_PUSH(path, const char *) = svn_path_canonicalize((sessionPrefix+"/"+m_prefix).c_str(), pool);
+	}
 	apr_array_header_t *props = apr_array_make(pool, 1, sizeof (const char *)); // Intentionally empty
+
 	int windowSize = 1024;
 	if (!strncmp(d->url, "file://", strlen("file://"))) {
 		windowSize = 0;
 	}
 
-	PDEBUG << "Path is " << svn_path_canonicalize(m_prefix.empty() ? sessionPrefix.c_str() : (sessionPrefix+"/"+m_prefix).c_str(), pool) << endl;
+	PDEBUG << "Path is " << APR_ARRAY_IDX(path, 0, const char *)
+		<< ", range is [" << m_startrev << ":" << m_endrev << "]" << endl;
+
+	// This is a vector of intervals that should be fetched. The revisions of
+	// each interval will be appended after fetching, so it can be used to store
+	// revisions that are already cached.
+	std::vector<Interval> fetch;
+	fetch.push_back(Interval(m_startrev, m_endrev));
+
+	std::string cachefile = utils::strprintf("log_%s", APR_ARRAY_IDX(path, 0, const char *));
+	if (m_backend->options().useCache()) {
+		readIntervalsFromCache(cachefile);
+
+		// Check if a cached interval intersects with the interval that should be fetched. It's
+		// assumed that m_cachedIntervals doesn't contain intersecting intervals, which is assured
+		// by the recursive merging in mergeInterval().
+		std::vector<Interval> fetchnew = missingIntervals(m_startrev, m_endrev);
+		if (!fetchnew.empty()) {
+			fetch = fetchnew;
+		}
+	}
 
 	logReceiverBaton baton;
 	baton.mutex = &m_mutex;
 	baton.cond = &m_cond;
 	baton.ids = &m_ids;
-	baton.latest = -1;
+	baton.latest = 0;
 
-	// Determine revisions, but not at once
-	int64_t wstart = m_startrev, lastStart = m_startrev;
-	while (wstart < m_endrev-1) {
-		PDEBUG << "Fetching log from " << wstart << " to " << m_endrev << " with window size " << windowSize << endl;
-		svn_error_t *err = svn_ra_get_log2(d->ra, path, wstart, m_endrev, windowSize, FALSE, FALSE /* otherwise, copy history will be ignored */, FALSE, props, &logReceiver, &baton, subpool);
-		if (err != NULL) {
-			throw PEX(SvnConnection::strerr(err));
+	// Fetch all revision intervals that are required
+	for (size_t i = 0; i < fetch.size(); i++) {
+		uint64_t wstart = fetch[i].start, lastStart = fetch[i].start;
+		while (wstart <= fetch[i].end) {
+			PDEBUG << "Fetching log from " << wstart << " to " << fetch[i].end << " with window size " << windowSize << endl;
+			svn_error_t *err = svn_ra_get_log2(d->ra, path, wstart, fetch[i].end, windowSize, FALSE, FALSE /* otherwise, copy history will be ignored */, FALSE, props, &logReceiver, &baton, subpool);
+			if (err != NULL) {
+				throw PEX(SvnConnection::strerr(err));
+			}
+
+			if (baton.latest + 1 > lastStart) {
+				lastStart = baton.latest + 1;
+			} else {
+				lastStart += std::max(windowSize, 1);
+			}
+			wstart = lastStart;
+			svn_pool_clear(subpool);
 		}
 
-		if (baton.latest + 1 > lastStart) {
-			lastStart = baton.latest + 1;
-		} else {
-			lastStart += std::max(windowSize, 1);
+		m_mutex.lock();
+		Logger &l = PTRACE << "Appending " << baton.temp.size() << " fetched revisions: ";
+		for (size_t j = 0; j < baton.temp.size(); j++) {
+			l << baton.temp[j] << " ";
+			m_ids.push_back(baton.temp[j]);
 		}
-		wstart = lastStart;
-		svn_pool_clear(subpool);
+		l << endl;
+		baton.temp.clear();
+
+		// Append cached revisions
+		if (!fetch[i].revisions.empty()) {
+			l << "Appending " << fetch[i].revisions.size() << " cached revisions: ";
+			for (size_t j = 0; j < fetch[i].revisions.size(); j++) {
+				l << fetch[i].revisions[j] << " ";
+				m_ids.push_back(utils::int2str(fetch[i].revisions[j]));
+			}
+			l << endl;
+		}
+
+		m_cond.wakeAll();
+		m_mutex.unlock();
 	}
 
 	m_mutex.lock();
-	for (unsigned int i = 0; i < baton.temp.size(); i++) {
-		m_ids.push_back(baton.temp[i]);
-	}
 	m_finished = true;
 	m_cond.wakeAll();
 	m_mutex.unlock();
 
+	if (m_backend->options().useCache()) {
+		// Add current interval
+		Interval current(m_startrev, m_endrev);
+		for (size_t i = 0; i < m_ids.size(); i++) {
+			uint64_t rev;
+			utils::str2int(m_ids[i], &rev);
+			current.revisions.push_back(rev);
+		}
+
+		mergeInterval(current);
+		writeIntervalsToCache(cachefile);
+	}
+
 	svn_pool_destroy(pool);
+}
+
+// Reads previous log intervals from the cache
+void SubversionBackend::SvnLogIterator::readIntervalsFromCache(const std::string &file)
+{
+	sys::parallel::MutexLocker locker(&s_cacheMutex);
+	std::string cachefile = Cache::cacheFile(m_backend, file);
+
+	m_cachedIntervals.clear();
+
+	if (!sys::fs::fileExists(cachefile)) {
+		return;
+	}
+
+	GZIStream in(cachefile);
+	uint32_t version;
+	in >> version;
+	if (version != 1) {
+		Logger::warn() << "Unknown version number in cache file " << cachefile  << ": " << version << endl;
+		return;
+	}
+	while (!in.eof()) {
+		Interval interval;
+		uint64_t i = 0, num;
+		in >> interval.start >> interval.end >> num;
+		interval.revisions.resize(num);
+		while (i < num && !in.eof()) {
+			in >> interval.revisions[i++];
+		}
+
+		PTRACE << "New revision range: [" << interval.start << ":" << interval.end
+			<< "] with " << interval.revisions.size() << " revisions" << endl;
+		m_cachedIntervals.push_back(interval);
+	}
+
+	if (!in.ok()) {
+		m_cachedIntervals.clear();
+		Logger::warn() << "Error reading from cache file " << cachefile << endl;
+	}
+}
+
+// Writes the current intervals to the cache
+void SubversionBackend::SvnLogIterator::writeIntervalsToCache(const std::string &file)
+{
+	sys::parallel::MutexLocker locker(&s_cacheMutex);
+	std::string cachefile = Cache::cacheFile(m_backend, file);
+
+	PDEBUG << "Writing log intervals to cache file " << cachefile << endl;
+	GZOStream *out = new GZOStream(cachefile);
+	*out << (uint32_t)1; // Version number
+	for (size_t i = 0; i < m_cachedIntervals.size() && out->ok(); i++) {
+		const std::vector<uint64_t> &revisions = m_cachedIntervals[i].revisions;
+		*out << m_cachedIntervals[i].start << m_cachedIntervals[i].end << (uint64_t)revisions.size();
+		for (size_t j = 0; j < revisions.size() && out->ok(); j++) {
+			*out << revisions[j];
+		}
+	}
+	if (!out->ok()) {
+		Logger::warn() << "Error writing to cache file: " << cachefile << endl;
+		delete out;
+		out = NULL;
+		sys::fs::unlink(cachefile);
+	}
+	delete out;
+}
+
+// Merges the given interval into the intervals that have been already known
+void SubversionBackend::SvnLogIterator::mergeInterval(const Interval &interval)
+{
+	PDEBUG << "Merging new interval [" << interval.start << ":" << interval.end << "]" << endl;
+	for (size_t i = 0; i < m_cachedIntervals.size(); i++) {
+		const Interval &candidate = m_cachedIntervals[i];
+		if ((interval.start <= candidate.start && interval.end >= candidate.start) ||
+			(interval.start <= candidate.end && interval.end >= candidate.end)) {
+			// Intervals intersect, let's merge them.
+			// NOTE: It's assumed that the repository is immutable, i.e. no
+			// revisions will ever be deleted.
+			PDEBUG << "Intervals [" << interval.start << ":" << interval.end << "] and ["
+				<< candidate.start << ":" << candidate.end << "] intersect" << endl;
+
+			Interval merged(std::min(interval.start, candidate.start), std::max(interval.end, candidate.end));
+			merged.revisions.insert(merged.revisions.begin(), interval.revisions.begin(), interval.revisions.end());
+			merged.revisions.insert(merged.revisions.end(), candidate.revisions.begin(), candidate.revisions.end());
+			std::sort(merged.revisions.begin(), merged.revisions.end());
+
+			// Remove duplicates
+			for (size_t j = 0; j < merged.revisions.size()-1; j++) {
+				if (merged.revisions[j] == merged.revisions[j+1]) {
+					merged.revisions.erase(merged.revisions.begin()+j);
+					--j;
+				}
+			}
+
+			// Merge the merged interval
+			m_cachedIntervals.erase(m_cachedIntervals.begin()+i);
+			mergeInterval(merged);
+			return;
+		}
+	}
+
+	PDEBUG << "No intersections" << endl;
+	// No merge with previous intervals
+	m_cachedIntervals.push_back(interval);
+}
+
+// Returns missing intervals, including following cached revision numbers
+std::vector<SubversionBackend::SvnLogIterator::Interval> SubversionBackend::SvnLogIterator::missingIntervals(uint64_t start, uint64_t end)
+{
+	std::vector<Interval> missing;
+
+	for (size_t i = 0; i < m_cachedIntervals.size(); i++) {
+		const Interval &candidate = m_cachedIntervals[i];
+		if (start >= candidate.start && end <= candidate.end ) {
+			// Completely inside candidate interval. No need to fetch any logs from the repository,
+			// but store the relevant revisions in a pseudo interval
+			Interval interval(start+1, start);
+			size_t j = 0, n = candidate.revisions.size();
+			while (j < n && candidate.revisions[j] < start) ++j;
+			while (j < n && candidate.revisions[j] <= end) {
+				interval.revisions.push_back(candidate.revisions[j]);
+				++j;
+			}
+			missing.push_back(interval);
+			return missing;
+		}
+		else if (start <= candidate.start && end >= candidate.end) {
+			// Completely including candidate interval. Two intervals need to be fetched from
+			// the server now, but both will be splitted further.
+			std::vector<Interval> recurse = missingIntervals(start, (candidate.start == 0 ? 0 : candidate.start-1));
+			recurse.back().revisions.insert(recurse.back().revisions.end(), candidate.revisions.begin(), candidate.revisions.end());
+			missing.insert(missing.begin(), recurse.begin(), recurse.end());
+
+			recurse = missingIntervals(candidate.end+1, end);
+			missing.insert(missing.end(), recurse.begin(), recurse.end());
+			return missing;
+		}
+		else if (start >= candidate.start && start <= candidate.end) {
+			// Intersecting at start. Add a pseudo interval for the cached revisions
+			// and an interval for the remaining ones after candidate.end
+			Interval interval1(start+1, start);
+			size_t j = 0, n = candidate.revisions.size();
+			while (j < n && candidate.revisions[j] < start) ++j;
+			interval1.revisions.insert(interval1.revisions.begin(), candidate.revisions.begin() + j, candidate.revisions.end());
+			missing.push_back(interval1);
+
+			std::vector<Interval> recurse = missingIntervals(candidate.end+1, end);
+			missing.insert(missing.end(), recurse.begin(), recurse.end());
+			return missing;
+		}
+		else if (end >= candidate.start && end <= candidate.end) {
+			// Intersectiong at end. Add a single interval, including the first
+			// revisions in candidate
+			std::vector<Interval> recurse = missingIntervals(start, (candidate.start == 0 ? 0 : candidate.start-1));
+			for (size_t j = 0; j < candidate.revisions.size() && candidate.revisions[j] <= end; j++) {
+				recurse.back().revisions.push_back(candidate.revisions[j]);
+			}
+			missing.insert(missing.begin(), recurse.begin(), recurse.end());
+			return missing;
+		}
+	}
+
+	// No intersections, so return the complete interval
+	missing.push_back(Interval(start, end));
+	return missing;
 }
 
 
@@ -593,7 +823,7 @@ std::vector<Tag> SubversionBackend::tags()
 Diffstat SubversionBackend::diffstat(const std::string &id)
 {
 	if (m_prefetcher && m_prefetcher->willFetch(id)) {
-		PDEBUG << "Revision " << id << " will be prefetched" << endl;
+		PTRACE << "Revision " << id << " will be prefetched" << endl;
 		Diffstat stat;
 		if (!m_prefetcher->get(id, &stat)) {
 			throw PEX(std::string("Failed to retrieve diffstat for revision ") + id);
@@ -736,10 +966,10 @@ Backend::LogIterator *SubversionBackend::iterator(const std::string &branch, int
 		utils::str2int(head(branch), &endrev);
 	}
 
-	PDEBUG << "Revision range: [ " << start << " : " << end << " -> [" << startrev << " : " << endrev << "]" << endl;
+	PDEBUG << "Revision range: [ " << start << " : " << end << "] -> [" << startrev << " : " << endrev << "]" << endl;
 
 	svn_pool_destroy(pool);
-	return new SvnLogIterator(d, prefix, startrev, endrev);
+	return new SvnLogIterator(this, prefix, startrev, endrev);
 }
 
 // Adds the given revision IDs to the diffstat scheduler

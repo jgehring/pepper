@@ -26,8 +26,17 @@ class SubversionBackend : public Backend
 	public:
 		class SvnLogIterator : public LogIterator
 		{
+			struct Interval
+			{
+				Interval() : start(0), end(0) { }
+				Interval(uint64_t start, uint64_t end) : start(start), end(end) { }
+
+				uint64_t start, end;
+				std::vector<uint64_t> revisions;
+			};
+
 			public:
-				SvnLogIterator(SvnConnection *connection, const std::string &prefix, int64_t startrev, int64_t endrev);
+				SvnLogIterator(SubversionBackend *backend, const std::string &prefix, uint64_t startrev, uint64_t endrev);
 				~SvnLogIterator();
 
 				bool nextIds(std::queue<std::string> *queue);
@@ -36,13 +45,23 @@ class SubversionBackend : public Backend
 				void run();
 
 			private:
+				void readIntervalsFromCache(const std::string &file);
+				void writeIntervalsToCache(const std::string &file);
+				void mergeInterval(const Interval &interval);
+				std::vector<Interval> missingIntervals(uint64_t start, uint64_t end);
+
+			private:
+				SubversionBackend *m_backend;
 				SvnConnection *d;
 				std::string m_prefix;
-				int64_t m_startrev, m_endrev;
+				uint64_t m_startrev, m_endrev;
 				sys::parallel::Mutex m_mutex;
 				sys::parallel::WaitCondition m_cond;
 				std::vector<std::string>::size_type m_index;
+				std::vector<Interval> m_cachedIntervals;
 				bool m_finished;
+
+				static sys::parallel::Mutex s_cacheMutex;
 		};
 
 	public:
