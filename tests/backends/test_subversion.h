@@ -16,6 +16,7 @@
 
 
 #include <svn_cmdline.h>
+#include <svn_io.h>
 #include <svn_pools.h>
 #include <svn_repos.h>
 
@@ -71,10 +72,12 @@ std::string setupTestRepo()
 	}
 
 	// Setup input stream
-	svn_string_t input;
+	svn_stringbuf_t input;
+	input.pool = pool;
 	input.data = (char *)svnrepo_dump;
 	input.len = svnrepo_dump_len;
-	svn_stream_t *dumpstream = svn_stream_from_string(&input, pool);
+	input.blocksize = input.len;
+	svn_stream_t *dumpstream = svn_stream_from_stringbuf(&input, pool);
 
 	// Load the test repository into a temporary directory
 	err = svn_repos_load_fs2(repos, dumpstream, NULL, svn_repos_load_uuid_default, NULL, FALSE, FALSE, NULL, NULL, pool);
