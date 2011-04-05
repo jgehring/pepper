@@ -56,6 +56,7 @@ AC_DEFUN([BACKENDS_CHECK], [
 				AC_CHECK_LIB([svn_subr-1], [svn_cmdline_setup_auth_baton], ,[AC_MSG_ERROR([Neccessary Subversion libraries are missing])]) 
 				AC_CHECK_LIB([svn_diff-1], [svn_diff_file_diff_2], ,[AC_MSG_ERROR([Neccessary Subversion libraries are missing])]) 
 				AC_CHECK_LIB([svn_delta-1], [svn_txdelta_apply], ,[AC_MSG_ERROR([Neccessary Subversion libraries are missing])]) 
+				AC_CHECK_LIB([svn_repos-1], [svn_repos_create], ,[AC_MSG_ERROR([Neccessary Subversion libraries are missing])]) 
 				LDFLAGS=$OLD_LDFLAGS
 				SVN_LDFLAGS=$LIBS
 				LIBS=$OLD_LIBS
