@@ -1,0 +1,14 @@
+[[!meta title="pepper 0.2.1 released"]]
+
+Version 0.2.1 of pepper is now available. This release focuses on the
+Subversion backend implementation and contains new features as well as
+bugfixes. The revision log for Subversion repositories is now cached
+locally, resulting in a noticeable speedup for subsequent reports on
+remote repositories. Furthermore, a working copy can now be used for the
+repository URL. The bugfixes include several Subversion-related issues,
+including possibly missing diffstats for deleted files and problems with
+subdirectory handling.
+
+A more detailed listing of the changes can be found in the [change
+log](ChangeLog). As usual, source tarballs can be found at the
+[[Download]] section.
