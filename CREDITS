@@ -16,8 +16,13 @@ completeness, here's a brief alphabetical listing:
 	  License: Seems to be in public domain
 	  http://lua-users.org/wiki/CppBindingWithLunar
 
+	* CATCH, C++ Adaptive Test Cases in Headers
+	  Author: Phil Nash
+	  License: Boost Software License
+	  https://github.com/philsquared/Catch
+
 The background image used on the pepper website
-(http://pepper-scm.sf.net) is derived work from
+(http://scm-pepper.sourceforge.net) is derived work from
 http://en.wikipedia.org/wiki/File:4_color_mix_of_peppercorns.jpg, and
 therefore licensed under the Creative Commons Attribution-Share Alike
 1.0 Generic license.
