@@ -43,7 +43,7 @@ class Revision
 		void write(BOStream &out) const;
 		bool load(BIStream &in);
 
-	private:
+	PEPPER_PVARS:
 		std::string m_id;
 		int64_t m_date;
 		std::string m_author;

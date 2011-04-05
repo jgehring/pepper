@@ -57,7 +57,7 @@ class Diffstat
 		void write(BOStream &out) const;
 		bool load(BIStream &in);
 
-	private:
+	PEPPER_PVARS:
 		std::map<std::string, Stat> m_stats;
 
 	// Lua binding

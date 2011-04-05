@@ -21,6 +21,7 @@
 
 #include "logger.h"
 #include "options.h"
+#include "revision.h"
 #include "utils.h"
 
 #include "syslib/fs.h"
@@ -159,8 +160,110 @@ TEST_CASE("subversion/logcache", "Revision log merging and caching")
 		ids.push_back(utils::int2str(12));
 		REQUIRE(kt.m_ids == ids);
 	}
+}
 
-	free(templ);
+TEST_CASE("subversion/revisions", "Revision retrieval")
+{
+	std::string repo = setupTestRepo();
+
+	Options options;
+	options.m_options["repository"] = repo;
+	options.m_options["cache"] = "false";
+	Logger::setLevel(Logger::Debug);
+	Logger::setOutput(std::cout);
+	SubversionBackend backend(options);
+	backend.init();
+
+	Revision *rev = backend.revision("1");
+	REQUIRE(rev->m_id == "1");
+	REQUIRE(rev->m_author == "jonas");
+	REQUIRE(rev->m_message == "Initial repository layout");
+	REQUIRE(rev->m_date == 1299014963);
+	delete rev;
+
+	rev = backend.revision("7");
+	REQUIRE(rev->m_id == "7");
+	REQUIRE(rev->m_author == "jonas");
+	REQUIRE(rev->m_message == "Use real names");
+	REQUIRE(rev->m_date == 1299447342);
+	Diffstat d = rev->m_diffstat;
+	REQUIRE(d.m_stats.size() == 2);
+	REQUIRE(d.m_stats["trunk/dude"].ladd == 0);
+	REQUIRE(d.m_stats["trunk/dude"].ldel == 4);
+	REQUIRE(d.m_stats["trunk/dude"].cadd == 0);
+	REQUIRE(d.m_stats["trunk/dude"].cdel == 240);
+	REQUIRE(d.m_stats["trunk/jeffrey"].ladd == 4);
+	REQUIRE(d.m_stats["trunk/jeffrey"].ldel == 0);
+	REQUIRE(d.m_stats["trunk/jeffrey"].cadd == 240);
+	REQUIRE(d.m_stats["trunk/jeffrey"].cdel == 0);
+	delete rev;
+}
+
+TEST_CASE("subversion/iterators", "Revision iterator setup")
+{
+	std::string repo = setupTestRepo();
+
+	Options options;
+	options.m_options["repository"] = repo;
+	options.m_options["cache"] = "false";
+	Logger::setLevel(Logger::Debug);
+	Logger::setOutput(std::cout);
+	SubversionBackend backend(options);
+	backend.init();
+
+	{
+		Backend::LogIterator *it = backend.iterator("trunk");
+		it->start();
+		it->wait();
+		std::vector<std::string> ids;
+		for (int i = 1; i <= 7; i++) ids.push_back(utils::int2str(i));
+		ids.push_back(utils::int2str(12));
+		REQUIRE(it->m_ids == ids);
+		delete it;
+	}
+
+	{
+		Backend::LogIterator *it = backend.iterator("swearing");
+		it->start();
+		it->wait();
+		std::vector<std::string> ids;
+		for (int i = 1; i <= 7; i++) ids.push_back(utils::int2str(i));
+		ids.push_back(utils::int2str(9));
+		ids.push_back(utils::int2str(10));
+		ids.push_back(utils::int2str(11));
+		REQUIRE(it->m_ids == ids);
+		delete it;
+	}
+
+	{
+		Backend::LogIterator *it = backend.iterator("trunk", 1299110400, 1299283200);
+		it->start();
+		it->wait();
+		std::vector<std::string> ids;
+		for (int i = 3; i <= 4; i++) ids.push_back(utils::int2str(i));
+		REQUIRE(it->m_ids == ids);
+		delete it;
+	}
+}
+
+TEST_CASE("subversion/tags", "Tag listing")
+{
+	std::string repo = setupTestRepo();
+
+	Options options;
+	options.m_options["repository"] = repo;
+	options.m_options["cache"] = "false";
+	Logger::setLevel(Logger::Debug);
+	Logger::setOutput(std::cout);
+	SubversionBackend backend(options);
+	backend.init();
+
+	std::vector<Tag> dtags;
+	dtags.push_back(Tag("8", "1.0"));
+	std::vector<Tag> tags = backend.tags();
+	REQUIRE(tags.size() == dtags.size());
+	REQUIRE(tags[0].id() == dtags[0].id());
+	REQUIRE(tags[0].name() == dtags[0].name());
 }
 
 
