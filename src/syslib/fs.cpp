@@ -110,6 +110,14 @@ std::string cwd()
 	return std::string(cwd);
 }
 
+// Changes the current directory
+void chdir(const std::string &path)
+{
+	if (::chdir(path.c_str()) != 0) {
+		throw PEX_ERRNO();
+	}
+}
+
 // Wrapper for mkdir()
 void mkdir(const std::string &path)
 {
@@ -236,6 +244,37 @@ size_t filesize(const std::string &path)
 		throw PEX_ERRNO();
 	}
 	return statbuf.st_size;
+}
+
+// Searches the current PATH for the given program
+std::string which(const std::string &program)
+{
+	std::string progPath;
+	char *path = getenv("PATH");
+	if (path == NULL) {
+		throw PEX("PATH is not set");
+	}
+	std::vector<std::string> ls;
+#ifdef POS_WIN
+	ls = utils::split(path, ";");
+#else
+	ls = utils::split(path, ":");
+#endif
+	for (size_t i = 0; i < ls.size(); i++) {
+		std::string t = ls[i] + "/" + program;
+#ifdef POS_WIN
+		t += ".exe";
+#endif
+		if (sys::fs::fileExecutable(t)) {
+			progPath = t;
+			break;
+		}
+	}
+
+	if (progPath.empty()) {
+		throw PEX(std::string("Can't find ") + program + " in PATH");
+	}
+	return progPath;
 }
 
 // Lists the contents of the given directory

@@ -30,6 +30,7 @@ std::string dirname(const std::string &path);
 std::string canonicalize(const std::string &path);
 std::string makeAbsolute(const std::string &path);
 std::string cwd();
+void chdir(const std::string &path);
 
 void mkdir(const std::string &path);
 void mkpath(const std::string &path);
@@ -43,6 +44,7 @@ bool fileExists(const std::string &path);
 bool fileExecutable(const std::string &path);
 bool dirExists(const std::string &path);
 size_t filesize(const std::string &path);
+std::string which(const std::string &program);
 
 std::vector<std::string> ls(const std::string &path);
 
