@@ -11,6 +11,7 @@ SUBDIRS = pepper
 
 # Bundled scripts
 dist_pkgdata_DATA = \
+	age.lua \
 	activity.lua \
 	authors.lua \
 	branches.lua \
