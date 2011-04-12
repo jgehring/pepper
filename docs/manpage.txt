@@ -76,9 +76,9 @@ REVISION CACHE
 contains meta-data and diffstats of revisions that have been requested
 in previous invocations of the program.
 
-If the program complains that your revision cache may is invalid
-(probably because of abnormal program termination or power failure),
-please run the *check_cache* report to fix it and remove faulty revisions.
+If the program complains that your revision cache is invalid (probably
+because of abnormal program termination or power failure), please run
+the *check_cache* report to fix it and remove faulty revisions.
 
 
 ENVIRONMENT VARIABLES
@@ -120,7 +120,7 @@ that look like releases (of the Linux kernel).
 pepper --username=user commit_counts --period=14d http://svn.example.org::
 This generates a histogram of commit frequencies for the last 14
 days. This time, a remote Subversion repository requiring authentication
-is being used. If a password is required, the program will prompt for it.a
+is being used. If a password is required, the program will prompt for it.
 
 pepper shortlog --branch=stable --summary::
 This will print a simple commit summary from the "stable" branch to
