@@ -21,5 +21,6 @@ dist_pkgdata_DATA = \
 	directories.lua \
 	filetypes.lua \
 	loc.lua \
+	participation.lua \
 	shortlog.lua \
 	times.lua
