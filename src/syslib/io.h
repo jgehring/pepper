@@ -17,6 +17,7 @@
 
 #include <string>
 #include <vector>
+#include <streambuf>
 
 
 namespace sys
@@ -34,18 +35,21 @@ class PopenStreambufData;
 class PopenStreambuf : public std::streambuf
 {
 	public:
-		explicit PopenStreambuf(const char *cmd, const char *arg1 = NULL, const char *arg2 = NULL, const char *arg3 = NULL, const char *arg4 = NULL, const char *arg5 = NULL, const char *arg6 = NULL, const char *arg7 = NULL);
+		explicit PopenStreambuf(const char *cmd, const char *arg1 = NULL, const char *arg2 = NULL, const char *arg3 = NULL, const char *arg4 = NULL, const char *arg5 = NULL, const char *arg6 = NULL, const char *arg7 = NULL, std::ios::open_mode m = std::ios::in);
 		~PopenStreambuf();
 
 		int close();
 
 	private:
 		int_type underflow();
+		int_type sync();
+		int_type overflow(int_type c);
 
 	private:
 		PopenStreambufData *d;
+		std::ios::open_mode m_mode;
 		const std::size_t m_putback;
-		std::vector<char> m_buffer;
+		std::vector<char> m_inbuffer, m_outbuffer;
 
 	private:
 		// Not allowed
