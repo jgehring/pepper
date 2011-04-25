@@ -38,10 +38,14 @@ struct Filedes {
 	Filedes(int r = -1, int w = -1) : r(r), w(w) { }
 };
 
+static sys::parallel::Mutex forkMutex;
+
 // Forks the process, running the given command and returning file
 // descriptors for reading and writing
 static Filedes forkrw(const char *cmd, const char * const *argv, int *pid = NULL, std::ios::open_mode mode = std::ios::in)
 {
+	sys::parallel::MutexLocker locker(&forkMutex);
+
 	int rfds[2] = {-1, -1}, wfds[2] = {-1, -1};
 	if ((mode & std::ios::in) && pipe(rfds) == -1) {
 		throw PEX_ERRNO();
