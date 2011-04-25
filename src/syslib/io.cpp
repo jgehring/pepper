@@ -77,17 +77,18 @@ static Filedes forkrw(const char *cmd, const char * const *argv, int *pid = NULL
 		}
 
 		::execv(cmd, (char * const *)argv);
+		perror("Error running program");
 
 		// NOTE: Needs to be changed to _exit() if vfork() is being used above
 		exit(127);
 	}
 
 	// Parent process: close unused pipe ends
-	if (mode & std::ios::in) {
-		close(rfds[1]);
+	if ((mode & std::ios::in) && close(rfds[1]) == -1) {
+		throw PEX_ERRNO();
 	}
-	if (mode & std::ios::out) {
-		close(wfds[0]);
+	if ((mode & std::ios::out) && close(wfds[0]) == -1) {
+		throw PEX_ERRNO();
 	}
 
 	if (pid != NULL) {
@@ -120,10 +121,14 @@ std::string execv(int *ret, const char *cmd, const char * const *argv)
 		throw PEX_ERRNO();
 	}
 
-	close(fd);
+	if (close(fd) == -1) {
+		throw PEX_ERRNO();
+	}
 
-	// Wait for child
-	waitpid(pid, ret, 0);
+	// Wait for child process
+	if (waitpid(pid, ret, 0) == -1) {
+		throw PEX_ERRNO();
+	}
 	return result;
 }
 
@@ -191,7 +196,7 @@ PopenStreambuf::PopenStreambuf(const char *cmd, const char *arg1, const char *ar
 // Destructor
 PopenStreambuf::~PopenStreambuf()
 {
-	if (d->pipe.r >= 0 || d->pipe.w >= 0) {
+	if (d->pid >= 0) {
 		close();
 	}
 	delete d;
@@ -200,18 +205,22 @@ PopenStreambuf::~PopenStreambuf()
 // Closes the process and returns its exit code
 int PopenStreambuf::close()
 {
-	if (d->pipe.r >= 0 && ::close(d->pipe.r) == -1)  {
+	if (d->pipe.r >= 0 && ::close(d->pipe.r) == -1) {
 		throw PEX_ERRNO();
 	}
-	if (d->pipe.w >= 0 && ::close(d->pipe.w) == -1)  {
+	if (d->pipe.w >= 0 && ::close(d->pipe.w) == -1) {
 		throw PEX_ERRNO();
 	}
 	d->pipe.r = d->pipe.w = -1;
 
-	int status;
-	if (waitpid(d->pid, &status, 0) == -1) {
-		throw PEX_ERRNO();
+	int status = -1;
+	if (d->pid >= 0) {
+		if (waitpid(d->pid, &status, 0) == -1) {
+			throw PEX_ERRNO();
+		}
 	}
+	d->pid = -1;
+
 	return status;
 }
 
