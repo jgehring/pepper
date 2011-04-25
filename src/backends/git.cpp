@@ -29,11 +29,11 @@
 #include "backends/git.h"
 
 
-// Diffstat fetching worker thread
-class GitDiffstatThread : public sys::parallel::Thread
+// Diffstat fetching worker thread, using a pipe to write data to "git diff-tree"
+class GitDiffstatPipe : public sys::parallel::Thread
 {
 public:
-	GitDiffstatThread(const std::string &git, JobQueue<std::string, Diffstat> *queue)
+	GitDiffstatPipe(const std::string &git, JobQueue<std::string, Diffstat> *queue)
 		: m_git(git), m_queue(queue)
 	{
 	}
@@ -62,16 +62,28 @@ public:
 protected:
 	void run()
 	{
+		// TODO: Error checking
+		sys::io::PopenStreambuf buf(m_git.c_str(), "diff-tree", "-U0", "--no-renames", "--stdin", "--root", NULL, NULL, std::ios::in | std::ios::out);
+		std::istream in(&buf);
+		std::ostream out(&buf);
+
 		std::string revision;
 		while (m_queue->getArg(&revision)) {
 			std::vector<std::string> revs = utils::split(revision, ":");
-			try {
-				Diffstat stat = (revs.size() > 1 ? diffstat(m_git, revs[1], revs[0]) : diffstat(m_git, revs[0]));
-				m_queue->done(revision, stat);
-			} catch (const std::exception &ex) {
-				PDEBUG << "Exception while retrieving diffstat for revision " << revision << ": " << ex.what() << endl;
-				m_queue->failed(revision);
+
+			if (revs.size() < 2) {
+				out << revs[0] << '\n';
+			} else {
+				out << revs[1] << " " << revs[0] << '\n';
 			}
+
+			// We use EOF characters to mark the end of a revision for
+			// the diff parser. git diff-tree won't understand this line
+			// and simply write the EOF.
+			out << (char)EOF << '\n' << std::flush;
+
+			Diffstat stat = DiffParser::parse(in);
+			m_queue->done(revision, stat);
 		}
 	}
 
@@ -92,7 +104,7 @@ public:
 		}
 		Logger::info() << "GitBackend: Using " << n << " threads for prefetching diffstats" << endl;
 		for (int i = 0; i < n; i++) {
-			GitDiffstatThread * thread = new GitDiffstatThread(git, &m_queue);
+			sys::parallel::Thread *thread = new GitDiffstatPipe(git, &m_queue);
 			thread->start();
 			m_threads.push_back(thread);
 		}
@@ -134,7 +146,7 @@ public:
 
 private:
 	JobQueue<std::string, Diffstat> m_queue;
-	std::vector<GitDiffstatThread *> m_threads;
+	std::vector<sys::parallel::Thread *> m_threads;
 };
 
 
@@ -368,9 +380,9 @@ Diffstat GitBackend::diffstat(const std::string &id)
 
 	std::vector<std::string> revs = utils::split(id, ":");
 	if (revs.size() > 1) {
-		return GitDiffstatThread::diffstat(m_git, revs[1], revs[0]);
+		return GitDiffstatPipe::diffstat(m_git, revs[1], revs[0]);
 	}
-	return GitDiffstatThread::diffstat(m_git, revs[0]);
+	return GitDiffstatPipe::diffstat(m_git, revs[0]);
 }
 
 // Returns a file listing for the given revision (defaults to HEAD)

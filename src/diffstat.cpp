@@ -204,9 +204,10 @@ Diffstat DiffParser::parse(std::istream &in)
 	Diffstat ds;
 	Diffstat::Stat stat;
 	int chunk[2] = {0, 0};
+
 	while (in.good()) {
 		std::getline(in, str);
-		if (!str.compare(0, 4, "--- ") && chunk[0] <= 0 && chunk[1] <= 0) {
+		if (chunk[0] <= 0 && chunk[1] <= 0 && (!str.compare(0, 4, "--- ") || !str.compare(0, 4, "+++ "))) {
 			if (!file.empty() && !stat.empty()) {
 				ds.m_stats[file] = stat;
 				file = std::string();
@@ -221,26 +222,7 @@ Diffstat DiffParser::parse(std::istream &in)
 				if (file[0] == '"' && file[file.length()-1] == '"') {
 					file = file.substr(1, file.length()-2);
 				}
-				if (!file.compare(0, 2, "a/")) {
-					file = file.substr(2);
-				}
-			}
-		} else if (!str.compare(0, 4, "+++ ") && chunk[0] <= 0 && chunk[1] <= 0) {
-			if (!file.empty() && !stat.empty()) {
-				ds.m_stats[file] = stat;
-				file = std::string();
-			}
-			stat = Diffstat::Stat();
-			std::vector<std::string> header = utils::split(str.substr(4), "\t");
-			if (header.empty()) {
-				throw PEX(std::string("EMPTY HEADER: ")+str);
-			}
-			if (header[0] != "/dev/null") {
-				file = header[0];
-				if (file[0] == '"' && file[file.length()-1] == '"') {
-					file = file.substr(1, file.length()-2);
-				}
-				if (!file.compare(0, 2, "b/")) {
+				if (!file.compare(0, 2, "a/") || !file.compare(0, 2, "b/")) {
 					file = file.substr(2);
 				}
 			}
@@ -264,21 +246,25 @@ Diffstat DiffParser::parse(std::istream &in)
 			} else {
 				chunk[(ranges[1][0] == '-' ? 0 : 1)] = 1;
 			}
-		} else if (str[0] == '-') {
+		} else if (!str.empty() && str[0] == '-') {
 			stat.cdel += str.length();
 			++stat.ldel;
 			--chunk[0];
-		} else if (str[0] == '+') {
+		} else if (!str.empty() && str[0] == '+') {
 			stat.cadd += str.length();
 			++stat.ladd;
 			--chunk[1];
 		} else if (str == marker) {
 			chunk[0] = chunk[1] = 0;
+		} else if (!str.empty() && str[0] == EOF) {
+			// git diff-tree pipe prints EOF after diff data
+			break;
 		} else {
 			if (chunk[0] > 0) --chunk[0];
 			if (chunk[1] > 0) --chunk[1];
 		}
 	}
+
 	if (!file.empty() && !stat.empty()) {
 		ds.m_stats[file] = stat;
 	}
