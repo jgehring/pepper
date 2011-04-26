@@ -63,6 +63,24 @@ class JobQueue
 			return true;
 		}
 
+		bool getArgs(std::vector<Arg> *args, size_t max) {
+			m_mutex.lock();
+			while (!m_end && (m_queue.empty() || m_results.size() > m_max)) {
+				m_argWait.wait(&m_mutex);
+			}
+			if (m_end) {
+				m_mutex.unlock();
+				return false;
+			}
+			args->clear();
+			while (args->size() < max && !m_queue.empty()) {
+				args->push_back(m_queue.front());
+				m_queue.pop();
+			}
+			m_mutex.unlock();
+			return true;
+		}
+
 		bool hasArg(const Arg &arg) {
 			m_mutex.lock();
 			bool has = (m_status.find(arg) != m_status.end());
