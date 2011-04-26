@@ -17,7 +17,7 @@
 
 #include "backend.h"
 
-class GitDiffstatPrefetcher;
+class GitRevisionPrefetcher;
 
 
 class GitBackend : public Backend
@@ -46,7 +46,7 @@ class GitBackend : public Backend
 
 	private:
 		std::string m_git;
-		GitDiffstatPrefetcher *m_prefetcher;
+		GitRevisionPrefetcher *m_prefetcher;
 };
 
 

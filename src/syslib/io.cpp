@@ -228,6 +228,16 @@ int PopenStreambuf::close()
 	return status;
 }
 
+// Closes the write channel, if any
+void PopenStreambuf::closeWrite()
+{
+	sync();
+	if (d->pipe.w >= 0 && ::close(d->pipe.w) == -1) {
+		throw PEX_ERRNO();
+	}
+	d->pipe.w = -1;
+}
+
 // Actual data fetching from pipe
 PopenStreambuf::int_type PopenStreambuf::underflow()
 {

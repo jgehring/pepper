@@ -39,6 +39,7 @@ class PopenStreambuf : public std::streambuf
 		~PopenStreambuf();
 
 		int close();
+		void closeWrite();
 
 	private:
 		int_type underflow();

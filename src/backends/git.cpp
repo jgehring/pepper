@@ -93,24 +93,152 @@ private:
 };
 
 
-// Handles the prefetching of diffstats
-class GitDiffstatPrefetcher
+// Meta-data fetching worker thread, using a pipe to write data to "git rev-list"
+class GitMetaDataPipe : public sys::parallel::Thread
 {
 public:
-	GitDiffstatPrefetcher(const std::string &git, int n = -1)
+	struct Data
+	{
+		int64_t date;
+		std::string author;
+		std::string message;
+	};
+
+public:
+	GitMetaDataPipe(const std::string &git, JobQueue<std::string, Data> *queue)
+		: m_git(git), m_queue(queue)
+	{
+	}
+
+	static void parseHeader(const std::vector<std::string> &header, Data *dest)
+	{
+		// Parse author information
+		unsigned int i = 0;
+		while (i < header.size() && header[i].compare(0, 7, "author ")) {
+			++i;
+		}
+		if (i >= header.size()) {
+			throw PEX(utils::strprintf("Unable to parse author information"));
+		}
+		std::vector<std::string> authorln = utils::split(header[i], " ");
+		if (authorln.size() < 4) {
+			throw PEX(utils::strprintf("Unable to parse author information"));
+		}
+
+		// Author: 2nd to n-2nd entry
+		std::string author = utils::join(authorln.begin()+1, authorln.end()-2, " ");
+		// Strip email address, assuming a start at the last "<" (not really compliant with RFC2882)
+		dest->author = utils::trim(author.substr(0, author.find_last_of('<')));
+
+		// Committer date: last 2 entries in the form %s %z
+		while (i < header.size() && header[i].compare(0, 10, "committer ")) {
+			++i;
+		}
+		if (i >= header.size()) {
+			throw PEX(utils::strprintf("Unable to parse date information"));
+		}
+		std::vector<std::string> dateln = utils::split(header[i], " ");
+		if (dateln.size() < 2) {
+			throw PEX(utils::strprintf("Unable to parse date information"));
+		}
+		int64_t off = 0;
+		if (!utils::str2int(dateln[dateln.size()-2], &(dest->date), 10) || !utils::str2int(dateln[dateln.size()-1], &off, 10)) {
+			throw PEX(utils::strprintf("Unable to parse date information"));
+		}
+		dest->date += off;
+
+		// Last but not least: commit message
+		while (i < header.size() && !header[i].empty()) {
+			++i;
+		}
+		dest->message.clear();
+		++i;
+		while (i < header.size()) {
+			if (header[i].length() > 4) {
+				dest->message += header[i].substr(4);
+			}
+			if (i < header.size()-1) {
+				dest->message += "\n";
+			}
+			++i;
+		}
+	}
+
+protected:
+	void run()
+	{
+		Data data;
+		size_t maxrevs = 128;
+		std::string revision;
+		std::vector<std::string> revisions;
+		while (m_queue->getArgs(&revisions, maxrevs)) {
+			// TODO: Doesn't work with git < 1.7
+			// TODO: Error checking
+			sys::io::PopenStreambuf buf(m_git.c_str(), "rev-list", "--stdin", "--header", "--no-walk", NULL, NULL, NULL, std::ios::in | std::ios::out);
+			std::istream in(&buf);
+			std::ostream out(&buf);
+
+			for (size_t i = 0; i < revisions.size(); i++) {
+				out << utils::split(revisions[i], ":").back() << '\n';
+			}
+			buf.closeWrite();
+
+			// Parse single headers
+			std::string str;
+			std::vector<std::string> header;
+			size_t i = 0;
+			while (in.good()) {
+				std::getline(in, str);
+				if (str.size() > 0 && str[0] == '\0') {
+					try {
+						parseHeader(header, &data);
+						m_queue->done(revisions[i], data);
+					} catch (const std::exception &ex) {
+						Logger::info() << "Error parsing revision header: " << ex.what() << endl;
+						m_queue->failed(revisions[i]);
+					}
+					++i;
+
+					header.clear();
+					header.push_back(str.substr(1));
+				} else {
+					header.push_back(str);
+				}
+			}
+		}
+	}
+
+private:
+	std::string m_git;
+	JobQueue<std::string, Data> *m_queue;
+};
+
+
+// Handles the prefetching of revision meta-data and diffstats
+class GitRevisionPrefetcher
+{
+public:
+	GitRevisionPrefetcher(const std::string &git, int n = -1)
 	{
 		if (n < 0) {
 			n = std::max(1, sys::parallel::idealThreadCount() / 2);
 		}
 		Logger::info() << "GitBackend: Using " << n << " threads for prefetching diffstats" << endl;
 		for (int i = 0; i < n; i++) {
-			sys::parallel::Thread *thread = new GitDiffstatPipe(git, &m_queue);
+			sys::parallel::Thread *thread = new GitDiffstatPipe(git, &m_diffQueue);
+			thread->start();
+			m_threads.push_back(thread);
+		}
+
+		Logger::info() << "GitBackend: Using " << n << " threads for prefetching meta-data" << endl;
+		for (int i = 0; i < n; i++) {
+			sys::parallel::Thread *thread = new GitMetaDataPipe(git, &m_metaQueue);
 			thread->start();
 			m_threads.push_back(thread);
 		}
 	}
 
-	~GitDiffstatPrefetcher()
+	~GitRevisionPrefetcher()
 	{
 		for (unsigned int i = 0; i < m_threads.size(); i++) {
 			delete m_threads[i];
@@ -119,7 +247,8 @@ public:
 
 	void stop()
 	{
-		m_queue.stop();
+		m_diffQueue.stop();
+		m_metaQueue.stop();
 	}
 
 	void wait()
@@ -131,21 +260,33 @@ public:
 
 	void prefetch(const std::vector<std::string> &revisions)
 	{
-		m_queue.put(revisions);
+		m_diffQueue.put(revisions);
+		m_metaQueue.put(revisions);
 	}
 
-	bool get(const std::string &revision, Diffstat *dest)
+	bool getDiffstat(const std::string &revision, Diffstat *dest)
 	{
-		return m_queue.getResult(revision, dest);
+		return m_diffQueue.getResult(revision, dest);
 	}
 
-	bool willFetch(const std::string &revision)
+	bool getMeta(const std::string &revision, GitMetaDataPipe::Data *dest)
 	{
-		return m_queue.hasArg(revision);
+		return m_metaQueue.getResult(revision, dest);
+	}
+
+	bool willFetchDiffstat(const std::string &revision)
+	{
+		return m_diffQueue.hasArg(revision);
+	}
+
+	bool willFetchMeta(const std::string &revision)
+	{
+		return m_metaQueue.hasArg(revision);
 	}
 
 private:
-	JobQueue<std::string, Diffstat> m_queue;
+	JobQueue<std::string, Diffstat> m_diffQueue;
+	JobQueue<std::string, GitMetaDataPipe::Data> m_metaQueue;
 	std::vector<sys::parallel::Thread *> m_threads;
 };
 
@@ -367,10 +508,9 @@ std::vector<Tag> GitBackend::tags()
 Diffstat GitBackend::diffstat(const std::string &id)
 {
 	// Maybe it's prefetched
-	if (m_prefetcher && m_prefetcher->willFetch(id)) {
-		PDEBUG << "Revision " << id << " will be prefetched" << endl;
+	if (m_prefetcher && m_prefetcher->willFetchDiffstat(id)) {
 		Diffstat stat;
-		if (!m_prefetcher->get(id, &stat)) {
+		if (!m_prefetcher->getDiffstat(id, &stat)) {
 			throw PEX(utils::strprintf("Failed to retrieve diffstat for revision %s", id.c_str()));
 		}
 		return stat;
@@ -441,7 +581,7 @@ Backend::LogIterator *GitBackend::iterator(const std::string &branch, int64_t st
 void GitBackend::prefetch(const std::vector<std::string> &ids)
 {
 	if (m_prefetcher == NULL) {
-		m_prefetcher = new GitDiffstatPrefetcher(m_git);
+		m_prefetcher = new GitRevisionPrefetcher(m_git);
 	}
 	m_prefetcher->prefetch(ids);
 	PDEBUG << "Started prefetching " << ids.size() << " revisions" << endl;
@@ -470,7 +610,17 @@ Revision *GitBackend::revision(const std::string &id)
 		lines.erase(lines.begin());
 	}
 	std::string msg = utils::join(lines, "\n");
+	return new Revision(id, date, author, msg, diffstat(id));
 #else
+
+	// Maybe it's prefetched
+	if (m_prefetcher && m_prefetcher->willFetchMeta(id)) {
+		GitMetaDataPipe::Data data;
+		if (!m_prefetcher->getMeta(id, &data)) {
+			throw PEX(utils::strprintf("Failed to retrieve meta-data for revision %s", id.c_str()));
+		}
+		return new Revision(id, data.date, data.author, data.message, diffstat(id));
+	}
 
 	std::string rev = utils::split(id, ":").back();
 
@@ -484,59 +634,10 @@ Revision *GitBackend::revision(const std::string &id)
 		throw PEX(utils::strprintf("Unable to parse meta-data for revision '%s' (%d, %s)", rev.c_str(), ret, header.c_str()));
 	}
 
-	// Parse author information
-	unsigned int i = 0;
-	while (i < lines.size() && lines[i].compare(0, 7, "author ")) {
-		++i;
-	}
-	if (i >= lines.size()) {
-		throw PEX(utils::strprintf("Unable to parse author information for revision '%s' (%d, %s)", rev.c_str(), ret, header.c_str()));
-	}
-	std::vector<std::string> authorln = utils::split(lines[i], " ");
-	if (authorln.size() < 4) {
-		throw PEX(utils::strprintf("Unable to parse author information for revision '%s' (%d, %s)", rev.c_str(), ret, lines[i].c_str()));
-	}
-
-	// Author: 2nd to n-2nd entry
-	std::string author = utils::join(authorln.begin()+1, authorln.end()-2, " ");
-	// Strip email address, assuming a start at the last "<" (not really compliant with RFC2882)
-	author = utils::trim(author.substr(0, author.find_last_of('<')));
-
-	// Committer ate: last 2 entries in the form %s %z
-	while (i < lines.size() && lines[i].compare(0, 10, "committer ")) {
-		++i;
-	}
-	if (i >= lines.size()) {
-		throw PEX(utils::strprintf("Unable to parse date information for revision '%s' (%d, %s)", rev.c_str(), ret, header.c_str()));
-	}
-	std::vector<std::string> dateln = utils::split(lines[i], " ");
-	if (dateln.size() < 2) {
-		throw PEX(utils::strprintf("Unable to parse date information for revision '%s' (%d, %s)", rev.c_str(), ret, lines[i].c_str()));
-	}
-	int64_t date = 0, off = 0;
-	if (!utils::str2int(dateln[dateln.size()-2], &date, 10) || !utils::str2int(dateln[dateln.size()-1], &off, 10)) {
-		throw PEX(utils::strprintf("Unable to parse date information for revision '%s' (%d, %s)", rev.c_str(), ret, lines[i].c_str()));
-	}
-	date += off;
-
-	// Last but not least: commit message
-	while (i < lines.size() && !lines[i].empty()) {
-		++i;
-	}
-	std::string msg;
-	++i;
-	while (i < lines.size()) {
-		if (lines[i].length() > 4) {
-			msg += lines[i].substr(4);
-		}
-		if (i < lines.size()-1) {
-			msg += "\n";
-		}
-		++i;
-	}
+	GitMetaDataPipe::Data data;
+	GitMetaDataPipe::parseHeader(lines, &data);
+	return new Revision(id, data.date, data.author, data.message, diffstat(id));
 #endif
-
-	return new Revision(id, date, author, msg, diffstat(id));
 }
 
 // Handle cleanup of diffstat scheduler
