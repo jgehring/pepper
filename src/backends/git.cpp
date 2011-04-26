@@ -112,6 +112,11 @@ public:
 
 	static void parseHeader(const std::vector<std::string> &header, Data *dest)
 	{
+		// TODO: Proper exception descriptions
+		if (header.size() < 6) {
+			throw PEX(utils::strprintf("Unable to parse meta-data"));
+		}
+
 		// Parse author information
 		unsigned int i = 0;
 		while (i < header.size() && header[i].compare(0, 7, "author ")) {
@@ -630,10 +635,6 @@ Revision *GitBackend::revision(const std::string &id)
 		throw PEX(utils::strprintf("Unable to retrieve meta-data for revision '%s' (%d, %s)", rev.c_str(), ret, header.c_str()));
 	}
 	std::vector<std::string> lines = utils::split(header, "\n");
-	if (lines.size() < 6) {
-		throw PEX(utils::strprintf("Unable to parse meta-data for revision '%s' (%d, %s)", rev.c_str(), ret, header.c_str()));
-	}
-
 	GitMetaDataPipe::Data data;
 	GitMetaDataPipe::parseHeader(lines, &data);
 	return new Revision(id, data.date, data.author, data.message, diffstat(id));
