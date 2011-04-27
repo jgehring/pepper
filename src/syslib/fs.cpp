@@ -169,6 +169,14 @@ void unlinkr(const std::string &path)
 	}
 }
 
+// Wrapper for rename()
+void rename(const std::string &oldpath, const std::string &newpath)
+{
+	if (::rename(oldpath.c_str(), newpath.c_str()) == -1) {
+		throw PEX_ERRNO();
+	}
+}
+
 // Checks if the given file (or directory) exists
 bool exists(const std::string &path)
 {

@@ -35,6 +35,7 @@ void mkdir(const std::string &path);
 void mkpath(const std::string &path);
 void unlink(const std::string &path);
 void unlinkr(const std::string &path);
+void rename(const std::string &oldpath, const std::string &newpath);
 
 bool exists(const std::string &path);
 bool fileExists(const std::string &path);
