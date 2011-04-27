@@ -22,6 +22,7 @@
 #include "revision.h"
 #include "utils.h"
 
+#include "syslib/datetime.h"
 #include "syslib/fs.h"
 #include "syslib/io.h"
 #include "syslib/parallel.h"
@@ -385,48 +386,91 @@ bool GitBackend::handles(const std::string &url)
 // Returns a unique identifier for this repository
 std::string GitBackend::uuid()
 {
-	// Use the SHA1 of the first commit of the master branch as the UUID.
-	// Let's try to find the "master" branch
+	// Determine current main branch and the HEAD revision
+	std::string branch = mainBranch();
+	std::string headrev = head(branch);
+	std::string oldroot, oldhead;
 	int ret;
-	std::string out = sys::io::exec(&ret, m_git.c_str(), "branch", "-a");
-	if (ret != 0) {
-		throw PEX(utils::strprintf("Unable to retrieve the list of branches (%d)", ret));
-	}
-	std::vector<std::string> branches = utils::split(out, "\n");
-	std::string branch;
-	for (unsigned int i = 0; i < branches.size(); i++) {
-		if (branches[i].empty()) {
-			continue;
+
+	// The $GIT_DIR/pepper.cache file caches branch names and their root
+	// commits. It consists of lines of the form
+	// $BRANCH_NAME $HEAD $ROOT
+	std::string cachefile = std::string(getenv("GIT_DIR")) + "/pepper.cache";
+	{
+		std::ifstream in((std::string(getenv("GIT_DIR")) + "/pepper.cache").c_str());
+		while (in.good()) {
+			std::string str;
+			std::getline(in, str);
+			if (str.compare(0, branch.length(), branch)) {
+				continue;
+			}
+
+			std::vector<std::string> parts = utils::split(str, " ");
+			if (parts.size() == 3) {
+				oldhead = parts[1];
+				oldroot = parts[2];
+				if (oldhead == headrev) {
+					PDEBUG << "Found cached root commit" << endl;
+					return oldroot;
+				}
+			}
+			break;
 		}
-		if (branches[i][0] == '*') {
-			branch = branches[i].substr(2); // Fallback branch: current one
-		}
-		branches[i] = branches[i].substr(2);
 	}
 
-	if (branch.empty()) {
-		if (std::search_n(branches.begin(), branches.end(), 1, "master") != branches.end()) {
-			branch = "master";
-		} else if (std::search_n(branches.begin(), branches.end(), 1, "remotes/origin/master") != branches.end()) {
-			branch = "remotes/origin/master";
+	// Check if the old root commit is still valid by checking if the old head revision
+	// is an ancestory of the current one
+	std::string root;
+	if (!oldroot.empty()) {
+		std::string ref = sys::io::exec(&ret, m_git.c_str(), "rev-list", "-1", (oldhead + ".." + headrev).c_str());
+		if (ret == 0 && !ref.empty()) {
+			PDEBUG << "Old head " << oldhead << " is a valid ancestor, updating cached head" << endl;
+			root = oldroot;
 		}
 	}
-	if (branch.empty()) {
-		throw PEX("Unable to retrieve UUID for repository");
-	}
 
-	// Get ID of first commit of the root branch
+	// Get ID of first commit of the selected branch
 	// Unfortunatley, the --max-count=n option results in n revisions counting from the HEAD.
 	// This way, we'll always get the HEAD revision with --max-count=1.
-	std::string id = sys::io::exec(&ret, m_git.c_str(), "rev-list", "--reverse", branch.c_str(), "--");
-	if (ret != 0) {
-		throw PEX(utils::strprintf("Unable to determine the root commit for branch '%s' (%d)", branch.c_str(), ret));
+	if (root.empty()) {
+		sys::datetime::Watch watch;
+
+		std::string id = sys::io::exec(&ret, m_git.c_str(), "rev-list", "--reverse", branch.c_str(), "--");
+		if (ret != 0) {
+			throw PEX(utils::strprintf("Unable to determine the root commit for branch '%s' (%d)", branch.c_str(), ret));
+		}
+		size_t pos = id.find_first_of('\n');
+		if (pos == std::string::npos) {
+			throw PEX(utils::strprintf("Unable to determine the root commit for branch '%s' (%d)", branch.c_str(), ret));
+		}
+
+		root = id.substr(0, pos);
+		PDEBUG << "Determined root commit in " << watch.elapsedMSecs() << " ms" << endl;
 	}
-	size_t pos = id.find_first_of('\n');
-	if (pos == std::string::npos) {
-		throw PEX(utils::strprintf("Unable to determine the root commit for branch '%s' (%d)", branch.c_str(), ret));
+
+	// Update the cache file
+	std::string newfile = cachefile + ".tmp";
+	FILE *out = fopen(newfile.c_str(), "w");
+	if (out == NULL) {
+		throw PEX_ERRNO();
 	}
-	return utils::trim(id.substr(0, pos));
+	fprintf(out, "%s %s %s\n", branch.c_str(), headrev.c_str(), root.c_str());
+	{
+		std::ifstream in(cachefile.c_str());
+		while (in.good()) {
+			std::string str;
+			std::getline(in, str);
+			if (str.empty() && str.compare(0, branch.length(), branch)) {
+				continue;
+			}
+			fprintf(out, "%s\n", str.c_str());
+		}
+		fsync(fileno(out));
+		fclose(out);
+	}
+	sys::fs::rename(newfile, cachefile);
+
+	return root;
 }
 
 // Returns the HEAD revision for the given branch
