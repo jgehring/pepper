@@ -494,10 +494,22 @@ std::string GitBackend::mainBranch()
 	}
 	std::vector<std::string> branches = utils::split(out, "\n");
 	for (unsigned int i = 0; i < branches.size(); i++) {
-		if (!branches[i].empty() && branches[i][0] == '*') {
+		if (branches[i].empty()) {
+			continue;
+		}
+		if (branches[i][0] == '*') {
 			return branches[i].substr(2);
 		}
+		branches[i] = branches[i].substr(2);
 	}
+
+	if (std::search_n(branches.begin(), branches.end(), 1, "master") != branches.end()) {
+		return "master";
+	} else if (std::search_n(branches.begin(), branches.end(), 1, "remotes/origin/master") != branches.end()) {
+		return "remotes/origin/master";
+	}
+
+	// Fallback
 	return "master";
 }
 
