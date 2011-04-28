@@ -66,6 +66,11 @@ std::string strprintf(const char *format, ...);
 std::vector<char> compress(const std::vector<char> &data, int level = 9);
 std::vector<char> uncompress(const std::vector<char> &data);
 
+inline std::string childId(const std::string &id) {
+	size_t p = id.find_last_of(':');
+	return (p != std::string::npos ? id.substr(p+1) : id);
+}
+
 uint32_t crc32(const char *data, size_t len);
 inline uint32_t crc32(const std::vector<char> &data) {
 	return crc32(&data[0], data.size());
