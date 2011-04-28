@@ -271,7 +271,7 @@ public:
 		}
 
 		// Limit to 4 threads to prevent meta queue congestions
-		n = std::max(n, 4);
+		n = std::min(n, 4);
 		Logger::info() << "GitBackend: Using " << n << " threads for prefetching meta-data" << endl;
 		for (int i = 0; i < n; i++) {
 			sys::parallel::Thread *thread = new GitMetaDataThread(git, &m_metaQueue);
