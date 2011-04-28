@@ -94,10 +94,10 @@ private:
 };
 
 
-// Meta-data fetching worker thread, using a pipe to write data to "git rev-list".
+// Meta-data fetching worker thread, passing multiple revisions to git-rev-list at once.
 // Note that all IDs coming from the JobQueue are expected to contain a single hash,
 // i.e. no parent:child ID spec.
-class GitMetaDataPipe : public sys::parallel::Thread
+class GitMetaDataThread : public sys::parallel::Thread
 {
 public:
 	struct Data
@@ -108,7 +108,7 @@ public:
 	};
 
 public:
-	GitMetaDataPipe(const std::string &git, JobQueue<std::string, Data> *queue)
+	GitMetaDataThread(const std::string &git, JobQueue<std::string, Data> *queue)
 		: m_git(git), m_queue(queue)
 	{
 	}
@@ -180,7 +180,7 @@ public:
 		if (ret != 0) {
 			throw PEX(utils::strprintf("Unable to retrieve meta-data for revision '%s' (%d, %s)", id.c_str(), ret, header.c_str()));
 		}
-		GitMetaDataPipe::parseHeader(utils::split(header, "\n"), dest);
+		GitMetaDataThread::parseHeader(utils::split(header, "\n"), dest);
 	}
 
 protected:
@@ -274,7 +274,7 @@ public:
 		n = std::max(n, 4);
 		Logger::info() << "GitBackend: Using " << n << " threads for prefetching meta-data" << endl;
 		for (int i = 0; i < n; i++) {
-			sys::parallel::Thread *thread = new GitMetaDataPipe(git, &m_metaQueue);
+			sys::parallel::Thread *thread = new GitMetaDataThread(git, &m_metaQueue);
 			thread->start();
 			m_threads.push_back(thread);
 		}
@@ -318,7 +318,7 @@ public:
 		return m_diffQueue.getResult(revision, dest);
 	}
 
-	bool getMeta(const std::string &revision, GitMetaDataPipe::Data *dest)
+	bool getMeta(const std::string &revision, GitMetaDataThread::Data *dest)
 	{
 		return m_metaQueue.getResult(utils::childId(revision), dest);
 	}
@@ -335,7 +335,7 @@ public:
 
 private:
 	JobQueue<std::string, Diffstat> m_diffQueue;
-	JobQueue<std::string, GitMetaDataPipe::Data> m_metaQueue;
+	JobQueue<std::string, GitMetaDataThread::Data> m_metaQueue;
 	std::vector<sys::parallel::Thread *> m_threads;
 };
 
@@ -719,15 +719,15 @@ Revision *GitBackend::revision(const std::string &id)
 
 	// Check for pre-fetched meta data first
 	if (m_prefetcher && m_prefetcher->willFetchMeta(id)) {
-		GitMetaDataPipe::Data data;
+		GitMetaDataThread::Data data;
 		if (!m_prefetcher->getMeta(id, &data)) {
 			throw PEX(utils::strprintf("Failed to retrieve meta-data for revision %s", id.c_str()));
 		}
 		return new Revision(id, data.date, data.author, data.message, diffstat(id));
 	}
 
-	GitMetaDataPipe::Data data;
-	GitMetaDataPipe::metaData(m_git, utils::childId(id), &data);
+	GitMetaDataThread::Data data;
+	GitMetaDataThread::metaData(m_git, utils::childId(id), &data);
 	return new Revision(id, data.date, data.author, data.message, diffstat(id));
 #endif
 }
