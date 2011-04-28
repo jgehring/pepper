@@ -114,7 +114,7 @@ public:
 	static void parseHeader(const std::vector<std::string> &header, Data *dest)
 	{
 		// TODO: Proper exception descriptions
-		if (header.size() < 6) {
+		if (header.size() < 5) {
 			throw PEX(utils::strprintf("Unable to parse meta-data"));
 		}
 
