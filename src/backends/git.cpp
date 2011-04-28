@@ -94,7 +94,9 @@ private:
 };
 
 
-// Meta-data fetching worker thread, using a pipe to write data to "git rev-list"
+// Meta-data fetching worker thread, using a pipe to write data to "git rev-list".
+// Note that all IDs coming from the JobQueue are expected to contain a single hash,
+// i.e. no parent:child ID spec.
 class GitMetaDataPipe : public sys::parallel::Thread
 {
 public:
@@ -185,40 +187,37 @@ protected:
 	void run()
 	{
 		Data data;
-		size_t maxrevs = 128;
-		std::string revision;
-		std::vector<std::string> revisions;
-		std::map<std::string, std::string> revmap;
-		while (m_queue->getArgs(&revisions, maxrevs)) {
-			// TODO: Doesn't work with git < 1.7
-			// TODO: Error checking
-			sys::io::PopenStreambuf buf(m_git.c_str(), "rev-list", "--stdin", "--header", "--no-walk", NULL, NULL, NULL, std::ios::in | std::ios::out);
-			std::istream in(&buf);
-			std::ostream out(&buf);
+		const size_t maxids = 64;
+		const char **args = new const char *[maxids + 5];
+		std::vector<std::string> ids;
 
-			revmap.clear();
-			for (size_t i = 0; i < revisions.size(); i++) {
-				std::string rev = utils::split(revisions[i], ":").back();
-				out << rev << '\n';
-				revmap[rev] = revisions[i];
+		args[0] = m_git.c_str();
+		args[1] = "rev-list";
+		args[2] = "--no-walk";
+		args[3] = "--header"; // No support for message bodies in old git versions
+
+		// Try to fetch the revision headers for maxrevs revisions at once
+		while (m_queue->getArgs(&ids, maxids)) {
+			for (size_t i = 0; i < ids.size(); i++) {
+				args[i+4] = ids[i].c_str();
 			}
-			buf.closeWrite();
+			args[ids.size()+4] = NULL;
 
-			// Parse single headers
+			sys::io::PopenStreambuf buf(m_git.c_str(), args);
+			std::istream in(&buf);
+
+			// Parse headers
 			std::string str;
 			std::vector<std::string> header;
 			while (in.good()) {
 				std::getline(in, str);
 				if (str.size() > 0 && str[0] == '\0') {
-					if (revmap.find(header[0]) != revmap.end()) {
-						try {
-							std::cout << "DONE: " << header[0] << std::endl;
-							parseHeader(header, &data);
-							m_queue->done(revmap[header[0]], data);
-						} catch (const std::exception &ex) {
-							Logger::info() << "Error parsing revision header: " << ex.what() << endl;
-							m_queue->failed(revmap[header[0]]);
-						}
+					try {
+						parseHeader(header, &data);
+						m_queue->done(header[0], data);
+					} catch (const std::exception &ex) {
+						PDEBUG << "Error parsing revision header: " << ex.what() << endl;
+						m_queue->failed(header[0]);
 					}
 
 					header.clear();
@@ -227,7 +226,25 @@ protected:
 					header.push_back(str);
 				}
 			}
+
+			int ret = buf.close();
+			if (ret != 0) {
+				PDEBUG << "Error running rev-list, ret = " << ret << endl;
+
+				// Try all IDs one by one, so the incorrect ones can be identified
+				for (size_t i = 0; i < ids.size(); i++) {
+					try {
+						metaData(m_git, ids[i], &data);
+						m_queue->done(ids[i], data);
+					} catch (const std::exception &ex) {
+						PDEBUG << "Error parsing revision header: " << ex.what() << endl;
+						m_queue->failed(ids[i]);
+					}
+				}
+			}
 		}
+
+		delete[] args;
 	}
 
 private:
@@ -253,6 +270,8 @@ public:
 			m_threads.push_back(thread);
 		}
 
+		// Limit to 4 threads to prevent meta queue congestions
+		n = std::max(n, 4);
 		Logger::info() << "GitBackend: Using " << n << " threads for prefetching meta-data" << endl;
 		for (int i = 0; i < n; i++) {
 			sys::parallel::Thread *thread = new GitMetaDataPipe(git, &m_metaQueue);
@@ -284,7 +303,14 @@ public:
 	void prefetch(const std::vector<std::string> &revisions)
 	{
 		m_diffQueue.put(revisions);
-		m_metaQueue.put(revisions);
+
+		// Put child commits only to the meta queue
+		std::vector<std::string> children;
+		children.resize(revisions.size());
+		for (size_t i = 0; i < revisions.size(); i++) {
+			children[i] = utils::childId(revisions[i]);
+		}
+		m_metaQueue.put(children);
 	}
 
 	bool getDiffstat(const std::string &revision, Diffstat *dest)
@@ -294,7 +320,7 @@ public:
 
 	bool getMeta(const std::string &revision, GitMetaDataPipe::Data *dest)
 	{
-		return m_metaQueue.getResult(revision, dest);
+		return m_metaQueue.getResult(utils::childId(revision), dest);
 	}
 
 	bool willFetchDiffstat(const std::string &revision)
@@ -304,7 +330,7 @@ public:
 
 	bool willFetchMeta(const std::string &revision)
 	{
-		return m_metaQueue.hasArg(revision);
+		return m_metaQueue.hasArg(utils::childId(revision));
 	}
 
 private:
@@ -691,7 +717,7 @@ Revision *GitBackend::revision(const std::string &id)
 	return new Revision(id, date, author, msg, diffstat(id));
 #else
 
-	// Maybe it's prefetched
+	// Check for pre-fetched meta data first
 	if (m_prefetcher && m_prefetcher->willFetchMeta(id)) {
 		GitMetaDataPipe::Data data;
 		if (!m_prefetcher->getMeta(id, &data)) {
