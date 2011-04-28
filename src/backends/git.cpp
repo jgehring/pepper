@@ -177,6 +177,7 @@ protected:
 		size_t maxrevs = 128;
 		std::string revision;
 		std::vector<std::string> revisions;
+		std::map<std::string, std::string> revmap;
 		while (m_queue->getArgs(&revisions, maxrevs)) {
 			// TODO: Doesn't work with git < 1.7
 			// TODO: Error checking
@@ -184,26 +185,30 @@ protected:
 			std::istream in(&buf);
 			std::ostream out(&buf);
 
+			revmap.clear();
 			for (size_t i = 0; i < revisions.size(); i++) {
-				out << utils::split(revisions[i], ":").back() << '\n';
+				std::string rev = utils::split(revisions[i], ":").back();
+				out << rev << '\n';
+				revmap[rev] = revisions[i];
 			}
 			buf.closeWrite();
 
 			// Parse single headers
 			std::string str;
 			std::vector<std::string> header;
-			size_t i = 0;
 			while (in.good()) {
 				std::getline(in, str);
 				if (str.size() > 0 && str[0] == '\0') {
-					try {
-						parseHeader(header, &data);
-						m_queue->done(revisions[i], data);
-					} catch (const std::exception &ex) {
-						Logger::info() << "Error parsing revision header: " << ex.what() << endl;
-						m_queue->failed(revisions[i]);
+					if (revmap.find(header[0]) != revmap.end()) {
+						try {
+							std::cout << "DONE: " << header[0] << std::endl;
+							parseHeader(header, &data);
+							m_queue->done(revmap[header[0]], data);
+						} catch (const std::exception &ex) {
+							Logger::info() << "Error parsing revision header: " << ex.what() << endl;
+							m_queue->failed(revmap[header[0]]);
+						}
 					}
-					++i;
 
 					header.clear();
 					header.push_back(str.substr(1));
@@ -225,6 +230,7 @@ class GitRevisionPrefetcher
 {
 public:
 	GitRevisionPrefetcher(const std::string &git, int n = -1)
+		: m_metaQueue(4096)
 	{
 		if (n < 0) {
 			n = std::max(1, sys::parallel::idealThreadCount() / 2);
