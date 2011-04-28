@@ -197,6 +197,22 @@ PopenStreambuf::PopenStreambuf(const char *cmd, const char *arg1, const char *ar
 	d->pipe = forkrw(cmd, d->argv, &d->pid, m);
 }
 
+// Constructor
+PopenStreambuf::PopenStreambuf(const char *cmd, const char * const *argv, std::ios::open_mode m)
+	: std::streambuf(), d(new PopenStreambufData()), m_mode(m), m_putback(8)
+{
+	if (m & std::ios::in) {
+		m_inbuffer = std::vector<char>(4096 + 8);
+		setg(0, 0, 0);
+	}
+	if (m & std::ios::out) {
+		m_outbuffer = std::vector<char>(4096 + 8);
+		setp(&m_outbuffer.front(), &m_outbuffer.front() + m_outbuffer.size() - 1);
+	}
+
+	d->pipe = forkrw(cmd, argv, &d->pid, m);
+}
+
 // Destructor
 PopenStreambuf::~PopenStreambuf()
 {

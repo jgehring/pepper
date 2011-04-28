@@ -36,6 +36,7 @@ class PopenStreambuf : public std::streambuf
 {
 	public:
 		explicit PopenStreambuf(const char *cmd, const char *arg1 = NULL, const char *arg2 = NULL, const char *arg3 = NULL, const char *arg4 = NULL, const char *arg5 = NULL, const char *arg6 = NULL, const char *arg7 = NULL, std::ios::open_mode m = std::ios::in);
+		explicit PopenStreambuf(const char *cmd, const char * const *argv, std::ios::open_mode m = std::ios::in);
 		~PopenStreambuf();
 
 		int close();
