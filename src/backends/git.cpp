@@ -170,6 +170,17 @@ public:
 		}
 	}
 
+	static void metaData(const std::string &git, const std::string &id, Data *dest)
+	{
+		// TODO: This commands adds a trailing newline character to the message
+		int ret;
+		std::string header = sys::io::exec(&ret,git.c_str(), "rev-list", "-1", "--header", id.c_str());
+		if (ret != 0) {
+			throw PEX(utils::strprintf("Unable to retrieve meta-data for revision '%s' (%d, %s)", id.c_str(), ret, header.c_str()));
+		}
+		GitMetaDataPipe::parseHeader(utils::split(header, "\n"), dest);
+	}
+
 protected:
 	void run()
 	{
@@ -689,16 +700,8 @@ Revision *GitBackend::revision(const std::string &id)
 		return new Revision(id, data.date, data.author, data.message, diffstat(id));
 	}
 
-	std::string rev = utils::split(id, ":").back();
-
-	int ret;
-	std::string header = sys::io::exec(&ret, m_git.c_str(), "rev-list", "-1", "--header", rev.c_str());
-	if (ret != 0) {
-		throw PEX(utils::strprintf("Unable to retrieve meta-data for revision '%s' (%d, %s)", rev.c_str(), ret, header.c_str()));
-	}
-	std::vector<std::string> lines = utils::split(header, "\n");
 	GitMetaDataPipe::Data data;
-	GitMetaDataPipe::parseHeader(lines, &data);
+	GitMetaDataPipe::metaData(m_git, utils::childId(id), &data);
 	return new Revision(id, data.date, data.author, data.message, diffstat(id));
 #endif
 }
