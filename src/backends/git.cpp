@@ -120,67 +120,78 @@ public:
 			throw PEX(utils::strprintf("Unable to parse meta-data"));
 		}
 
-		// Parse author information
-		unsigned int i = 0;
-		while (i < header.size() && header[i].compare(0, 7, "author ")) {
-			++i;
+		// Here's the raw header format. The 'parent' line is not present for
+		// non-root commits.
+		// $ID_HASH
+		// tree $TREE_HASH
+		// parent $PARENT_HASH
+		// author $AUTHOR_NAME $AUTHOR_EMAIL $DATE $OFFSET
+		// committer $AUTHOR_NAME $AUTHOR_EMAIL $DATE $OFFSET
+		//
+		//     $MESSAGE_INDENTED_BY_4_SPACES
+
+		// Find author line
+		size_t line = 0;
+		while (line < header.size() && header[line].compare(0, 7, "author ")) {
+			++line;
 		}
-		if (i >= header.size()) {
-			throw PEX(utils::strprintf("Unable to parse author information"));
-		}
-		std::vector<std::string> authorln = utils::split(header[i], " ");
-		if (authorln.size() < 4) {
-			throw PEX(utils::strprintf("Unable to parse author information"));
+		if (line >= header.size()) {
+			PDEBUG << "Invalid header:" << endl;
+			for (size_t i = 0; i < header.size(); i++) {
+				PDEBUG << header[i] << endl;
+			}
+			throw PEX(utils::strprintf("Unable to parse meta-data"));
 		}
 
-		// Author: 2nd to n-2nd entry
-		std::string author = utils::join(authorln.begin()+1, authorln.end()-2, " ");
-		// Strip email address, assuming a start at the last "<" (not really compliant with RFC2882)
-		dest->author = utils::trim(author.substr(0, author.find_last_of('<')));
+		// Author information
+		dest->author = header[line].substr(7);
 
-		// Committer date: last 2 entries in the form %s %z
-		while (i < header.size() && header[i].compare(0, 10, "committer ")) {
-			++i;
+		// Strip email address and date, assuming a start at the last "<" (not really compliant with RFC2882)
+		size_t pos = dest->author.find_last_of('<');
+		if (pos != std::string::npos) {
+			dest->author = dest->author.substr(0, pos);
 		}
-		if (i >= header.size()) {
-			throw PEX(utils::strprintf("Unable to parse date information"));
-		}
-		std::vector<std::string> dateln = utils::split(header[i], " ");
-		if (dateln.size() < 2) {
-			throw PEX(utils::strprintf("Unable to parse date information"));
-		}
-		int64_t off = 0;
-		if (!utils::str2int(dateln[dateln.size()-2], &(dest->date), 10) || !utils::str2int(dateln[dateln.size()-1], &off, 10)) {
-			throw PEX(utils::strprintf("Unable to parse date information"));
-		}
-		dest->date += off;
+		dest->author = utils::trim(dest->author);
 
-		// Last but not least: commit message
-		while (i < header.size() && !header[i].empty()) {
-			++i;
+		// Commiter date
+		if (header[++line].compare(0, 10, "committer ")) {
+			throw PEX(utils::strprintf("Unable to parse commit date from line: %s", header[line].c_str()));
 		}
+
+		// Parse offset
+		int64_t offset = 0;
+		pos = header[line].find_last_of(' ');
+		if (pos == std::string::npos || !utils::str2int(header[line].substr(pos), &offset, 10)) {
+			throw PEX(utils::strprintf("Unable to parse commit date from line: %s", header[line].c_str()));
+		}
+
+		size_t pos2 = header[line].find_last_of(' ', pos - 1);
+		if (pos2 == std::string::npos || !utils::str2int(header[line].substr(pos2, pos - pos2), &(dest->date), 10)) {
+			throw PEX(utils::strprintf("Unable to parse commit date from line: %s", header[line].c_str()));
+		}
+		dest->date += offset;
+
+		// Commit message
 		dest->message.clear();
-		++i;
-		while (i < header.size()) {
+		for (size_t i = line+1; i < header.size(); i++) {
 			if (header[i].length() > 4) {
 				dest->message += header[i].substr(4);
 			}
-			if (i < header.size()-1) {
+			if (!header[i].empty() && header[i][0] != '\0') {
 				dest->message += "\n";
 			}
-			++i;
 		}
 	}
 
 	static void metaData(const std::string &git, const std::string &id, Data *dest)
 	{
-		// TODO: This commands adds a trailing newline character to the message
 		int ret;
 		std::string header = sys::io::exec(&ret,git.c_str(), "rev-list", "-1", "--header", id.c_str());
 		if (ret != 0) {
 			throw PEX(utils::strprintf("Unable to retrieve meta-data for revision '%s' (%d, %s)", id.c_str(), ret, header.c_str()));
 		}
-		GitMetaDataThread::parseHeader(utils::split(header, "\n"), dest);
+
+		parseHeader(utils::split(header, "\n"), dest);
 	}
 
 protected:
@@ -211,7 +222,7 @@ protected:
 			std::vector<std::string> header;
 			while (in.good()) {
 				std::getline(in, str);
-				if (str.size() > 0 && str[0] == '\0') {
+				if (!str.empty() && str[0] == '\0') {
 					try {
 						parseHeader(header, &data);
 						m_queue->done(header[0], data);
@@ -263,7 +274,6 @@ public:
 		if (n < 0) {
 			n = std::max(1, sys::parallel::idealThreadCount() / 2);
 		}
-		Logger::info() << "GitBackend: Using " << n << " threads for prefetching diffstats" << endl;
 		for (int i = 0; i < n; i++) {
 			sys::parallel::Thread *thread = new GitDiffstatPipe(git, &m_diffQueue);
 			thread->start();
@@ -272,12 +282,14 @@ public:
 
 		// Limit to 4 threads to prevent meta queue congestions
 		n = std::min(n, 4);
-		Logger::info() << "GitBackend: Using " << n << " threads for prefetching meta-data" << endl;
 		for (int i = 0; i < n; i++) {
 			sys::parallel::Thread *thread = new GitMetaDataThread(git, &m_metaQueue);
 			thread->start();
 			m_threads.push_back(thread);
 		}
+
+		Logger::info() << "GitBackend: Using " << m_threads.size() << " threads for prefetching diffstats ("
+			<< m_threads.size()-n << ") / meta-data (" << n << ")" << endl;
 	}
 
 	~GitRevisionPrefetcher()
