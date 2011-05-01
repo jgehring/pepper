@@ -256,7 +256,7 @@ Diffstat DiffParser::parse(std::istream &in)
 			--chunk[1];
 		} else if (str == marker) {
 			chunk[0] = chunk[1] = 0;
-		} else if (!str.empty() && str[0] == EOF) {
+		} else if (!str.empty() && str[0] == (char)EOF) {
 			// git diff-tree pipe prints EOF after diff data
 			break;
 		} else {
