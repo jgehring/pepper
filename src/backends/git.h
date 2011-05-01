@@ -45,7 +45,7 @@ class GitBackend : public Backend
 		void finalize();
 
 	private:
-		std::string m_git;
+		std::string m_gitpath;
 		GitRevisionPrefetcher *m_prefetcher;
 };
 

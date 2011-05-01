@@ -34,15 +34,15 @@
 class GitDiffstatPipe : public sys::parallel::Thread
 {
 public:
-	GitDiffstatPipe(const std::string &git, JobQueue<std::string, Diffstat> *queue)
-		: m_git(git), m_queue(queue)
+	GitDiffstatPipe(const std::string &gitpath, JobQueue<std::string, Diffstat> *queue)
+		: m_gitpath(gitpath), m_queue(queue)
 	{
 	}
 
-	static Diffstat diffstat(const std::string &git, const std::string &id, const std::string &parent = std::string())
+	static Diffstat diffstat(const std::string &gitpath, const std::string &id, const std::string &parent = std::string())
 	{
 		if (!parent.empty()) {
-			sys::io::PopenStreambuf buf(git.c_str(), "diff-tree", "-U0", "--no-renames", parent.c_str(), id.c_str());
+			sys::io::PopenStreambuf buf((gitpath+"/git-diff-tree").c_str(), "-U0", "--no-renames", parent.c_str(), id.c_str());
 			std::istream in(&buf);
 			Diffstat stat = DiffParser::parse(in);
 			if (buf.close() != 0) {
@@ -50,7 +50,7 @@ public:
 			}
 			return stat;
 		} else {
-			sys::io::PopenStreambuf buf(git.c_str(), "diff-tree", "-U0", "--no-renames", "--root", id.c_str());
+			sys::io::PopenStreambuf buf((gitpath+"/git-diff-tree").c_str(), "-U0", "--no-renames", "--root", id.c_str());
 			std::istream in(&buf);
 			Diffstat stat = DiffParser::parse(in);
 			if (buf.close() != 0) {
@@ -64,7 +64,7 @@ protected:
 	void run()
 	{
 		// TODO: Error checking
-		sys::io::PopenStreambuf buf(m_git.c_str(), "diff-tree", "-U0", "--no-renames", "--stdin", "--root", NULL, NULL, std::ios::in | std::ios::out);
+		sys::io::PopenStreambuf buf((m_gitpath+"/git-diff-tree").c_str(), "-U0", "--no-renames", "--stdin", "--root", NULL, NULL, NULL, std::ios::in | std::ios::out);
 		std::istream in(&buf);
 		std::ostream out(&buf);
 
@@ -89,7 +89,7 @@ protected:
 	}
 
 private:
-	std::string m_git;
+	std::string m_gitpath;
 	JobQueue<std::string, Diffstat> *m_queue;
 };
 
@@ -108,8 +108,8 @@ public:
 	};
 
 public:
-	GitMetaDataThread(const std::string &git, JobQueue<std::string, Data> *queue)
-		: m_git(git), m_queue(queue)
+	GitMetaDataThread(const std::string &gitpath, JobQueue<std::string, Data> *queue)
+		: m_gitpath(gitpath), m_queue(queue)
 	{
 	}
 
@@ -183,10 +183,10 @@ public:
 		}
 	}
 
-	static void metaData(const std::string &git, const std::string &id, Data *dest)
+	static void metaData(const std::string &gitpath, const std::string &id, Data *dest)
 	{
 		int ret;
-		std::string header = sys::io::exec(&ret,git.c_str(), "rev-list", "-1", "--header", id.c_str());
+		std::string header = sys::io::exec(&ret, (gitpath+"/git-rev-list").c_str(), "-1", "--header", id.c_str());
 		if (ret != 0) {
 			throw PEX(utils::strprintf("Unable to retrieve meta-data for revision '%s' (%d, %s)", id.c_str(), ret, header.c_str()));
 		}
@@ -199,22 +199,22 @@ protected:
 	{
 		Data data;
 		const size_t maxids = 64;
-		const char **args = new const char *[maxids + 5];
+		const char **args = new const char *[maxids + 4];
 		std::vector<std::string> ids;
 
-		args[0] = m_git.c_str();
-		args[1] = "rev-list";
-		args[2] = "--no-walk";
-		args[3] = "--header"; // No support for message bodies in old git versions
+		std::string revlist = m_gitpath + "/git-rev-list";
+		args[0] = revlist.c_str();
+		args[1] = "--no-walk";
+		args[2] = "--header"; // No support for message bodies in old git versions
 
 		// Try to fetch the revision headers for maxrevs revisions at once
 		while (m_queue->getArgs(&ids, maxids)) {
 			for (size_t i = 0; i < ids.size(); i++) {
-				args[i+4] = ids[i].c_str();
+				args[i+3] = ids[i].c_str();
 			}
-			args[ids.size()+4] = NULL;
+			args[ids.size()+3] = NULL;
 
-			sys::io::PopenStreambuf buf(m_git.c_str(), args);
+			sys::io::PopenStreambuf buf(args[0], args);
 			std::istream in(&buf);
 
 			// Parse headers
@@ -245,7 +245,7 @@ protected:
 				// Try all IDs one by one, so the incorrect ones can be identified
 				for (size_t i = 0; i < ids.size(); i++) {
 					try {
-						metaData(m_git, ids[i], &data);
+						metaData(m_gitpath, ids[i], &data);
 						m_queue->done(ids[i], data);
 					} catch (const std::exception &ex) {
 						PDEBUG << "Error parsing revision header: " << ex.what() << endl;
@@ -259,7 +259,7 @@ protected:
 	}
 
 private:
-	std::string m_git;
+	std::string m_gitpath;
 	JobQueue<std::string, Data> *m_queue;
 };
 
@@ -395,6 +395,7 @@ void GitBackend::init()
 	}
 
 	// Search for git executable
+	std::string git;
 	char *path = getenv("PATH");
 	if (path == NULL) {
 		throw PEX("PATH is not set");
@@ -411,15 +412,22 @@ void GitBackend::init()
 		t += ".exe";
 #endif
 		if (sys::fs::fileExecutable(t)) {
-			m_git = t;
+			git = t;
 		}
 	}
 
-	if (m_git.empty()) {
+	if (git.empty()) {
 		throw PEX("Can't find git in PATH");
 	}
+	PDEBUG << "git executable is " << git << endl;
 
-	PDEBUG << "git executable is " << m_git << endl;
+	int ret;
+	m_gitpath = utils::trim(sys::io::exec(&ret, git.c_str(), "--exec-path"));
+	if (ret != 0) {
+		throw PEX("Unable to determine git exec-path");
+	}
+	PDEBUG << "git exec-path is " << m_gitpath << endl;
+
 	PDEBUG << "GIT_DIR has been set to " << getenv("GIT_DIR") << endl;
 }
 
@@ -477,7 +485,7 @@ std::string GitBackend::uuid()
 	// is an ancestory of the current one
 	std::string root;
 	if (!oldroot.empty()) {
-		std::string ref = sys::io::exec(&ret, m_git.c_str(), "rev-list", "-1", (oldhead + ".." + headrev).c_str());
+		std::string ref = sys::io::exec(&ret, (m_gitpath+"/git-rev-list").c_str(), "-1", (oldhead + ".." + headrev).c_str());
 		if (ret == 0 && !ref.empty()) {
 			PDEBUG << "Old head " << oldhead << " is a valid ancestor, updating cached head" << endl;
 			root = oldroot;
@@ -490,7 +498,7 @@ std::string GitBackend::uuid()
 	if (root.empty()) {
 		sys::datetime::Watch watch;
 
-		std::string id = sys::io::exec(&ret, m_git.c_str(), "rev-list", "--reverse", branch.c_str(), "--");
+		std::string id = sys::io::exec(&ret, (m_gitpath+"/git-rev-list").c_str(), "--reverse", branch.c_str(), "--");
 		if (ret != 0) {
 			throw PEX(utils::strprintf("Unable to determine the root commit for branch '%s' (%d)", branch.c_str(), ret));
 		}
@@ -532,7 +540,7 @@ std::string GitBackend::uuid()
 std::string GitBackend::head(const std::string &branch)
 {
 	int ret;
-	std::string out = sys::io::exec(&ret, m_git.c_str(), "rev-list", "-1", (branch.empty() ? "HEAD" : branch).c_str(), "--");
+	std::string out = sys::io::exec(&ret, (m_gitpath+"/git-rev-list").c_str(), "-1", (branch.empty() ? "HEAD" : branch).c_str(), "--");
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retrieve head commit for branch %s (%d)", branch.c_str(), ret));
 	}
@@ -543,7 +551,7 @@ std::string GitBackend::head(const std::string &branch)
 std::string GitBackend::mainBranch()
 {
 	int ret;
-	std::string out = sys::io::exec(&ret, m_git.c_str(), "branch");
+	std::string out = sys::io::exec(&ret, (m_gitpath+"/git-branch").c_str());
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retrieve the list of branches (%d)", ret));
 	}
@@ -572,7 +580,7 @@ std::string GitBackend::mainBranch()
 std::vector<std::string> GitBackend::branches()
 {
 	int ret;
-	std::string out = sys::io::exec(&ret, m_git.c_str(), "branch");
+	std::string out = sys::io::exec(&ret, (m_gitpath+"/git-branch").c_str());
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retrieve the list of branches (%d)", ret));
 	}
@@ -594,7 +602,7 @@ std::vector<Tag> GitBackend::tags()
 	int ret;
 
 	// Fetch list of tag names
-	std::string out = sys::io::exec(&ret, m_git.c_str(), "tag");
+	std::string out = sys::io::exec(&ret, (m_gitpath+"/git-tag").c_str());
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retrieve the list of tags (%d)", ret));
 	}
@@ -607,7 +615,7 @@ std::vector<Tag> GitBackend::tags()
 			continue;
 		}
 
-		std::string out = sys::io::exec(&ret, m_git.c_str(), "rev-list", "-1", names[i].c_str());
+		std::string out = sys::io::exec(&ret, (m_gitpath+"/git-rev-list").c_str(), "-1", names[i].c_str());
 		if (ret != 0) {
 			throw PEX(utils::strprintf("Unable to retrieve the list of tags (%d)", ret));
 		}
@@ -636,16 +644,16 @@ Diffstat GitBackend::diffstat(const std::string &id)
 
 	std::vector<std::string> revs = utils::split(id, ":");
 	if (revs.size() > 1) {
-		return GitDiffstatPipe::diffstat(m_git, revs[1], revs[0]);
+		return GitDiffstatPipe::diffstat(m_gitpath, revs[1], revs[0]);
 	}
-	return GitDiffstatPipe::diffstat(m_git, revs[0]);
+	return GitDiffstatPipe::diffstat(m_gitpath, revs[0]);
 }
 
 // Returns a file listing for the given revision (defaults to HEAD)
 std::vector<std::string> GitBackend::tree(const std::string &id)
 {
 	int ret;
-	std::string out = sys::io::exec(&ret, m_git.c_str(), "ls-tree", "-r", "--full-name", "--name-only", (id.empty() ? "HEAD" : id.c_str()));
+	std::string out = sys::io::exec(&ret, (m_gitpath+"/git-ls-tree").c_str(), "-r", "--full-name", "--name-only", (id.empty() ? "HEAD" : id.c_str()));
 	if (ret != 0) {
 		throw PEX(utils::strprintf("Unable to retrieve tree listing for ID '%s' (%d)", id.c_str(), ret));
 	}
@@ -665,16 +673,16 @@ Backend::LogIterator *GitBackend::iterator(const std::string &branch, int64_t st
 		std::string maxage = utils::strprintf("--max-age=%lld", start);
 		if (end >= 0) {
 			std::string minage = utils::strprintf("--min-age=%lld", end);
-			out = sys::io::exec(&ret, m_git.c_str(), "rev-list", "--first-parent", "--reverse", maxage.c_str(), minage.c_str(), branch.c_str(), "--");
+			out = sys::io::exec(&ret, (m_gitpath+"/git-rev-list").c_str(), "--first-parent", "--reverse", maxage.c_str(), minage.c_str(), branch.c_str(), "--");
 		} else {
-			out = sys::io::exec(&ret, m_git.c_str(), "rev-list", "--first-parent", "--reverse", maxage.c_str(), branch.c_str(), "--");
+			out = sys::io::exec(&ret, (m_gitpath+"/git-rev-list").c_str(), "--first-parent", "--reverse", maxage.c_str(), branch.c_str(), "--");
 		}
 	} else {
 		if (end >= 0) {
 			std::string minage = utils::strprintf("--min-age=%lld", end);
-			out = sys::io::exec(&ret, m_git.c_str(), "rev-list", "--first-parent", "--reverse", minage.c_str(), branch.c_str(), "--");
+			out = sys::io::exec(&ret, (m_gitpath+"/git-rev-list").c_str(), "--first-parent", "--reverse", minage.c_str(), branch.c_str(), "--");
 		} else {
-			out = sys::io::exec(&ret, m_git.c_str(), "rev-list", "--first-parent", "--reverse", branch.c_str(), "--");
+			out = sys::io::exec(&ret, (m_gitpath+"/git-rev-list").c_str(), "--first-parent", "--reverse", branch.c_str(), "--");
 		}
 	}
 	if (ret != 0) {
@@ -697,7 +705,7 @@ Backend::LogIterator *GitBackend::iterator(const std::string &branch, int64_t st
 void GitBackend::prefetch(const std::vector<std::string> &ids)
 {
 	if (m_prefetcher == NULL) {
-		m_prefetcher = new GitRevisionPrefetcher(m_git);
+		m_prefetcher = new GitRevisionPrefetcher(m_gitpath);
 	}
 	m_prefetcher->prefetch(ids);
 	PDEBUG << "Started prefetching " << ids.size() << " revisions" << endl;
@@ -739,7 +747,7 @@ Revision *GitBackend::revision(const std::string &id)
 	}
 
 	GitMetaDataThread::Data data;
-	GitMetaDataThread::metaData(m_git, utils::childId(id), &data);
+	GitMetaDataThread::metaData(m_gitpath, utils::childId(id), &data);
 	return new Revision(id, data.date, data.author, data.message, diffstat(id));
 #endif
 }
