@@ -23,7 +23,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#if defined(__GNUG__)
+#if defined(__GLIBC__)
  #include <cxxabi.h>
  #include <execinfo.h>
 #endif
@@ -78,7 +78,7 @@ const char *PepperException::trace() const throw()
 // Credits go out to Timo Bingmann (http://idlebox.net/2008/0901-stacktrace-demangled/)
 std::string PepperException::stackTrace()
 {
-#if defined(_GNU_SOURCE)
+#if defined(__GLIBC__)
 	std::string str = "Stack trace:\n";
 
 	// storage array for stack trace address data
