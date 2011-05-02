@@ -13,22 +13,26 @@ outdir = ARGV[1]
 home = ENV["HOME"]
 ENV["PEPPER_REPORTS"] = srcdir + "/reports"
 
+# The maintainer has been determine with
+# 	pepper shortlog -s | sort -n | tail -n 1
 repos = {
-	"pepper" => { :dir => srcdir, :branch => "master", :tags => "" },
-	"hg" => { :dir => home + "/data/repos/hg", :branch => "default", :tags => "'^[0-9].[0-9]$'" },
-	"git" => { :dir => home + "/data/repos/git", :branch => "master", :tags => "'^v[1-9].[4-9].[0-9]$'" },
-	"linux" => { :dir => home + "/data/repos/linux-2.6", :branch => "master", :tags => "'^v2.6.[0-9]*$'" }
-}
-reports = {
-	"authors" => { :file => "authors" },
-	"loc" => { :file => "loc" },
-	"activity" => { :file => "activity", :options => [ "--split=directories" ] },
-	"commit_counts" => { :file => "commits" },
-	"times" => { :file => "times" },
-	"filetypes" => { :file => "filetypes" }
+#	"pepper" => { :dir => srcdir, :branch => "master", :tags => "" },
+	"hg" => { :dir => home + "/data/repos/hg", :branch => "default", :tags => "'^[0-9].[0-9]$'", :maintainer => "Matt Mackall" },
+	"git" => { :dir => home + "/data/repos/git", :branch => "master", :tags => "'^v[1-9].[4-9].[0-9]$'", :maintainer => "Junio C Hamano" },
+	"linux" => { :dir => home + "/data/repos/linux-2.6", :branch => "master", :tags => "'^v2.6.[0-9]*$'", :maintainer => "Linus Torvalds" }
 }
 
 repos.keys.each do |repo|
+	reports = {
+		"authors" => { :file => "authors" },
+		"loc" => { :file => "loc" },
+		"activity" => { :file => "activity", :options => [ "--split=directories" ] },
+		"commit_counts" => { :file => "commits" },
+		"times" => { :file => "times" },
+		"filetypes" => { :file => "filetypes" },
+		"participation" => { :file => "participation", :options => [ "--author='#{repos[repo][:maintainer]}'" ] },
+	}
+
 	puts(">> Generating reports for #{repo}")
 	reports.keys.each do |report|
 		puts(">>> #{report}")
@@ -46,6 +50,7 @@ repos.keys.each do |repo|
 
 		pipe = IO.popen(cmd)
 		pipe.close()
+		raise "Error running command: #{cmd}" unless $?.exitstatus == 0
 	end
 end
 
