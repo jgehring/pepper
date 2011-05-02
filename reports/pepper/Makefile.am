@@ -11,4 +11,5 @@ pkgdatadir = $(datadir)/@PACKAGE@/pepper
 
 # Bundled modules
 dist_pkgdata_DATA = \
+	datetime.lua \
 	plotutils.lua
