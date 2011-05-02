@@ -1,3 +1,17 @@
+2011-05-02  --  version 0.2.2
+
+	- Improvements and bugfixes for the Git backend:
+		* Faster prefetching of diffstats
+		* Added prefetching of meta-data
+		* Fixed parsing of commit dates
+	- New reports:
+		* Added participation report which renders a histogram
+		  visualizing the contribution of a single author compared
+		  to the whole development team.
+		* Added age report, printing the age and next birthday of
+		  a repository.
+	- Added datetime Lua module
+
 2011-04-06  --  version 0.2.1
 
 	- Improvements and bugfixes for the Subversion backend:
