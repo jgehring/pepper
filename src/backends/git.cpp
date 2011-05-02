@@ -517,7 +517,7 @@ std::string GitBackend::uuid()
 		while (in.good()) {
 			std::string str;
 			std::getline(in, str);
-			if (str.empty() && str.compare(0, branch.length(), branch)) {
+			if (str.empty() || !str.compare(0, branch.length(), branch)) {
 				continue;
 			}
 			fprintf(out, "%s\n", str.c_str());
