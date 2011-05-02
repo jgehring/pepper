@@ -157,19 +157,13 @@ public:
 		if (header[++line].compare(0, 10, "committer ")) {
 			throw PEX(utils::strprintf("Unable to parse commit date from line: %s", header[line].c_str()));
 		}
-
-		// Parse offset
-		int64_t offset = 0;
-		pos = header[line].find_last_of(' ');
-		if (pos == std::string::npos || !utils::str2int(header[line].substr(pos), &offset, 10)) {
+		if ((pos = header[line].find_last_of(' ')) == std::string::npos) {
 			throw PEX(utils::strprintf("Unable to parse commit date from line: %s", header[line].c_str()));
 		}
-
 		size_t pos2 = header[line].find_last_of(' ', pos - 1);
 		if (pos2 == std::string::npos || !utils::str2int(header[line].substr(pos2, pos - pos2), &(dest->date), 10)) {
 			throw PEX(utils::strprintf("Unable to parse commit date from line: %s", header[line].c_str()));
 		}
-		dest->date += offset;
 
 		// Commit message
 		dest->message.clear();

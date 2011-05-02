@@ -27,7 +27,7 @@
 #include "cache.h"
 
 
-#define CACHE_VERSION (uint32_t)3
+#define CACHE_VERSION (uint32_t)4
 #define MAX_CACHEFILE_SIZE 4194304
 
 
@@ -295,29 +295,31 @@ void Cache::clear()
 // Checks the cache version
 Cache::VersionCheckResult Cache::checkVersion(int version)
 {
-	switch (version) {
-		case 1:
-			// The diffstats for Mercurial and Git have been flawed in version 1.
-			// The Subversion backend uses repository-wide diffstats now.
-			Logger::warn() << "Warning: Cache is out of date, clearing" << endl;
-			return Clear;
-
-		case 2:
-			// Invalid diffstats for deleted files in version 2 (Subversion backend)
-			if (m_backend->name() == "subversion") {
-				Logger::warn() << "Warning: Cache is out of date, clearing" << endl;
-				return Clear;
-			}
-			break;
-
-		case CACHE_VERSION:
-			break;
-
-		default:
-			return UnknownVersion;
+	if (version <= 0) {
+		return UnknownVersion;
+	}
+	if (version <= 1) {
+		// The diffstats for Mercurial and Git have been flawed in version 1.
+		// The Subversion backend uses repository-wide diffstats now.
+		goto outofdate;
+	}
+	if (version <= 2 && m_backend->name() == "subversion") {
+		// Invalid diffstats for deleted files in version 2 (Subversion backend)
+		goto outofdate;
+	}
+	if (version <= 3 && m_backend->name() == "git") {
+		// Invalid commit times in version 3 (Git backend)
+		goto outofdate;
 	}
 
-	return Ok;
+	if (version == CACHE_VERSION) {
+		return Ok;
+	}
+	return UnknownVersion;
+
+outofdate:
+	Logger::warn() << "Warning: Cache is out of date, clearing" << endl;
+	return Clear;
 }
 
 // Checks cache entries and removes invalid ones from the index file
