@@ -311,10 +311,10 @@ Cache::VersionCheckResult Cache::checkVersion(int version)
 		// Invalid commit times in version 3 (Git backend)
 		goto outofdate;
 	}
-
-	if (version == CACHE_VERSION) {
+	if ((uint32_t)version <= CACHE_VERSION) {
 		return Ok;
 	}
+
 	return UnknownVersion;
 
 outofdate:
