@@ -16,8 +16,8 @@ AC_DEFUN([CHECK_MANPROGS], [
 	dnl Check for Asciidoc
 	AC_ARG_VAR([ASCIIDOC], AsciiDoc executable)
 	AC_PATH_PROG([ASCIIDOC], [asciidoc], [not found])
-	if test "x$ASCIIDOC" == "xnot found"; then
-		if test "x$manpage" == "xyes"; then
+	if test "x$ASCIIDOC" = "xnot found"; then
+		if test "x$manpage" = "xyes"; then
 			AC_MSG_ERROR([Asciidoc could not be located in your \$PATH])
 		else
 			manpage="no"
@@ -38,7 +38,7 @@ AC_DEFUN([CHECK_MANPROGS], [
 			prog_version_ok="no"
 		fi
 		if test "$prog_version_ok" !=  "yes"; then
-			if test "x$manpage" == "xyes"; then
+			if test "x$manpage" = "xyes"; then
 				AC_MSG_ERROR([Asciidoc >= 8.4 is needed. Please upgrade your installation])
 			else
 				manpage="no"
@@ -49,8 +49,8 @@ AC_DEFUN([CHECK_MANPROGS], [
 	dnl Check for xmlto
 	AC_ARG_VAR([XMLTO], xmlto executable)
 	AC_PATH_PROG([XMLTO], [xmlto], [not found])
-	if test "x$XMLTO" == "xnot found"; then
-		if test "x$manpage" == "xyes"; then
+	if test "x$XMLTO" = "xnot found"; then
+		if test "x$manpage" = "xyes"; then
 			AC_MSG_ERROR([xmlto could not be located in your \$PATH])
 		else
 			manpage="no"
@@ -71,7 +71,7 @@ AC_DEFUN([CHECK_MANPROGS], [
 			prog_version_ok="no"
 		fi
 		if test "$prog_version_ok" !=  "yes"; then
-			if test "x$manpage" == "xyes"; then
+			if test "x$manpage" = "xyes"; then
 				AC_MSG_ERROR([xmlto >= 0.0.18 is needed. Please upgrade your installation])
 			else
 				manpage="no"
