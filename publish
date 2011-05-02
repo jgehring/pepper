@@ -17,3 +17,6 @@ cp "$PEPPER_SRCDIR/README" pub/documentation/
 rm -rf pub/documentation/api
 cp -r "$PEPPER_SRCDIR/luadoc" pub/documentation/api
 cp "$PEPPER_SRCDIR/ChangeLog" pub/download/
+
+# Fix pages
+sed -i 's/<title>pepper</<title>pepper - Repository statistics and report tool</' pub/index.html
