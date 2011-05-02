@@ -16,6 +16,7 @@ meta.description = "Participation of a single author"
 meta.options = {
 	{"-bARG, --branch=ARG", "Select branch"},
 	{"-aARG, --author=ARG", "Show participation of author ARG"},
+	{"-c, --changes, -l", "Count line changes instead of commit counts"},
 	{"-pARG, --period=ARG", "Show counts for the last 'Ndays', 'Nweeks', 'Nmonths' or 'Nyears'. The default is '12months'"},
 	{"-rARG, --resolution=ARG", "Set histogram resolution to 'days', 'weeks', 'months', 'years' or 'auto' (the default)"}
 }
@@ -138,6 +139,8 @@ function main()
 	local resolution = resolution(now - start, pepper.report.getopt("r,resolution", "auto"))
 	start = timeslot(start, resolution)
 
+	local count_changes = pepper.report.getopt("c,changes,l")
+
 	-- Gather data
 	local branch = pepper.report.getopt("b,branch", repo:default_branch())
 	local data = {} -- {commits, changes}
@@ -145,10 +148,16 @@ function main()
 		function (r)
 			local slot = timeslot(r:date(), resolution)
 			if data[slot] == nil then data[slot] = {0, 0} end
+
+			local n = 1
+			if count_changes then
+				n = r:diffstat():lines_added()
+			end
+
 			if r:author() == author then
-				data[slot][1] = data[slot][1] + 1
+				data[slot][1] = data[slot][1] + n
 			else
-				data[slot][2] = data[slot][2] + 1
+				data[slot][2] = data[slot][2] + n
 			end
 		end
 	)
@@ -177,5 +186,9 @@ set style fill solid
 set style histogram rowstacked
 set boxwidth 0.8 relative
 ]])
-	p:plot_histogram(keys, values, {string.format("Commits by %s", author), "All Commits"})
+	if count_changes then
+		p:plot_histogram(keys, values, {string.format("Contributions by %s", author), "All Contributions"})
+	else
+		p:plot_histogram(keys, values, {string.format("Commits by %s", author), "All Commits"})
+	end
 end
