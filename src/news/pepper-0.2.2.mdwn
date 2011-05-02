@@ -1,0 +1,10 @@
+[[!meta title="pepper 0.2.2 released"]]
+
+Version 0.2.2 of pepper is now available. This release greatly improves
+the performance of the Git backend and adds two new built-in report
+scripts. One of them, the participation report, is on display at the
+[[Gallery]].
+
+A more detailed listing of the changes can be found in the [change
+log](ChangeLog). As usual, source tarballs can be found at the
+[[Download]] section.

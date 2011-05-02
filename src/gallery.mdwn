@@ -5,9 +5,7 @@ reports.  The output type has been set to `svg` in order to render both
 thumbnails and high-resolution versions of each plot after wards. The
 latter can be accessed by clicking on a thumbnail image.
 
-The repository data is from [pepper's own git
-repository](http://github.com/jgehring/pepper)
-as well as from the self-hosting repositories of
+The repository data is from the self-hosting repositories of
 [Git](http://git.kernel.org/?p=git/git.git;a=summary) and
 [Mercurial](http://selenic.com/repo/hg). Additionally,
 a clone of [Linus Torvald's kernel
@@ -24,7 +22,6 @@ most graphical reports, tag marks can be added to the plot.
 
 <table width="100%">
 <tr>
-<td><a href="loc-pepper.png"><img src="loc-pepper-thumb.png" title="pepper" width="80%"></a></td>
 <td><a href="loc-git.png"><img src="loc-git-thumb.png" title="Git" width="80%"></a></td>
 <td><a href="loc-hg.png"><img src="loc-hg-thumb.png" title="Mercurial" width="80%"></a></td>
 <td><a href="loc-linux.png"><img src="loc-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
@@ -40,7 +37,6 @@ The `authors` report plots the contributions made by the "busiest" authors.
 
 <table width="100%">
 <tr>
-<td><a href="authors-pepper.png"><img src="authors-pepper-thumb.png" title="pepper" width="80%"></a></td>
 <td><a href="authors-git.png"><img src="authors-git-thumb.png" title="Git" width="80%"></a></td>
 <td><a href="authors-hg.png"><img src="authors-hg-thumb.png" title="Mercurial" width="80%"></a></td>
 <td><a href="authors-linux.png"><img src="authors-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
@@ -59,7 +55,6 @@ splitted by directories.
 
 <table width="100%">
 <tr>
-<td><a href="activity-pepper.png"><img src="activity-pepper-thumb.png" title="pepper" width="80%"></a></td>
 <td><a href="activity-git.png"><img src="activity-git-thumb.png" title="Git" width="80%"></a></td>
 <td><a href="activity-hg.png"><img src="activity-hg-thumb.png" title="Mercurial" width="80%"></a></td>
 <td><a href="activity-linux.png"><img src="activity-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
@@ -78,7 +73,6 @@ visualize the sum of the number of files touched per commit.
 
 <table width="100%">
 <tr>
-<td><a href="commits-pepper.png"><img src="commits-pepper-thumb.png" title="pepper" width="80%"></a></td>
 <td><a href="commits-git.png"><img src="commits-git-thumb.png" title="Git" width="80%"></a></td>
 <td><a href="commits-hg.png"><img src="commits-hg-thumb.png" title="Mercurial" width="80%"></a></td>
 <td><a href="commits-linux.png"><img src="commits-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
@@ -96,7 +90,6 @@ In pepper, this report is called `times`.
 
 <table width="100%">
 <tr>
-<td><a href="times-pepper.png"><img src="times-pepper-thumb.png" title="pepper" width="80%"></a></td>
 <td><a href="times-git.png"><img src="times-git-thumb.png" title="Git" width="80%"></a></td>
 <td><a href="times-hg.png"><img src="times-hg-thumb.png" title="Mercurial" width="80%"></a></td>
 <td><a href="times-linux.png"><img src="times-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
@@ -113,9 +106,28 @@ corresponding histogram.
 
 <table width="100%">
 <tr>
-<td><a href="filetypes-pepper.png"><img src="filetypes-pepper-thumb.png" title="pepper" width="80%"></a></td>
 <td><a href="filetypes-git.png"><img src="filetypes-git-thumb.png" title="Git" width="80%"></a></td>
 <td><a href="filetypes-hg.png"><img src="filetypes-hg-thumb.png" title="Mercurial" width="80%"></a></td>
 <td><a href="filetypes-linux.png"><img src="filetypes-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
+</tr>
+</table>
+
+---
+
+
+#### Participation
+
+This report is very similar to the ones used on the [GitHub author
+pages](https://github.com/jgehring/). However, there's an option to count
+contributed lines of code instead of commits as well as a configurable
+time range and resolution.
+
+For each repository, the author with the most commits has been selected.
+
+<table width="100%">
+<tr>
+<td><a href="participation-git.png"><img src="participation-git-thumb.png" title="Git" width="80%"></a></td>
+<td><a href="participation-hg.png"><img src="participation-hg-thumb.png" title="Mercurial" width="80%"></a></td>
+<td><a href="participation-linux.png"><img src="participation-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
 </tr>
 </table>

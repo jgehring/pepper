@@ -13,8 +13,8 @@ for pepper first (see the [[Download]] page for a list of packages). If
 it doesn't, you need to grab a source tarball from the [[Download]]
 page and extract it using tar:
 
-	$ tar xvzf pepper-0.2.1.tar.gz
-	$ cd pepper-0.2.1
+	$ tar xvzf pepper-0.2.2.tar.gz
+	$ cd pepper-0.2.2
 
 Next, you should make sure that all compile-time dependencies are
 satisfied. In general, you'll need a C++ compiler and Lua 5.1 (e.g.,
