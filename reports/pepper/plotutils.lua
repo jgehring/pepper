@@ -1,3 +1,15 @@
+--[[
+	pepper - SCM statistics report generator
+	Copyright (C) 2010-2011 Jonas Gehring
+
+	Released under the GNU General Public License, version 3.
+	Please see the COPYING file in the source distribution for license
+	terms and conditions, or see http://www.gnu.org/licenses/.
+
+	file pepper/plotutils.lua
+	Common utility functions for plotting
+--]]
+
 --- Common utility functions for plotting.
 --  Please note that this is a Lua module. If you want to use it, add
 --  <pre>require "pepper.plotutils"</pre> to your script. The functions
