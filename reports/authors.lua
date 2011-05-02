@@ -29,14 +29,9 @@ function callback(r)
 		return
 	end
 
-	-- Accumulate contributed lines
-	local s = r:diffstat()
-	local loc = 0
-	for i,v in ipairs(s:files()) do
-		loc = loc + s:lines_added(v)
-	end
 
 	-- Save commit and LOC count
+	local loc = r:diffstat():lines_added()
 	table.insert(commits, {r:date(), r:author(), loc})
 	if authors[r:author()] == nil then
 		authors[r:author()] = loc
