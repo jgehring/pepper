@@ -1,7 +1,7 @@
 [[!meta title="pepper 0.2.2 released"]]
 
 Version 0.2.2 of pepper is now available. This release greatly improves
-the performance of the Git backend and adds two new built-in report
+the performance of the Git backend and adds two built-in report
 scripts. One of them, the participation report, is on display at the
 [[Gallery]].
 
