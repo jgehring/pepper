@@ -479,6 +479,12 @@ void SubversionBackend::SvnLogIterator::readIntervalsFromCache(const std::string
 			in >> interval.revisions[i++];
 		}
 
+		if (interval.revisions.empty() || interval.start >= interval.end) {
+			PTRACE << "Skipping bogus interval: [" << interval.start << ":" << interval.end
+				<< "] with " << interval.revisions.size() << " revisions" << endl;
+			continue;
+		}
+
 		PTRACE << "New revision range: [" << interval.start << ":" << interval.end
 			<< "] with " << interval.revisions.size() << " revisions" << endl;
 		m_cachedIntervals.push_back(interval);
