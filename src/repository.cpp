@@ -162,6 +162,8 @@ int Repository::revision(lua_State *L)
 
 int Repository::iterator(lua_State *L)
 {
+	if (m_backend == NULL) return LuaHelpers::pushNil(L);
+
 	if (lua_gettop(L) < 1 || lua_gettop(L) > 3) {
 		return luaL_error(L, "Invalid number of arguments (1 to 3 expected)");
 	}
