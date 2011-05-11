@@ -247,23 +247,21 @@ static int utils_mkstemp(lua_State *L)
 	}
 	lua_setfenv(L, -2);
 
-	*pf = fdopen(fd, "r+w");
-	if (pf == NULL) {
-		free(buf);
-		return LuaHelpers::pushError(L, PepperException::strerror(errno));
+	// Gemerate the file
+	std::string filename;
+	try {
+		*pf = sys::fs::mkstemp(&filename, templ);
+	} catch (const PepperException &ex) {
+		return LuaHelpers::pushError(L, ex.what(), ex.where());
 	}
 
-	LuaHelpers::push(L, (const char *)buf);
-	free(buf);
+	LuaHelpers::push(L, filename);
 	return 2;
 }
 
 // Removes a file
 static int utils_unlink(lua_State *L)
 {
-	if (lua_gettop(L) != 1) {
-		return luaL_error(L, "Invalid number of arguments (1 expected)");
-	}
 	try {
 		sys::fs::unlink(LuaHelpers::tops(L).c_str());
 	} catch (const std::exception &ex) {
@@ -275,10 +273,6 @@ static int utils_unlink(lua_State *L)
 // Splits a string
 static int utils_split(lua_State *L)
 {
-	if (lua_gettop(L) != 2) {
-		return luaL_error(L, "Invalid number of arguments (2 expected)");
-	}
-
 	std::string pattern = LuaHelpers::pops(L);
 	std::string string = LuaHelpers::pops(L);
 	return LuaHelpers::push(L, utils::split(string, pattern));
@@ -287,10 +281,6 @@ static int utils_split(lua_State *L)
 // Wrapper for strptime
 static int utils_strptime(lua_State *L)
 {
-	if (lua_gettop(L) != 2) {
-		return luaL_error(L, "Invalid number of arguments (2 expected)");
-	}
-
 	std::string format = LuaHelpers::pops(L);
 	std::string str = LuaHelpers::pops(L);
 	int64_t time;
