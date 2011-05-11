@@ -280,5 +280,6 @@ res = commands.%s(myui, repo, %s)\n", cmd.c_str(), args.c_str()).c_str());
 	char *method = strdup("getvalue");
 	PyObject *output = PyObject_CallMethod(object, method, NULL);
 	free(method);
+	assert(output != NULL);
 	return std::string(PyString_AsString(output));
 }
