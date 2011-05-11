@@ -227,15 +227,6 @@ static int utils_mkstemp(lua_State *L)
 	std::string templ;
 	if (lua_gettop(L) > 0) {
 		templ = LuaHelpers::pops(L);
-	} else {
-		templ = "/tmp/pepperXXXXXX";
-	}
-
-	char *buf = strdup(templ.c_str());
-	int fd = mkstemp(buf);
-	if (fd == -1) {
-		free(buf);
-		return LuaHelpers::pushError(L, PepperException::strerror(errno));
 	}
 
 	FILE **pf = (FILE **)lua_newuserdata(L, sizeof *pf);

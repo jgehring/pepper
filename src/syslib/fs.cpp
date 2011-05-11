@@ -177,6 +177,30 @@ void rename(const std::string &oldpath, const std::string &newpath)
 	}
 }
 
+// Wrapper for mkstemp()
+FILE *mkstemp(std::string *filename, const std::string &templ)
+{
+	char buf[FILENAME_MAX+1];
+	buf[FILENAME_MAX] = '\0';
+
+	if (!templ.empty()) {
+		strncpy(buf, templ.c_str(), FILENAME_MAX);
+	} else {
+		char *tmpdir = getenv("TMPDIR");
+		snprintf(buf, FILENAME_MAX, "%s/pepperXXXXXX", (tmpdir ? tmpdir : "/tmp"));
+	}
+
+	int fd = ::mkstemp(buf);
+	if (fd == -1) {
+		throw PEX_ERRNO();
+	}
+
+	if (filename) {
+		*filename = buf;
+	}
+	return fdopen(fd, "r+w");
+}
+
 // Checks if the given file (or directory) exists
 bool exists(const std::string &path)
 {

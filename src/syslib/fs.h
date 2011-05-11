@@ -36,6 +36,7 @@ void mkpath(const std::string &path);
 void unlink(const std::string &path);
 void unlinkr(const std::string &path);
 void rename(const std::string &oldpath, const std::string &newpath);
+FILE *mkstemp(std::string *filename, const std::string &templ = std::string());
 
 bool exists(const std::string &path);
 bool fileExists(const std::string &path);
