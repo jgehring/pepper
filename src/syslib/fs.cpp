@@ -239,7 +239,7 @@ size_t filesize(const std::string &path)
 }
 
 // Lists the contents of the given directory
-std::vector<std::string> ls(std::string &path)
+std::vector<std::string> ls(const std::string &path)
 {
 	DIR *dp;
 	std::vector<std::string> entries;
