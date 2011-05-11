@@ -389,30 +389,7 @@ void GitBackend::init()
 	}
 
 	// Search for git executable
-	std::string git;
-	char *path = getenv("PATH");
-	if (path == NULL) {
-		throw PEX("PATH is not set");
-	}
-	std::vector<std::string> ls;
-#ifdef POS_WIN
-	ls = utils::split(path, ";");
-#else
-	ls = utils::split(path, ":");
-#endif
-	for (size_t i = 0; i < ls.size(); i++) {
-		std::string t = ls[i] + "/git";
-#ifdef POS_WIN
-		t += ".exe";
-#endif
-		if (sys::fs::fileExecutable(t)) {
-			git = t;
-		}
-	}
-
-	if (git.empty()) {
-		throw PEX("Can't find git in PATH");
-	}
+	std::string git = sys::fs::which("git");;
 	PDEBUG << "git executable is " << git << endl;
 
 	int ret;
