@@ -68,6 +68,7 @@ class Backend
 		virtual Diffstat diffstat(const std::string &id) = 0;
 		virtual void filterDiffstat(Diffstat *stat);
 		virtual std::vector<std::string> tree(const std::string &id = std::string()) = 0;
+		virtual std::string cat(const std::string &path, const std::string &id = std::string()) = 0;
 
 		virtual LogIterator *iterator(const std::string &branch = std::string(), int64_t start = -1, int64_t end = -1) = 0;
 		virtual void prefetch(const std::vector<std::string> &ids);

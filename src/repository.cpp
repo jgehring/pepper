@@ -58,6 +58,7 @@ Lunar<Repository>::RegType Repository::methods[] = {
 	LUNAR_DECLARE_METHOD(Repository, tree),
 	LUNAR_DECLARE_METHOD(Repository, revision),
 	LUNAR_DECLARE_METHOD(Repository, iterator),
+	LUNAR_DECLARE_METHOD(Repository, cat),
 
 	LUNAR_DECLARE_METHOD(Repository, main_branch),
 	{0,0}
@@ -184,6 +185,28 @@ int Repository::iterator(lua_State *L)
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
 	}
 	return LuaHelpers::push(L, it);
+}
+
+int Repository::cat(lua_State *L)
+{
+	if (m_backend == NULL) return LuaHelpers::pushNil(L);
+
+	if (lua_gettop(L) < 1 || lua_gettop(L) > 2) {
+		return luaL_error(L, "Invalid number of arguments (1 or 2 expected)");
+	}
+
+	std::string path, id;
+	switch (lua_gettop(L)) {
+		case 2: id = LuaHelpers::pops(L);
+		case 1: path = LuaHelpers::pops(L);
+		default: break;
+	}
+
+	try {
+		return LuaHelpers::push(L, m_backend->cat(path, id));
+	} catch (const PepperException &ex) {
+		return LuaHelpers::pushError(L, ex.what(), ex.where());
+	}
 }
 
 int Repository::main_branch(lua_State *L)

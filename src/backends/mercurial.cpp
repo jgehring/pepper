@@ -165,6 +165,31 @@ std::vector<std::string> MercurialBackend::tree(const std::string &id)
 	return contents;
 }
 
+// Returns the file contents of the given path at the given revision (defaults to HEAD)
+std::string MercurialBackend::cat(const std::string &path, const std::string &id)
+{
+	// stdout redirection to a cStringIO object doesn't work here,
+	// because Mercurial's cat will close the file after writing,
+	// which discards all contents of a cStringIO object.
+	std::string filename;
+	FILE *f = sys::fs::mkstemp(&filename);
+	hgcmd("cat", utils::strprintf("\"%s\", output=\"%s\", rev=\"%s\"", (m_opts.repository() + "/" + path).c_str(), filename.c_str(), id.c_str()));
+
+	char buf[4096];
+	size_t size;
+	std::string out;
+	while ((size = fread(buf, 1, sizeof(buf), f)) != 0) {
+		out += std::string(buf, size);
+	}
+	if (ferror(f)) {
+		throw PEX("Error reading stream");
+	}
+	fclose(f);
+	sys::fs::unlink(filename);
+
+	return out;
+}
+
 // Returns a revision iterator for the given branch
 Backend::LogIterator *MercurialBackend::iterator(const std::string &branch, int64_t start, int64_t end)
 {

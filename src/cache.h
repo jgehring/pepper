@@ -50,6 +50,7 @@ class Cache : public Backend
 		Diffstat diffstat(const std::string &id);
 		void filterDiffstat(Diffstat *stat) { m_backend->filterDiffstat(stat); }
 		std::vector<std::string> tree(const std::string &id = std::string()) { return m_backend->tree(id); }
+		std::string cat(const std::string &path, const std::string &id = std::string()) { return m_backend->cat(path, id); };
 
 		LogIterator *iterator(const std::string &branch = std::string(), int64_t start = -1, int64_t end = -1) { return m_backend->iterator(branch, start, end); }
 		void prefetch(const std::vector<std::string> &ids);

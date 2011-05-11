@@ -45,6 +45,7 @@ class Repository
 		int tree(lua_State *L);
 		int revision(lua_State *L);
 		int iterator(lua_State *L);
+		int cat(lua_State *L);
 
 		// Compability methods
 		int main_branch(lua_State *L);

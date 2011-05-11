@@ -635,6 +635,17 @@ std::vector<std::string> GitBackend::tree(const std::string &id)
 	return contents;
 }
 
+// Returns the file contents of the given path at the given revision (defaults to HEAD)
+std::string GitBackend::cat(const std::string &path, const std::string &id)
+{
+	int ret;
+	std::string out = sys::io::exec(&ret, (m_gitpath+"/git-show").c_str(), ((id.empty() ? std::string("HEAD") : id)+":"+path).c_str());
+	if (ret != 0) {
+		throw PEX(utils::strprintf("Unable to get file contents of %s@%s (%d)", path.c_str(), id.c_str(), ret));
+	}
+	return out;
+}
+
 // Returns a revision iterator for the given branch
 Backend::LogIterator *GitBackend::iterator(const std::string &branch, int64_t start, int64_t end)
 {

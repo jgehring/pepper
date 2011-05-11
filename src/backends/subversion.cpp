@@ -936,6 +936,36 @@ std::vector<std::string> SubversionBackend::tree(const std::string &id)
 	return contents;
 }
 
+// Returns the file contents of the given path at the given revision (defaults to HEAD)
+std::string SubversionBackend::cat(const std::string &path, const std::string &id)
+{
+	svn_revnum_t revision;
+	if (id.empty()) {
+		revision = SVN_INVALID_REVNUM;
+	} else if (!utils::str2int(id, &revision)) {
+		throw PEX(std::string("Error parsing revision number ") + id);
+	}
+
+	apr_pool_t *pool = svn_pool_create(d->pool);
+	svn_stringbuf_t *buf = svn_stringbuf_create("", pool);
+	svn_stream_t *stream = svn_stream_from_stringbuf(buf, pool);
+
+	svn_error_t *err = svn_ra_get_file(d->ra, path.c_str(), revision, stream, NULL, NULL, pool);
+	if (err != NULL) {
+		throw PEX(SvnConnection::strerr(err));
+	}
+
+	svn_string_t *result;
+	err = svn_string_from_stream(&result, stream, pool, pool);
+	if (err != NULL) {
+		throw PEX(SvnConnection::strerr(err));
+	}
+
+	std::string content = std::string(result->data, result->len);
+	svn_pool_destroy(pool);
+	return content;
+}
+
 // Returns a log iterator for the given branch
 Backend::LogIterator *SubversionBackend::iterator(const std::string &branch, int64_t start, int64_t end)
 {
