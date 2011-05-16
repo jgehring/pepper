@@ -16,20 +16,38 @@
 
 
 #include <iostream>
+#include <map>
+#include <stack>
+#include <string>
 
 class Backend;
+class Repository;
 
 
-namespace Report
+// Report context
+class Report
 {
+	public:
+		Report(const std::string &script, Backend *backend = NULL);
+		Report(const std::string &script, const std::map<std::string, std::string> &options, Backend *backend = NULL);
+		~Report();
 
-int run(const std::string &script, Backend *backend);
+		int run(std::ostream &err = std::cerr);
+		void printHelp();
 
-void printHelp(const std::string &script);
+		static Report *current();
+		Repository *repository() const;
+		std::map<std::string, std::string> options() const;
 
-void listReports(std::ostream &out = std::cout);
+		static void listReports(std::ostream &out = std::cout);
 
-} // namespace report
+	private:
+		Repository *m_repo;
+		std::string m_script;
+		std::map<std::string, std::string> m_options;
+
+		static std::stack<Report *> s_stack;
+};
 
 
 #endif // REPORT_H_

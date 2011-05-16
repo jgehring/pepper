@@ -80,7 +80,8 @@ static void printHelp(const Options &opts)
 	if (!opts.report().empty()) {
 		std::cout << std::endl;
 		try {
-			Report::printHelp(opts.report());
+			Report r(opts.report());
+			r.printHelp();
 		} catch (const PepperException &ex) {
 			std::cerr << ex.where() << ": " << ex.what() << std::endl;
 			return;
@@ -185,7 +186,8 @@ int start(const Options &opts)
 
 	int ret;
 	try {
-		ret = Report::run(opts.report(), (cache ? cache : backend));
+		Report r(opts.report(), (cache ? cache : backend));
+		ret = r.run();
 	} catch (const PepperException &ex) {
 		std::cerr << "Recieved exception while running report:" << std::endl;
 		std::cerr << "  what():  " << ex.what() << std::endl;

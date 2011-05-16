@@ -39,56 +39,26 @@
 
 #include "report.h"
 
+#define PEPPER_MAX_STACK_SIZE 64
 
-namespace Report
+
+/*
+ * Stack helper functions
+ */
+
+namespace {
+
+// Checks if the given report is "executable", i.e. contains a main() function
+bool isExecutable(lua_State *L)
 {
-
-// A local stack of repository contexts
-struct ReportContext;
-static const size_t maxStackSize = 64;
-static std::stack<ReportContext *> contextStack;
-
-// Context of current report
-struct ReportContext
-{
-	Repository *repo;
-	std::string script;
-	std::map<std::string, std::string> options;
-
-	ReportContext(const std::string &script, Backend *backend)
-		: script(script)
-	{
-		repo = new Repository(backend);
-		options = backend->options().reportOptions();
-	}
-
-	ReportContext(const std::string &script, const std::map<std::string, std::string> &options, Backend *backend)
-		: script(script), options(options)
-	{
-		repo = new Repository(backend);
-	}
-
-	~ReportContext()
-	{
-		delete repo;
-	}
-
-	// Returns the current context
-	static ReportContext *current()
-	{
-		return (contextStack.empty() ? NULL : contextStack.top());
-	}
-};
-
-// Prototypes for local non-API functions
-static lua_State *setupLua();
-static int run(ReportContext *ctx, std::ostream &err = std::cerr);
-static std::vector<std::string> reportDirs();
-static std::string findScript(const std::string &script);
-
+	lua_getglobal(L, "main");
+	bool hasmain = (lua_type(L, -1) == LUA_TFUNCTION);
+	lua_pop(L, 1);
+	return hasmain;
+}
 
 // Prints a backtrace if Lua is panicking
-static int atpanic(lua_State *L)
+int atpanic(lua_State *L)
 {
 	std::cerr << "Lua PANIC: " << LuaHelpers::tops(L) << std::endl;
 #ifdef DEBUG
@@ -97,15 +67,63 @@ static int atpanic(lua_State *L)
 	return 0;
 }
 
+// Returns all paths that may contains reports
+std::vector<std::string> reportDirs()
+{
+	std::vector<std::string> dirs;
+
+	// Read the PEPPER_REPORTS environment variable
+	char *env = getenv("PEPPER_REPORTS");
+	if (env != NULL) {
+#ifdef POS_WIN
+		std::vector<std::string> parts = utils::split(env, ";");
+#else
+		std::vector<std::string> parts = utils::split(env, ":");
+#endif
+		for (size_t i = 0; i < parts.size(); i++) {
+			dirs.push_back(parts[i]);
+		}
+	}
+
+#ifdef DATADIR
+	dirs.push_back(DATADIR);
+#endif
+	return dirs;
+}
+
+// Returns the full path to the given script
+std::string findScript(const std::string &script)
+{
+	if (sys::fs::exists(script)) {
+		return script;
+	}
+	if (sys::fs::exists(script + ".lua")) {
+		return script + ".lua";
+	}
+
+	std::vector<std::string> dirs = reportDirs();
+	for (size_t i = 0; i < dirs.size(); i++) {
+		std::string path = dirs[i] + "/" + script;
+		if (sys::fs::exists(path)) {
+			return path;
+		}
+		path += ".lua";
+		if (sys::fs::exists(path)) {
+			return path;
+		}
+	}
+	return script;
+}
+
 
 // Returns the current repository
-static int repository(lua_State *L)
+int repository(lua_State *L)
 {
-	return LuaHelpers::push(L, ReportContext::current()->repo);
+	return LuaHelpers::push(L, Report::current()->repository());
 }
 
 // Returns a report option (or the default value)
-static int getopt(lua_State *L)
+int getopt(lua_State *L)
 {
 	if (lua_gettop(L) != 1 && lua_gettop(L) != 2) {
 		return luaL_error(L, "Invalid number of arguments (1 or 2 expected)");
@@ -114,7 +132,7 @@ static int getopt(lua_State *L)
 	bool defaultProvided = (lua_gettop(L) == 2);
 	std::string defaultValue = (lua_gettop(L) == 2 ? LuaHelpers::pops(L) : std::string());
 	std::vector<std::string> keys = utils::split(LuaHelpers::pops(L), ",", true);
-	const std::map<std::string, std::string> options = ReportContext::current()->options;
+	const std::map<std::string, std::string> options = Report::current()->options();
 
 	std::string value;
 	bool valueFound = false;
@@ -135,22 +153,22 @@ static int getopt(lua_State *L)
 }
 
 // Runs another report
-static int run_fromscript(lua_State *L)
+int run_fromscript(lua_State *L)
 {
 	if (lua_gettop(L) != 1 && lua_gettop(L) != 2) {
 		return luaL_error(L, "Invalid number of arguments (1 or 2 expected)");
 	}
 
-	std::map<std::string, std::string> options = ReportContext::current()->options;
+	std::map<std::string, std::string> options = Report::current()->options();
 	if (lua_gettop(L) == 2) {
 		options = LuaHelpers::popms(L);
 	}
 	std::string script = LuaHelpers::pops(L);
 
-	ReportContext context(findScript(script), options, ReportContext::current()->repo->backend());
+	Report r(findScript(script), options, Report::current()->repository()->backend());
 	try {
 		std::stringstream oss;
-		if (run(&context, oss) != 0) {
+		if (r.run(oss) != 0) {
 			return LuaHelpers::pushError(L, utils::trim(oss.str()));
 		}
 	} catch (const PepperException &ex) {
@@ -162,13 +180,13 @@ static int run_fromscript(lua_State *L)
 }
 
 // Backwards compability with 0.1
-static int revision(lua_State *L)
+int revision(lua_State *L)
 {
-	return ReportContext::current()->repo->revision(L);
+	return Report::current()->repository()->revision(L);
 }
 
 // Backwards compability with 0.1
-static int walk_branch(lua_State *L)
+int walk_branch(lua_State *L)
 {
 	if (lua_gettop(L) < 2 || lua_gettop(L) > 4) {
 		return luaL_error(L, "Invalid number of arguments (2 to 4 expected)");
@@ -190,7 +208,7 @@ static int walk_branch(lua_State *L)
 	LuaHelpers::push(L, branch);
 	LuaHelpers::push(L, start);
 	LuaHelpers::push(L, end);
-	ReportContext::current()->repo->iterator(L);
+	Report::current()->repository()->iterator(L);
 	RevisionIterator *it = LuaHelpers::popl<RevisionIterator>(L);
 
 	// Map callback function
@@ -202,7 +220,7 @@ static int walk_branch(lua_State *L)
 }
 
 // Function table of the report library
-static const struct luaL_reg report[] = {
+const struct luaL_reg report[] = {
 	{"getopt", getopt},
 	{"repository", repository},
 	{"revision", revision},
@@ -213,7 +231,7 @@ static const struct luaL_reg report[] = {
 
 
 // Custom fclose() handler for lua file handles
-static int utils_fclose(lua_State *L)
+int utils_fclose(lua_State *L)
 {
 	FILE **p = (FILE **)lua_touserdata(L, 1);
 	int rc = fclose(*p);
@@ -222,7 +240,7 @@ static int utils_fclose(lua_State *L)
 }
 
 // Generates a temporary file, and returns a file handle as well as the file name
-static int utils_mkstemp(lua_State *L)
+int utils_mkstemp(lua_State *L)
 {
 	std::string templ;
 	if (lua_gettop(L) > 0) {
@@ -260,7 +278,7 @@ static int utils_mkstemp(lua_State *L)
 }
 
 // Removes a file
-static int utils_unlink(lua_State *L)
+int utils_unlink(lua_State *L)
 {
 	try {
 		sys::fs::unlink(LuaHelpers::tops(L).c_str());
@@ -271,7 +289,7 @@ static int utils_unlink(lua_State *L)
 }
 
 // Splits a string
-static int utils_split(lua_State *L)
+int utils_split(lua_State *L)
 {
 	std::string pattern = LuaHelpers::pops(L);
 	std::string string = LuaHelpers::pops(L);
@@ -279,7 +297,7 @@ static int utils_split(lua_State *L)
 }
 
 // Wrapper for strptime
-static int utils_strptime(lua_State *L)
+int utils_strptime(lua_State *L)
 {
 	std::string format = LuaHelpers::pops(L);
 	std::string str = LuaHelpers::pops(L);
@@ -293,19 +311,19 @@ static int utils_strptime(lua_State *L)
 }
 
 // Wrapper for dirname()
-static int utils_dirname(lua_State *L)
+int utils_dirname(lua_State *L)
 {
 	return LuaHelpers::push(L, sys::fs::dirname(LuaHelpers::pops(L)));
 }
 
 // Wrapper for basename()
-static int utils_basename(lua_State *L)
+int utils_basename(lua_State *L)
 {
 	return LuaHelpers::push(L, sys::fs::basename(LuaHelpers::pops(L)));
 }
 
 // Function table of the utils library
-static const struct luaL_reg utils[] = {
+const struct luaL_reg utils[] = {
 	{"mkstemp", utils_mkstemp},
 	{"unlink", utils_unlink},
 	{"split", utils_split},
@@ -317,7 +335,7 @@ static const struct luaL_reg utils[] = {
 
 
 // Runs a cache check for the given repository
-static int internal_check_cache(lua_State *L)
+int internal_check_cache(lua_State *L)
 {
 	Repository *repo = LuaHelpers::popl<Repository>(L);
 	Cache *cache = dynamic_cast<Cache *>(repo->backend());
@@ -338,14 +356,13 @@ static int internal_check_cache(lua_State *L)
 }
 
 // Function table of internal functions
-static const struct luaL_reg internal[] = {
+const struct luaL_reg internal[] = {
 	{"check_cache", internal_check_cache},
 	{NULL, NULL}
 };
 
-
 // Sets up the lua context
-static lua_State *setupLua()
+lua_State *setupLua()
 {
 	// Setup lua context
 	lua_State *L = lua_open();
@@ -389,40 +406,67 @@ static lua_State *setupLua()
 	return L;
 }
 
-// Checks if the given report is "executable", i.e. contains a main() function
-static bool isExecutable(lua_State *L)
+} // anonymous namespace
+
+
+/*
+ * Report class implementation
+ */
+
+// Static report stack
+std::stack<Report *> Report::s_stack;
+
+// Constructor
+Report::Report(const std::string &script, Backend *backend)
+	: m_repo(NULL), m_script(script)
 {
-	lua_getglobal(L, "main");
-	bool hasmain = (lua_type(L, -1) == LUA_TFUNCTION);
-	lua_pop(L, 1);
-	return hasmain;
+	if (backend) {
+		m_repo = new Repository(backend);
+		m_options = backend->options().reportOptions();
+	}
 }
 
-// The actual report execution function
-// Error messages will be written to the given stream
-static int run(ReportContext *ctx, std::ostream &err)
+// Constructor
+Report::Report(const std::string &script, const std::map<std::string, std::string> &options, Backend *backend)
+	: m_repo(NULL), m_script(script), m_options(options)
 {
-	if (contextStack.size() == maxStackSize) {
+	if (backend) {
+		m_repo = new Repository(backend);
+	}	
+}
+
+// Destructor
+Report::~Report()
+{
+	delete m_repo;
+}
+
+
+// Runs the report, printing error messages to the given stream
+int Report::run(std::ostream &err)
+{
+	if (s_stack.size() == PEPPER_MAX_STACK_SIZE) {
 		err << "Error running report: maximum stack size (";
-		err << maxStackSize << ") exceeded" << std::endl;
+		err << PEPPER_MAX_STACK_SIZE << ") exceeded" << std::endl;
 		return EXIT_FAILURE;
 	}
 
-	// Push the context on top of the stack
-	std::string script = ctx->script;
-	PTRACE << "Pushing report context for " << script << endl;
-	contextStack.push(ctx);
-	PDEBUG << "Stack size is " << contextStack.size() << endl;
+	// Push this context on top of the stack
+	std::string path = findScript(m_script);
+	PDEBUG << "Report path resolved: " << m_script << " -> " << path << endl;
+	PTRACE << "Pushing report context for " << path << endl;
+	s_stack.push(this);
+	PDEBUG << "Stack size is " << s_stack.size() << endl;
 
 	lua_State *L = setupLua();
 
 	// Run the script
 	int ret = EXIT_SUCCESS;
-	if (luaL_dofile(L, script.c_str()) != 0) {
+	if (luaL_dofile(L, path.c_str()) != 0) {
 		err << "Error opening report: " << lua_tostring(L, -1) << std::endl;
 		ret = EXIT_FAILURE;
 	} else if (!isExecutable(L)) {
-		err << "Error opening report '" << script << "': Not executable" << std::endl;
+		err << "Error opening report '" << path << "': Not executable" << std::endl;
 		ret = EXIT_FAILURE;
 	} else {
 		// Call the report function
@@ -437,75 +481,18 @@ static int run(ReportContext *ctx, std::ostream &err)
 	lua_gc(L, LUA_GCCOLLECT, 0);
 	lua_close(L);
 
-	PTRACE << "Popping report context for " << script <<  endl;
-	contextStack.pop();
+	PTRACE << "Popping report context for " << path <<  endl;
+	s_stack.pop();
 	return ret;
 }
 
-// Returns all paths that may contains reports
-static std::vector<std::string> reportDirs()
-{
-	std::vector<std::string> dirs;
-
-	// Read the PEPPER_REPORTS environment variable
-	char *env = getenv("PEPPER_REPORTS");
-	if (env != NULL) {
-#ifdef POS_WIN
-		std::vector<std::string> parts = utils::split(env, ";");
-#else
-		std::vector<std::string> parts = utils::split(env, ":");
-#endif
-		for (size_t i = 0; i < parts.size(); i++) {
-			dirs.push_back(parts[i]);
-		}
-	}
-
-#ifdef DATADIR
-	dirs.push_back(DATADIR);
-#endif
-	return dirs;
-}
-
-// Returns the full path to the given script
-static std::string findScript(const std::string &script)
-{
-	if (sys::fs::exists(script)) {
-		return script;
-	}
-	if (sys::fs::exists(script + ".lua")) {
-		return script + ".lua";
-	}
-
-	std::vector<std::string> dirs = reportDirs();
-	for (size_t i = 0; i < dirs.size(); i++) {
-		std::string path = dirs[i] + "/" + script;
-		if (sys::fs::exists(path)) {
-			return path;
-		}
-		path += ".lua";
-		if (sys::fs::exists(path)) {
-			return path;
-		}
-	}
-	return script;
-}
-
-
-// Runs a scripted report using the given backend
-int run(const std::string &script, Backend *backend)
-{
-	// Create the new report context
-	ReportContext context(findScript(script), backend);
-	return run(&context);
-}
-
-// Opens a script, calls the "options()" function and pretty-prints some help
-void printHelp(const std::string &script)
+// Pretty-prints report options
+void Report::printHelp()
 {
 	lua_State *L = setupLua();
 
 	// Open the script
-	std::string path = findScript(script);
+	std::string path = findScript(m_script);
 	if (luaL_dofile(L, path.c_str()) != 0) {
 		throw PEX(utils::strprintf("Error opening report: %s", lua_tostring(L, -1)));
 	}
@@ -513,7 +500,7 @@ void printHelp(const std::string &script)
 	lua_getglobal(L, "meta");
 
 	// Retrieve the report name
-	std::string name = script;
+	std::string name = m_script;
 	lua_getfield(L, -1, "title");
 	if (lua_type(L, -1) == LUA_TSTRING) {
 		name = LuaHelpers::tops(L);
@@ -563,7 +550,7 @@ void printHelp(const std::string &script)
 }
 
 // Prints a listing of all report scripts to stdout
-void listReports(std::ostream &out)
+void Report::listReports(std::ostream &out)
 {
 	std::vector<std::string> dirs = reportDirs();
 	for (size_t j = 0; j < dirs.size(); j++) {
@@ -630,4 +617,20 @@ void listReports(std::ostream &out)
 #endif
 }
 
-} // namespace report
+// Returns the backend wrapper
+Repository *Report::repository() const
+{
+	return m_repo;
+}
+
+// Returns the report options
+std::map<std::string, std::string> Report::options() const
+{
+	return m_options;
+}
+
+// Returns the current context
+Report *Report::current()
+{
+	return (s_stack.empty() ? NULL : s_stack.top());
+}
