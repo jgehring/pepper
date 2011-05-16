@@ -20,6 +20,7 @@ libpepper_a_SOURCES = \
 	jobqueue.h \
 	logger.h logger.cpp \
 	luahelpers.h \
+	luamodules.h luamodules.cpp \
 	main.h \
 	options.h options.cpp \
 	pex.h pex.cpp \

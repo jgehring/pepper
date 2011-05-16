@@ -7,7 +7,7 @@
  * terms and conditions, or see http://www.gnu.org/licenses/.
  *
  * file: report.h
- * Report script access and invocation (interface)
+ * Report script context (interface)
  */
 
 

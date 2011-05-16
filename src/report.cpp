@@ -7,8 +7,7 @@
  * terms and conditions, or see http://www.gnu.org/licenses/.
  *
  * file: report.cpp
- * Report script access and invocation, as well as a Lua interface proiding
- * main report actions
+ * Report script context
  */
 
 
@@ -20,10 +19,10 @@
 #include <stack>
 
 #include "backend.h"
-#include "cache.h"
 #include "diffstat.h"
 #include "logger.h"
 #include "luahelpers.h"
+#include "luamodules.h"
 #include "options.h"
 #include "repository.h"
 #include "revision.h"
@@ -34,7 +33,6 @@
  #include "plot.h"
 #endif
 
-#include "syslib/datetime.h"
 #include "syslib/fs.h"
 
 #include "report.h"
@@ -229,138 +227,6 @@ const struct luaL_reg report[] = {
 	{NULL, NULL}
 };
 
-
-// Custom fclose() handler for lua file handles
-int utils_fclose(lua_State *L)
-{
-	FILE **p = (FILE **)lua_touserdata(L, 1);
-	int rc = fclose(*p);
-	if (rc == 0) *p = NULL;
-	return 1;
-}
-
-// Generates a temporary file, and returns a file handle as well as the file name
-int utils_mkstemp(lua_State *L)
-{
-	std::string templ;
-	if (lua_gettop(L) > 0) {
-		templ = LuaHelpers::pops(L);
-	}
-
-	FILE **pf = (FILE **)lua_newuserdata(L, sizeof *pf);
-	*pf = 0;
-	luaL_getmetatable(L, LUA_FILEHANDLE);
-	lua_setmetatable(L, -2);
-
-	// Register custom __close() function
-	// (From lua posix module by Luiz Henrique de Figueiredo)
-	lua_getfield(L, LUA_REGISTRYINDEX, "PEPPER_UTILS_FILE");
-	if (lua_isnil(L, -1)) {
-		lua_pop(L, 1);
-		lua_newtable(L);
-		lua_pushvalue(L, -1);
-		lua_pushcfunction(L, utils_fclose);
-		lua_setfield(L, -2, "__close");
-		lua_setfield(L, LUA_REGISTRYINDEX, "PEPPER_UTILS_FILE");
-	}
-	lua_setfenv(L, -2);
-
-	// Gemerate the file
-	std::string filename;
-	try {
-		*pf = sys::fs::mkstemp(&filename, templ);
-	} catch (const PepperException &ex) {
-		return LuaHelpers::pushError(L, ex.what(), ex.where());
-	}
-
-	LuaHelpers::push(L, filename);
-	return 2;
-}
-
-// Removes a file
-int utils_unlink(lua_State *L)
-{
-	try {
-		sys::fs::unlink(LuaHelpers::tops(L).c_str());
-	} catch (const std::exception &ex) {
-		return LuaHelpers::pushError(L, ex.what());
-	}
-	return 0;
-}
-
-// Splits a string
-int utils_split(lua_State *L)
-{
-	std::string pattern = LuaHelpers::pops(L);
-	std::string string = LuaHelpers::pops(L);
-	return LuaHelpers::push(L, utils::split(string, pattern));
-}
-
-// Wrapper for strptime
-int utils_strptime(lua_State *L)
-{
-	std::string format = LuaHelpers::pops(L);
-	std::string str = LuaHelpers::pops(L);
-	int64_t time;
-	try {
-		time = sys::datetime::ptime(str, format);
-	} catch (const std::exception &ex) {
-		return LuaHelpers::pushError(L, ex.what());
-	}
-	return LuaHelpers::push(L, time);
-}
-
-// Wrapper for dirname()
-int utils_dirname(lua_State *L)
-{
-	return LuaHelpers::push(L, sys::fs::dirname(LuaHelpers::pops(L)));
-}
-
-// Wrapper for basename()
-int utils_basename(lua_State *L)
-{
-	return LuaHelpers::push(L, sys::fs::basename(LuaHelpers::pops(L)));
-}
-
-// Function table of the utils library
-const struct luaL_reg utils[] = {
-	{"mkstemp", utils_mkstemp},
-	{"unlink", utils_unlink},
-	{"split", utils_split},
-	{"strptime", utils_strptime},
-	{"dirname", utils_dirname},
-	{"basename", utils_basename},
-	{NULL, NULL}
-};
-
-
-// Runs a cache check for the given repository
-int internal_check_cache(lua_State *L)
-{
-	Repository *repo = LuaHelpers::popl<Repository>(L);
-	Cache *cache = dynamic_cast<Cache *>(repo->backend());
-	if (cache == NULL) {
-		cache = new Cache(repo->backend(), repo->backend()->options());
-	}
-
-	try {
-		cache->check();
-	} catch (const PepperException &ex) {
-		return LuaHelpers::pushError(L, utils::strprintf("Error checking cache: %s: %s", ex.where(), ex.what()));
-	}
-
-	if (cache != repo->backend()) {
-		delete cache;
-	}
-	return LuaHelpers::pushNil(L);
-}
-
-// Function table of internal functions
-const struct luaL_reg internal[] = {
-	{"check_cache", internal_check_cache},
-	{NULL, NULL}
-};
-
 // Sets up the lua context
 lua_State *setupLua()
 {
@@ -372,8 +238,7 @@ lua_State *setupLua()
 
 	// Register report functions
 	luaL_register(L, "pepper.report", report);
-	luaL_register(L, "pepper.utils", utils);
-	luaL_register(L, "pepper.internal", internal);
+	LuaModules::registerModules(L);
 
 	// Register binding classes
 	Lunar<Repository>::Register(L, "pepper");
