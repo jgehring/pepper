@@ -330,9 +330,10 @@ void Report::printHelp()
 	lua_close(L);
 }
 
-// Prints a listing of all report scripts to stdout
-void Report::listReports(std::ostream &out)
+// Lists all report scripts and their descriptions
+std::vector<std::pair<std::string, std::string> > Report::listReports()
 {
+	std::vector<std::pair<std::string, std::string> > reports;
 	std::vector<std::string> dirs = reportDirs();
 	for (size_t j = 0; j < dirs.size(); j++) {
 		std::string builtin = dirs[j];
@@ -340,25 +341,21 @@ void Report::listReports(std::ostream &out)
 			continue;
 		}
 
-		out << "Available reports in " << builtin << ":" << std::endl;
-
-		std::vector<std::string> reports = sys::fs::ls(builtin);
-		std::sort(reports.begin(), reports.end());
-
-		for (size_t i = 0; i < reports.size(); i++) {
-			if (reports[i].empty() || reports[i][reports[i].length()-1] == '~' || !sys::fs::fileExists(builtin + "/" + reports[i])) {
+		std::vector<std::string> contents = sys::fs::ls(builtin);
+		std::sort(contents.begin(), contents.end());
+		for (size_t i = 0; i < contents.size(); i++) {
+			if (contents[i].empty() || contents[i][contents[i].length()-1] == '~' || !sys::fs::fileExists(builtin + "/" + contents[i])) {
 				continue;
 			}
 
 			lua_State *L = setupLua();
-			std::string path = builtin + "/" + reports[i];
+			std::string path = builtin + "/" + contents[i];
 			if (luaL_dofile(L, path.c_str()) != 0) {
 				PDEBUG << "Error opening report at " << path << ": " << lua_tostring(L, -1) << endl;
 				lua_gc(L, LUA_GCCOLLECT, 0);
 				lua_close(L);
 				continue;
 			}
-
 			if (!isExecutable(L)) {
 				PDEBUG << "Skipping unexecutable report " << path << endl;
 				lua_gc(L, LUA_GCCOLLECT, 0);
@@ -394,20 +391,37 @@ void Report::listReports(std::ostream &out)
 			}
 			lua_pop(L, 1);
 
-			// Strip possible Lua suffix when displaying
-			std::string name = reports[i];
-			if (name.length() > 4 && name.compare(name.length()-4, 4, ".lua") == 0) {
-				name = name.substr(0, name.length()-4);
-			}
+			reports.push_back(std::pair<std::string, std::string>(builtin + "/" + contents[i], description));
 
-			Options::print(name, description, out);
 			lua_gc(L, LUA_GCCOLLECT, 0);
 			lua_close(L);
 		}
+	}
 
-		if (j < dirs.size()-1) {
-			out << std::endl;
+	return reports;
+}
+
+// Prints a listing of all report scripts to stdout
+void Report::printReportListing(std::ostream &out)
+{
+	std::vector<std::pair<std::string, std::string> > reports = listReports();
+	std::string dirname;
+	for (size_t i = 0; i < reports.size(); i++) {
+		std::string nextdir = sys::fs::dirname(reports[i].first);
+		if (dirname != nextdir) {
+			dirname = nextdir;
+			if (i < reports.size()-1) {
+				out << std::endl;
+			}
+			out << "Available reports in " << dirname << ":" << std::endl;
 		}
+
+		std::string name = sys::fs::basename(reports[i].first);
+		if (name.length() > 4 && name.compare(name.length()-4, 4, ".lua") == 0) {
+			name = name.substr(0, name.length()-4);
+		}
+
+		Options::print(name, reports[i].second, out);
 	}
 
 #ifndef USE_GNUPLOT

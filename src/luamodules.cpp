@@ -47,10 +47,23 @@ int run(lua_State *L)
 	return r.run(L);
 }
 
+// Returns a list of all reachable reports
+int list_reports(lua_State *L)
+{
+	// Return only the report paths
+	std::vector<std::pair<std::string, std::string> > reports = Report::listReports();
+	std::vector<std::string> paths(reports.size());
+	for (size_t i = 0; i < reports.size(); i++) {
+		paths[i] = reports[i].first;
+	}
+	return LuaHelpers::push(L, paths);
+}
+
 // Function table of main functions
 const struct luaL_reg table[] = {
 	{"current_report", current_report},
 	{"run", run},
+	{"list_reports", list_reports},
 	{NULL, NULL}
 };
 

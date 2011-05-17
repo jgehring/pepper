@@ -41,7 +41,8 @@ class Report
 		Repository *repository() const;
 		std::map<std::string, std::string> options() const;
 
-		static void listReports(std::ostream &out = std::cout);
+		static std::vector<std::pair<std::string, std::string> > listReports();
+		static void printReportListing(std::ostream &out = std::cout);
 
 	private:
 		Repository *m_repo;

@@ -139,7 +139,7 @@ int start(const Options &opts)
 		printFooter();
 		return EXIT_SUCCESS;
 	} else if (opts.reportListRequested()) {
-		Report::listReports();
+		Report::printReportListing();
 		printFooter();
 		return EXIT_SUCCESS;
 	} else if (opts.repository().empty() || opts.report().empty()) {
