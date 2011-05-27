@@ -142,12 +142,12 @@ void SvnConnection::open(SvnConnection *parent)
 // Similar to svn_handle_error2(), but returns the error description as a std::string
 std::string SvnConnection::strerr(svn_error_t *err)
 {
-	apr_pool_t *subpool;
+	apr_pool_t *pool;
 	svn_error_t *tmp_err;
 	apr_array_header_t *empties;
 
-	apr_pool_create(&subpool, NULL);
-	empties = apr_array_make(subpool, 0, sizeof(apr_status_t));
+	apr_pool_create(&pool, NULL);
+	empties = apr_array_make(pool, 0, sizeof(apr_status_t));
 
 	std::string str;
 	tmp_err = err;
@@ -192,7 +192,7 @@ std::string SvnConnection::strerr(svn_error_t *err)
 		tmp_err = tmp_err->child;
 	}
 
-	apr_pool_destroy(subpool);
+	apr_pool_destroy(pool);
 	return str;
 }
 
@@ -336,7 +336,7 @@ static svn_error_t *logReceiver(void *baton, svn_log_entry_t *entry, apr_pool_t 
 void SubversionBackend::SvnLogIterator::run()
 {
 	apr_pool_t *pool = svn_pool_create(d->pool);
-	apr_pool_t *subpool = svn_pool_create(pool);
+	apr_pool_t *iterpool = svn_pool_create(pool);
 	apr_array_header_t *path = apr_array_make(pool, 1, sizeof (const char *));
 	std::string sessionPrefix = d->prefix;
 	if (m_prefix.empty()) {
@@ -383,10 +383,12 @@ void SubversionBackend::SvnLogIterator::run()
 
 	// Fetch all revision intervals that are required
 	for (size_t i = 0; i < fetch.size(); i++) {
+		svn_pool_clear(iterpool);
+
 		uint64_t wstart = fetch[i].start, lastStart = fetch[i].start;
 		while (wstart <= fetch[i].end) {
 			PDEBUG << "Fetching log from " << wstart << " to " << fetch[i].end << " with window size " << windowSize << endl;
-			svn_error_t *err = svn_ra_get_log2(d->ra, path, wstart, fetch[i].end, windowSize, FALSE, FALSE /* otherwise, copy history will be ignored */, FALSE, props, &logReceiver, &baton, subpool);
+			svn_error_t *err = svn_ra_get_log2(d->ra, path, wstart, fetch[i].end, windowSize, FALSE, FALSE /* otherwise, copy history will be ignored */, FALSE, props, &logReceiver, &baton, iterpool);
 			if (err != NULL) {
 				Logger::err() << "Error: Unable to fetch server log: " << SvnConnection::strerr(err) << endl;
 				m_mutex.lock();
@@ -404,7 +406,6 @@ void SubversionBackend::SvnLogIterator::run()
 				lastStart += std::max(windowSize, 1);
 			}
 			wstart = lastStart;
-			svn_pool_clear(subpool);
 		}
 
 		m_mutex.lock();
@@ -790,7 +791,7 @@ std::vector<std::string> SubversionBackend::branches()
 
 	// Let's be nice
 	std::sort(branches.begin()+1, branches.end());
-	svn_pool_clear(pool);
+	svn_pool_destroy(pool);
 	return branches;
 }
 
@@ -831,7 +832,7 @@ std::vector<Tag> SubversionBackend::tags()
 		}
 	}
 
-	svn_pool_clear(pool);
+	svn_pool_destroy(pool);
 	return tags;
 }
 
@@ -863,9 +864,9 @@ Diffstat SubversionBackend::diffstat(const std::string &id)
 
 	PDEBUG << "Fetching revision " << id << " manually" << endl;
 
-	apr_pool_t *subpool = svn_pool_create(d->pool);
-	Diffstat stat = SvnDiffstatThread::diffstat(d, r1, r2, subpool);
-	svn_pool_destroy(subpool);
+	apr_pool_t *pool = svn_pool_create(d->pool);
+	Diffstat stat = SvnDiffstatThread::diffstat(d, r1, r2, pool);
+	svn_pool_destroy(pool);
 	return stat;
 }
 
@@ -889,6 +890,7 @@ std::vector<std::string> SubversionBackend::tree(const std::string &id)
 	}
 
 	apr_pool_t *pool = svn_pool_create(d->pool);
+	apr_pool_t *iterpool = svn_pool_create(pool);
 
 	std::vector<std::string> contents;
 
@@ -896,7 +898,7 @@ std::vector<std::string> SubversionBackend::tree(const std::string &id)
 	std::stack<std::pair<std::string, int> > stack;
 	stack.push(std::pair<std::string, int>("", svn_node_dir));
 	while (!stack.empty()) {
-		apr_pool_t *subpool = svn_pool_create(pool);
+		svn_pool_clear(iterpool);
 
 		std::string node = stack.top().first;
 		if (stack.top().second != svn_node_dir) {
@@ -909,14 +911,14 @@ std::vector<std::string> SubversionBackend::tree(const std::string &id)
 		PTRACE << "Listing directory contents in " << node << "@" << revision << endl;
 
 		apr_hash_t *dirents;
-		svn_error_t *err = svn_ra_get_dir2(d->ra, &dirents, NULL, NULL, node.c_str(), revision, SVN_DIRENT_KIND, subpool);
+		svn_error_t *err = svn_ra_get_dir2(d->ra, &dirents, NULL, NULL, node.c_str(), revision, SVN_DIRENT_KIND, iterpool);
 		if (err != NULL) {
 			throw PEX(SvnConnection::strerr(err));
 		}
 
 		std::string prefix = (node.empty() ? "" : node + "/");
 		std::stack<std::pair<std::string, int> > next;
-		apr_array_header_t *array = svn_sort__hash(dirents, &svn_sort_compare_items_lexically,  subpool);
+		apr_array_header_t *array = svn_sort__hash(dirents, &svn_sort_compare_items_lexically,  iterpool);
 		for (int i = 0; i < array->nelts; i++) {
 			svn_sort__item_t *item = &APR_ARRAY_IDX(array, i, svn_sort__item_t);
 			svn_dirent_t *dirent = (svn_dirent_t *)apr_hash_get(dirents, item->key, item->klen);
@@ -928,8 +930,6 @@ std::vector<std::string> SubversionBackend::tree(const std::string &id)
 			stack.push(next.top());
 			next.pop();
 		}
-
-		svn_pool_destroy(subpool);
 	}
 
 	svn_pool_destroy(pool);
