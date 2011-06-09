@@ -94,9 +94,7 @@ Revision *Cache::revision(const std::string &id)
 std::string Cache::cacheFile(Backend *backend, const std::string &name)
 {
 	std::string dir = backend->options().cacheDir() + "/" + backend->uuid();
-	if (!sys::fs::dirExists(dir)) {
-		sys::fs::mkdir(dir);
-	}
+	checkDir(dir);
 	return dir + "/" + name;
 }
 
@@ -217,14 +215,10 @@ void Cache::load()
 
 	std::string path = m_opts.cacheDir() + "/" + uuid();
 	PDEBUG << "Using cache dir: " << path << endl;
-	if (!sys::fs::dirExists(path)) {
-		// Create the cache directory
-		try {
-			sys::fs::mkpath(path);
-		} catch (const std::exception &ex) {
-			throw PEX(utils::strprintf("Unable to create cache directory: %s", ex.what()));
-		}
-		Logger::info() << "Cache: Creating cache directory for '" << uuid() << '\'' << endl;
+
+	bool created;
+	checkDir(path, &created);
+	if (created) {
 		return;
 	}
 
@@ -322,13 +316,9 @@ outofdate:
 	return Clear;
 }
 
-// Checks cache entries and removes invalid ones from the index file
-void Cache::check()
+// Ensures that the cache dir is writable and exists
+void Cache::checkDir(const std::string &path, bool *created)
 {
-	std::map<std::string, std::pair<uint32_t, uint32_t> > index;
-
-	std::string path = m_opts.cacheDir() + "/" + uuid();
-	PDEBUG << "Checking cache in dir: " << path << endl;
 	if (!sys::fs::dirExists(path)) {
 		// Create the cache directory
 		try {
@@ -336,10 +326,30 @@ void Cache::check()
 		} catch (const std::exception &ex) {
 			throw PEX(utils::strprintf("Unable to create cache directory: %s", ex.what()));
 		}
-		Logger::info() << "Cache: Creating cache directory for '" << uuid() << '\'' << endl;
+		PDEBUG << "Cache: Creating cache directory '" << path << '\'' << endl;
+
+		if (created) {
+			*created = true;
+		}
+	} else if (created) {
+		*created = false;
+	}
+}
+
+// Checks cache entries and removes invalid ones from the index file
+void Cache::check()
+{
+	std::map<std::string, std::pair<uint32_t, uint32_t> > index;
+
+	std::string path = m_opts.cacheDir() + "/" + uuid();
+	PDEBUG << "Checking cache in dir: " << path << endl;
+
+	bool created;
+	checkDir(path, &created);
+	if (created) {
+		Logger::info() << "Cache: Created empty cache for '" << uuid() << '\'' << endl;
 		return;
 	}
-
 	sys::datetime::Watch watch;
 
 	GZIStream *in = new GZIStream(path+"/index");

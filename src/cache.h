@@ -69,6 +69,8 @@ class Cache : public Backend
 		void clear();
 		VersionCheckResult checkVersion(int version);
 
+		static void checkDir(const std::string &path, bool *created = NULL);
+
 	private:
 		Backend *m_backend;
 		std::string m_uuid; // Cached backend UUID
