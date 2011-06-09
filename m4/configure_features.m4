@@ -7,7 +7,7 @@ dnl Please see the COPYING file in the source distribution for license
 dnl terms and conditions, or see http://www.gnu.org/licenses/.
 dnl
 
-AC_ARG_ENABLE([gnuplot], [AS_HELP_STRING([--disable-gnuplot], [Don't offer Gnuplot graphing to Lua scripts])], [gnuplot="$enableval"], [gnuplot="yes"])
+AC_ARG_ENABLE([gnuplot], [AS_HELP_STRING([--disable-gnuplot], [Don't offer Gnuplot graphing to Lua scripts])], [gnuplot="$enableval"], [gnuplot="check"])
 AC_ARG_ENABLE([man], [AS_HELP_STRING([--disable-man], [Don't generate the man page])], [manpage="$enableval"], [manpage="check"])
 
 
@@ -82,6 +82,19 @@ AC_DEFUN([CHECK_MANPROGS], [
 
 dnl Run checks for the features
 AC_DEFUN([FEATURES_CHECK], [
+	if test "x$gnuplot" != "xno"; then
+		AC_PATH_PROG([GNUPLOT], [gnuplot], [not found])
+		if test "x$GNUPLOT" = "xnot found"; then
+			if test "x$gnuplot" = "xyes"; then
+				AC_MSG_ERROR([gnuplot could not be located in your \$PATH])
+			else
+				gnuplot="no"
+			fi
+		else
+			gnuplot="yes"
+		fi
+	fi
+
 	if test "x$manpage" != "xno"; then
 		CHECK_MANPROGS()
 		if test "x$manpage" != "xno"; then
