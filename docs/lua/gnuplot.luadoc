@@ -32,30 +32,52 @@ function set_xrange_time(min, max)
 
 --- Plots one or more data series.
 --  The <code>values</code> parameter may contain multiple Y values per
---  entry, i.e. it can be a two-dimensional array.
+--  entry, i.e. it can be a two-dimensional array.<br>
+--  The last <code>options</code> parameter can either be a dictionary
+--  or a string. Using a dictionary, the following keys can be specified:
+--  <table>
+--  <tr><th>Key</th><th>Description</th><th>Default value</th></tr>
+--  <tr><td><code>style</code></td><td>Gnuplot style</td><td><code>"lines"</code></td></tr>
+--  <tr><td><code>command</code></td><td>Plot command string, inserted after <code>plot "$FILE"</code></td><td></td></tr>
+--  </table><br>
+--  If <code>options</code> is a string, it will be used for the <code>sytle</code> key.
 --  @param keys The array of X values
 --  @param values The array of Y values
 --  @param titles Optional titles for the series
---  @param style Optional style for plotting (defaults to "lines")
-function plot_series(keys, values, titles, style)
+--- @param options Additional options (see above)
+function plot_series(keys, values, titles, options)
 
 --- Plots multiple data series.
 --  The <code>keys</code> and <code>values</code> are arrays of the same
 --  size, each containing the same number of series. Each series (a pair
---  of keys and values) will be plotted into the same graph.
+--  of keys and values) will be plotted into the same graph.<br>
+--  The last <code>options</code> parameter can either be a dictionary
+--  or a string. Using a dictionary, the following keys can be specified:
+--  <table>
+--  <tr><th>Key</th><th>Description</th><th>Default value</th></tr>
+--  <tr><td><code>style</code></td><td>Gnuplot style</td><td><code>"lines"</code></td></tr>
+--  </table><br>
+--  If <code>options</code> is a string, it will be used for the <code>sytle</code> key.
 --  @param keys The series array with X values
 --  @param values The series array with Y values
 --  @param titles Optional titles for the series
---  @param style Optional style for plotting (defaults to "lines")
+--- @param options Additional options (see above)
 function plot_multi_series(keys, values, titles, style)
 
 --- Plots a histogram bar chart from data sequences.
 --  The <code>values</code> parameter may contain multiple Y values per
---  entry, i.e. it can be a two-dimensional array.
+--  entry, i.e. it can be a two-dimensional array.<br>
+--  The last <code>options</code> parameter can either be a dictionary
+--  or a string. Using a dictionary, the following keys can be specified:
+--  <table>
+--  <tr><th>Key</th><th>Description</th><th>Default value</th></tr>
+--  <tr><td><code>style</code></td><td>Gnuplot style</td><td></td></tr>
+--  </table><br>
+--  If <code>options</code> is a string, it will be used for the <code>sytle</code> key.
 --  @param keys The array of X values, used as the X-axis keys
 --  @param values The array of Y values
 --  @param titles Optional titles for the series
---  @param style Optional style for plotting (defaults to none)
+--- @param options Additional options (see above)
 function plot_histogram(keys, values, titles, style)
 
 --- Finish plotting and restart the Gnuplot process.

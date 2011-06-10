@@ -175,11 +175,19 @@ int Plot::plot_series(lua_State *L)
 	// Validate arguments
 	int index = -1;
 	if (lua_gettop(L) > 4) {
-		return LuaHelpers::pushError(L, utils::strprintf("Invalid number of arguments (expected 2-3, got %d)", lua_gettop(L)));
+		return LuaHelpers::pushError(L, utils::strprintf("Invalid number of arguments (expected 2-4, got %d)", lua_gettop(L)));
 	}
-	std::string style = "lines";
+
+	std::map<std::string, std::string> options;
+	options.insert(std::pair<std::string, std::string>("style", "lines"));
 	switch (lua_gettop(L)) {
-		case 4: style = LuaHelpers::pops(L);
+		case 4: {
+			if (lua_type(L, -1) == LUA_TTABLE) {
+				options = LuaHelpers::popms(L);
+			} else {
+				options["style"] = LuaHelpers::pops(L);
+			}
+		}
 		case 3: luaL_checktype(L, index--, LUA_TTABLE);
 		default:
 			luaL_checktype(L, index--, LUA_TTABLE);
@@ -240,17 +248,23 @@ int Plot::plot_series(lua_State *L)
 
 	std::ostringstream cmd;
 	cmd << "plot ";
-	for (size_t i = 0; i < nseries; i++) {
-		cmd << "\"" << file << "\" using 1:" << (i+2);
-		if (titles.size() > i) {
-			cmd << " title \"" << titles[i] << "\"";
-		} else {
-			cmd << " notitle";
+	if (options.find("command") == options.end()) {
+		for (size_t i = 0; i < nseries; i++) {
+			cmd << "\"" << file << "\" using 1:" << (i+2);
+			if (titles.size() > i) {
+				cmd << " title \"" << titles[i] << "\"";
+			} else {
+				cmd << " notitle";
+			}
+			if (options.find("style") != options.end()) {
+				cmd << " with " << options["style"];
+			}
+			if (i < nseries-1) {
+				cmd << ", ";
+			}
 		}
-		cmd << " with " << style;
-		if (i < nseries-1) {
-			cmd << ", ";
-		}
+	} else {
+		cmd << "\"" << file << "\" " << options["command"];
 	}
 	PDEBUG << "Running plot with command: " << cmd.str() << endl;
 	gcmd(cmd.str());
@@ -265,9 +279,17 @@ int Plot::plot_multi_series(lua_State *L)
 	if (lua_gettop(L) > 4) {
 		return LuaHelpers::pushError(L, utils::strprintf("Invalid number of arguments (expected 2-4, got %d)", lua_gettop(L)));
 	}
-	std::string style = "lines";
+
+	std::map<std::string, std::string> options;
+	options.insert(std::pair<std::string, std::string>("style", "lines"));
 	switch (lua_gettop(L)) {
-		case 4: style = LuaHelpers::pops(L);
+		case 4: {
+			if (lua_type(L, -1) == LUA_TTABLE) {
+				options = LuaHelpers::popms(L);
+			} else {
+				options["style"] = LuaHelpers::pops(L);
+			}
+		}
 		case 3: luaL_checktype(L, index--, LUA_TTABLE);
 		default:
 			luaL_checktype(L, index--, LUA_TTABLE);
@@ -329,7 +351,9 @@ int Plot::plot_multi_series(lua_State *L)
 		} else {
 			cmd << " notitle";
 		}
-		cmd << " with " << style;
+		if (options.find("style") != options.end()) {
+			cmd << " with " << options["style"];
+		}
 		if (i < nseries-1) {
 			cmd << ", ";
 		}
@@ -349,9 +373,16 @@ int Plot::plot_histogram(lua_State *L)
 	if (lua_gettop(L) > 4) {
 		return LuaHelpers::pushError(L, utils::strprintf("Invalid number of arguments (expected 2-4, got %d)", lua_gettop(L)));
 	}
-	std::string style = "";
+
+	std::map<std::string, std::string> options;
 	switch (lua_gettop(L)) {
-		case 4: style = LuaHelpers::pops(L);
+		case 4: {
+			if (lua_type(L, -1) == LUA_TTABLE) {
+				options = LuaHelpers::popms(L);
+			} else {
+				options["style"] = LuaHelpers::pops(L);
+			}
+		}
 		case 3: luaL_checktype(L, index--, LUA_TTABLE);
 		default:
 			luaL_checktype(L, index--, LUA_TTABLE);
@@ -420,8 +451,8 @@ int Plot::plot_histogram(lua_State *L)
 		} else {
 			cmd << " notitle";
 		}
-		if (!style.empty()) {
-			cmd << " with " << style;
+		if (options.find("style") != options.end()) {
+			cmd << " with " << options["style"];
 		}
 		if (i < nseries-1) {
 			cmd << ", ";
