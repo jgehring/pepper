@@ -23,5 +23,6 @@ dist_pkgdata_DATA = \
 	filetypes.lua \
 	loc.lua \
 	participation.lua \
+	punchcard.lua \
 	shortlog.lua \
 	times.lua
