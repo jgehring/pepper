@@ -623,6 +623,11 @@ void listReports(std::ostream &out)
 			out << std::endl;
 		}
 	}
+
+#ifndef USE_GNUPLOT
+	out << std::endl << "NOTE: Built without Gnuplot support. ";
+	out << "Graphical reports are not shown." << std::endl;
+#endif
 }
 
 } // namespace report
