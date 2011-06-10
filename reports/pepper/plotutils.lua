@@ -16,6 +16,9 @@
 --  in this module are provided to facilate common plotting tasks and
 --  to remove duplicate code for the built-in reports.
 
+-- Check for required modules
+assert(pepper.gnuplot ~= nil, "pepper built without Gnuplot support")
+
 module("pepper.plotutils", package.seeall)
 
 
