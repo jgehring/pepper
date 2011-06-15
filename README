@@ -27,13 +27,12 @@ pepper depends on the following third-party software:
 
 The following dependencies are optional:
 
-	* Python C API and the Mercurial modules (for the Mercurial backend)
-	* Subversion C API (for the Subversion backend)
-
-Additionally, the following programs may be required at runtime:
-
+	* Python development files and the Mercurial modules (for the
+	  Mercurial backend)
+	* Subversion development files (for the Subversion backend)
 	* The standard Git command line client (for the Git backend)
-	* Gnuplot (for scripts producing plots)
+	* Gnuplot (for graphical reports)
+	* Asciidoc and xmlto (for the man page)
 
 pepper has been written in a hopefully platform-independent manner,
 and should compile and run on all major Unix platforms, e.g. Linux,
@@ -51,6 +50,9 @@ way of running
 
 should be fine. You can pass "--help" to the configuration script for
 a brief version of the next two sections.
+
+Additional instructions can be found in the INSTALL file included in
+the source code distribution.
 
 
 Available SCM backends
