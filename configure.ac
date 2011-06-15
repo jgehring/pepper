@@ -15,7 +15,7 @@ AC_CONFIG_TESTDIR([tests])
 
 # Custom arguments that should be listed first
 AC_ARG_ENABLE([debug], [AS_HELP_STRING([--enable-debug], [Turn on debugging])], [debug="$enableval"], [debug="no"])
-AM_CONDITIONAL([DEBUG], [test "x$debug" = "xyes"])
+AC_ARG_ENABLE([tests], [AS_HELP_STRING([--enable-tests], [Build the test suite])], [testsuite="$enableval"], [testsuite="ifdebug"])
 
 sinclude(m4/ax_check_zlib.m4)
 sinclude(m4/ax_lua.m4)
@@ -32,23 +32,6 @@ AC_PROG_CXX()
 AC_PROG_CC()
 AC_PROG_INSTALL()
 AC_PROG_RANLIB()
-
-
-#
-# Feature configuration
-#
-
-FEATURES_CHECK()
-
-AM_CONDITIONAL([GNUPLOT], [test "x$gnuplot" = "xyes"])
-AM_CONDITIONAL([MANPAGE], [test "x$manpage" = "xyes"])
-
-# Build unit tests?
-AC_ARG_ENABLE([tests], [AS_HELP_STRING([--enable-tests], [Build the test suite])], [testsuite="$enableval"], [testsuite="ifdebug"])
-if test "x$testsuite" = "xifdebug" -a "x$debug" = "xyes"; then
-	testsuite="yes"
-fi
-AM_CONDITIONAL([TESTSUITE], [test "x$testsuite" = "xyes"])
 
 
 #
@@ -147,7 +130,17 @@ AM_CONDITIONAL([SVN_BACKEND], [test "x$subversion" = "xyes"])
 
 
 #
-# Debugging
+# Feature configuration
+#
+
+FEATURES_CHECK()
+
+AM_CONDITIONAL([GNUPLOT], [test "x$gnuplot" = "xyes"])
+AM_CONDITIONAL([MANPAGE], [test "x$manpage" = "xyes"])
+
+
+#
+# Debugging and unit tests
 #
 
 if test "x$debug" = "xyes"; then
@@ -157,6 +150,12 @@ else
 	CXXFLAGS="-O2 -DNDEBUG"
 	CFLAGS="-O2 -DNDEBUG"
 fi
+AM_CONDITIONAL([DEBUG], [test "x$debug" = "xyes"])
+
+if test "x$testsuite" = "xifdebug" -a "x$debug" = "xyes"; then
+	testsuite="yes"
+fi
+AM_CONDITIONAL([TESTSUITE], [test "x$testsuite" = "xyes"])
 
 
 #
