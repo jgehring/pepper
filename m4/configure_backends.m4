@@ -11,12 +11,25 @@ sinclude(m4/find_apr.m4)
 sinclude(m4/find_svn.m4)
 sinclude(m4/ax_python_devel.m4)
 
-AC_ARG_ENABLE([git], [AS_HELP_STRING([--disable-git], [Don't include the git backend])], [git="$enableval"], [git="yes"])
-AC_ARG_ENABLE([mercurial], [AS_HELP_STRING([--disable-mercurial], [Don't include the mercurial backend (default is autodetect)])], [mercurial="$enableval"], [mercurial="auto"])
-AC_ARG_ENABLE([svn], [AS_HELP_STRING([--disable-svn], [Don't include the subversion backend (default is autodetect)])], [subversion="$enableval"], [subversion="auto"])
+AC_ARG_ENABLE([git], [AS_HELP_STRING([--disable-git], [Don't include the git backend])], [git="$enableval"], [git="auto"])
+AC_ARG_ENABLE([mercurial], [AS_HELP_STRING([--disable-mercurial], [Don't include the mercurial backend])], [mercurial="$enableval"], [mercurial="auto"])
+AC_ARG_ENABLE([svn], [AS_HELP_STRING([--disable-svn], [Don't include the subversion backend])], [subversion="$enableval"], [subversion="auto"])
 
 dnl Run checks for the backends
 AC_DEFUN([BACKENDS_CHECK], [
+	if test "x$git" != "xno"; then
+		AC_PATH_PROG([GIT], [git], [not found])
+		if test "x$GIT" = "xnot found"; then
+			if test "x$git" = "xyes"; then
+				AC_MSG_ERROR([git could not be located in your \$PATH])
+			else
+				git="no"
+			fi
+		else
+			git="yes"
+		fi
+	fi
+
 	if test "x$subversion" != "xno"; then
 		APR_FIND_APR(,,[1],[1])
 		if test "$apr_found" = "no"; then
