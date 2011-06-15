@@ -116,6 +116,9 @@ if test "x$LUA_FOUND" = "xno"; then
 fi
 
 CHECK_ZLIB()
+if test "x$want" = "xno"; then
+	AC_MSG_ERROR([zlib is mandatory and cannot be disabled.])
+fi
 
 
 #
