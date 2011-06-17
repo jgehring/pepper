@@ -12,16 +12,7 @@ units_SOURCES = \
 	main.cpp \
 	test_bstream.h \
 	test_options.h \
-	test_utils.h \
-	\
-	$(top_srcdir)/src/bstream.cpp \
-	$(top_srcdir)/src/logger.cpp \
-	$(top_srcdir)/src/options.cpp \
-	$(top_srcdir)/src/pex.cpp \
-	$(top_srcdir)/src/utils.cpp \
-	\
-	$(top_srcdir)/src/syslib/fs.cpp \
-	$(top_srcdir)/src/syslib/parallel.cpp 
+	test_utils.h
 
 AM_CXXFLAGS = \
 	-Wall -W -pipe \
@@ -34,7 +25,9 @@ INCLUDES = \
 	-I$(top_srcdir)/src/3rdparty
 LIBS += \
 	$(PTHREAD_LIBS) \
-	$(FRAMEWORKS)
+	$(LUA_LIB) \
+	$(FRAMEWORKS) \
+	$(top_srcdir)/src/libpepper.a
 
 
 # Last but not least, the CFLAGS

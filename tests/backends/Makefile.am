@@ -9,23 +9,7 @@
 
 noinst_PROGRAMS = backends
 backends_SOURCES = \
-	main.cpp \
-	\
-	$(top_srcdir)/src/backend.cpp \
-	$(top_srcdir)/src/bstream.cpp \
-	$(top_srcdir)/src/cache.cpp \
-	$(top_srcdir)/src/diffstat.cpp \
-	$(top_srcdir)/src/logger.cpp \
-	$(top_srcdir)/src/options.cpp \
-	$(top_srcdir)/src/pex.cpp \
-	$(top_srcdir)/src/revision.cpp \
-	$(top_srcdir)/src/tag.cpp \
-	$(top_srcdir)/src/utils.cpp \
-	\
-	$(top_srcdir)/src/syslib/fs.cpp \
-	$(top_srcdir)/src/syslib/datetime.cpp \
-	$(top_srcdir)/src/syslib/sigblock.cpp \
-	$(top_srcdir)/src/syslib/parallel.cpp 
+	main.cpp
 
 AM_CXXFLAGS = \
 	-Wall -W -pipe \
@@ -37,18 +21,16 @@ INCLUDES = \
 	-I$(top_srcdir)/tests/catch \
 	-I$(top_srcdir)/src \
 	-I$(top_srcdir)/src/3rdparty
-AM_LDFLAGS = \
+LIBS += \
 	$(PTHREAD_LIBS) \
+	$(FRAMEWORKS) \
 	$(LUA_LIB) \
-	$(FRAMEWORKS)
+	$(top_srcdir)/src/libpepper.a
+AM_LDFLAGS = 
 
 if SVN_BACKEND
 backends_SOURCES += \
-	test_subversion.h \
-	$(top_srcdir)/src/backends/subversion.h \
-	$(top_srcdir)/src/backends/subversion.cpp \
-	$(top_srcdir)/src/backends/subversion_p.h \
-	$(top_srcdir)/src/backends/subversion_delta.cpp
+	test_subversion.h
 AM_CPPFLAGS += \
 	-DUSE_SUBVERSION $(APR_CPPFLAGS) $(APR_INCLUDES)
 AM_CXXFLAGS += \
@@ -59,6 +41,15 @@ AM_LDFLAGS += \
 	$(SVN_LDFLAGS) \
 	$(SVN_LIBS) \
 	$(APR_LIBS)
+endif
+
+if MERCURIAL_BACKEND
+AM_CPPFLAGS += \
+	-DUSE_MERCURIAL
+AM_CXXFLAGS += \
+	$(PYTHON_CPPFLAGS)
+AM_LDFLAGS += \
+	$(PYTHON_LDFLAGS)
 endif
 
 

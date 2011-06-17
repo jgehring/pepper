@@ -7,9 +7,12 @@
 # terms and conditions, or see http://www.gnu.org/licenses/.
 #
 
+# Pack all code into a static library, so the unit test programs
+# can use it easily.
+noinst_LIBRARIES = libpepper.a
 bin_PROGRAMS = pepper
 
-pepper_SOURCES = \
+libpepper_a_SOURCES = \
 	backend.h backend.cpp \
 	bstream.h bstream.cpp \
 	cache.h cache.cpp \
@@ -17,7 +20,7 @@ pepper_SOURCES = \
 	jobqueue.h \
 	logger.h logger.cpp \
 	luahelpers.h \
-	main.h main.cpp \
+	main.h \
 	options.h options.cpp \
 	pex.h pex.cpp \
 	report.h report.cpp \
@@ -34,6 +37,12 @@ pepper_SOURCES = \
 	syslib/datetime.h syslib/datetime.cpp \
 	\
 	3rdparty/lunar/lunar.h
+
+# This is the main program
+pepper_SOURCES = \
+	main.cpp
+pepper_LDADD = \
+	libpepper.a
 
 AM_CXXFLAGS = \
 	-Wall -W -pipe \
@@ -61,14 +70,14 @@ endif
 
 # Optional features
 if GIT_BACKEND
-pepper_SOURCES += \
+libpepper_a_SOURCES += \
 	backends/git.h backends/git.cpp
 AM_CPPFLAGS += \
 	-DUSE_GIT
 endif
 
 if MERCURIAL_BACKEND
-pepper_SOURCES += \
+libpepper_a_SOURCES += \
 	backends/mercurial.h backends/mercurial.cpp
 AM_CPPFLAGS += \
 	-DUSE_MERCURIAL
@@ -79,7 +88,7 @@ AM_LDFLAGS += \
 endif
 
 if SVN_BACKEND
-pepper_SOURCES += \
+libpepper_a_SOURCES += \
 	backends/subversion.h backends/subversion.cpp \
 	backends/subversion_p.h \
 	backends/subversion_delta.cpp
@@ -96,7 +105,7 @@ AM_LDFLAGS += \
 endif
 
 if GNUPLOT
-pepper_SOURCES += \
+libpepper_a_SOURCES += \
 	plot.h plot.cpp \
 	3rdparty/gnuplot-cpp/gnuplot_i.h
 AM_CPPFLAGS += \

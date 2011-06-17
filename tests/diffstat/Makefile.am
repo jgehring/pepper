@@ -9,13 +9,7 @@
 
 noinst_PROGRAMS = pdiffstat
 pdiffstat_SOURCES = \
-	main.cpp \
-	\
-	$(top_srcdir)/src/diffstat.cpp \
-	$(top_srcdir)/src/logger.cpp \
-	$(top_srcdir)/src/pex.cpp \
-	$(top_srcdir)/src/utils.cpp \
-	$(top_srcdir)/src/syslib/parallel.cpp
+	main.cpp
 
 AM_CXXFLAGS = \
 	-Wall -W -pipe \
@@ -29,7 +23,8 @@ INCLUDES = \
 LIBS += \
 	$(PTHREAD_LIBS) \
 	$(LUA_LIB) \
-	$(FRAMEWORKS)
+	$(FRAMEWORKS) \
+	$(top_srcdir)/src/libpepper.a
 
 
 # Last but not least, the CFLAGS

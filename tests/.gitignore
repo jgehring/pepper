@@ -1,5 +1,6 @@
+backends/backends
 diffstat/pdiffstat
-units/units
 package.m4
 testsuite
 testsuite.dir
+units/units
