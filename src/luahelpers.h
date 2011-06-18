@@ -94,23 +94,31 @@ inline int push(lua_State *L, int (*f)(lua_State *L)) {
 	return 1;
 }
 
-inline int push(lua_State *L, const std::vector<std::string> &v) {
+template <typename T>
+inline int push(lua_State *L, const std::vector<T> &v)
+{
 	lua_createtable(L, v.size(), 0);
 	int table = lua_gettop(L);
-	for (unsigned int i = 0; i < v.size(); i++) {
-		lua_pushstring(L, v[i].c_str());
-		lua_rawseti(L, table, i+1);
+	int i = 1;
+	typename std::vector<T>::const_iterator it = v.begin();
+	while (it != v.end()) {
+		push(L, *it);
+		lua_rawseti(L, table, i++);
+		++it;
 	}
 	return 1;
 }
 
-inline int push(lua_State *L, const std::map<std::string, std::string> &m) {
+template <typename T1, typename T2>
+inline int push(lua_State *L, const std::map<T1, T2> &m) {
 	lua_createtable(L, m.size(), 0);
 	int table = lua_gettop(L);
-	for (std::map<std::string, std::string>::const_iterator it = m.begin(); it != m.end(); ++it) {
-		lua_pushstring(L, it->first.c_str());
-		lua_pushstring(L, it->second.c_str());
+	typename std::map<T1, T2>::const_iterator it = m.begin();
+	while (it != m.end()) {
+		push(L, it->first);
+		push(L, it->second);
 		lua_settable(L, table);
+		++it;
 	}
 	return 1;
 }
@@ -120,20 +128,6 @@ inline int push(lua_State *L, T *i, bool gc = false)
 {
 	Lunar<T>::push(L, i, gc);
 	return 1;
-}
-
-template <typename T>
-inline int push(lua_State *L, const std::vector<T> &v)
-{
-	lua_createtable(L, v.size(), 0);
-	int table = lua_gettop(L);
-	int i = 1;
-	for (std::vector<std::string>::const_iterator &it = v.begin(); it != v.end(); ++it) {
-		push(L, *it);
-		lua_rawseti(L, table, i++);
-	}
-	return 1;
-
 }
 
 inline int pushNil(lua_State *L) {
