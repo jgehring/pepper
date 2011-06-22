@@ -24,7 +24,7 @@ LIBS += \
 	$(PTHREAD_LIBS) \
 	$(LUA_LIB) \
 	$(FRAMEWORKS) \
-	$(top_srcdir)/src/libpepper.a
+	$(top_builddir)/src/libpepper.a
 
 
 # Last but not least, the CFLAGS

@@ -25,7 +25,7 @@ LIBS += \
 	$(PTHREAD_LIBS) \
 	$(FRAMEWORKS) \
 	$(LUA_LIB) \
-	$(top_srcdir)/src/libpepper.a
+	$(top_builddir)/src/libpepper.a
 AM_LDFLAGS = 
 
 if SVN_BACKEND
