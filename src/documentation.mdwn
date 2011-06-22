@@ -13,8 +13,8 @@ for pepper first (see the [[Download]] page for a list of packages). If
 it doesn't, you need to grab a source tarball from the [[Download]]
 page and extract it using tar:
 
-	$ tar xvzf pepper-0.2.2.tar.gz
-	$ cd pepper-0.2.2
+	$ tar xvzf pepper-0.2.3.tar.gz
+	$ cd pepper-0.2.3
 
 Next, you should make sure that all compile-time dependencies are
 satisfied. In general, you'll need a C++ compiler and Lua 5.1 (e.g.,
@@ -87,8 +87,8 @@ generated with [LuaDoc](http://luadoc.luaforge.net).
 #### Source code repository
 
 pepper's [Git](http://git-scm.com) repository is hosted at
-[GitHub](http://github.com/jgehring/pepper). Public read-only access is
-provided, so you can get your local copy using
+[GitHub](http://github.com/jgehring/pepper) and is eager to get cloned
+and forked. You can get your local copy using
 
 	$ git clone git://github.com/jgehring/pepper
 
