@@ -1,3 +1,11 @@
+2011-06-22  --  version 0.2.3
+
+	* Added punchcard report
+	* #3314428: Fixed Subversion log fetching when there is no
+	  cache directory yet.
+	* Fixed possible memory leaks in Subversion backend
+	* #3314434: Check for Gnuplot in configure
+
 2011-05-02  --  version 0.2.2
 
 	- Improvements and bugfixes for the Git backend:
