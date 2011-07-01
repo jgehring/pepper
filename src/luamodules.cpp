@@ -17,6 +17,7 @@
 
 #include "cache.h"
 #include "luahelpers.h"
+#include "report.h"
 #include "repository.h"
 
 #include "syslib/datetime.h"
@@ -25,6 +26,36 @@
 
 namespace LuaModules
 {
+
+// "Main" module
+namespace pepper
+{
+
+// Returns the current report context
+int current_report(lua_State *L)
+{
+	if (Report::current() == NULL) {
+		return LuaHelpers::pushNil(L);
+	}
+	return LuaHelpers::push(L, Report::current());
+}
+
+// Runs another report
+int run(lua_State *L)
+{
+	Report r(L);
+	return r.run(L);
+}
+
+// Function table of main functions
+const struct luaL_reg table[] = {
+	{"current_report", current_report},
+	{"run", run},
+	{NULL, NULL}
+};
+
+} // namespace pepper
+
 
 // Utility functions
 namespace utils
@@ -173,6 +204,7 @@ const struct luaL_reg table[] = {
 // Registers all modules in the given Lua context
 void registerModules(lua_State *L)
 {
+	luaL_register(L, "pepper", pepper::table);
 	luaL_register(L, "pepper.utils", utils::table);
 	luaL_register(L, "pepper.internal", internal::table);
 }
