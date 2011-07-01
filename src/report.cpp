@@ -164,6 +164,34 @@ lua_State *setupLua()
 	return L;
 }
 
+// Wrapper for print(), mostly from VIM - Vi IMproved by Bram Moolenaar
+int printWrapper(lua_State *L)
+{
+	std::string str;
+	int n = lua_gettop(L);
+	lua_getglobal(L, "tostring");
+	for (int i = 1; i <= n; i++) {
+		lua_pushvalue(L, -1); /* tostring */
+		lua_pushvalue(L, i); /* arg */
+		lua_call(L, 1, 1);
+		size_t l;
+		const char *s = lua_tolstring(L, -1, &l);
+		if (s == NULL) {
+			return luaL_error(L, "cannot convert to string");
+		}
+
+		if (i > 1) {
+			str += '\t';
+		}
+		str += std::string(s, l);
+		lua_pop(L, 1);
+	}
+
+	Report *c = Report::current();
+	(c == NULL ? std::cout : c->out()) << str << std::endl;
+	return 0;
+}
+
 } // anonymous namespace
 
 
@@ -176,7 +204,7 @@ std::stack<Report *> Report::s_stack;
 
 // Constructor
 Report::Report(const std::string &script, Backend *backend)
-	: m_repo(NULL), m_script(script), m_metaDataRead(false)
+	: m_repo(NULL), m_script(script), m_out(&std::cout),  m_metaDataRead(false)
 {
 	if (backend) {
 		m_repo = new Repository(backend);
@@ -186,7 +214,7 @@ Report::Report(const std::string &script, Backend *backend)
 
 // Constructor
 Report::Report(const std::string &script, const std::map<std::string, std::string> &options, Backend *backend)
-	: m_repo(NULL), m_script(script), m_options(options), m_metaDataRead(false)
+	: m_repo(NULL), m_script(script), m_options(options), m_out(&std::cout), m_metaDataRead(false)
 {
 	if (backend) {
 		m_repo = new Repository(backend);
@@ -201,7 +229,7 @@ Report::~Report()
 
 
 // Runs the report, printing error messages to the given stream
-int Report::run(std::ostream &err)
+int Report::run(std::ostream &out, std::ostream &err)
 {
 	if (s_stack.size() == PEPPER_MAX_STACK_SIZE) {
 		err << "Error running report: maximum stack size (";
@@ -216,7 +244,14 @@ int Report::run(std::ostream &err)
 	s_stack.push(this);
 	PDEBUG << "Stack size is " << s_stack.size() << endl;
 
+	std::ostream *prevout = m_out;
+	m_out = &out;
+
 	lua_State *L = setupLua();
+
+	// Wrap print() function to use custom output stream
+	lua_pushcfunction(L, printWrapper);
+	lua_setglobal(L, "print");
 
 	// Run the script
 	int ret = EXIT_SUCCESS;
@@ -246,6 +281,7 @@ int Report::run(std::ostream &err)
 
 	PTRACE << "Popping report context for " << path <<  endl;
 	s_stack.pop();
+	m_out = prevout;
 	return ret;
 }
 
@@ -294,6 +330,18 @@ bool Report::valid()
 	lua_gc(L, LUA_GCCOLLECT, 0);
 	lua_close(L);
 	return valid;
+}
+
+// Returns the report output stream
+std::ostream &Report::out() const
+{
+	return *m_out;
+}
+
+// Returns whether the standard output is redirected
+bool Report::outputRedirected() const
+{
+	return (m_out != &std::cout);
 }
 
 // Lists all report scripts and their descriptions
@@ -477,7 +525,7 @@ Lunar<Report>::RegType Report::methods[] = {
 };
 
 Report::Report(lua_State *L)
-	: m_repo(NULL), m_metaDataRead(false)
+	: m_repo(NULL), m_out(&std::cout), m_metaDataRead(false)
 {
 	if (lua_gettop(L) != 1 && lua_gettop(L) != 2) {
 		LuaHelpers::pushError(L, "Invalid number of arguments (1 or 2 expected)");
@@ -533,10 +581,11 @@ int Report::getopt(lua_State *L)
 int Report::run(lua_State *L)
 {
 	try {
-		std::stringstream oss;
-		if (run(oss) != 0) {
-			return LuaHelpers::pushError(L, utils::trim(oss.str()));
+		std::stringstream out, err;
+		if (run(out, err) != 0) {
+			return LuaHelpers::pushError(L, utils::trim(err.str()));
 		}
+		return LuaHelpers::push(L, out.str());
 	} catch (const PepperException &ex) {
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
 	} catch (const std::exception &ex) {

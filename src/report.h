@@ -41,10 +41,13 @@ class Report
 		Report(const std::string &script, const std::map<std::string, std::string> &options, Backend *backend = NULL);
 		~Report();
 
-		int run(std::ostream &err = std::cerr);
+		int run(std::ostream &out = std::cout, std::ostream &err = std::cerr);
 		void printHelp();
+
 		MetaData metaData();
 		bool valid();
+		std::ostream &out() const;
+		bool outputRedirected() const;
 
 		static Report *current();
 		Repository *repository() const;
@@ -60,6 +63,7 @@ class Report
 		Repository *m_repo;
 		std::string m_script;
 		std::map<std::string, std::string> m_options;
+		std::ostream *m_out;
 		MetaData m_metaData;
 		bool m_metaDataRead;
 
