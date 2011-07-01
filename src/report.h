@@ -30,12 +30,21 @@ class Repository;
 class Report
 {
 	public:
+		struct MetaData {
+			std::string name;
+			std::string description;
+			std::map<std::string, std::string> options;
+		};
+
+	public:
 		Report(const std::string &script, Backend *backend = NULL);
 		Report(const std::string &script, const std::map<std::string, std::string> &options, Backend *backend = NULL);
 		~Report();
 
 		int run(std::ostream &err = std::cerr);
 		void printHelp();
+		MetaData metaData();
+		bool valid();
 
 		static Report *current();
 		Repository *repository() const;
@@ -45,9 +54,14 @@ class Report
 		static void printReportListing(std::ostream &out = std::cout);
 
 	private:
+		void readMetaData();
+
+	private:
 		Repository *m_repo;
 		std::string m_script;
 		std::map<std::string, std::string> m_options;
+		MetaData m_metaData;
+		bool m_metaDataRead;
 
 		static std::stack<Report *> s_stack;
 

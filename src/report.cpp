@@ -173,7 +173,7 @@ std::stack<Report *> Report::s_stack;
 
 // Constructor
 Report::Report(const std::string &script, Backend *backend)
-	: m_repo(NULL), m_script(script)
+	: m_repo(NULL), m_script(script), m_metaDataRead(false)
 {
 	if (backend) {
 		m_repo = new Repository(backend);
@@ -183,7 +183,7 @@ Report::Report(const std::string &script, Backend *backend)
 
 // Constructor
 Report::Report(const std::string &script, const std::map<std::string, std::string> &options, Backend *backend)
-	: m_repo(NULL), m_script(script), m_options(options)
+	: m_repo(NULL), m_script(script), m_options(options), m_metaDataRead(false)
 {
 	if (backend) {
 		m_repo = new Repository(backend);
@@ -253,81 +253,48 @@ int Report::run(std::ostream &err)
 // Pretty-prints report options
 void Report::printHelp()
 {
+	if (!m_metaDataRead) {
+		readMetaData();
+	}
+
+	std::cout << "Options for report '" << m_metaData.name << "':" << std::endl;
+
+	std::map<std::string, std::string>::const_iterator it = m_metaData.options.begin();
+	while (it != m_metaData.options.end()) {
+		Options::print(it->first, it->second);
+		++it;
+	}
+}
+
+// Returns the report's meta data
+Report::MetaData Report::metaData()
+{
+	if (!m_metaDataRead) {
+		readMetaData();
+	}
+
+	return m_metaData;
+}
+
+// Checks if the report is valid (e.g., executable)
+bool Report::valid()
+{
+	std::string path = findScript(m_script);
 	lua_State *L = setupLua();
 
-	// Open the script
-	std::string path = findScript(m_script);
+	bool valid = true;
 	if (luaL_dofile(L, path.c_str()) != 0) {
-		throw PEX(utils::strprintf("Error opening report: %s", lua_tostring(L, -1)));
+		PDEBUG << "Invalid report: " << lua_tostring(L, -1) << std::endl;
+		valid = false;
+	} else if (!isExecutable(L)) {
+		PDEBUG << "Report not executable: " << lua_tostring(L, -1) << std::endl;
+		valid = false;
 	}
 
-	// Try to run describe()
-	lua_getglobal(L, "describe");
-	if (lua_type(L, -1) == LUA_TFUNCTION) {
-		LuaHelpers::push(L, this);
-		if (lua_pcall(L, 1, 1, 0) != 0) {
-			throw PEX(utils::strprintf("Error opening report: %s", lua_tostring(L, -1)));
-		}
-		if (lua_type(L, -1) != LUA_TTABLE) {
-			throw PEX("Error opening report: Expected table from describe()");
-		}
-	} else {
-		lua_pop(L, 1);
-		// Else, use the meta table
-		lua_getglobal(L, "meta");
-		if (lua_type(L, -1) != LUA_TTABLE) {
-			throw PEX("Error opening report: Neither describe() nor meta-table found");
-		}
-	}
-
-	// Retrieve the report name
-	std::string name = m_script;
-	lua_getfield(L, -1, "title");
-	if (lua_type(L, -1) == LUA_TSTRING) {
-		name = LuaHelpers::tops(L);
-	} else {
-		lua_pop(L, 1);
-		// "meta.name" has been used in the first version of the scripting tutorial
-		lua_getfield(L, -1, "name");
-		if (lua_type(L, -1) == LUA_TSTRING) {
-			name = LuaHelpers::tops(L);
-		}
-	}
-	lua_pop(L, 1);
-
-	std::cout << "Options for report '" << name << "':" << std::endl;
-
-	// Check for possible options
-	lua_getfield(L, -1, "options");
-	if (lua_type(L, -1) == LUA_TTABLE) {
-		// Pop the arguments from the stack
-		std::vector<std::string> switches, text;
-		luaL_checktype(L, -1, LUA_TTABLE);
-		lua_pushnil(L);
-		while (lua_next(L, -2) != 0) {
-			luaL_checktype(L, -1, LUA_TTABLE);
-			lua_pushnil(L);
-			int i = 0;
-			while (lua_next(L, -2) != 0) {
-				if (i == 0) {
-					switches.push_back(luaL_checkstring(L, -1));
-				} else if (i == 1) {
-					text.push_back(luaL_checkstring(L, -1));
-				}
-				++i;
-				lua_pop(L, 1);
-			}
-			lua_pop(L, 1);
-		}
-
-		for (unsigned int i = 0; i < std::min(switches.size(), text.size()); i++) {
-			Options::print(switches[i], text[i]);
-		}
-	}
-	lua_pop(L, 1);
-
+	// Clean up
 	lua_gc(L, LUA_GCCOLLECT, 0);
 	lua_close(L);
+	return valid;
 }
 
 // Lists all report scripts and their descriptions
@@ -348,53 +315,11 @@ std::vector<std::pair<std::string, std::string> > Report::listReports()
 				continue;
 			}
 
-			lua_State *L = setupLua();
 			std::string path = builtin + "/" + contents[i];
-			if (luaL_dofile(L, path.c_str()) != 0) {
-				PDEBUG << "Error opening report at " << path << ": " << lua_tostring(L, -1) << endl;
-				lua_gc(L, LUA_GCCOLLECT, 0);
-				lua_close(L);
-				continue;
+			Report report(path);
+			if (report.valid()) {
+				reports.push_back(std::pair<std::string, std::string>(path, report.metaData().description));
 			}
-			if (!isExecutable(L)) {
-				PDEBUG << "Skipping unexecutable report " << path << endl;
-				lua_gc(L, LUA_GCCOLLECT, 0);
-				lua_close(L);
-				continue;
-			}
-
-			// Try to run describe()
-			lua_getglobal(L, "describe");
-			if (lua_type(L, -1) == LUA_TFUNCTION) {
-				Report report(path);
-				LuaHelpers::push(L, &report);
-				if (lua_pcall(L, 1, 1, 0) != 0) {
-					throw PEX(utils::strprintf("Error opening report: %s", lua_tostring(L, -1)));
-				}
-				if (lua_type(L, -1) != LUA_TTABLE) {
-					throw PEX("Error opening report: Expected table from describe()");
-				}
-			} else {
-				lua_pop(L, 1);
-				// Else, use the meta table
-				lua_getglobal(L, "meta");
-				if (lua_type(L, -1) != LUA_TTABLE) {
-					throw PEX("Error opening report: Neither describe() nor meta-table found");
-				}
-			}
-
-			// Retrieve the report description
-			std::string description;
-			lua_getfield(L, -1, "description");
-			if (lua_type(L, -1) == LUA_TSTRING) {
-				description = LuaHelpers::tops(L);
-			}
-			lua_pop(L, 1);
-
-			reports.push_back(std::pair<std::string, std::string>(builtin + "/" + contents[i], description));
-
-			lua_gc(L, LUA_GCCOLLECT, 0);
-			lua_close(L);
 		}
 	}
 
@@ -448,6 +373,98 @@ Report *Report::current()
 	return (s_stack.empty() ? NULL : s_stack.top());
 }
 
+// Reads the report script's meta data
+void Report::readMetaData()
+{
+	lua_State *L = setupLua();
+
+	// Open the script
+	std::string path = findScript(m_script);
+	if (luaL_dofile(L, path.c_str()) != 0) {
+		throw PEX(utils::strprintf("Error opening report: %s", lua_tostring(L, -1)));
+	}
+
+	// Try to run describe()
+	lua_getglobal(L, "describe");
+	if (lua_type(L, -1) == LUA_TFUNCTION) {
+		LuaHelpers::push(L, this);
+		if (lua_pcall(L, 1, 1, 0) != 0) {
+			throw PEX(utils::strprintf("Error opening report: %s", lua_tostring(L, -1)));
+		}
+		if (lua_type(L, -1) != LUA_TTABLE) {
+			throw PEX("Error opening report: Expected table from describe()");
+		}
+	} else {
+		lua_pop(L, 1);
+		// Else, use the meta table
+		lua_getglobal(L, "meta");
+		if (lua_type(L, -1) != LUA_TTABLE) {
+			throw PEX("Error opening report: Neither describe() nor meta-table found");
+		}
+	}
+
+	// Read the report name
+	m_metaData.name = m_script;
+	lua_getfield(L, -1, "title");
+	if (lua_type(L, -1) == LUA_TSTRING) {
+		m_metaData.name = LuaHelpers::tops(L);
+	} else {
+		lua_pop(L, 1);
+		// "meta.name" has been used in the first version of the scripting tutorial
+		lua_getfield(L, -1, "name");
+		if (lua_type(L, -1) == LUA_TSTRING) {
+			m_metaData.name = LuaHelpers::tops(L);
+		}
+	}
+	lua_pop(L, 1);
+
+	// Read the report description
+	lua_getfield(L, -1, "description");
+	if (lua_type(L, -1) == LUA_TSTRING) {
+		m_metaData.description = LuaHelpers::tops(L);
+	}
+	lua_pop(L, 1);
+
+	// Check for possible options
+	lua_getfield(L, -1, "options");
+	if (lua_type(L, -1) == LUA_TTABLE) {
+		lua_pushnil(L);
+		while (lua_next(L, -2) != 0) {
+			if (lua_type(L, -1) != LUA_TTABLE) {
+				lua_pop(L, 1);
+				continue;
+			}
+
+			int i = 0;
+			std::string arg, text;
+
+			lua_pushnil(L);
+			while (lua_next(L, -2) != 0) {
+				if (lua_type(L, -1) == LUA_TSTRING) {
+					if (i == 0) {
+						arg = luaL_checkstring(L, -1);
+					} else if (i == 1) {
+						text = luaL_checkstring(L, -1);
+					}
+				}
+				++i;
+				lua_pop(L, 1);
+			}
+			lua_pop(L, 1);
+
+			if (i >= 2) {
+				m_metaData.options.insert(std::pair<std::string, std::string>(arg, text));
+			}
+		}
+	}
+	lua_pop(L, 1);
+
+	// Clean up
+	lua_gc(L, LUA_GCCOLLECT, 0);
+	lua_close(L);
+	m_metaDataRead = true;
+}
+
 /*
  * Lua binding
  */
@@ -461,7 +478,7 @@ Lunar<Report>::RegType Report::methods[] = {
 };
 
 Report::Report(lua_State *L)
-	: m_repo(NULL)
+	: m_repo(NULL), m_metaDataRead(false)
 {
 	if (lua_gettop(L) != 1 && lua_gettop(L) != 2) {
 		LuaHelpers::pushError(L, "Invalid number of arguments (1 or 2 expected)");
