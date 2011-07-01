@@ -20,6 +20,8 @@
 #include <stack>
 #include <string>
 
+#include "lunar/lunar.h"
+
 class Backend;
 class Repository;
 
@@ -47,6 +49,17 @@ class Report
 		std::map<std::string, std::string> m_options;
 
 		static std::stack<Report *> s_stack;
+
+	// Lua binding
+	public:
+		Report(lua_State *L);
+
+		int repository(lua_State *L);
+		int getopt(lua_State *L);
+		int run(lua_State *L);
+
+		static const char className[];
+		static Lunar<Report>::RegType methods[];
 };
 
 

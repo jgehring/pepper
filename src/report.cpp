@@ -113,120 +113,6 @@ std::string findScript(const std::string &script)
 	return script;
 }
 
-
-// Returns the current repository
-int repository(lua_State *L)
-{
-	return LuaHelpers::push(L, Report::current()->repository());
-}
-
-// Returns a report option (or the default value)
-int getopt(lua_State *L)
-{
-	if (lua_gettop(L) != 1 && lua_gettop(L) != 2) {
-		return luaL_error(L, "Invalid number of arguments (1 or 2 expected)");
-	}
-
-	bool defaultProvided = (lua_gettop(L) == 2);
-	std::string defaultValue = (lua_gettop(L) == 2 ? LuaHelpers::pops(L) : std::string());
-	std::vector<std::string> keys = utils::split(LuaHelpers::pops(L), ",", true);
-	const std::map<std::string, std::string> options = Report::current()->options();
-
-	std::string value;
-	bool valueFound = false;
-	for (unsigned int i = 0; i < keys.size(); i++) {
-		if (options.find(keys[i]) != options.end()) {
-			value = options.find(keys[i])->second;
-			valueFound = true;
-			break;
-		}
-	}
-
-	if (valueFound) {
-		return LuaHelpers::push(L, value);
-	} else if (defaultProvided) {
-		return LuaHelpers::push(L, defaultValue);
-	}
-	return LuaHelpers::pushNil(L);
-}
-
-// Runs another report
-int run_fromscript(lua_State *L)
-{
-	if (lua_gettop(L) != 1 && lua_gettop(L) != 2) {
-		return luaL_error(L, "Invalid number of arguments (1 or 2 expected)");
-	}
-
-	std::map<std::string, std::string> options = Report::current()->options();
-	if (lua_gettop(L) == 2) {
-		options = LuaHelpers::popms(L);
-	}
-	std::string script = LuaHelpers::pops(L);
-
-	Report r(findScript(script), options, Report::current()->repository()->backend());
-	try {
-		std::stringstream oss;
-		if (r.run(oss) != 0) {
-			return LuaHelpers::pushError(L, utils::trim(oss.str()));
-		}
-	} catch (const PepperException &ex) {
-		return LuaHelpers::pushError(L, ex.what(), ex.where());
-	} catch (const std::exception &ex) {
-		return LuaHelpers::pushError(L, ex.what());
-	}
-	return LuaHelpers::pushNil(L);
-}
-
-// Backwards compability with 0.1
-int revision(lua_State *L)
-{
-	return Report::current()->repository()->revision(L);
-}
-
-// Backwards compability with 0.1
-int walk_branch(lua_State *L)
-{
-	if (lua_gettop(L) < 2 || lua_gettop(L) > 4) {
-		return luaL_error(L, "Invalid number of arguments (2 to 4 expected)");
-	}
-
-	std::string branch;
-	int64_t start = -1, end = -1;
-	switch (lua_gettop(L)) {
-		case 4: end = LuaHelpers::popi(L);
-		case 3: start = LuaHelpers::popi(L);
-		case 2: branch = LuaHelpers::pops(L);
-		default: break;
-	}
-
-	luaL_checktype(L, -1, LUA_TFUNCTION);
-	int callback = luaL_ref(L, LUA_REGISTRYINDEX);
-
-	// First, get an iterator
-	LuaHelpers::push(L, branch);
-	LuaHelpers::push(L, start);
-	LuaHelpers::push(L, end);
-	Report::current()->repository()->iterator(L);
-	RevisionIterator *it = LuaHelpers::popl<RevisionIterator>(L);
-
-	// Map callback function
-	lua_rawgeti(L, LUA_REGISTRYINDEX, callback);
-	it->map(L);
-
-	delete it;
-	return 0;
-}
-
-// Function table of the report library
-const struct luaL_reg report[] = {
-	{"getopt", getopt},
-	{"repository", repository},
-	{"revision", revision},
-	{"walk_branch", walk_branch},
-	{"run", run_fromscript},
-	{NULL, NULL}
-};
-
 // Sets up the lua context
 lua_State *setupLua()
 {
@@ -236,11 +122,11 @@ lua_State *setupLua()
 
 	lua_atpanic(L, atpanic);
 
-	// Register report functions
-	luaL_register(L, "pepper.report", report);
+	// Register extra modules functions
 	LuaModules::registerModules(L);
 
 	// Register binding classes
+	Lunar<Report>::Register(L, "pepper");
 	Lunar<Repository>::Register(L, "pepper");
 	Lunar<Revision>::Register(L, "pepper");
 	Lunar<RevisionIterator>::Register(L, "pepper");
@@ -334,9 +220,10 @@ int Report::run(std::ostream &err)
 		err << "Error opening report '" << path << "': Not executable" << std::endl;
 		ret = EXIT_FAILURE;
 	} else {
-		// Call the report function
+		// Call the report function, with the current report context as an argument
 		lua_getglobal(L, "main");
-		if (lua_pcall(L, 0, 1, 0) != 0) {
+		LuaHelpers::push(L, this);
+		if (lua_pcall(L, 1, 1, 0) != 0) {
 			err << "Error running report: " << lua_tostring(L, -1) << std::endl;
 			ret = EXIT_FAILURE;
 		}
@@ -498,4 +385,85 @@ std::map<std::string, std::string> Report::options() const
 Report *Report::current()
 {
 	return (s_stack.empty() ? NULL : s_stack.top());
+}
+
+/*
+ * Lua binding
+ */
+
+const char Report::className[] = "report";
+Lunar<Report>::RegType Report::methods[] = {
+	LUNAR_DECLARE_METHOD(Report, getopt),
+	LUNAR_DECLARE_METHOD(Report, repository),
+	LUNAR_DECLARE_METHOD(Report, run),
+	{0,0}
+};
+
+Report::Report(lua_State *L)
+	: m_repo(NULL)
+{
+	if (lua_gettop(L) != 1 && lua_gettop(L) != 2) {
+		LuaHelpers::pushError(L, "Invalid number of arguments (1 or 2 expected)");
+		return;
+	}
+	if (!Report::current()) {
+		LuaHelpers::pushError(L, "No current report");
+		return;
+	}
+
+	m_options = Report::current()->options();
+	if (lua_gettop(L) == 2) {
+		m_options = LuaHelpers::popms(L);
+	}
+	m_script = LuaHelpers::pops(L);
+
+	m_repo = new Repository(Report::current()->repository()->backend());
+}
+
+int Report::repository(lua_State *L)
+{
+	return LuaHelpers::push(L, m_repo);
+}
+
+int Report::getopt(lua_State *L)
+{
+	if (lua_gettop(L) != 1 && lua_gettop(L) != 2) {
+		return luaL_error(L, "Invalid number of arguments (1 or 2 expected)");
+	}
+
+	bool defaultProvided = (lua_gettop(L) == 2);
+	std::string defaultValue = (lua_gettop(L) == 2 ? LuaHelpers::pops(L) : std::string());
+	std::vector<std::string> keys = utils::split(LuaHelpers::pops(L), ",", true);
+
+	std::string value;
+	bool valueFound = false;
+	for (unsigned int i = 0; i < keys.size(); i++) {
+		if (m_options.find(keys[i]) != m_options.end()) {
+			value = m_options.find(keys[i])->second;
+			valueFound = true;
+			break;
+		}
+	}
+
+	if (valueFound) {
+		return LuaHelpers::push(L, value);
+	} else if (defaultProvided) {
+		return LuaHelpers::push(L, defaultValue);
+	}
+	return LuaHelpers::pushNil(L);
+}
+
+int Report::run(lua_State *L)
+{
+	try {
+		std::stringstream oss;
+		if (run(oss) != 0) {
+			return LuaHelpers::pushError(L, utils::trim(oss.str()));
+		}
+	} catch (const PepperException &ex) {
+		return LuaHelpers::pushError(L, ex.what(), ex.where());
+	} catch (const std::exception &ex) {
+		return LuaHelpers::pushError(L, ex.what());
+	}
+	return LuaHelpers::pushNil(L);
 }
