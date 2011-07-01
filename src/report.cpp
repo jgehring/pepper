@@ -50,11 +50,14 @@ namespace {
 const char *funcs[] = {"run", "main", NULL};
 
 // Checks if the given report is "executable", i.e. contains a main() function
-bool isExecutable(lua_State *L)
+bool isExecutable(lua_State *L, std::string *entryPoint = NULL)
 {
 	int i = 0;
 	while (funcs[i] != NULL && !LuaHelpers::hasFunction(L, funcs[i])) {
 		++i;
+	}
+	if (funcs[i] != NULL && entryPoint != NULL) {
+		*entryPoint = funcs[i];
 	}
 	return funcs[i] != NULL;
 }
@@ -222,17 +225,13 @@ int Report::run(std::ostream &err)
 		ret = EXIT_FAILURE;
 	} else {
 		// Find report entry point
-		int i = 0;
-		while (funcs[i] != NULL && !LuaHelpers::hasFunction(L, funcs[i])) {
-			++i;
-		}
-
-		if (funcs[i] == NULL) {
+		std::string func;
+		if (!isExecutable(L, &func)) {
 			err << "Error opening report '" << path << "': Not executable (no run function)" << std::endl;
 			ret = EXIT_FAILURE;
 		} else {
 			// Call the report function, with the current report context as an argument
-			lua_getglobal(L, funcs[i]);
+			lua_getglobal(L, func.c_str());
 			LuaHelpers::push(L, this);
 			if (lua_pcall(L, 1, 1, 0) != 0) {
 				err << "Error running report: " << lua_tostring(L, -1) << std::endl;
