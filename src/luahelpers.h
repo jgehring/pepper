@@ -291,6 +291,13 @@ inline size_t tablesize(lua_State *L, int index = -1) {
 	return lua_objlen(L, index);
 }
 
+inline bool hasFunction(lua_State *L, const std::string &name) {
+	lua_getglobal(L, name.c_str());
+	bool has = (lua_type(L, -1) == LUA_TFUNCTION);
+	lua_pop(L, 1);
+	return has;
+}
+
 } // namespace LuaHelpers
 
 
