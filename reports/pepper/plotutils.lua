@@ -30,11 +30,18 @@ module("pepper.plotutils", package.seeall)
 --  <tr><td>-tARG, --type=ARG</td><td>Explicitly set image type</td></tr>
 --  <tr><td>-sW[xH], --size=W[xH]</td><td>Set image size to width W and height H</td></tr>
 --  </table>
-function add_plot_options()
-	if meta.options == nil then meta.options = {} end
-	table.insert(meta.options, {"-oARG, --output=ARG", "Select output file"})
-	table.insert(meta.options, {"-tARG, --type=ARG", "Explicitly set image type"})
-	table.insert(meta.options, {"-sW[xH], --size=W[xH]", "Set image size to width W and height H"})
+--  @param r If not null, options will be added to this table
+function add_plot_options(r)
+	if r then
+		table.insert(r.options, {"-oARG, --output=ARG", "Select output file"})
+		table.insert(r.options, {"-tARG, --type=ARG", "Explicitly set image type"})
+		table.insert(r.options, {"-sW[xH], --size=W[xH]", "Set image size to width W and height H"})
+	else
+		if meta.options == nil then meta.options = {} end
+		table.insert(meta.options, {"-oARG, --output=ARG", "Select output file"})
+		table.insert(meta.options, {"-tARG, --type=ARG", "Explicitly set image type"})
+		table.insert(meta.options, {"-sW[xH], --size=W[xH]", "Set image size to width W and height H"})
+	end
 end
 
 --- Converts from UNIX to Gnuplot epoch.

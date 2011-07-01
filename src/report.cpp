@@ -154,7 +154,7 @@ lua_State *setupLua()
 	lua_pop(L, 1);
 	PDEBUG << "Lua package path has been set to " << path << endl;
 
-	// Setup meta table
+	// Setup (deprecated) meta table
 	luaL_newmetatable(L, "meta");
 	lua_setglobal(L, "meta");
 
@@ -261,7 +261,24 @@ void Report::printHelp()
 		throw PEX(utils::strprintf("Error opening report: %s", lua_tostring(L, -1)));
 	}
 
-	lua_getglobal(L, "meta");
+	// Try to run describe()
+	lua_getglobal(L, "describe");
+	if (lua_type(L, -1) == LUA_TFUNCTION) {
+		LuaHelpers::push(L, this);
+		if (lua_pcall(L, 1, 1, 0) != 0) {
+			throw PEX(utils::strprintf("Error opening report: %s", lua_tostring(L, -1)));
+		}
+		if (lua_type(L, -1) != LUA_TTABLE) {
+			throw PEX("Error opening report: Expected table from describe()");
+		}
+	} else {
+		lua_pop(L, 1);
+		// Else, use the meta table
+		lua_getglobal(L, "meta");
+		if (lua_type(L, -1) != LUA_TTABLE) {
+			throw PEX("Error opening report: Neither describe() nor meta-table found");
+		}
+	}
 
 	// Retrieve the report name
 	std::string name = m_script;
@@ -349,7 +366,25 @@ void Report::listReports(std::ostream &out)
 				continue;
 			}
 
-			lua_getglobal(L, "meta");
+			// Try to run describe()
+			lua_getglobal(L, "describe");
+			if (lua_type(L, -1) == LUA_TFUNCTION) {
+				Report report(path);
+				LuaHelpers::push(L, &report);
+				if (lua_pcall(L, 1, 1, 0) != 0) {
+					throw PEX(utils::strprintf("Error opening report: %s", lua_tostring(L, -1)));
+				}
+				if (lua_type(L, -1) != LUA_TTABLE) {
+					throw PEX("Error opening report: Expected table from describe()");
+				}
+			} else {
+				lua_pop(L, 1);
+				// Else, use the meta table
+				lua_getglobal(L, "meta");
+				if (lua_type(L, -1) != LUA_TTABLE) {
+					throw PEX("Error opening report: Neither describe() nor meta-table found");
+				}
+			}
 
 			// Retrieve the report description
 			std::string description;
