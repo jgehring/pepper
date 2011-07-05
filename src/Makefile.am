@@ -49,9 +49,7 @@ AM_CXXFLAGS = \
 	-Wall -W -pipe \
 	$(PTHREAD_CFLAGS)
 INCLUDES = \
-	-I@top_srcdir@/src/3rdparty \
-	-I@top_srcdir@/src/lua \
-	-I@top_srcdir@/src/syslib
+	-I@top_srcdir@/src/3rdparty
 AM_CPPFLAGS = \
 	$(LUA_INCLUDE) \
 	-DDATADIR=\"$(pkgdatadir)\"
