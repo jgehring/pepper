@@ -294,7 +294,6 @@ except:\n\
 	Py_ssize_t res = (object == Py_None ? 0 : PyNumber_AsSsize_t(object, NULL));
 
 	if (res != 0) {
-		PDEBUG << "res = " << res << std::endl;
 		// Throw exception
 		object = PyObject_GetAttrString(pModule, "stderr");
 		PyObject *output = PyObject_CallMethod(object, "getvalue", NULL);
@@ -311,6 +310,6 @@ except:\n\
 // Wrapper for PyRun_SimpleString()
 int MercurialBackend::simpleString(const std::string &str) const
 {
-	PDEBUG << str;
+	PTRACE << str;
 	return PyRun_SimpleString(str.c_str());
 }
