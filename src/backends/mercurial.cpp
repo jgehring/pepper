@@ -16,6 +16,7 @@
 
 #include <algorithm>
 
+#include "logger.h"
 #include "options.h"
 #include "revision.h"
 #include "utils.h"
@@ -46,13 +47,15 @@ void MercurialBackend::init()
 		throw PEX(utils::strprintf("Not a mercurial repository: %s", repo.c_str()));
 	}
 
-	PyRun_SimpleString(utils::strprintf("\
+	int res = simpleString(utils::strprintf("\
 import sys \n\
-from cStringIO import StringIO \n\
+from cStringIO import StringIO\n\
 from mercurial import ui,hg,commands \n\
+sys.stderr = stderr = StringIO()\n\
 myui = ui.ui() \n\
 myui.quiet = True \n\
-repo = hg.repository(myui, '%s') \n\n", repo.c_str()).c_str());
+repo = hg.repository(myui, '%s') \n\n", repo.c_str()));
+	assert(res == 0);
 }
 
 // Returns true if this backend is able to access the given repository
@@ -114,9 +117,9 @@ std::vector<std::string> MercurialBackend::branches()
 std::vector<Tag> MercurialBackend::tags()
 {
 	// TODO: Determine correct keyword for non-quiet output, if any
-	PyRun_SimpleString("myui.quiet = False\n");
+	simpleString("myui.quiet = False\n");
 	std::string out = hgcmd("tags");
-	PyRun_SimpleString("myui.quiet = True\n");
+	simpleString("myui.quiet = True\n");
 
 	std::vector<std::string> lines = utils::split(out, "\n");
 	std::vector<Tag> tags;
@@ -268,18 +271,41 @@ std::string MercurialBackend::hgcmd() const
 std::string MercurialBackend::hgcmd(const std::string &cmd, const std::string &args) const
 {
 	PyObject *pModule = PyImport_AddModule("__main__"); 
-/*
-	std::cout << utils::strprintf("\
-sys.stdout = stdout = StringIO()\n\
-res = commands.%s(myui, repo, %s)\n", cmd.c_str(), args.c_str()).c_str() << std::endl;
-*/
-	PyRun_SimpleString(utils::strprintf("\
-sys.stdout = stdout = StringIO()\n\
-res = commands.%s(myui, repo, %s)\n", cmd.c_str(), args.c_str()).c_str());
-	PyObject *object = PyObject_GetAttrString(pModule, "stdout");
-	char *method = strdup("getvalue");
-	PyObject *output = PyObject_CallMethod(object, method, NULL);
-	free(method);
-	assert(output != NULL);
-	return std::string(PyString_AsString(output));
+	simpleString(utils::strprintf("\
+stdout = \"\"\n\
+stderr.truncate(0)\n\
+res = -127\n\
+try:\n\
+	myui.pushbuffer()\n\
+	res = commands.%s(myui, repo, %s)\n\
+	stdout = myui.popbuffer()\n\
+except:\n\
+	res = -127\n\
+	stderr.write(sys.exc_info()[0])\n\
+", cmd.c_str(), args.c_str()));
+
+	// Check return value
+	PyObject *object = PyObject_GetAttrString(pModule, "res");
+	Py_ssize_t res = (object == Py_None ? 0 : PyNumber_AsSsize_t(object, NULL));
+
+	if (res != 0) {
+		PDEBUG << "res = " << res << std::endl;
+		// Throw exception
+		object = PyObject_GetAttrString(pModule, "stderr");
+		PyObject *output = PyObject_CallMethod(object, "getvalue", NULL);
+		assert(output != NULL);
+		throw PEX(utils::trim(PyString_AsString(output)));
+	}
+
+	// Return stdout
+	object = PyObject_GetAttrString(pModule, "stdout");
+	assert(object != NULL);
+	return std::string(PyString_AsString(object));
+}
+
+// Wrapper for PyRun_SimpleString()
+int MercurialBackend::simpleString(const std::string &str) const
+{
+	PDEBUG << str;
+	return PyRun_SimpleString(str.c_str());
 }
