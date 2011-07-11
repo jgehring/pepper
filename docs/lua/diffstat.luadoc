@@ -3,32 +3,32 @@
 module "pepper.diffstat"
 
 
---- Constructs a copy of the source diffstat
-function diffstat(source)
+--- Constructs a copy of the source diffstat.
+function diffstat:new(source)
 
---- Returns an array of all files in the diffstat
-function files()
+--- Returns an array of all files in the diffstat.
+function diffstat:files()
 
 --- Returns the number of lines added.
 --  If the <code>file</code> parameter is omitted, the total number of lines
 --  added is being returned
 --  @param file An optional file name
-function lines_added(file)
+function diffstat:lines_added(file)
 
 --- Returns the number of bytes added.
 --  If the <code>file</code> parameter is omitted, the total number of bytes 
 --  added is being returned
 --  @param file An optional file name
-function bytes_added(file)
+function diffstat:bytes_added(file)
 
 --- Returns the number of lines removed.
 --  If the <code>file</code> parameter is omitted, the total number of lines
 --  removed is being returned
 --  @param file An optional file name
-function lines_removed(file)
+function diffstat:lines_removed(file)
 
 --- Returns the number of bytes removed.
 --  If the <code>file</code> parameter is omitted, the total number of bytes
 --  removed is being returned
 --  @param file An optional file name
-function bytes_removed(file)
+function diffstat:bytes_removed(file)

@@ -1,39 +1,24 @@
---- Stand-alone functions for report scripts.
+--- Report script context.
 --  This module provides functions for retrieving the current repository
 --  as well as command-line option handling.
 
 module "pepper.report"
 
 
+--- Constructor.
+function report:new()
+
 --- Returns a command line option for the report script.
 --  @param option The command line flags, separated with commas
 --  @param default An optional default option value
-function getopt(option, default)
+function report:getopt(option, default)
 
 --- Returns the current repository.
 --  @return A repository instance
 --  @see pepper.repository
-function repository()
+function report:repository()
 
---- Runs a report script, using the current repository.
---  pepper tries to find a report named <code>report</code> (just
---  like you would pass it on the command line) and runs it.
---  If the <code>options</code> parameter is omitted, the options
---  of the calling report are used.<br>
---  You may want to use Lua's <a href="http://www.lua.org/manual/5.1/manual.html#pdf-pcall">pcall()</a>
---  to wrap calls to this function. If the execution failed, an error
---  will be pushed to the calling report.
---  @param report Name or path of the report script
---  @param options Optional dictionary with command-line options
-function run(report, options)
-
---- Fetches a specific revision.
+--- Runs a report.
 --  @deprecated Plese use pepper.repository:revision()
 --  @see pepper.repository
-function revision(id)
-
---- Calls <code>callback</code> for every revision in the given
---  <code>branch</code>.
---  @deprecated Please use pepper.repository:iterator()
---  @see pepper.repository
-function walk_branch(callback, branch)
+function report:run(id)

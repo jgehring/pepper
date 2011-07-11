@@ -18,12 +18,13 @@ endif
 
 # Generate luadoc documentation
 LUADOCS = \
-	docs/lua/gnuplot.luadoc \
 	docs/lua/diffstat.luadoc \
+	docs/lua/gnuplot.luadoc \
+	docs/lua/iterator.luadoc \
+	docs/lua/pepper.luadoc \
 	docs/lua/report.luadoc \
 	docs/lua/repository.luadoc \
 	docs/lua/revision.luadoc \
-	docs/lua/iterator.luadoc \
 	docs/lua/tag.luadoc \
 	docs/lua/utils.luadoc \
 	reports/pepper/datetime.lua \

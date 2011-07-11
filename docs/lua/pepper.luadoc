@@ -1,0 +1,26 @@
+--- General functions for interacting with the main program.
+
+module "pepper"
+
+
+--- Returns the current report context.
+--  @return A pepper.report instance
+--  @see pepper.report
+function current_report()
+
+--- Runs a report script, using the current repository.
+--  pepper tries to find a report named <code>report</code> (just
+--  like you would pass it on the command line) and runs it.
+--  If the <code>options</code> parameter is omitted, the options
+--  of the calling report are used.<br>
+--  You may want to use Lua's <a href="http://www.lua.org/manual/5.1/manual.html#pdf-pcall">pcall()</a>
+--  to wrap calls to this function. If the execution failed, an error
+--  will be pushed to the calling report.
+--  @param report Name or path of the report script
+--  @param options Optional dictionary with command-line options
+--  @return The report outut
+function run(report, options)
+
+--- Returns a listing of all reports in the current search directories.
+--  @return An array of report paths that can be used in run()
+function list_reports()
