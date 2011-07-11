@@ -160,7 +160,12 @@ Diffstat MercurialBackend::diffstat(const std::string &id)
 // Returns a file listing for the given revision (defaults to HEAD)
 std::vector<std::string> MercurialBackend::tree(const std::string &id)
 {
-	std::string out = hgcmd("status", utils::strprintf("change=\"%s\", all=True, no_status=True", id.c_str()));
+	std::string out;
+	if (id.empty()) {
+		out = hgcmd("status", utils::strprintf("change=\"%s\", all=True, no_status=True", id.c_str()));
+	} else {
+		out = hgcmd("status", utils::strprintf("all=True, no_status=True", id.c_str()));
+	}
 	std::vector<std::string> contents = utils::split(out, "\n");
 	if (!contents.empty() && contents[contents.size()-1].empty()) {
 		contents.pop_back();
