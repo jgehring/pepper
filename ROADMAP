@@ -1,0 +1,22 @@
+A non-committal roadmap for pepper
+==================================
+
+Planned features for 0.3:
+	* API overhaul (more OOP and report-centric and report-centric)
+	* repository:cat()
+	* repository:log()
+	* Time range arguments for all reports
+	* GUI report (using lgob.gtk)
+
+Planned for 0.3.x:
+	* Bazaar backend
+	* libgit2 backend
+	* Meta data pre-fetching for Subversion backend
+
+Planned features for 0.4:
+	* Filter module (cloc and friends)
+	* HTML module for generating custom HTML reports
+	* Cache backends using "real" databases
+
+Planned:
+	* Windows version?
