@@ -451,7 +451,7 @@ void Report::readMetaData()
 	}
 
 	// Read the report name
-	m_metaData.name = m_script;
+	m_metaData.name = sys::fs::basename(m_script);
 	lua_getfield(L, -1, "title");
 	if (lua_type(L, -1) == LUA_TSTRING) {
 		m_metaData.name = LuaHelpers::tops(L);
