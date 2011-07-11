@@ -521,6 +521,9 @@ Lunar<Report>::RegType Report::methods[] = {
 	LUNAR_DECLARE_METHOD(Report, getopt),
 	LUNAR_DECLARE_METHOD(Report, repository),
 	LUNAR_DECLARE_METHOD(Report, run),
+	LUNAR_DECLARE_METHOD(Report, name),
+	LUNAR_DECLARE_METHOD(Report, description),
+	LUNAR_DECLARE_METHOD(Report, options),
 	{0,0}
 };
 
@@ -586,6 +589,51 @@ int Report::run(lua_State *L)
 			return LuaHelpers::pushError(L, utils::trim(err.str()));
 		}
 		return LuaHelpers::push(L, out.str());
+	} catch (const PepperException &ex) {
+		return LuaHelpers::pushError(L, ex.what(), ex.where());
+	} catch (const std::exception &ex) {
+		return LuaHelpers::pushError(L, ex.what());
+	}
+	return LuaHelpers::pushNil(L);
+}
+
+int Report::name(lua_State *L)
+{
+	try {
+		if (!m_metaDataRead) {
+			readMetaData();
+		}
+		return LuaHelpers::push(L, m_metaData.name);
+	} catch (const PepperException &ex) {
+		return LuaHelpers::pushError(L, ex.what(), ex.where());
+	} catch (const std::exception &ex) {
+		return LuaHelpers::pushError(L, ex.what());
+	}
+	return LuaHelpers::pushNil(L);
+}
+
+int Report::description(lua_State *L)
+{
+	try {
+		if (!m_metaDataRead) {
+			readMetaData();
+		}
+		return LuaHelpers::push(L, m_metaData.description);
+	} catch (const PepperException &ex) {
+		return LuaHelpers::pushError(L, ex.what(), ex.where());
+	} catch (const std::exception &ex) {
+		return LuaHelpers::pushError(L, ex.what());
+	}
+	return LuaHelpers::pushNil(L);
+}
+
+int Report::options(lua_State *L)
+{
+	try {
+		if (!m_metaDataRead) {
+			readMetaData();
+		}
+		return LuaHelpers::push(L, m_metaData.options);
 	} catch (const PepperException &ex) {
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
 	} catch (const std::exception &ex) {

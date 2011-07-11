@@ -76,6 +76,9 @@ class Report
 		int repository(lua_State *L);
 		int getopt(lua_State *L);
 		int run(lua_State *L);
+		int name(lua_State *L);
+		int description(lua_State *L);
+		int options(lua_State *L);
 
 		static const char className[];
 		static Lunar<Report>::RegType methods[];
