@@ -8,9 +8,10 @@ module "pepper.utils"
 -- @return A pair containing the file handle and the file name
 function mkstemp(template)
 
---- Removes a file.
+--- Removes a file or directory.
 -- @param path The path to the file
-function unlink(path)
+-- @param recurse Recurse into subdirectories (default is false)
+function unlink(path, recurse)
 
 --- Splits the given string.
 -- @param string The string

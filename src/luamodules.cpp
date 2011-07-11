@@ -124,8 +124,17 @@ int mkstemp(lua_State *L)
 // Removes a file
 int unlink(lua_State *L)
 {
+	bool recurse = false;
+	if (lua_gettop(L) > 1) {
+		recurse = LuaHelpers::popb(L);
+	}
+
 	try {
-		sys::fs::unlink(LuaHelpers::tops(L).c_str());
+		if (recurse) {
+			sys::fs::unlink(LuaHelpers::tops(L).c_str());
+		} else {
+			sys::fs::unlinkr(LuaHelpers::tops(L).c_str());
+		}
 	} catch (const std::exception &ex) {
 		return LuaHelpers::pushError(L, ex.what());
 	}
