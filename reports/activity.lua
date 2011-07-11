@@ -11,22 +11,26 @@
 	This is a port of http://labs.freehackers.org/wiki/hgactivity
 --]]
 
--- Script meta-data
-meta.title = "Activity"
-meta.description = "General repository activity"
-meta.options = {
-	{"-bARG, --branch=ARG", "Select branch"},
-	{"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with a regular expression"},
-	{"-c, --changes, -l", "Count line changes instead of commit counts"},
-	{"--split=ARG", "Split the graph by 'authors', 'files', 'directories', or 'none' (the default)"},
-	{"-nARG", "Maximum number of series when using --split"},
-	{"--datemin=ARG", "Start date (format is YYYY-MM-DD)"},
-	{"--datemax=ARG", "End date (format is YYYY-MM-DD)"}
-}
-
 require "pepper.plotutils"
-pepper.plotutils.add_plot_options()
 
+
+-- Describes the report
+function describe(self)
+	local r = {}
+	r.name = "Activity"
+	r.description = "General repository activity"
+	r.options = {
+		{"-bARG, --branch=ARG", "Select branch"},
+		{"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with a regular expression"},
+		{"-c, --changes, -l", "Count line changes instead of commit counts"},
+		{"--split=ARG", "Split the graph by 'authors', 'files', 'directories', or 'none' (the default)"},
+		{"-nARG", "Maximum number of series when using --split"},
+		{"--datemin=ARG", "Start date (format is YYYY-MM-DD)"},
+		{"--datemax=ARG", "End date (format is YYYY-MM-DD)"}
+	}
+	pepper.plotutils.add_plot_options(r)
+	return r
+end
 
 -- Revision callback function
 function count(r)
@@ -113,29 +117,29 @@ function tablesize(t)
 end
 
 -- Main report function
-function main()
+function run(self)
 	activity = {}
 	firstdate = os.time()
 	lastdate = 0
 
 	-- Parse date range
-	local datemin = pepper.report.getopt("datemin")
+	local datemin = self:getopt("datemin")
 	if datemin ~= nil then datemin = pepper.utils.strptime(datemin, "%Y-%m-%d")
 	else datemin = -1 end
-	local datemax = pepper.report.getopt("datemax")
+	local datemax = self:getopt("datemax")
 	if datemax ~= nil then datemax = pepper.utils.strptime(datemax, "%Y-%m-%d")
 	else datemax = -1 end
 
-	count_changes = pepper.report.getopt("c,changes,l")
-	split = pepper.report.getopt("split", "none")
+	count_changes = self:getopt("c,changes,l")
+	split = self:getopt("split", "none")
 	local valid = {none=1, authors=1, files=1, directories=1}
 	if ({none=1, authors=1, files=1, branches=1, directories=1})[split] == nil then
 		error("Unknown split option '" .. split .. "'")
 	end
 
 	-- Gather data
-	local repo = pepper.report.repository()
-	local branch = pepper.report.getopt("b,branch", repo:default_branch())
+	local repo = self:repository()
+	local branch = self:getopt("b,branch", repo:default_branch())
 	repo:iterator(branch, datemin, datemax):map(count)
 	if last == 0 then
 		error("No data on this branch")
@@ -152,8 +156,8 @@ function main()
 	end
 	p:cmd("set noytics")
 
-	if pepper.report.getopt("tags") ~= nil then
-		pepper.plotutils.add_tagmarks(p, repo, pepper.report.getopt("tags", "*"))
+	if self:getopt("tags") ~= nil then
+		pepper.plotutils.add_tagmarks(p, repo, self:getopt("tags", "*"))
 	end
 
 	-- Generate graphs
@@ -170,7 +174,7 @@ function main()
 		end
 		table.sort(freqs, function (a,b) return (a[2] > b[2]) end)
 
-		local n = 1 + tonumber(pepper.report.getopt("n", 6))
+		local n = 1 + tonumber(self:getopt("n", 6))
 		local i = 1
 		local vdates = {}
 		local values = {}

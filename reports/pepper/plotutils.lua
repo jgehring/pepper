@@ -59,9 +59,10 @@ function setup_output(plot, width, height)
 	if height == nil then height = 480 end
 	local ratio = height / width
 
-	local file = pepper.report.getopt("o, output", "")
-	local size = pepper.utils.split(pepper.report.getopt("s, size", "" .. width .. "x" .. height), "x")
-	local terminal = pepper.report.getopt("t, type")
+	local self = pepper.current_report()
+	local file = self:getopt("o, output", "")
+	local size = pepper.utils.split(self:getopt("s, size", "" .. width .. "x" .. height), "x")
+	local terminal = self:getopt("t, type")
 	width = tonumber(size[1])
 	height = width * ratio
 	if (#size > 1) then

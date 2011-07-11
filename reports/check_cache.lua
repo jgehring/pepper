@@ -10,12 +10,16 @@
 	Runs a cache check
 --]]
 
--- Script meta-data
-meta.title = "Cache check"
-meta.description = "Checks and cleans up the revision cache"
 
+-- Describes the report
+function describe(self)
+	local r = {}
+	r.title = "Cache check"
+	r.description = "Checks and cleans up the revision cache"
+	return r
+end
 
 -- Main script function
-function main()
-	pepper.internal.check_cache(pepper.report.repository())
+function run(self)
+	pepper.internal.check_cache(self:repository())
 end

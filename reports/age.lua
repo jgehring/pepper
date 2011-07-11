@@ -10,15 +10,19 @@
 	Prints the age of a repository or branch
 --]]
 
--- Script meta-data
-meta.title = "age"
-meta.description = "Repository age information"
-meta.options = {
-	{"-bARG, --branch=ARG", "Select branch"}
-}
-
 require "pepper.datetime"
 
+
+-- Describes the report
+function describe(self)
+	local r = {}
+	r.name = "Age"
+	r.description = "Repository age information"
+	r.options = {
+		{"-bARG, --branch=ARG", "Select branch"}
+	}
+	return r
+end
 
 -- Returns a counting string for the given number (e.g. 1 -> 1st)
 function count_str(s)
@@ -79,9 +83,9 @@ function print_age(url, t)
 end
 
 -- Main report function
-function main()
-	local repo = pepper.report.repository()
-	local branch = pepper.report.getopt("b,branch", repo:default_branch())
+function run(self)
+	local repo = self:repository()
+	local branch = self:getopt("b,branch", repo:default_branch())
 
 	if repo:type() == "mercurial" then
 		print_age(repo:url(), repo:revision("0"):date())

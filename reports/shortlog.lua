@@ -10,14 +10,18 @@
 	Generates a summarized revision log (like "git shortlog")
 --]]
 
--- Script meta-data
-meta.title = "Shortlog"
-meta.description = "Summarized revision log"
-meta.options = {
-	{"-bARG, --branch=ARG", "Select branch"},
-	{"-s, --summary", "Print commit count summary only"}
-}
 
+-- Describes the report
+function describe(self)
+	local r = {}
+	r.title = "Shortlog"
+	r.description = "Summarized revision log"
+	r.options = {
+		{"-bARG, --branch=ARG", "Select branch"},
+		{"-s, --summary", "Print commit count summary only"}
+	}
+	return r
+end
 
 -- Revision callback function
 function callback(r)
@@ -30,13 +34,13 @@ function callback(r)
 end
 
 -- Main report function
-function main()
+function run(self)
 	-- Commit message dictionary, indexed by author
 	messages = {}
 
 	-- Gather data
-	local repo = pepper.report.repository()
-	local branch = pepper.report.getopt("b,branch", repo:default_branch())
+	local repo = self:repository()
+	local branch = self:getopt("b,branch", repo:default_branch())
 	repo:iterator(branch):map(callback)
 
 	-- Sort commit dictionary by name
@@ -47,7 +51,7 @@ function main()
 	table.sort(authors)
 
 	-- Print results
-	if pepper.report.getopt("s,summary") == nil then
+	if self:getopt("s,summary") == nil then
 		for i,author in ipairs(authors) do
 			print(author .. " (" .. #messages[author] .. "):")
 			for j,msg in ipairs(messages[author]) do

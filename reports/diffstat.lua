@@ -11,11 +11,15 @@
 	The histogram rendering is inspired by the git implementation.
 --]]
 
--- Script meta-data
-meta.title = "Diffstat"
-meta.description = "Print diffstat of given revision"
-meta.options = {{"-rARG, --revision=ARG", "Revision ID"}}
 
+-- Describes the report
+function describe(self)
+	local r = {}
+	r.title = "Diffstat"
+	r.description = "Print diffstat of given revision"
+	r.options = {{"-rARG, --revision=ARG", "Revision ID"}}
+	return r
+end
 
 -- Graph scaling
 function scale(i, width, max)
@@ -62,11 +66,11 @@ function scale_name(name, width)
 end
 
 -- Main report function
-function main()
-	local id = pepper.report.getopt("r,revision")
+function run(self)
+	local id = self:getopt("r,revision")
 	assert(id ~= nil, "Please specify a revision ID")
 
-	local stat = pepper.report.repository():revision(id):diffstat()
+	local stat = self:repository():revision(id):diffstat()
 
 	-- Determine maximum filename length and amount of change
 	local width = 80

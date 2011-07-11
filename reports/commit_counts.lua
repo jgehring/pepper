@@ -11,18 +11,22 @@
 	NOTE: The implementation trusts the normalizing behaviour of mktime().
 --]]
 
--- Script meta-data
-meta.title = "Commit counts"
-meta.description = "Histogramm of commit counts"
-meta.options = {
-	{"-bARG, --branch=ARG", "Select branch"},
-	{"-pARG, --period=ARG", "Show counts for the last 'Ndays', 'Nweeks', 'Nmonths' or 'Nyears'. The default is '12months'"},
-	{"-rARG, --resolution=ARG", "Set histogram resolution to 'days', 'weeks', 'months', 'years' or 'auto' (the default)"}
-}
-
 require "pepper.plotutils"
-pepper.plotutils.add_plot_options()
 
+
+-- Describes the report
+function describe(self)
+	local r = {}
+	r.title = "Commit counts"
+	r.description = "Histogramm of commit counts"
+	r.options = {
+		{"-bARG, --branch=ARG", "Select branch"},
+		{"-pARG, --period=ARG", "Show counts for the last 'Ndays', 'Nweeks', 'Nmonths' or 'Nyears'. The default is '12months'"},
+		{"-rARG, --resolution=ARG", "Set histogram resolution to 'days', 'weeks', 'months', 'years' or 'auto' (the default)"}
+	}
+	pepper.plotutils.add_plot_options(r)
+	return r
+end
 
 -- Subtracts a time period in text form from a timestamp
 function subdate(t, period)
@@ -107,20 +111,20 @@ function slotkey(t, resolution)
 end
 
 -- Main report function
-function main()
+function run(self)
 	-- First, determine time range for the revision iterator, according
 	-- to the --period argument
-	local period = pepper.report.getopt("p,period", "12months")
+	local period = self:getopt("p,period", "12months")
 	local now = os.time()
 	local start = subdate(now, period)
 
 	-- Determine time resolution
-	local resolution = resolution(now - start, pepper.report.getopt("r,resolution", "auto"))
+	local resolution = resolution(now - start, self:getopt("r,resolution", "auto"))
 	start = timeslot(start, resolution)
 
 	-- Gather data
-	local repo = pepper.report.repository()
-	local branch = pepper.report.getopt("b,branch", repo:default_branch())
+	local repo = self:repository()
+	local branch = self:getopt("b,branch", repo:default_branch())
 	local data = {} -- {commits, changes}
 	repo:iterator(branch, start):map(
 		function (r)

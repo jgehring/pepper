@@ -12,12 +12,17 @@
 --]]
 
 
--- Script meta-data
-meta.title = "Tags"
+-- Describes the report
+function describe(self)
+	local r = {}
+	r.name = "Tags"
+	r.description = "Lists all tags"
+	return r
+end
 
 -- Main script function
 function main()
-	local repo = pepper.report.repository()
+	local repo = pepper.current_report():repository()
 	local tags = repo:tags()
 	local maxlen = 0
 	for i,v in ipairs(tags) do

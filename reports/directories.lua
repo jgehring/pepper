@@ -10,18 +10,22 @@
 	Visualizes directory size changes on a given branch.
 --]]
 
--- Script meta-data
-meta.title = "Directories"
-meta.description = "Directory sizes"
-meta.options = {
-	{"-bARG, --branch=ARG", "Select branch"},
-	{"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with a regular expression"},
-	{"-nARG", "Show the ARG largest directories"}
-}
-
 require "pepper.plotutils"
-pepper.plotutils.add_plot_options()
 
+
+-- Describes the report
+function describe(self)
+	local r = {}
+	r.title = "Directories"
+	r.description = "Directory sizes"
+	r.options = {
+		{"-bARG, --branch=ARG", "Select branch"},
+		{"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with a regular expression"},
+		{"-nARG", "Show the ARG largest directories"}
+	}
+	pepper.plotutils.add_plot_options(r)
+	return r
+end
 
 -- Revision callback function
 function count(r)
@@ -54,13 +58,13 @@ function commitcmp(a, b)
 end
 
 -- Main report function
-function main()
+function main(self)
 	commits = {}     -- Commit list by timestamp with diffstat
 	directories = {} -- Total LOC by directory
 
 	-- Gather data
-	local repo = pepper.report.repository()
-	local branch = pepper.report.getopt("b,branch", repo:default_branch())
+	local repo = self:repository()
+	local branch = self:getopt("b,branch", repo:default_branch())
 	repo:iterator(branch):map(count)
 
 	-- Determine the largest directories (by current LOC)
@@ -69,7 +73,7 @@ function main()
 		table.insert(dirloc, {k, v})
 	end
 	table.sort(dirloc, dircmp)
-	local i = 1 + tonumber(pepper.report.getopt("n", 6))
+	local i = 1 + tonumber(self:getopt("n", 6))
 	while i <= #dirloc do
 		directories[dirloc[i][1]] = nil
 		dirloc[i] = nil
@@ -118,8 +122,8 @@ function main()
 	pepper.plotutils.setup_std_time(p, {key = "below"})
 	p:set_title("Directory Sizes (on " .. branch .. ")")
 
-	if pepper.report.getopt("tags") ~= nil then
-		pepper.plotutils.add_tagmarks(p, repo, pepper.report.getopt("tags", "*"))
+	if self:getopt("tags") ~= nil then
+		pepper.plotutils.add_tagmarks(p, repo, self:getopt("tags", "*"))
 	end
 
 	p:set_xrange_time(keys[1], keys[#keys])

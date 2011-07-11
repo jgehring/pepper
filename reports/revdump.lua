@@ -11,13 +11,17 @@
 	NOTE: This report is mainly used for testing purposes
 --]]
 
--- Script meta-data
-meta.title = "Revision dump"
-meta.options = {
-	{"-bARG, --branch=ARG", "Select branch"},
-	{"-rARG, --revision=ARG", "Select revision"}
-}
 
+-- Describes the report
+function describe(self)
+	local r = {}
+	r.title = "Revision dump"
+	r.options = {
+		{"-bARG, --branch=ARG", "Select branch"},
+		{"-rARG, --revision=ARG", "Select revision"}
+	}
+	return r
+end
 
 -- Revision dump function
 function revdump(r)
@@ -38,13 +42,13 @@ function revdump(r)
 end
 
 -- Main script function
-function main()
-	local repo = pepper.report.repository()
-	local rev = pepper.report.getopt("r,revision")
+function run(self)
+	local repo = self:repository()
+	local rev = self:getopt("r,revision")
 	if rev ~= nil then
 		revdump(repo:revision(rev))
 	else
-		local branch = pepper.report.getopt("b,branch", repo:default_branch())
+		local branch = self:getopt("b,branch", repo:default_branch())
 		repo:iterator(branch):map(revdump)
 	end
 end

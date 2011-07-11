@@ -10,18 +10,22 @@
 	Visualizes code contribution by author.
 --]]
 
--- Script meta-data
-meta.title = "Code contribution by authors"
-meta.description = "Contributed lines of code by authors"
-meta.options = {
-	{"-bARG, --branch=ARG", "Select branch"},
-	{"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with a regular expression"},
-	{"-nARG", "Show the ARG busiest authors"}
-}
-
 require "pepper.plotutils"
-pepper.plotutils.add_plot_options()
 
+
+-- Describes the report
+function describe(self)
+	local r = {}
+	r.name = "Authors"
+	r.description = "Contributed lines of code by authors"
+	r.options = {
+		{"-bARG, --branch=ARG", "Select branch"},
+		{"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with a regular expression"},
+		{"-nARG", "Show the ARG busiest authors"}
+	}
+	pepper.plotutils.add_plot_options(r)
+	return r
+end
 
 -- Revision callback function
 function callback(r)
@@ -41,13 +45,13 @@ function callback(r)
 end
 
 -- Main script function
-function main()
+function run(self)
 	commits = {}   -- Commit list by timestamp with LOC delta
 	authors = {}   -- Total LOC by author
 
 	-- Gather data
-	local repo = pepper.report.repository()
-	local branch = pepper.report.getopt("b,branch", repo:default_branch())
+	local repo = self:repository()
+	local branch = self:getopt("b,branch", repo:default_branch())
 	repo:iterator(branch):map(callback)
 
 	-- Determine the "busiest" authors (by LOC)
@@ -56,7 +60,7 @@ function main()
 		table.insert(authorloc, {k, v})
 	end
 	table.sort(authorloc, function (a,b) return (a[2] > b[2]) end)
-	local i = 1 + tonumber(pepper.report.getopt("n", 6))
+	local i = 1 + tonumber(self:getopt("n", 6))
 	while i <= #authorloc do
 		authors[authorloc[i][1]] = nil
 		authorloc[i] = nil
@@ -94,8 +98,8 @@ function main()
 	pepper.plotutils.setup_std_time(p, {key = "below"})
 	p:set_title("Contributed Lines of Code by Author (on " .. branch .. ")")
 
-	if pepper.report.getopt("tags") ~= nil then
-		pepper.plotutils.add_tagmarks(p, repo, pepper.report.getopt("tags", "*"))
+	if self:getopt("tags") ~= nil then
+		pepper.plotutils.add_tagmarks(p, repo, self:getopt("tags", "*"))
 	end
 
 	p:set_xrange_time(keys[1], keys[#keys])

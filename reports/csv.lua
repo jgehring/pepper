@@ -10,21 +10,25 @@
 	Dumps commits in a CSV format
 --]]
 
--- Script meta-data
-meta.title = "CSV"
-meta.description = "Dumps commits in CSV format"
-meta.options = {
-	{"-bARG, --branch=ARG", "Select branch"},
-	{"-cARG, --columns=ARG",
-		"Comma-seperated list of columns. " ..
-		"Possible values (and abbreviations) are 'id', " ..
-		"'author' (a), 'added' (+), 'removed' (-), " ..
-		"'delta' (d), 'total' (t), 'files' (f), " ..
-		"'message' (m)"},
-	{"--datemin=ARG", "Start date (format is YYYY-MM-DD)"},
-	{"--datemax=ARG", "End date (format is YYYY-MM-DD)"}
-}
 
+-- Describes the report
+function describe(self)
+	local r = {}
+	r.title = "CSV"
+	r.description = "Dumps commits in CSV format"
+	r.options = {
+		{"-bARG, --branch=ARG", "Select branch"},
+		{"-cARG, --columns=ARG",
+			"Comma-seperated list of columns. " ..
+			"Possible values (and abbreviations) are 'id', " ..
+			"'author' (a), 'added' (+), 'removed' (-), " ..
+			"'delta' (d), 'total' (t), 'files' (f), " ..
+			"'message' (m)"},
+		{"--datemin=ARG", "Start date (format is YYYY-MM-DD)"},
+		{"--datemax=ARG", "End date (format is YYYY-MM-DD)"}
+	}
+	return r
+end
 
 -- Returns the name of the given code
 function codename(code)
@@ -84,24 +88,24 @@ function info(r, code)
 end
 
 -- Main report function
-function main()
+function run(self)
 	-- Global counters
 	loc = 0
 
 	-- Parse date range
-	local datemin = pepper.report.getopt("datemin")
+	local datemin = self:getopt("datemin")
 	if datemin ~= nil then datemin = pepper.utils.strptime(datemin, "%Y-%m-%d")
 	else datemin = -1 end
-	local datemax = pepper.report.getopt("datemax")
+	local datemax = self:getopt("datemax")
 	if datemax ~= nil then datemax = pepper.utils.strptime(datemax, "%Y-%m-%d")
 	else datemax = -1 end
 
-	local columns = pepper.utils.split(pepper.report.getopt("c,columns", "a,d,t"), ",")
+	local columns = pepper.utils.split(self:getopt("c,columns", "a,d,t"), ",")
 	local printheader = true
 
 	-- Gather data
-	local repo = pepper.report.repository()
-	local branch = pepper.report.getopt("b,branch", repo:default_branch())
+	local repo = self:repository()
+	local branch = self:getopt("b,branch", repo:default_branch())
 	repo:iterator(branch, datemin, datemax):map(
 		function (r)
 			if printheader then

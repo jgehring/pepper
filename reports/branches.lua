@@ -10,14 +10,18 @@
 	Shows all branches and their current heads, similar to "git branch -v".
 --]]
 
--- Script meta-data
-meta.title = "Branches"
-meta.description = "Lists all repository branches"
 
+-- Describes the report
+function describe(self)
+	local r = {}
+	r.name = "Branches"
+	r.description = "Lists all repository branches"
+	return r
+end
 
 -- Main script function
-function main()
-	local repo = pepper.report.repository()
+function run(self)
+	local repo = self:repository()
 	local branches = repo:branches()
 	local main = repo:default_branch()
 	local maxlen = 0

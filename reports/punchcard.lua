@@ -11,17 +11,22 @@
 	or "git timecard" (http://dustin.github.com/2009/01/11/timecard.html)
 --]]
 
--- Script meta-data
-meta.title = "Punchcard"
-meta.description = "Commit activity by day and hour"
-meta.options = {
-	{"-bARG, --branch=ARG", "Select branch"},
-	{"-aARG, --author=ARG", "Show commits of author ARG"}
-}
 
 require "pepper.plotutils"
-pepper.plotutils.add_plot_options()
 
+
+-- Describes the report
+function describe(self)
+	local r = {}
+	r.title = "Punchcard"
+	r.description = "Commit activity by day and hour"
+	r.options = {
+		{"-bARG, --branch=ARG", "Select branch"},
+		{"-aARG, --author=ARG", "Show commits of author ARG"}
+	}
+	pepper.plotutils.add_plot_options(r)
+	return r
+end
 
 -- Revision callback function
 function callback(r)
@@ -45,14 +50,14 @@ function callback(r)
 end
 
 -- Main report function
-function main()
+function run(self)
 	commits = {}  -- Number of commits: (hour, wday) -> num
-	author = pepper.report.getopt("a,author")
+	author = self:getopt("a,author")
 	max = 0
 
 	-- Gather data
-	local repo = pepper.report.repository()
-	local branch = pepper.report.getopt("b,branch", repo:default_branch())
+	local repo = self:repository()
+	local branch = self:getopt("b,branch", repo:default_branch())
 	repo:iterator(branch):map(callback)
 
 	max = max * 2

@@ -10,17 +10,21 @@
 	Visualizes the file type distribution using a histogram.
 --]]
 
--- Script meta-data
-meta.title = "File types histogram"
-meta.description = "Histogram of the file types distribution"
-meta.options = {
-	{"-rARG, --revision=ARG", "Select revision (defaults to HEAD)"},
-	{"-nARG", "Show the ARG most frequent file types"}
-}
-
 require "pepper.plotutils"
-pepper.plotutils.add_plot_options()
 
+
+-- Describes the report
+function describe(self)
+	local r = {}
+	r.title = "Files"
+	r.description = "Histogram of the file types distribution"
+	r.options = {
+		{"-rARG, --revision=ARG", "Select revision (defaults to HEAD)"},
+		{"-nARG", "Show the ARG most frequent file types"}
+	}
+	pepper.plotutils.add_plot_options(r)
+	return r
+end
 
 -- Maps file extensions to languages
 extmap = {
@@ -85,9 +89,9 @@ function countcmp(a, b)
 end
 
 -- Main report function
-function main()
-	local rev = pepper.report.getopt("r, revision", "")
-	local tree = pepper.report.repository():tree(rev)
+function run(self)
+	local rev = self:getopt("r, revision", "")
+	local tree = self:repository():tree(rev)
 
 	-- For now, simply count the number of files for each extension
 	local count = {}
@@ -118,7 +122,7 @@ function main()
 	-- Use descriptive titles
 	local keys = {}
 	local values = {}
-	local n = 1 + tonumber(pepper.report.getopt("n", 6))
+	local n = 1 + tonumber(self:getopt("n", 6))
 	for i,v in pairs(extcount) do
 		if i > n then
 			break

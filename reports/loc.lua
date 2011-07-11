@@ -10,17 +10,21 @@
 	Visualizes lines of code changes on a given branch.
 --]]
 
--- Script meta-data
-meta.title = "LOC"
-meta.description = "Lines of code"
-meta.options = {
-	{"-bARG, --branch=ARG", "Select branch"},
-	{"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with Lua pattern ARG"}
-}
-
 require "pepper.plotutils"
-pepper.plotutils.add_plot_options()
 
+
+-- Describes the report
+function describe(self)
+	local r = {}
+	r.name = "LOC"
+	r.description = "Lines of code"
+	r.options = {
+		{"-bARG, --branch=ARG", "Select branch"},
+		{"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with Lua pattern ARG"}
+	}
+	pepper.plotutils.add_plot_options(r)
+	return r
+end
 
 -- Revision callback function
 function callback(r)
@@ -38,13 +42,13 @@ function callback(r)
 end
 
 -- Main report function
-function main()
+function run(self)
 	dates = {}
 	locdeltas = {}
 
 	-- Gather data
-	local repo = pepper.report.repository()
-	local branch = pepper.report.getopt("b,branch", repo:default_branch())
+	local repo = self:repository()
+	local branch = self:getopt("b,branch", repo:default_branch())
 	repo:iterator(branch):map(callback)
 
 	-- Sort loc data by date
@@ -62,8 +66,8 @@ function main()
 	pepper.plotutils.setup_std_time(p)
 	p:set_title("Lines of Code (on " .. branch .. ")")
 
-	if pepper.report.getopt("tags") ~= nil then
-		pepper.plotutils.add_tagmarks(p, repo, pepper.report.getopt("tags", "*"))
+	if self:getopt("tags") ~= nil then
+		pepper.plotutils.add_tagmarks(p, repo, self:getopt("tags", "*"))
 	end
 
 	p:set_xrange_time(dates[1], dates[#dates])

@@ -10,14 +10,18 @@
 	Visualizes commit times using a scatter plot.
 --]]
 
--- Script meta-data
-meta.title = "Times"
-meta.description = "Scatter plot of commit times"
-meta.options = {{"-bARG, --branch=ARG", "Select branch"}}
-
 require "pepper.plotutils"
-pepper.plotutils.add_plot_options()
 
+
+-- Describes the report
+function describe(self)
+	local r = {}
+	r.title = "Times"
+	r.description = "Scatter plot of commit times"
+	r.options = {{"-bARG, --branch=ARG", "Select branch"}}
+	pepper.plotutils.add_plot_options(r)
+	return r
+end
 
 -- Revision callback function
 function callback(r)
@@ -35,7 +39,7 @@ function callback(r)
 end
 
 -- Main report function
-function main()
+function run(self)
 	dates = {}     -- Commit timestamps
 	daytimes = {}  -- Time in hours and hour fractions
 
@@ -44,8 +48,8 @@ function main()
 	lastdate = 0
 
 	-- Gather data
-	local repo = pepper.report.repository()
-	local branch = pepper.report.getopt("b,branch", repo:default_branch())
+	local repo = self:repository()
+	local branch = self:getopt("b,branch", repo:default_branch())
 	repo:iterator(branch):map(callback)
 
 	-- Generate graph

@@ -10,20 +10,24 @@
 	Visualizes the participation of a single author.
 --]]
 
--- Script meta-data
-meta.title = "Participation"
-meta.description = "Participation of a single author"
-meta.options = {
-	{"-bARG, --branch=ARG", "Select branch"},
-	{"-aARG, --author=ARG", "Show participation of author ARG"},
-	{"-c, --changes, -l", "Count line changes instead of commit counts"},
-	{"-pARG, --period=ARG", "Show counts for the last 'Ndays', 'Nweeks', 'Nmonths' or 'Nyears'. The default is '12months'"},
-	{"-rARG, --resolution=ARG", "Set histogram resolution to 'days', 'weeks', 'months', 'years' or 'auto' (the default)"}
-}
-
 require "pepper.plotutils"
-pepper.plotutils.add_plot_options()
 
+
+-- Describes the report
+function describe(self)
+	local r = {}
+	r.name = "Participation"
+	r.description = "Participation of a single author"
+	r.options = {
+		{"-bARG, --branch=ARG", "Select branch"},
+		{"-aARG, --author=ARG", "Show participation of author ARG"},
+		{"-c, --changes, -l", "Count line changes instead of commit counts"},
+		{"-pARG, --period=ARG", "Show counts for the last 'Ndays', 'Nweeks', 'Nmonths' or 'Nyears'. The default is '12months'"},
+		{"-rARG, --resolution=ARG", "Set histogram resolution to 'days', 'weeks', 'months', 'years' or 'auto' (the default)"}
+	}
+	pepper.plotutils.add_plot_options(r)
+	return r
+end
 
 -- Subtracts a time period in text form from a timestamp
 function subdate(t, period)
@@ -111,7 +115,7 @@ end
 function determine_author(repo)
 	local author = nil
 	if repo:type() == "git" then
-		local f = io.popen("git config user.name"); -- GIT_DIR already set by parent process
+		local f = io.popen("git config user.name"); -- GIT_DIR already set by pepper
 		author = f:read()
 		f:close()
 	end
@@ -119,11 +123,11 @@ function determine_author(repo)
 end
 
 -- Main report function
-function main()
-	local repo = pepper.report.repository()
+function run(self)
+	local repo = self:repository()
 
 	-- Which author should be tracked
-	local author = pepper.report.getopt("a,author")
+	local author = self:getopt("a,author")
 	if author == nil then
 		author = determine_author(repo)
 		assert(author ~= nil, "Please specifiy an author name")
@@ -131,18 +135,18 @@ function main()
 
 	-- First, determine time range for the revision iterator, according
 	-- to the --period argument
-	local period = pepper.report.getopt("p,period", "12months")
+	local period = self:getopt("p,period", "12months")
 	local now = os.time()
 	local start = subdate(now, period)
 
 	-- Determine time resolution
-	local resolution = resolution(now - start, pepper.report.getopt("r,resolution", "auto"))
+	local resolution = resolution(now - start, self:getopt("r,resolution", "auto"))
 	start = timeslot(start, resolution)
 
-	local count_changes = pepper.report.getopt("c,changes,l")
+	local count_changes = self:getopt("c,changes,l")
 
 	-- Gather data
-	local branch = pepper.report.getopt("b,branch", repo:default_branch())
+	local branch = self:getopt("b,branch", repo:default_branch())
 	local data = {} -- {commits, changes}
 	repo:iterator(branch, start):map(
 		function (r)
