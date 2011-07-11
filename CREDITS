@@ -6,11 +6,6 @@ the source code distribution. They can be found at src/3rdparty with
 their respective READMEs and License files. For the sake of credit and
 completeness, here's a brief alphabetical listing:
 
-	* gnuplot-cpp, C++ interface to Gnuplot via POSIX threads
-	  Author: Jeremy Conlin (current maintainer)
-	  License: GNU General Public License v2
-	  http://code.google.com/p/gnuplot-cpp
-
 	* lunar, C++ class binding for Lua
 	  Author is unknown (to me)
 	  License: Seems to be in public domain

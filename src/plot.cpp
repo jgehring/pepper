@@ -14,15 +14,17 @@
 #include "main.h"
 
 #include <cmath>
+#include <fstream>
 
+#include "gnuplot.h"
 #include "logger.h"
 #include "luahelpers.h"
 #include "options.h"
+#include "report.h"
 #include "utils.h"
 
 #include "syslib/io.h"
-
-#include "gnuplot-cpp/gnuplot_i.h"
+#include "syslib/fs.h"
 
 #include "plot.h"
 
@@ -32,6 +34,9 @@ static inline int64_t convepoch(int64_t t)
 {
 	return t - 946684800;
 }
+
+// Gnuplot arguments
+const char *args[] = {"-persist", NULL};
 
 
 // Static variables for the lua bindings
@@ -53,22 +58,17 @@ Lunar<Plot>::RegType Plot::methods[] = {
 // Constructor
 Plot::Plot(lua_State *L)
 {
+	m_standardTerminal = "svg";
 #if ( defined(unix) || defined(__unix) || defined(__unix__) ) && !defined(__APPLE__)
-	if (getenv("DISPLAY") && sys::io::isterm(stdout)) {
-		Gnuplot::set_terminal_std("x11");
-	} else {
-		Gnuplot::set_terminal_std("svg");
+	if (getenv("DISPLAY") && sys::io::isterm(stdout) && !Report::current()->outputRedirected()) {
+		m_standardTerminal = "x11";
 	}
-#else
-	Gnuplot::set_terminal_std("svg");
 #endif
 
-	Gnuplot::set_GNUPlotArgs("-persist");
-
 	try {
-		g = new Gnuplot();
-	} catch (const GnuplotException &ex) {
-		LuaHelpers::pushError(L, ex.what());
+		g = new Gnuplot(args, Report::current()->out());
+	} catch (const PepperException &ex) {
+		LuaHelpers::pushError(L, ex.what(), ex.where());
 	}
 }
 
@@ -76,6 +76,7 @@ Plot::Plot(lua_State *L)
 Plot::~Plot()
 {
 	delete g;
+	removeTempfiles();
 }
 
 // Writes a Gnuplot command
@@ -108,10 +109,10 @@ int Plot::set_output(lua_State *L)
 		if (pos != std::string::npos) {
 			terminal = file.substr(pos+1);
 			if (terminal.empty()) {
-				terminal = Gnuplot::get_terminal_std();
+				terminal = m_standardTerminal;
 			}
 		} else {
-			terminal = Gnuplot::get_terminal_std();;
+			terminal = m_standardTerminal;
 		}
 	}
 
@@ -133,7 +134,8 @@ int Plot::set_output(lua_State *L)
 // Sets the plot title
 int Plot::set_title(lua_State *L)
 {
-	g->set_title(LuaHelpers::pops(L));
+	std::string title = LuaHelpers::pops(L);
+	gcmd(utils::strprintf("set title \"%s\"", title.c_str()));
 	return 0;
 }
 
@@ -203,7 +205,7 @@ int Plot::plot_series(lua_State *L)
 
 	// Open stream to data file
 	std::ofstream out;
-	std::string file = g->create_tmpfile(out);
+	std::string file = tempfile(out);;
 
 	// Read data entries and write them to a file
 	++index;
@@ -305,7 +307,7 @@ int Plot::plot_multi_series(lua_State *L)
 
 	for (size_t i = 0; i < nseries; i++) {
 		std::ofstream out;
-		files[i] = g->create_tmpfile(out);
+		files[i] = tempfile(out);
 
 		// Read keys
 		lua_rawgeti(L, index, i+1);
@@ -398,7 +400,7 @@ int Plot::plot_histogram(lua_State *L)
 
 	// Open stream to data file
 	std::ofstream out;
-	std::string file = g->create_tmpfile(out);
+	std::string file = tempfile(out);
 
 	// Read data entries and write them to a file
 	++index;
@@ -468,9 +470,9 @@ int Plot::flush(lua_State *L)
 {
 	try {
 		delete g;
-		g = new Gnuplot();
-	} catch (const GnuplotException &ex) {
-		return LuaHelpers::pushError(L, ex.what());
+		g = new Gnuplot(args, Report::current()->out());
+	} catch (const PepperException &ex) {
+		return LuaHelpers::pushError(L, ex.what(), ex.where());
 	}
 	return 0;
 }
@@ -480,4 +482,28 @@ void Plot::gcmd(const std::string &c)
 {
 	PDEBUG << c << endl;
 	g->cmd(c);
+}
+
+// Creates a temporary file
+std::string Plot::tempfile(std::ofstream &out)
+{
+	std::string path;
+	sys::fs::mkstemp(&path);
+
+	out.open(path.c_str());
+	if (out.bad()) {
+		throw PEX(utils::strprintf("Unable to open temporary file '%s'", path.c_str()));
+	}
+
+	m_tempfiles.push_back(path);
+	return path;
+}
+
+// Removes all temporary files
+void Plot::removeTempfiles()
+{
+	for (size_t i = 0; i < m_tempfiles.size(); i++) {
+		sys::fs::unlink(m_tempfiles[i]);
+	}
+	m_tempfiles.clear();
 }

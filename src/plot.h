@@ -15,6 +15,9 @@
 #define PLOT_H_
 
 
+#include <vector>
+#include <iostream>
+
 #include "lunar/lunar.h"
 
 class Gnuplot;
@@ -44,9 +47,13 @@ class Plot
 
 	private:
 		void gcmd(const std::string &c);
+		std::string tempfile(std::ofstream &out);
+		void removeTempfiles();
 
 	private:
 		Gnuplot *g;
+		std::vector<std::string> m_tempfiles;
+		std::string m_standardTerminal;
 };
 
 

@@ -210,7 +210,14 @@ PopenStreambuf::PopenStreambuf(const char *cmd, const char * const *argv, std::i
 		setp(&m_outbuffer.front(), &m_outbuffer.front() + m_outbuffer.size() - 1);
 	}
 
-	d->pipe = forkrw(cmd, argv, &d->pid, m);
+	int i;
+	d->argv[0] = cmd;
+	for (i = 0; i < 7 && argv[i] != NULL; i++) {
+		d->argv[i+1] = argv[i];
+	}
+	d->argv[i+1] = NULL;
+
+	d->pipe = forkrw(cmd, d->argv, &d->pid, m);
 }
 
 // Destructor

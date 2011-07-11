@@ -106,7 +106,7 @@ endif
 if GNUPLOT
 libpepper_a_SOURCES += \
 	plot.h plot.cpp \
-	3rdparty/gnuplot-cpp/gnuplot_i.h
+	gnuplot.h gnuplot.cpp
 AM_CPPFLAGS += \
 	-DUSE_GNUPLOT
 endif
