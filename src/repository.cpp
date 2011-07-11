@@ -136,7 +136,10 @@ int Repository::tree(lua_State *L)
 {
 	if (m_backend == NULL) return LuaHelpers::pushNil(L);
 
-	std::string id = LuaHelpers::pops(L);
+	std::string id;
+	if (lua_gettop(L) > 0) {
+		id = LuaHelpers::pops(L);
+	}
 	std::vector<std::string> t;
 	try {
 		t = m_backend->tree(id);
