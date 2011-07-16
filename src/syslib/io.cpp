@@ -172,11 +172,11 @@ PopenStreambuf::PopenStreambuf(const char *cmd, const char *arg1, const char *ar
 	: std::streambuf(), d(new PopenStreambufData()), m_mode(m), m_putback(8)
 {
 	if (m & std::ios::in) {
-		m_inbuffer = std::vector<char>(4096 + 8);
+		m_inbuffer = std::vector<char>(4096 + m_putback);
 		setg(0, 0, 0);
 	}
 	if (m & std::ios::out) {
-		m_outbuffer = std::vector<char>(4096 + 8);
+		m_outbuffer = std::vector<char>(4096 + m_putback);
 		setp(&m_outbuffer.front(), &m_outbuffer.front() + m_outbuffer.size() - 1);
 	}
 
@@ -202,11 +202,11 @@ PopenStreambuf::PopenStreambuf(const char *cmd, const char * const *argv, std::i
 	: std::streambuf(), d(new PopenStreambufData()), m_mode(m), m_putback(8)
 {
 	if (m & std::ios::in) {
-		m_inbuffer = std::vector<char>(4096 + 8);
+		m_inbuffer = std::vector<char>(4096 + m_putback);
 		setg(0, 0, 0);
 	}
 	if (m & std::ios::out) {
-		m_outbuffer = std::vector<char>(4096 + 8);
+		m_outbuffer = std::vector<char>(4096 + m_putback);
 		setp(&m_outbuffer.front(), &m_outbuffer.front() + m_outbuffer.size() - 1);
 	}
 
