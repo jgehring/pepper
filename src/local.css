@@ -42,9 +42,16 @@ div.toc li {
 	list-style-type: disc;
 }
 
-div.sflogo {
-	border: 1px solid #000000;
+div.logos {
 	float: right;
+}
+
+div.logos td {
+  padding-left: 20px;
+}
+
+div.logos img {
+  height: 3em;
 }
 
 img {
