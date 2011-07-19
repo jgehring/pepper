@@ -95,7 +95,7 @@ EXAMPLES
 Let's assume that the current directory is the repository of interest.
 
 pepper --list-reports::
-This lists all reports in the current search path can be listed with their
+This lists all reports in the current search path with their
 descriptions. The names from this listing can be used as the program's
 'report' argument.
 
