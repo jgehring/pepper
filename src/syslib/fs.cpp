@@ -21,7 +21,7 @@
 
 #include <sys/stat.h>
 
-#include "utils.h"
+#include "strlib.h"
 
 #include "fs.h"
 
@@ -256,9 +256,9 @@ std::string which(const std::string &program)
 	}
 	std::vector<std::string> ls;
 #ifdef POS_WIN
-	ls = utils::split(path, ";");
+	ls = str::split(path, ";");
 #else
-	ls = utils::split(path, ":");
+	ls = str::split(path, ":");
 #endif
 	for (size_t i = 0; i < ls.size(); i++) {
 		std::string t = ls[i] + "/" + program;

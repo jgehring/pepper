@@ -19,6 +19,7 @@
 #include "luahelpers.h"
 #include "report.h"
 #include "repository.h"
+#include "strlib.h"
 
 #include "syslib/datetime.h"
 #include "syslib/fs.h"
@@ -146,7 +147,7 @@ int split(lua_State *L)
 {
 	std::string pattern = LuaHelpers::pops(L);
 	std::string string = LuaHelpers::pops(L);
-	return LuaHelpers::push(L, ::utils::split(string, pattern));
+	return LuaHelpers::push(L, str::split(string, pattern));
 }
 
 // Wrapper for strptime
@@ -205,7 +206,7 @@ int check_cache(lua_State *L)
 	try {
 		cache->check();
 	} catch (const PepperException &ex) {
-		return LuaHelpers::pushError(L, ::utils::strprintf("Error checking cache: %s: %s", ex.where(), ex.what()));
+		return LuaHelpers::pushError(L, str::printf("Error checking cache: %s: %s", ex.where(), ex.what()));
 	}
 
 	if (cache != repo->backend()) {

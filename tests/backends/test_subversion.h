@@ -23,7 +23,7 @@
 #include "logger.h"
 #include "options.h"
 #include "revision.h"
-#include "utils.h"
+#include "strlib.h"
 
 #include "syslib/fs.h"
 
@@ -140,7 +140,7 @@ TEST_CASE("subversion/logcache", "Revision log merging and caching")
 		kt.wait();
 
 		std::vector<std::string> ids;
-		for (int i = 3; i <= 7; i++) ids.push_back(utils::int2str(i));
+		for (int i = 3; i <= 7; i++) ids.push_back(str::itos(i));
 		REQUIRE(kt.m_ids == ids);
 	}
 
@@ -159,8 +159,8 @@ TEST_CASE("subversion/logcache", "Revision log merging and caching")
 		kt.wait();
 
 		std::vector<std::string> ids;
-		for (int i = 1; i <= 7; i++) ids.push_back(utils::int2str(i));
-		ids.push_back(utils::int2str(12));
+		for (int i = 1; i <= 7; i++) ids.push_back(str::itos(i));
+		ids.push_back(str::itos(12));
 		REQUIRE(kt.m_ids == ids);
 	}
 }
@@ -219,8 +219,8 @@ TEST_CASE("subversion/iterators", "Revision iterator setup")
 		it->start();
 		it->wait();
 		std::vector<std::string> ids;
-		for (int i = 1; i <= 7; i++) ids.push_back(utils::int2str(i));
-		ids.push_back(utils::int2str(12));
+		for (int i = 1; i <= 7; i++) ids.push_back(str::itos(i));
+		ids.push_back(str::itos(12));
 		REQUIRE(it->m_ids == ids);
 		delete it;
 	}
@@ -230,10 +230,10 @@ TEST_CASE("subversion/iterators", "Revision iterator setup")
 		it->start();
 		it->wait();
 		std::vector<std::string> ids;
-		for (int i = 1; i <= 7; i++) ids.push_back(utils::int2str(i));
-		ids.push_back(utils::int2str(9));
-		ids.push_back(utils::int2str(10));
-		ids.push_back(utils::int2str(11));
+		for (int i = 1; i <= 7; i++) ids.push_back(str::itos(i));
+		ids.push_back(str::itos(9));
+		ids.push_back(str::itos(10));
+		ids.push_back(str::itos(11));
 		REQUIRE(it->m_ids == ids);
 		delete it;
 	}
@@ -243,7 +243,7 @@ TEST_CASE("subversion/iterators", "Revision iterator setup")
 		it->start();
 		it->wait();
 		std::vector<std::string> ids;
-		for (int i = 3; i <= 4; i++) ids.push_back(utils::int2str(i));
+		for (int i = 3; i <= 4; i++) ids.push_back(str::itos(i));
 		REQUIRE(it->m_ids == ids);
 		delete it;
 	}

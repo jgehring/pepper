@@ -15,14 +15,14 @@
 #define LUAHELPERS_H_
 
 
+#include "main.h"
+
 #include <iostream>
 #include <map>
 #include <string>
 #include <vector>
 
-#include "main.h"
-
-#include "utils.h"
+#include "strlib.h"
 
 #include "lunar/lunar.h"
 
@@ -265,7 +265,7 @@ inline void call(lua_State *L, const T1 &arg1, const T2 &arg2, const T3 &arg3, i
 template<typename T1, typename T2>
 inline void calls(lua_State *L, const std::string &name, const T1 &arg1, const T2 &arg2) {
 	// Find function
-	std::vector<std::string> parts = utils::split(name, ".");
+	std::vector<std::string> parts = str::split(name, ".");
 
 	lua_getglobal(L, parts[0].c_str());
 	if (parts.size() > 1) {

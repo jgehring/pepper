@@ -17,7 +17,7 @@
 #include <cstring>
 
 #include "logger.h"
-#include "utils.h"
+#include "strlib.h"
 
 #include "syslib/fs.h"
 
@@ -130,7 +130,7 @@ void Options::print(const std::string &option, const std::string &text, std::ost
 	}
 
 	// Word-wrap text
-	std::vector<std::string> words = utils::split(text, " ");
+	std::vector<std::string> words = str::split(text, " ");
 	int pos = 0;
 	for (size_t j = 0; j < words.size(); j++) {
 		if (pos + words[j].length() > textlen-1) {
@@ -180,7 +180,7 @@ void Options::reset()
 	if (char *cachedir = getenv("PEPPER_CACHEDIR")) {
 		m_options["cache_dir"] = std::string(cachedir);
 	} else {
-		m_options["cache_dir"] = utils::strprintf("%s/.%s/cache", getenv("HOME"), PACKAGE_NAME, "cache");
+		m_options["cache_dir"] = str::printf("%s/.%s/cache", getenv("HOME"), PACKAGE_NAME, "cache");
 	}
 	PDEBUG << "Default cache dir set to " << m_options["cache_dir"] << endl;
 }
@@ -293,7 +293,7 @@ bool Options::parseOpt(const std::string &arg, std::string *key, std::string *va
 	 */
 
 	if (!arg.compare(0, 2, "--") && arg.find("=") != std::string::npos && arg.find("=") > 2) {
-		std::vector<std::string> parts = utils::split(arg, "=");
+		std::vector<std::string> parts = str::split(arg, "=");
 		*key = parts[0].substr(2);
 		*value = parts[1];
 		return true;

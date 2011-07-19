@@ -35,7 +35,7 @@
 #include "logger.h"
 #include "options.h"
 #include "revision.h"
-#include "utils.h"
+#include "strlib.h"
 
 #include "syslib/fs.h"
 #include "syslib/parallel.h"
@@ -318,7 +318,7 @@ static svn_error_t *logReceiver(void *baton, svn_log_entry_t *entry, apr_pool_t 
 {
 	logReceiverBaton *b = static_cast<logReceiverBaton *>(baton);
 	b->latest = entry->revision;
-	b->temp.push_back(utils::int2str(b->latest));
+	b->temp.push_back(str::itos(b->latest));
 
 	if (b->temp.size() > 64) {
 		b->mutex->lock();
@@ -362,7 +362,7 @@ void SubversionBackend::SvnLogIterator::run()
 	std::vector<Interval> fetch;
 	fetch.push_back(Interval(m_startrev, m_endrev));
 
-	std::string cachefile = utils::strprintf("log_%s", APR_ARRAY_IDX(path, 0, const char *));
+	std::string cachefile = str::printf("log_%s", APR_ARRAY_IDX(path, 0, const char *));
 	if (m_backend->options().useCache()) {
 		readIntervalsFromCache(cachefile);
 
@@ -422,7 +422,7 @@ void SubversionBackend::SvnLogIterator::run()
 			l << "Appending " << fetch[i].revisions.size() << " cached revisions: ";
 			for (size_t j = 0; j < fetch[i].revisions.size(); j++) {
 				l << fetch[i].revisions[j] << " ";
-				m_ids.push_back(utils::int2str(fetch[i].revisions[j]));
+				m_ids.push_back(str::itos(fetch[i].revisions[j]));
 			}
 			l << endl;
 		}
@@ -441,7 +441,7 @@ void SubversionBackend::SvnLogIterator::run()
 		Interval current(m_startrev, m_endrev);
 		for (size_t i = 0; i < m_ids.size(); i++) {
 			uint64_t rev;
-			utils::str2int(m_ids[i], &rev);
+			str::stoi(m_ids[i], &rev);
 			current.revisions.push_back(rev);
 		}
 
@@ -741,7 +741,7 @@ std::string SubversionBackend::head(const std::string &branch)
 	svn_revnum_t rev = dirent->created_rev;
 	PDEBUG << "Head revision for branch " << prefix << " is " << rev << endl;
 	svn_pool_destroy(pool);
-	return utils::int2str((long int)rev);
+	return str::itos((long int)rev);
 }
 
 // Returns the standard branch (i.e., trunk)
@@ -828,7 +828,7 @@ std::vector<Tag> SubversionBackend::tags()
 		svn_sort__item_t *item = &APR_ARRAY_IDX(array, i, svn_sort__item_t);
 		svn_dirent_t *dirent = (svn_dirent_t *)apr_hash_get(dirents, item->key, item->klen);
 		if (dirent->kind == svn_node_dir) {
-			tags.push_back(Tag(utils::int2str(dirent->created_rev), (const char *)item->key));
+			tags.push_back(Tag(str::itos(dirent->created_rev), (const char *)item->key));
 		}
 	}
 
@@ -849,14 +849,14 @@ Diffstat SubversionBackend::diffstat(const std::string &id)
 	}
 
 
-	std::vector<std::string> revs = utils::split(id, ":");
+	std::vector<std::string> revs = str::split(id, ":");
 	svn_revnum_t r1, r2;
 	if (revs.size() > 1) {
-		if (!utils::str2int(revs[0], &r1) || !utils::str2int(revs[1], &r2)) {
+		if (!str::stoi(revs[0], &r1) || !str::stoi(revs[1], &r2)) {
 			throw PEX(std::string("Error parsing revision number ") + id);
 		}
 	} else {
-		if (!utils::str2int(revs[0], &r2)) {
+		if (!str::stoi(revs[0], &r2)) {
 			throw PEX(std::string("Error parsing revision number ") + id);
 		}
 		r1 = r2 - 1;
@@ -885,7 +885,7 @@ std::vector<std::string> SubversionBackend::tree(const std::string &id)
 	svn_revnum_t revision;
 	if (id.empty()) {
 		revision = SVN_INVALID_REVNUM;
-	} else if (!utils::str2int(id, &revision)) {
+	} else if (!str::stoi(id, &revision)) {
 		throw PEX(std::string("Error parsing revision number ") + id);
 	}
 
@@ -942,7 +942,7 @@ std::string SubversionBackend::cat(const std::string &path, const std::string &i
 	svn_revnum_t revision;
 	if (id.empty()) {
 		revision = SVN_INVALID_REVNUM;
-	} else if (!utils::str2int(id, &revision)) {
+	} else if (!str::stoi(id, &revision)) {
 		throw PEX(std::string("Error parsing revision number ") + id);
 	}
 
@@ -991,7 +991,7 @@ Backend::LogIterator *SubversionBackend::iterator(const std::string &branch, int
 		if (prefix == "trunk") {
 			prefix.clear();
 		} else {
-			throw PEX(utils::strprintf("No such branch: %s", branch.c_str()));
+			throw PEX(str::printf("No such branch: %s", branch.c_str()));
 		}
 	}
 
@@ -1012,7 +1012,7 @@ Backend::LogIterator *SubversionBackend::iterator(const std::string &branch, int
 			throw PEX(SvnConnection::strerr(err));
 		}
 	} else {
-		utils::str2int(head(branch), &endrev);
+		str::stoi(head(branch), &endrev);
 	}
 
 	PDEBUG << "Revision range: [ " << start << " : " << end << "] -> [" << startrev << " : " << endrev << "]" << endl;
@@ -1027,7 +1027,7 @@ void SubversionBackend::prefetch(const std::vector<std::string> &ids)
 	if (m_prefetcher == NULL) {
 		std::string numthreads = m_opts.value("threads", "10");
 		int nthreads = 10;
-		if (!utils::str2int(numthreads, &nthreads)) {
+		if (!str::stoi(numthreads, &nthreads)) {
 			throw PEX(std::string("Expected number for --threads parameter: ") + numthreads);
 		}
 		if (nthreads == 0) {
@@ -1071,10 +1071,10 @@ void SubversionBackend::printHelp() const
 Revision *SubversionBackend::revision(const std::string &id)
 {
 	std::map<std::string, std::string> data;
-	std::string rev = utils::split(id, ":").back();
+	std::string rev = str::split(id, ":").back();
 
 	svn_revnum_t revnum;
-	if (!utils::str2int(rev, &(revnum))) {
+	if (!str::stoi(rev, &(revnum))) {
 		throw PEX(std::string("Error parsing revision number ") + id);
 	}
 

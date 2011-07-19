@@ -27,8 +27,8 @@
 #include "repository.h"
 #include "revision.h"
 #include "revisioniterator.h"
+#include "strlib.h"
 #include "tag.h"
-#include "utils.h"
 #ifdef USE_GNUPLOT
  #include "plot.h"
 #endif
@@ -81,9 +81,9 @@ std::vector<std::string> reportDirs()
 	char *env = getenv("PEPPER_REPORTS");
 	if (env != NULL) {
 #ifdef POS_WIN
-		std::vector<std::string> parts = utils::split(env, ";");
+		std::vector<std::string> parts = str::split(env, ";");
 #else
-		std::vector<std::string> parts = utils::split(env, ":");
+		std::vector<std::string> parts = str::split(env, ":");
 #endif
 		for (size_t i = 0; i < parts.size(); i++) {
 			dirs.push_back(parts[i]);
@@ -428,7 +428,7 @@ void Report::readMetaData()
 	// Open the script
 	std::string path = findScript(m_script);
 	if (luaL_dofile(L, path.c_str()) != 0) {
-		throw PEX(utils::strprintf("Error opening report: %s", lua_tostring(L, -1)));
+		throw PEX(str::printf("Error opening report: %s", lua_tostring(L, -1)));
 	}
 
 	// Try to run describe()
@@ -436,7 +436,7 @@ void Report::readMetaData()
 	if (lua_type(L, -1) == LUA_TFUNCTION) {
 		LuaHelpers::push(L, this);
 		if (lua_pcall(L, 1, 1, 0) != 0) {
-			throw PEX(utils::strprintf("Error opening report: %s", lua_tostring(L, -1)));
+			throw PEX(str::printf("Error opening report: %s", lua_tostring(L, -1)));
 		}
 		if (lua_type(L, -1) != LUA_TTABLE) {
 			throw PEX("Error opening report: Expected table from describe()");
@@ -561,7 +561,7 @@ int Report::getopt(lua_State *L)
 
 	bool defaultProvided = (lua_gettop(L) == 2);
 	std::string defaultValue = (lua_gettop(L) == 2 ? LuaHelpers::pops(L) : std::string());
-	std::vector<std::string> keys = utils::split(LuaHelpers::pops(L), ",", true);
+	std::vector<std::string> keys = str::split(LuaHelpers::pops(L), ",", true);
 
 	std::string value;
 	bool valueFound = false;
@@ -586,7 +586,7 @@ int Report::run(lua_State *L)
 	try {
 		std::stringstream out, err;
 		if (run(out, err) != 0) {
-			return LuaHelpers::pushError(L, utils::trim(err.str()));
+			return LuaHelpers::pushError(L, str::trim(err.str()));
 		}
 		return LuaHelpers::push(L, out.str());
 	} catch (const PepperException &ex) {

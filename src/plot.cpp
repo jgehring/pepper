@@ -21,7 +21,7 @@
 #include "luahelpers.h"
 #include "options.h"
 #include "report.h"
-#include "utils.h"
+#include "strlib.h"
 
 #include "syslib/io.h"
 #include "syslib/fs.h"
@@ -93,7 +93,7 @@ int Plot::set_output(lua_State *L)
 	int width = 640, height = 480;
 
 	if (lua_gettop(L) > 4) {
-		return LuaHelpers::pushError(L, utils::strprintf("Invalid number of arguments (expected 1-4, got %d)", lua_gettop(L)));
+		return LuaHelpers::pushError(L, str::printf("Invalid number of arguments (expected 1-4, got %d)", lua_gettop(L)));
 	}
 
 	switch (lua_gettop(L)) {
@@ -123,11 +123,11 @@ int Plot::set_output(lua_State *L)
 	}
 
 	if (!file.empty()) {
-		gcmd(utils::strprintf("set output \"%s\"", file.c_str()));
+		gcmd(str::printf("set output \"%s\"", file.c_str()));
 	} else {
-		gcmd(utils::strprintf("set output"));
+		gcmd(str::printf("set output"));
 	}
-	gcmd(utils::strprintf("set terminal %s size %d,%d", terminal.c_str(), width, height));
+	gcmd(str::printf("set terminal %s size %d,%d", terminal.c_str(), width, height));
 	return 0;
 }
 
@@ -135,7 +135,7 @@ int Plot::set_output(lua_State *L)
 int Plot::set_title(lua_State *L)
 {
 	std::string title = LuaHelpers::pops(L);
-	gcmd(utils::strprintf("set title \"%s\"", title.c_str()));
+	gcmd(str::printf("set title \"%s\"", title.c_str()));
 	return 0;
 }
 
@@ -150,8 +150,8 @@ int Plot::set_xrange(lua_State *L)
 	range[0] = 1000 * floor(double(start) - 0.05 * d) / 1000;
 	range[1] = 1000 * ceil(double(end) + 0.05 * d) / 1000;
 
-	gcmd(utils::strprintf("set xrange [%f:%f]", range[0], range[1]));
-	gcmd(utils::strprintf("set x2range [%f:%f]", range[0], range[1]));
+	gcmd(str::printf("set xrange [%f:%f]", range[0], range[1]));
+	gcmd(str::printf("set x2range [%f:%f]", range[0], range[1]));
 	return 0;
 }
 
@@ -166,8 +166,8 @@ int Plot::set_xrange_time(lua_State *L)
 	range[0] = convepoch(1000 * floor(double(start) - 0.05 * d) / 1000);
 	range[1] = convepoch(1000 * ceil(double(end) + 0.05 * d) / 1000);
 
-	gcmd(utils::strprintf("set xrange [%lld:%lld]", range[0], range[1]));
-	gcmd(utils::strprintf("set x2range [%lld:%lld]", range[0], range[1]));
+	gcmd(str::printf("set xrange [%lld:%lld]", range[0], range[1]));
+	gcmd(str::printf("set x2range [%lld:%lld]", range[0], range[1]));
 	return 0;
 }
 
@@ -177,7 +177,7 @@ int Plot::plot_series(lua_State *L)
 	// Validate arguments
 	int index = -1;
 	if (lua_gettop(L) > 4) {
-		return LuaHelpers::pushError(L, utils::strprintf("Invalid number of arguments (expected 2-4, got %d)", lua_gettop(L)));
+		return LuaHelpers::pushError(L, str::printf("Invalid number of arguments (expected 2-4, got %d)", lua_gettop(L)));
 	}
 
 	std::map<std::string, std::string> options;
@@ -210,7 +210,7 @@ int Plot::plot_series(lua_State *L)
 	// Read data entries and write them to a file
 	++index;
 	if (LuaHelpers::tablesize(L, index) != keys.size()) {
-		return LuaHelpers::pushError(L, utils::strprintf("Number of keys and values doesn't match (%d != %d)", LuaHelpers::tablesize(L, index), keys.size()));
+		return LuaHelpers::pushError(L, str::printf("Number of keys and values doesn't match (%d != %d)", LuaHelpers::tablesize(L, index), keys.size()));
 	}
 	lua_pushvalue(L, index);
 	lua_pushnil(L);
@@ -279,7 +279,7 @@ int Plot::plot_multi_series(lua_State *L)
 	// Validate arguments
 	int index = -1;
 	if (lua_gettop(L) > 4) {
-		return LuaHelpers::pushError(L, utils::strprintf("Invalid number of arguments (expected 2-4, got %d)", lua_gettop(L)));
+		return LuaHelpers::pushError(L, str::printf("Invalid number of arguments (expected 2-4, got %d)", lua_gettop(L)));
 	}
 
 	std::map<std::string, std::string> options;
@@ -317,7 +317,7 @@ int Plot::plot_multi_series(lua_State *L)
 		++index;
 		lua_rawgeti(L, index, i+1);
 		if (LuaHelpers::tablesize(L) != keys.size()) {
-			return LuaHelpers::pushError(L, utils::strprintf("Number of keys and values doesn't match (%d != %d)", LuaHelpers::tablesize(L, index), keys.size()));
+			return LuaHelpers::pushError(L, str::printf("Number of keys and values doesn't match (%d != %d)", LuaHelpers::tablesize(L, index), keys.size()));
 		}
 
 		// Avoid copying values via popvd() and read the directly
@@ -373,7 +373,7 @@ int Plot::plot_histogram(lua_State *L)
 	// Validate arguments
 	int index = -1;
 	if (lua_gettop(L) > 4) {
-		return LuaHelpers::pushError(L, utils::strprintf("Invalid number of arguments (expected 2-4, got %d)", lua_gettop(L)));
+		return LuaHelpers::pushError(L, str::printf("Invalid number of arguments (expected 2-4, got %d)", lua_gettop(L)));
 	}
 
 	std::map<std::string, std::string> options;
@@ -405,7 +405,7 @@ int Plot::plot_histogram(lua_State *L)
 	// Read data entries and write them to a file
 	++index;
 	if (LuaHelpers::tablesize(L, index) != keys.size()) {
-		return LuaHelpers::pushError(L, utils::strprintf("Number of keys and values doesn't match (%d != %d)", LuaHelpers::tablesize(L, index), keys.size()));
+		return LuaHelpers::pushError(L, str::printf("Number of keys and values doesn't match (%d != %d)", LuaHelpers::tablesize(L, index), keys.size()));
 	}
 	lua_pushvalue(L, index);
 	lua_pushnil(L);
@@ -492,7 +492,7 @@ std::string Plot::tempfile(std::ofstream &out)
 
 	out.open(path.c_str());
 	if (out.bad()) {
-		throw PEX(utils::strprintf("Unable to open temporary file '%s'", path.c_str()));
+		throw PEX(str::printf("Unable to open temporary file '%s'", path.c_str()));
 	}
 
 	m_tempfiles.push_back(path);

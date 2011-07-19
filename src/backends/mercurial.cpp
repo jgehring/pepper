@@ -15,11 +15,12 @@
 #include "main.h" // Avoid compilation warnings
 
 #include <algorithm>
+#include <sstream>
 
 #include "logger.h"
 #include "options.h"
 #include "revision.h"
-#include "utils.h"
+#include "strlib.h"
 
 #include "syslib/fs.h"
 
@@ -44,10 +45,10 @@ void MercurialBackend::init()
 {
 	std::string repo = m_opts.repository();
 	if (!sys::fs::dirExists(repo + "/.hg")) {
-		throw PEX(utils::strprintf("Not a mercurial repository: %s", repo.c_str()));
+		throw PEX(str::printf("Not a mercurial repository: %s", repo.c_str()));
 	}
 
-	int res = simpleString(utils::strprintf("\
+	int res = simpleString(str::printf("\
 import sys \n\
 from cStringIO import StringIO\n\
 from mercurial import ui,hg,commands \n\
@@ -73,25 +74,25 @@ std::string MercurialBackend::uuid()
 	if (pos != std::string::npos) {
 		out = out.substr(pos+1);
 	}
-	return utils::trim(out);
+	return str::trim(out);
 }
 
 // Returns the HEAD revision for the current branch
 std::string MercurialBackend::head(const std::string &branch)
 {
-	std::string out = hgcmd("log", utils::strprintf("date=None, rev=None, user=None, quiet=None, limit=1, branch=[\"%s\"]", branch.c_str()));
+	std::string out = hgcmd("log", str::printf("date=None, rev=None, user=None, quiet=None, limit=1, branch=[\"%s\"]", branch.c_str()));
 	size_t pos = out.find(':');
 	if (pos != std::string::npos) {
 		out = out.substr(pos+1);
 	}
-	return utils::trim(out);
+	return str::trim(out);
 }
 
 // Returns the currently checked out branch
 std::string MercurialBackend::mainBranch()
 {
 	std::string out = hgcmd("branch");
-	return utils::trim(out);
+	return str::trim(out);
 }
 
 // Returns a list of available branches
@@ -103,10 +104,10 @@ std::vector<std::string> MercurialBackend::branches()
 	int ret;
 	std::string out = sys::io::exec(&ret, "hg", "--noninteractive", "--repository", m_opts.repository().c_str(), "branches", "--quiet");
 	if (ret != 0) {
-		throw PEX(utils::strprintf("Unable to retreive the list of branches (%d)", ret));
+		throw PEX(str::printf("Unable to retreive the list of branches (%d)", ret));
 	}
 #endif
-	std::vector<std::string> branches = utils::split(out, "\n");
+	std::vector<std::string> branches = str::split(out, "\n");
 	while (!branches.empty() && branches[branches.size()-1].empty()) {
 		branches.pop_back();
 	}
@@ -121,7 +122,7 @@ std::vector<Tag> MercurialBackend::tags()
 	std::string out = hgcmd("tags");
 	simpleString("myui.quiet = True\n");
 
-	std::vector<std::string> lines = utils::split(out, "\n");
+	std::vector<std::string> lines = str::split(out, "\n");
 	std::vector<Tag> tags;
 	for (unsigned int i = 0; i < lines.size(); i++) {
 		size_t pos = lines[i].find(" ");
@@ -142,13 +143,13 @@ std::vector<Tag> MercurialBackend::tags()
 // Returns a diffstat for the specified revision
 Diffstat MercurialBackend::diffstat(const std::string &id)
 {
-	std::vector<std::string> ids = utils::split(id, ":");
+	std::vector<std::string> ids = str::split(id, ":");
 #if 1
 	std::string out;
 	if (ids.size() > 1) {
-		out = hgcmd("diff", utils::strprintf("rev=[\"%s:%s\"]", ids[0].c_str(), ids[1].c_str()));
+		out = hgcmd("diff", str::printf("rev=[\"%s:%s\"]", ids[0].c_str(), ids[1].c_str()));
 	} else {
-		out = hgcmd("diff", utils::strprintf("change=\"%s\"", ids[0].c_str()));
+		out = hgcmd("diff", str::printf("change=\"%s\"", ids[0].c_str()));
 	}
 #else
 	std::string out = sys::io::exec(hgcmd()+" diff --change "+id);
@@ -162,11 +163,11 @@ std::vector<std::string> MercurialBackend::tree(const std::string &id)
 {
 	std::string out;
 	if (id.empty()) {
-		out = hgcmd("status", utils::strprintf("change=\"%s\", all=True, no_status=True", id.c_str()));
+		out = hgcmd("status", str::printf("change=\"%s\", all=True, no_status=True", id.c_str()));
 	} else {
-		out = hgcmd("status", utils::strprintf("all=True, no_status=True", id.c_str()));
+		out = hgcmd("status", str::printf("all=True, no_status=True", id.c_str()));
 	}
-	std::vector<std::string> contents = utils::split(out, "\n");
+	std::vector<std::string> contents = str::split(out, "\n");
 	if (!contents.empty() && contents[contents.size()-1].empty()) {
 		contents.pop_back();
 	}
@@ -181,7 +182,7 @@ std::string MercurialBackend::cat(const std::string &path, const std::string &id
 	// which discards all contents of a cStringIO object.
 	std::string filename;
 	FILE *f = sys::fs::mkstemp(&filename);
-	hgcmd("cat", utils::strprintf("\"%s\", output=\"%s\", rev=\"%s\"", (m_opts.repository() + "/" + path).c_str(), filename.c_str(), id.c_str()));
+	hgcmd("cat", str::printf("\"%s\", output=\"%s\", rev=\"%s\"", (m_opts.repository() + "/" + path).c_str(), filename.c_str(), id.c_str()));
 
 	char buf[4096];
 	size_t size;
@@ -204,17 +205,17 @@ Backend::LogIterator *MercurialBackend::iterator(const std::string &branch, int6
 	std::string date = "None";
 	if (start >= 0) {
 		if (end >= 0) {
-			date = utils::strprintf("\"%lld 0 to %lld 0\"", start, end);
+			date = str::printf("\"%lld 0 to %lld 0\"", start, end);
 		} else {
-			date = utils::strprintf("\">%lld 0\"", start);
+			date = str::printf("\">%lld 0\"", start);
 		}
 	} else if (end >= 0) {
-		date = utils::strprintf("\"<%lld 0\"", end);
+		date = str::printf("\"<%lld 0\"", end);
 	}
 
 	// Request log from HEAD to 0, so follow_first is effective
-	std::string out = hgcmd("log", utils::strprintf("date=%s, user=None, follow_first=True, quiet=None, rev=[\"%s:0\"]", date.c_str(), (head(branch)).c_str()));
-	std::vector<std::string> revisions = utils::split(out, "\n");
+	std::string out = hgcmd("log", str::printf("date=%s, user=None, follow_first=True, quiet=None, rev=[\"%s:0\"]", date.c_str(), (head(branch)).c_str()));
+	std::vector<std::string> revisions = str::split(out, "\n");
 	if (!revisions.empty()) {
 		revisions.pop_back();
 	}
@@ -238,22 +239,22 @@ Backend::LogIterator *MercurialBackend::iterator(const std::string &branch, int6
 // Returns the revision data for the given ID
 Revision *MercurialBackend::revision(const std::string &id)
 {
-	std::vector<std::string> ids = utils::split(id, ":");
+	std::vector<std::string> ids = str::split(id, ":");
 #if 1
-	std::string meta = hgcmd("log", utils::strprintf("rev=[\"%s\"], date=None, user=None, template=\"{date|hgdate}\\n{author|person}\\n{desc}\"", ids.back().c_str()));
+	std::string meta = hgcmd("log", str::printf("rev=[\"%s\"], date=None, user=None, template=\"{date|hgdate}\\n{author|person}\\n{desc}\"", ids.back().c_str()));
 #else
 	std::string meta = sys::io::exec(hgcmd()+" log -r "+id+" --template=\"{date|hgdate}\n{author|person}\n{desc}\"");
 #endif
-	std::vector<std::string> lines = utils::split(meta, "\n");
+	std::vector<std::string> lines = str::split(meta, "\n");
 	int64_t date;
 	std::string author;
 	if (!lines.empty()) {
 		// Date is given as seconds and timezone offset from UTC
-		std::vector<std::string> parts = utils::split(lines[0], " ");
+		std::vector<std::string> parts = str::split(lines[0], " ");
 		if (parts.size() > 1) {
 			int64_t offset;
-			utils::str2int(parts[0], &date);
-			utils::str2int(parts[1], &offset);
+			str::str2int(parts[0], &date);
+			str::str2int(parts[1], &offset);
 			date += offset;
 		}
 		lines.erase(lines.begin());
@@ -262,7 +263,7 @@ Revision *MercurialBackend::revision(const std::string &id)
 		author = lines[0];
 		lines.erase(lines.begin());
 	}
-	std::string msg = utils::join(lines, "\n");
+	std::string msg = str::join(lines, "\n");
 	return new Revision(id, date, author, msg, diffstat(id));
 }
 
@@ -276,7 +277,7 @@ std::string MercurialBackend::hgcmd() const
 std::string MercurialBackend::hgcmd(const std::string &cmd, const std::string &args) const
 {
 	PyObject *pModule = PyImport_AddModule("__main__"); 
-	simpleString(utils::strprintf("\
+	simpleString(str::printf("\
 stdout = \"\"\n\
 stderr.truncate(0)\n\
 res = -127\n\
@@ -298,7 +299,7 @@ except:\n\
 		object = PyObject_GetAttrString(pModule, "stderr");
 		PyObject *output = PyObject_CallMethod(object, "getvalue", NULL);
 		assert(output != NULL);
-		throw PEX(utils::trim(PyString_AsString(output)));
+		throw PEX(str::trim(PyString_AsString(output)));
 	}
 
 	// Return stdout

@@ -15,6 +15,7 @@
 
 #include "bstream.h"
 #include "luahelpers.h"
+#include "strlib.h"
 
 #include "revision.h"
 
@@ -84,11 +85,11 @@ Revision::Revision(lua_State *) {
 }
 
 int Revision::id(lua_State *L) {
-	return LuaHelpers::push(L, utils::split(m_id, ":").back());
+	return LuaHelpers::push(L, str::split(m_id, ":").back());
 }
 
 int Revision::parent_id(lua_State *L) {
-	std::vector<std::string> ids = utils::split(m_id, ":");
+	std::vector<std::string> ids = str::split(m_id, ":");
 	if (ids.size() > 1) {
 		return LuaHelpers::push(L, ids.front());
 	}

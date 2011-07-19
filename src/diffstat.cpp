@@ -16,7 +16,7 @@
 #include "bstream.h"
 #include "logger.h"
 #include "luahelpers.h"
-#include "utils.h"
+#include "strlib.h"
 
 #include "diffstat.h"
 
@@ -213,7 +213,7 @@ Diffstat DiffParser::parse(std::istream &in)
 				file = std::string();
 			}
 			stat = Diffstat::Stat();
-			std::vector<std::string> header = utils::split(str.substr(4), "\t");
+			std::vector<std::string> header = str::split(str.substr(4), "\t");
 			if (header.empty()) {
 				throw PEX(std::string("EMPTY HEADER: ")+str);
 			}
@@ -227,22 +227,22 @@ Diffstat DiffParser::parse(std::istream &in)
 				}
 			}
 		} else if (!str.compare(0, 2, "@@")) {
-			std::vector<std::string> header = utils::split(str.substr(2), "@@", true);
+			std::vector<std::string> header = str::split(str.substr(2), "@@", true);
 			if (header.empty()) {
 				throw PEX(std::string("EMPTY HEADER: ")+str);
 			}
-			std::vector<std::string> ranges = utils::split(header[0], " ", true);
+			std::vector<std::string> ranges = str::split(header[0], " ", true);
 			if (ranges.size() < 2 || ranges[0].empty() || ranges[1].empty()) {
 				throw PEX(std::string("EMPTY HEADER: ")+str);
 			}
 			size_t pos;
 			if ((pos = ranges[0].find(',')) != std::string::npos) {
-				utils::str2int(ranges[0].substr(pos+1), &chunk[(ranges[0][0] == '-' ? 0 : 1)]);
+				str::str2int(ranges[0].substr(pos+1), &chunk[(ranges[0][0] == '-' ? 0 : 1)]);
 			} else {
 				chunk[(ranges[0][0] == '-' ? 0 : 1)] = 1;
 			}
 			if ((pos = ranges[1].find(',')) != std::string::npos) {
-				utils::str2int(ranges[1].substr(pos+1), &chunk[(ranges[1][0] == '-' ? 0 : 1)]);
+				str::str2int(ranges[1].substr(pos+1), &chunk[(ranges[1][0] == '-' ? 0 : 1)]);
 			} else {
 				chunk[(ranges[1][0] == '-' ? 0 : 1)] = 1;
 			}

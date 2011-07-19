@@ -23,7 +23,7 @@
 
 #include "jobqueue.h"
 #include "logger.h"
-#include "utils.h"
+#include "strlib.h"
 
 #include "backends/subversion_p.h"
 
@@ -477,7 +477,7 @@ Diffstat SvnDiffstatThread::diffstat(SvnConnection *c, svn_revnum_t r1, svn_revn
 	if (err != NULL) {
 		apr_file_close(outfile);
 		apr_file_close(infile);
-		throw PEX(utils::strprintf("Diffstat fetching of revision %ld:%ld failed: %s", r1, r2, SvnConnection::strerr(err).c_str()));
+		throw PEX(str::printf("Diffstat fetching of revision %ld:%ld failed: %s", r1, r2, SvnConnection::strerr(err).c_str()));
 	}
 
 	editor->set_target_revision = SvnDelta::set_target_revision;
@@ -502,21 +502,21 @@ Diffstat SvnDiffstatThread::diffstat(SvnConnection *c, svn_revnum_t r1, svn_revn
 	if (err != NULL) {
 		apr_file_close(outfile);
 		apr_file_close(infile);
-		throw PEX(utils::strprintf("Diffstat fetching of revision %ld:%ld failed: %s", r1, r2, SvnConnection::strerr(err).c_str()));
+		throw PEX(str::printf("Diffstat fetching of revision %ld:%ld failed: %s", r1, r2, SvnConnection::strerr(err).c_str()));
 	}
 
 	err = reporter->set_path(report_baton, "", rev1.value.number, svn_depth_infinity, FALSE, NULL, pool);
 	if (err != NULL) {
 		apr_file_close(outfile);
 		apr_file_close(infile);
-		throw PEX(utils::strprintf("Diffstat fetching of revision %ld:%ld failed: %s", r1, r2, SvnConnection::strerr(err).c_str()));
+		throw PEX(str::printf("Diffstat fetching of revision %ld:%ld failed: %s", r1, r2, SvnConnection::strerr(err).c_str()));
 	}
 
 	err = reporter->finish_report(report_baton, pool);
 	if (err != NULL) {
 		apr_file_close(outfile);
 		apr_file_close(infile);
-		throw PEX(utils::strprintf("Diffstat fetching of revision %ld:%ld failed: %s", r1, r2, SvnConnection::strerr(err).c_str()));
+		throw PEX(str::printf("Diffstat fetching of revision %ld:%ld failed: %s", r1, r2, SvnConnection::strerr(err).c_str()));
 	}
 
 	if (apr_file_close(outfile) != APR_SUCCESS) {
@@ -537,14 +537,14 @@ void SvnDiffstatThread::run()
 	while (m_queue->getArg(&revision)) {
 		apr_pool_t *subpool = svn_pool_create(pool);
 
-		std::vector<std::string> revs = utils::split(revision, ":");
+		std::vector<std::string> revs = str::split(revision, ":");
 		svn_revnum_t r1, r2;
 		if (revs.size() > 1) {
-			if (!utils::str2int(revs[0], &r1) || !utils::str2int(revs[1], &r2)) {
+			if (!str::stoi(revs[0], &r1) || !str::stoi(revs[1], &r2)) {
 				goto parse_error;
 			}
 		} else {
-			if (!utils::str2int(revs[0], &r2)) {
+			if (!str::stoi(revs[0], &r2)) {
 				goto parse_error;
 			}
 			r1 = r2 - 1;

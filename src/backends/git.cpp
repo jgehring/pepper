@@ -20,6 +20,7 @@
 #include "logger.h"
 #include "options.h"
 #include "revision.h"
+#include "strlib.h"
 #include "utils.h"
 
 #include "syslib/datetime.h"
@@ -70,7 +71,7 @@ protected:
 
 		std::string revision;
 		while (m_queue->getArg(&revision)) {
-			std::vector<std::string> revs = utils::split(revision, ":");
+			std::vector<std::string> revs = str::split(revision, ":");
 
 			if (revs.size() < 2) {
 				out << revs[0] << '\n';
@@ -117,7 +118,7 @@ public:
 	{
 		// TODO: Proper exception descriptions
 		if (header.size() < 5) {
-			throw PEX(utils::strprintf("Unable to parse meta-data"));
+			throw PEX(str::printf("Unable to parse meta-data"));
 		}
 
 		// Here's the raw header format. The 'parent' line is not present for
@@ -140,7 +141,7 @@ public:
 			for (size_t i = 0; i < header.size(); i++) {
 				PDEBUG << header[i] << endl;
 			}
-			throw PEX(utils::strprintf("Unable to parse meta-data"));
+			throw PEX(str::printf("Unable to parse meta-data"));
 		}
 
 		// Author information
@@ -151,18 +152,18 @@ public:
 		if (pos != std::string::npos) {
 			dest->author = dest->author.substr(0, pos);
 		}
-		dest->author = utils::trim(dest->author);
+		dest->author = str::trim(dest->author);
 
 		// Commiter date
 		if (header[++line].compare(0, 10, "committer ")) {
-			throw PEX(utils::strprintf("Unable to parse commit date from line: %s", header[line].c_str()));
+			throw PEX(str::printf("Unable to parse commit date from line: %s", header[line].c_str()));
 		}
 		if ((pos = header[line].find_last_of(' ')) == std::string::npos) {
-			throw PEX(utils::strprintf("Unable to parse commit date from line: %s", header[line].c_str()));
+			throw PEX(str::printf("Unable to parse commit date from line: %s", header[line].c_str()));
 		}
 		size_t pos2 = header[line].find_last_of(' ', pos - 1);
-		if (pos2 == std::string::npos || !utils::str2int(header[line].substr(pos2, pos - pos2), &(dest->date), 10)) {
-			throw PEX(utils::strprintf("Unable to parse commit date from line: %s", header[line].c_str()));
+		if (pos2 == std::string::npos || !str::str2int(header[line].substr(pos2, pos - pos2), &(dest->date), 10)) {
+			throw PEX(str::printf("Unable to parse commit date from line: %s", header[line].c_str()));
 		}
 
 		// Commit message
@@ -182,10 +183,10 @@ public:
 		int ret;
 		std::string header = sys::io::exec(&ret, (gitpath+"/git-rev-list").c_str(), "-1", "--header", id.c_str());
 		if (ret != 0) {
-			throw PEX(utils::strprintf("Unable to retrieve meta-data for revision '%s' (%d, %s)", id.c_str(), ret, header.c_str()));
+			throw PEX(str::printf("Unable to retrieve meta-data for revision '%s' (%d, %s)", id.c_str(), ret, header.c_str()));
 		}
 
-		parseHeader(utils::split(header, "\n"), dest);
+		parseHeader(str::split(header, "\n"), dest);
 	}
 
 protected:
@@ -375,17 +376,17 @@ void GitBackend::init()
 		PDEBUG << "Parsing .git file" << endl;
 		std::ifstream in((repo + "/.git").c_str(), std::ios::in);
 		if (!in.good()) {
-			throw PEX(utils::strprintf("Unable to read from .git file: %s", repo.c_str()));
+			throw PEX(str::printf("Unable to read from .git file: %s", repo.c_str()));
 		}
 		std::string str;
 		std::getline(in, str);
-		std::vector<std::string> parts = utils::split(str, ":");
+		std::vector<std::string> parts = str::split(str, ":");
 		if (parts.size() < 2) {
-			throw PEX(utils::strprintf("Unable to parse contents of .git file: %s", str.c_str()));
+			throw PEX(str::printf("Unable to parse contents of .git file: %s", str.c_str()));
 		}
-		setenv("GIT_DIR", utils::trim(parts[1]).c_str(), 1);
+		setenv("GIT_DIR", str::trim(parts[1]).c_str(), 1);
 	} else {
-		throw PEX(utils::strprintf("Not a git repository: %s", repo.c_str()));
+		throw PEX(str::printf("Not a git repository: %s", repo.c_str()));
 	}
 
 	// Search for git executable
@@ -393,7 +394,7 @@ void GitBackend::init()
 	PDEBUG << "git executable is " << git << endl;
 
 	int ret;
-	m_gitpath = utils::trim(sys::io::exec(&ret, git.c_str(), "--exec-path"));
+	m_gitpath = str::trim(sys::io::exec(&ret, git.c_str(), "--exec-path"));
 	if (ret != 0) {
 		throw PEX("Unable to determine git exec-path");
 	}
@@ -439,7 +440,7 @@ std::string GitBackend::uuid()
 				continue;
 			}
 
-			std::vector<std::string> parts = utils::split(str, " ");
+			std::vector<std::string> parts = str::split(str, " ");
 			if (parts.size() == 3) {
 				oldhead = parts[1];
 				oldroot = parts[2];
@@ -471,11 +472,11 @@ std::string GitBackend::uuid()
 
 		std::string id = sys::io::exec(&ret, (m_gitpath+"/git-rev-list").c_str(), "--reverse", branch.c_str(), "--");
 		if (ret != 0) {
-			throw PEX(utils::strprintf("Unable to determine the root commit for branch '%s' (%d)", branch.c_str(), ret));
+			throw PEX(str::printf("Unable to determine the root commit for branch '%s' (%d)", branch.c_str(), ret));
 		}
 		size_t pos = id.find_first_of('\n');
 		if (pos == std::string::npos) {
-			throw PEX(utils::strprintf("Unable to determine the root commit for branch '%s' (%d)", branch.c_str(), ret));
+			throw PEX(str::printf("Unable to determine the root commit for branch '%s' (%d)", branch.c_str(), ret));
 		}
 
 		root = id.substr(0, pos);
@@ -513,9 +514,9 @@ std::string GitBackend::head(const std::string &branch)
 	int ret;
 	std::string out = sys::io::exec(&ret, (m_gitpath+"/git-rev-list").c_str(), "-1", (branch.empty() ? "HEAD" : branch).c_str(), "--");
 	if (ret != 0) {
-		throw PEX(utils::strprintf("Unable to retrieve head commit for branch %s (%d)", branch.c_str(), ret));
+		throw PEX(str::printf("Unable to retrieve head commit for branch %s (%d)", branch.c_str(), ret));
 	}
-	return utils::trim(out);
+	return str::trim(out);
 }
 
 // Returns the currently checked out branch
@@ -524,9 +525,9 @@ std::string GitBackend::mainBranch()
 	int ret;
 	std::string out = sys::io::exec(&ret, (m_gitpath+"/git-branch").c_str());
 	if (ret != 0) {
-		throw PEX(utils::strprintf("Unable to retrieve the list of branches (%d)", ret));
+		throw PEX(str::printf("Unable to retrieve the list of branches (%d)", ret));
 	}
-	std::vector<std::string> branches = utils::split(out, "\n");
+	std::vector<std::string> branches = str::split(out, "\n");
 	for (unsigned int i = 0; i < branches.size(); i++) {
 		if (branches[i].empty()) {
 			continue;
@@ -553,9 +554,9 @@ std::vector<std::string> GitBackend::branches()
 	int ret;
 	std::string out = sys::io::exec(&ret, (m_gitpath+"/git-branch").c_str());
 	if (ret != 0) {
-		throw PEX(utils::strprintf("Unable to retrieve the list of branches (%d)", ret));
+		throw PEX(str::printf("Unable to retrieve the list of branches (%d)", ret));
 	}
-	std::vector<std::string> branches = utils::split(out, "\n");
+	std::vector<std::string> branches = str::split(out, "\n");
 	for (unsigned int i = 0; i < branches.size(); i++) {
 		if (branches[i].empty()) {
 			branches.erase(branches.begin()+i);
@@ -575,9 +576,9 @@ std::vector<Tag> GitBackend::tags()
 	// Fetch list of tag names
 	std::string out = sys::io::exec(&ret, (m_gitpath+"/git-tag").c_str());
 	if (ret != 0) {
-		throw PEX(utils::strprintf("Unable to retrieve the list of tags (%d)", ret));
+		throw PEX(str::printf("Unable to retrieve the list of tags (%d)", ret));
 	}
-	std::vector<std::string> names = utils::split(out, "\n");
+	std::vector<std::string> names = str::split(out, "\n");
 	std::vector<Tag> tags;
 
 	// Determine corresponding commits
@@ -588,10 +589,10 @@ std::vector<Tag> GitBackend::tags()
 
 		std::string out = sys::io::exec(&ret, (m_gitpath+"/git-rev-list").c_str(), "-1", names[i].c_str());
 		if (ret != 0) {
-			throw PEX(utils::strprintf("Unable to retrieve the list of tags (%d)", ret));
+			throw PEX(str::printf("Unable to retrieve the list of tags (%d)", ret));
 		}
 
-		std::string id = utils::trim(out);
+		std::string id = str::trim(out);
 		if (!id.empty()) {
 			tags.push_back(Tag(id, names[i]));
 		}
@@ -606,14 +607,14 @@ Diffstat GitBackend::diffstat(const std::string &id)
 	if (m_prefetcher && m_prefetcher->willFetchDiffstat(id)) {
 		Diffstat stat;
 		if (!m_prefetcher->getDiffstat(id, &stat)) {
-			throw PEX(utils::strprintf("Failed to retrieve diffstat for revision %s", id.c_str()));
+			throw PEX(str::printf("Failed to retrieve diffstat for revision %s", id.c_str()));
 		}
 		return stat;
 	}
 
 	PDEBUG << "Fetching revision " << id << " manually" << endl;
 
-	std::vector<std::string> revs = utils::split(id, ":");
+	std::vector<std::string> revs = str::split(id, ":");
 	if (revs.size() > 1) {
 		return GitDiffstatPipe::diffstat(m_gitpath, revs[1], revs[0]);
 	}
@@ -626,9 +627,9 @@ std::vector<std::string> GitBackend::tree(const std::string &id)
 	int ret;
 	std::string out = sys::io::exec(&ret, (m_gitpath+"/git-ls-tree").c_str(), "-r", "--full-name", "--name-only", (id.empty() ? "HEAD" : id.c_str()));
 	if (ret != 0) {
-		throw PEX(utils::strprintf("Unable to retrieve tree listing for ID '%s' (%d)", id.c_str(), ret));
+		throw PEX(str::printf("Unable to retrieve tree listing for ID '%s' (%d)", id.c_str(), ret));
 	}
-	std::vector<std::string> contents = utils::split(out, "\n");
+	std::vector<std::string> contents = str::split(out, "\n");
 	while (!contents.empty() && contents[contents.size()-1].empty()) {
 		contents.pop_back();
 	}
@@ -641,7 +642,7 @@ std::string GitBackend::cat(const std::string &path, const std::string &id)
 	int ret;
 	std::string out = sys::io::exec(&ret, (m_gitpath+"/git-show").c_str(), ((id.empty() ? std::string("HEAD") : id)+":"+path).c_str());
 	if (ret != 0) {
-		throw PEX(utils::strprintf("Unable to get file contents of %s@%s (%d)", path.c_str(), id.c_str(), ret));
+		throw PEX(str::printf("Unable to get file contents of %s@%s (%d)", path.c_str(), id.c_str(), ret));
 	}
 	return out;
 }
@@ -652,25 +653,25 @@ Backend::LogIterator *GitBackend::iterator(const std::string &branch, int64_t st
 	int ret;
 	std::string out;
 	if (start >= 0) {
-		std::string maxage = utils::strprintf("--max-age=%lld", start);
+		std::string maxage = str::printf("--max-age=%lld", start);
 		if (end >= 0) {
-			std::string minage = utils::strprintf("--min-age=%lld", end);
+			std::string minage = str::printf("--min-age=%lld", end);
 			out = sys::io::exec(&ret, (m_gitpath+"/git-rev-list").c_str(), "--first-parent", "--reverse", maxage.c_str(), minage.c_str(), branch.c_str(), "--");
 		} else {
 			out = sys::io::exec(&ret, (m_gitpath+"/git-rev-list").c_str(), "--first-parent", "--reverse", maxage.c_str(), branch.c_str(), "--");
 		}
 	} else {
 		if (end >= 0) {
-			std::string minage = utils::strprintf("--min-age=%lld", end);
+			std::string minage = str::printf("--min-age=%lld", end);
 			out = sys::io::exec(&ret, (m_gitpath+"/git-rev-list").c_str(), "--first-parent", "--reverse", minage.c_str(), branch.c_str(), "--");
 		} else {
 			out = sys::io::exec(&ret, (m_gitpath+"/git-rev-list").c_str(), "--first-parent", "--reverse", branch.c_str(), "--");
 		}
 	}
 	if (ret != 0) {
-		throw PEX(utils::strprintf("Unable to retrieve log for branch '%s' (%d)", branch.c_str(), ret));
+		throw PEX(str::printf("Unable to retrieve log for branch '%s' (%d)", branch.c_str(), ret));
 	}
-	std::vector<std::string> revisions = utils::split(out, "\n");
+	std::vector<std::string> revisions = str::split(out, "\n");
 	while (!revisions.empty() && revisions[revisions.size()-1].empty()) {
 		revisions.pop_back();
 	}
@@ -702,20 +703,20 @@ Revision *GitBackend::revision(const std::string &id)
 	int ret;
 	std::string meta = sys::io::exec(&ret, m_git.c_str(), "log", "-1", "--pretty=format:%ct\n%aN\n%B", id.c_str());
 	if (ret != 0) {
-		throw PEX(utils::strprintf("Unable to retrieve meta-data for revision '%s' (%d, %s)", id.c_str(), ret, meta.c_str()));
+		throw PEX(str::printf("Unable to retrieve meta-data for revision '%s' (%d, %s)", id.c_str(), ret, meta.c_str()));
 	}
-	std::vector<std::string> lines = utils::split(meta, "\n");
+	std::vector<std::string> lines = str::split(meta, "\n");
 	int64_t date = 0;
 	std::string author;
 	if (!lines.empty()) {
-		utils::str2int(lines[0], &date);
+		str::str2int(lines[0], &date);
 		lines.erase(lines.begin());
 	}
 	if (!lines.empty()) {
 		author = lines[0];
 		lines.erase(lines.begin());
 	}
-	std::string msg = utils::join(lines, "\n");
+	std::string msg = str::join(lines, "\n");
 	return new Revision(id, date, author, msg, diffstat(id));
 #else
 
@@ -723,7 +724,7 @@ Revision *GitBackend::revision(const std::string &id)
 	if (m_prefetcher && m_prefetcher->willFetchMeta(id)) {
 		GitMetaDataThread::Data data;
 		if (!m_prefetcher->getMeta(id, &data)) {
-			throw PEX(utils::strprintf("Failed to retrieve meta-data for revision %s", id.c_str()));
+			throw PEX(str::printf("Failed to retrieve meta-data for revision %s", id.c_str()));
 		}
 		return new Revision(id, data.date, data.author, data.message, diffstat(id));
 	}

@@ -18,6 +18,7 @@
 #include "logger.h"
 #include "options.h"
 #include "revision.h"
+#include "strlib.h"
 #include "utils.h"
 
 #include "syslib/datetime.h"
@@ -25,7 +26,6 @@
 #include "syslib/sigblock.h"
 
 #include "cache.h"
-
 
 #define CACHE_VERSION (uint32_t)4
 #define MAX_CACHEFILE_SIZE 4194304
@@ -136,7 +136,7 @@ void Cache::put(const std::string &id, const Revision &rev)
 	if (m_cout == NULL) {
 		m_coindex = 0;
 		do {
-			path = utils::strprintf("%s/cache.%u", dir.c_str(), m_coindex);
+			path = str::printf("%s/cache.%u", dir.c_str(), m_coindex);
 			if (!sys::fs::fileExists(path) || sys::fs::filesize(path) < MAX_CACHEFILE_SIZE) {
 				break;
 			}
@@ -147,7 +147,7 @@ void Cache::put(const std::string &id, const Revision &rev)
 		m_cout = new BOStream(path, true);
 	} else if (m_cout->tell() >= MAX_CACHEFILE_SIZE) {
 		delete m_cout;
-		path = utils::strprintf("%s/cache.%u", dir.c_str(), ++m_coindex);
+		path = str::printf("%s/cache.%u", dir.c_str(), ++m_coindex);
 		m_cout = new BOStream(path, true);
 	}
 
@@ -180,17 +180,17 @@ Revision *Cache::get(const std::string &id)
 
 	std::string dir = m_opts.cacheDir() + "/" + uuid();
 	std::pair<uint32_t, uint32_t> offset = m_index[id];
-	std::string path = utils::strprintf("%s/cache.%u", dir.c_str(), offset.first);
+	std::string path = str::printf("%s/cache.%u", dir.c_str(), offset.first);
 	if (m_cin == NULL || offset.first != m_ciindex) {
 		delete m_cin;
 		m_cin = new BIStream(path);
 		m_ciindex = offset.first;
 		if (!m_cin->ok()) {
-			throw PEX(utils::strprintf("Unable to read from cache file: %s", path.c_str()));
+			throw PEX(str::printf("Unable to read from cache file: %s", path.c_str()));
 		}
 	}
 	if (!m_cin->seek(offset.second)) {
-		throw PEX(utils::strprintf("Unable to read from cache file: %s", path.c_str()));
+		throw PEX(str::printf("Unable to read from cache file: %s", path.c_str()));
 	}
 
 	Revision *rev = new Revision(id);
@@ -198,11 +198,11 @@ Revision *Cache::get(const std::string &id)
 	*m_cin >> data;
 	data = utils::uncompress(data);
 	if (data.empty()) {
-		throw PEX(utils::strprintf("Unable to read from cache file: %s", path.c_str()));
+		throw PEX(str::printf("Unable to read from cache file: %s", path.c_str()));
 	}
 	MIStream rin(data);
 	if (!rev->load(rin)) {
-		throw PEX(utils::strprintf("Unable to read from cache file: %s", path.c_str()));
+		throw PEX(str::printf("Unable to read from cache file: %s", path.c_str()));
 	}
 	return rev;
 }
@@ -242,7 +242,7 @@ void Cache::load()
 			clear();
 			return;
 		case UnknownVersion:
-			throw PEX(utils::strprintf("Unknown cache version number %u", version));
+			throw PEX(str::printf("Unknown cache version number %u", version));
 		default:
 			break;
 	}
@@ -324,7 +324,7 @@ void Cache::checkDir(const std::string &path, bool *created)
 		try {
 			sys::fs::mkpath(path);
 		} catch (const std::exception &ex) {
-			throw PEX(utils::strprintf("Unable to create cache directory: %s", ex.what()));
+			throw PEX(str::printf("Unable to create cache directory: %s", ex.what()));
 		}
 		PDEBUG << "Cache: Creating cache directory '" << path << '\'' << endl;
 
@@ -404,7 +404,7 @@ void Cache::check()
 		bool ok = true;
 		if (cache_in == NULL || cache_index != pos.first) {
 			delete cache_in;
-			cache_in = new BIStream(utils::strprintf("%s/cache.%u", path.c_str(), pos.first));
+			cache_in = new BIStream(str::printf("%s/cache.%u", path.c_str(), pos.first));
 			cache_index = pos.first;
 			if (!cache_in->ok()) {
 				delete cache_in; cache_in = NULL;

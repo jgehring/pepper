@@ -28,6 +28,7 @@ libpepper_a_SOURCES = \
 	repository.h repository.cpp \
 	revision.h revision.cpp \
 	revisioniterator.h revisioniterator.cpp \
+	strlib.h strlib.cpp \
 	tag.h tag.cpp \
 	utils.h utils.cpp \
 	\
