@@ -47,7 +47,7 @@ function print_age(url, t)
 	elseif span < 45*60 then age = tonumber(os.date("%M", span)) .. " minutes old"
 	elseif span < 24*60*60 then age = tonumber(os.date("%H", span)) .. " hours old"
 	elseif span < 28*24*60*60 then age = tonumber(os.date("%d", span)) .. " days old"
-	elseif span < 12*30*24*60*60 then age = tonumber(os.date("%m", span)) .. " months old"
+	elseif span < 365*24*60*60 then age = tonumber(os.date("%m", span)) .. " months old"
 	else
 		local years = (tonumber(os.date("%Y", span)) - 1970)
 		if years == 1 then age = "1 year old" else age = years .. " years old" end
