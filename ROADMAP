@@ -1,9 +1,9 @@
-A non-committal roadmap for pepper
-==================================
+A non-obligatory roadmap for pepper
+===================================
 
 Planned features for 0.3:
-	* API overhaul (more OOP and report-centric and report-centric)
-	* repository:cat()
+	- API overhaul (more OOP and report-centric)
+	- repository:cat()
 	* repository:log()
 	* Time range arguments for all reports
 	* GUI report (using lgob.gtk)
