@@ -17,6 +17,10 @@
 #include <cstdlib>
 #include <fstream>
 
+#if defined(POS_LINUX) && defined(DEBUG)
+ #include <sys/resource.h>
+#endif
+
 #include "backend.h"
 #include "cache.h"
 #include "logger.h"
@@ -213,6 +217,15 @@ int main(int argc, char **argv)
 	// newlines being automatically translated to CRLF.
 	_setmode(_fileno(stdout), _O_BINARY);
 #endif // WIN32
+#if defined(POS_LINUX) && defined(DEBUG)
+	// Enable core dumps
+	{
+		struct rlimit rl;
+		rl.rlim_cur = RLIM_INFINITY;
+		rl.rlim_max = RLIM_INFINITY;
+		setrlimit(RLIMIT_CORE, &rl);
+	}
+#endif
 
 	Options opts;
 	try {
