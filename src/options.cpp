@@ -157,7 +157,7 @@ void Options::printHelp(std::ostream &out)
 	print("-bARG, --backend=ARG", "Force usage of backend named ARG", out);
 	print("--no-cache", "Disable revision cache usage", out);
 	out << std::endl;
-	print("--list-reports", "List built-in report scrtips", out);
+	print("--list-reports", "List report scrtips in search paths", out);
 	print("--list-backends", "List available backends", out);
 }
 
