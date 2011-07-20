@@ -297,7 +297,9 @@ except:\n\
 	if (res != 0) {
 		// Throw exception
 		object = PyObject_GetAttrString(pModule, "stderr");
-		PyObject *output = PyObject_CallMethod(object, "getvalue", NULL);
+		char *getvalue = strdup("getvalue");
+		PyObject *output = PyObject_CallMethod(object, getvalue, NULL);
+		free(getvalue);
 		assert(output != NULL);
 		throw PEX(str::trim(PyString_AsString(output)));
 	}
