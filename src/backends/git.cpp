@@ -198,18 +198,17 @@ protected:
 		std::vector<std::string> ids;
 
 		std::string revlist = m_gitpath + "/git-rev-list";
-		args[0] = revlist.c_str();
-		args[1] = "--no-walk";
-		args[2] = "--header"; // No support for message bodies in old git versions
+		args[0] = "--no-walk";
+		args[1] = "--header"; // No support for message bodies in old git versions
 
 		// Try to fetch the revision headers for maxrevs revisions at once
 		while (m_queue->getArgs(&ids, maxids)) {
 			for (size_t i = 0; i < ids.size(); i++) {
-				args[i+3] = ids[i].c_str();
+				args[i+2] = ids[i].c_str();
 			}
-			args[ids.size()+3] = NULL;
+			args[ids.size()+2] = NULL;
 
-			sys::io::PopenStreambuf buf(args[0], args);
+			sys::io::PopenStreambuf buf(revlist.c_str(), args);
 			std::istream in(&buf);
 
 			// Parse headers
