@@ -13,6 +13,7 @@
 
 #include "main.h"
 
+#include <cassert>
 #include <cerrno>
 #include <cstdio>
 #include <cstdlib>
@@ -23,6 +24,8 @@
 #include "logger.h"
 
 #include "io.h"
+
+#define MAX_ARGS 512
 
 
 namespace sys
@@ -164,7 +167,7 @@ class PopenStreambufData
 public:
 	Filedes pipe;
 	int pid;
-	const char *argv[9];
+	const char *argv[MAX_ARGS];
 };
 
 // Constructor
@@ -212,9 +215,10 @@ PopenStreambuf::PopenStreambuf(const char *cmd, const char * const *argv, std::i
 
 	int i;
 	d->argv[0] = cmd;
-	for (i = 0; i < 7 && argv[i] != NULL; i++) {
+	for (i = 0; i < MAX_ARGS-2 && argv[i] != NULL; i++) {
 		d->argv[i+1] = argv[i];
 	}
+	assert(i < MAX_ARGS-2);
 	d->argv[i+1] = NULL;
 
 	d->pipe = forkrw(cmd, d->argv, &d->pid, m);
