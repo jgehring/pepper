@@ -42,10 +42,30 @@ function print_age(url, t)
 	local now = os.time()
 	local span = now - t
 	local age = ""
+	local name = pepper.utils.basename(url)
+
+	-- Easy case: Birthday in the past
+	if span < 0 then
+		print(name .. " is not born yet!")
+		return
+	end
+
+	-- Easy case: Happy birthday
+	local today = string.format("%s %s", os.date("%B", now), count_str(os.date("%d", now)))
+	local birthday = string.format("%s %s", os.date("%B", t), count_str(os.date("%d", t)))
+	if today == birthday then
+		local d = os.date("%Y", now) - os.date("%Y", t)
+		if d == 1 then
+			print(name .. " is " .. d .. " year old")
+		elseif d ~= 0 then
+			print(name .. " is " .. d .. " years old")
+		end
+		print("Happy birthday, " .. name .. "!")
+		return
+	end
 
 	-- Age information
-	if span < 0 then age = "not born yet"
-	elseif span < 60 then
+	if span < 60 then
 		if span == 1 then age = "one second old" else age = tostring(span) .. " seconds old" end
 	elseif span < 120 then age = "one minute old"
 	elseif span < 45*60 then age = tonumber(os.date("%M", span)) .. " minutes old"
@@ -58,8 +78,6 @@ function print_age(url, t)
 	end
 
 	-- Birthday information
-	local today = string.format("%s %s", os.date("%B", now), count_str(os.date("%d", now)))
-	local birthday = string.format("%s %s", os.date("%B", t), count_str(os.date("%d", t)))
 	local birthday_date = os.date("*t", t)
 	birthday_date.year = tonumber(os.date("%Y"))
 	if os.time(birthday_date) - now < 0 then
@@ -68,7 +86,6 @@ function print_age(url, t)
 	local birthday_dist = pepper.datetime.humanrange(os.time(birthday_date) - now)
 
 	-- Print result
-	local name = pepper.utils.basename(url)
 	print(name .. " is " .. age)
 
 	if today ~= birthday then
@@ -78,7 +95,6 @@ function print_age(url, t)
 		end
 		print(string.format("%s%s birthday is in %s (%s)", name, suffix, birthday_dist, birthday))
 	elseif span > 60*60*24 then
-		print("Happy birthday, " .. name .. "!")
 	end
 end
 
