@@ -36,7 +36,7 @@ namespace fs
 std::string basename(const std::string &path)
 {
 	if (path.empty()) {
-		return std::string(".");
+		return std::string();
 	}
 	int i = path.length()-1;
 	while (i > 0 && path[i] == '/') --i;
@@ -51,7 +51,7 @@ std::string basename(const std::string &path)
 		}
 		return path.substr(i+1, j-i);
 	}
-	return path;
+	return path.substr(0, j+1);
 }
 
 // Like dirname()
