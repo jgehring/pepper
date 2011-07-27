@@ -13,6 +13,7 @@ units_SOURCES = \
 	test_bstream.h \
 	test_options.h \
 	test_strlib.h \
+	test_sys_fs.h \
 	test_utils.h
 
 AM_CXXFLAGS = \

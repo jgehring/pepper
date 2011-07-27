@@ -97,7 +97,7 @@ TEST_CASE("str/join", "str::join()")
 	}
 }
 
-TEST_CASE("str/strprintf", "str::printf()")
+TEST_CASE("str/printf", "str::printf()")
 {
 	struct inout_t {
 		const char *src;

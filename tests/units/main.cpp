@@ -47,6 +47,7 @@ void push_back(std::vector<std::string> *v, const char *s1 = 0, const char *s2 =
 #include "test_bstream.h"
 #include "test_options.h"
 #include "test_strlib.h"
+#include "test_sys_fs.h"
 #include "test_utils.h"
 
 

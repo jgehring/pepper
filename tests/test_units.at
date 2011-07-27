@@ -23,6 +23,10 @@ AT_SETUP([String functions])
 AT_CHECK([units -t 'str/*'], [0], [ignore])
 AT_CLEANUP()
 
+AT_SETUP([Filesystem functions])
+AT_CHECK([units -t 'sys_fs/*'], [0], [ignore])
+AT_CLEANUP()
+
 AT_SETUP([Utility functions])
 AT_CHECK([units -t 'utils/*'], [0], [ignore])
 AT_CLEANUP()
