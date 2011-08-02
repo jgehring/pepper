@@ -294,10 +294,8 @@ void Report::printHelp()
 
 	std::cout << "Options for report '" << m_metaData.name << "':" << std::endl;
 
-	std::map<std::string, std::string>::const_iterator it = m_metaData.options.begin();
-	while (it != m_metaData.options.end()) {
-		Options::print(it->first, it->second);
-		++it;
+	for (size_t i = 0; i < m_metaData.options.size(); i++) {
+		Options::print(m_metaData.options[i].synopsis, m_metaData.options[i].description);
 	}
 }
 
@@ -500,7 +498,7 @@ void Report::readMetaData()
 			lua_pop(L, 1);
 
 			if (i >= 2) {
-				m_metaData.options.insert(std::pair<std::string, std::string>(arg, text));
+				m_metaData.options.push_back(MetaData::Option(arg, text));
 			}
 		}
 	}
@@ -633,7 +631,16 @@ int Report::options(lua_State *L)
 		if (!m_metaDataRead) {
 			readMetaData();
 		}
-		return LuaHelpers::push(L, m_metaData.options);
+
+		// Convert each option into a 2-dimensional vector
+		std::vector<std::vector<std::string> > opvec;
+		for (size_t i = 0; i < m_metaData.options.size(); i++) {
+			std::vector<std::string> v;
+			v.push_back(m_metaData.options[i].synopsis);
+			v.push_back(m_metaData.options[i].description);
+			opvec.push_back(v);
+		}
+		return LuaHelpers::push(L, opvec);
 	} catch (const PepperException &ex) {
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
 	} catch (const std::exception &ex) {

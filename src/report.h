@@ -31,9 +31,17 @@ class Report
 {
 	public:
 		struct MetaData {
+			struct Option {
+				std::string synopsis;
+				std::string description;
+
+				Option(const std::string &synopsis, const std::string &description) 
+					: synopsis(synopsis), description(description) { }
+			};
+
 			std::string name;
 			std::string description;
-			std::map<std::string, std::string> options;
+			std::vector<Option> options;
 		};
 
 	public:
