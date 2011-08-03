@@ -633,11 +633,7 @@ SubversionBackend::SubversionBackend(const Options &options)
 // Destructor
 SubversionBackend::~SubversionBackend()
 {
-	if (m_prefetcher) {
-		m_prefetcher->stop();
-		m_prefetcher->wait();
-		delete m_prefetcher;
-	}
+	close();
 	delete d;
 }
 
@@ -673,6 +669,13 @@ void SubversionBackend::init()
 		svn_pool_destroy(pool);
 	}
 	d->open(url, m_opts.options());
+}
+
+// Called after Report::run()
+void SubversionBackend::close()
+{
+	// Clean up any prefetching threads
+	finalize();
 }
 
 // Returns true if this backend is able to access the given repository

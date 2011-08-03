@@ -27,6 +27,7 @@ class GitBackend : public Backend
 		~GitBackend();
 
 		void init();
+		void close();
 
 		std::string name() const { return "git"; }
 		static bool handles(const std::string &url);

@@ -361,11 +361,7 @@ GitBackend::GitBackend(const Options &options)
 // Destructor
 GitBackend::~GitBackend()
 {
-	if (m_prefetcher) {
-		m_prefetcher->stop();
-		m_prefetcher->wait();
-		delete m_prefetcher;
-	}
+	close();
 }
 
 // Initializes the backend
@@ -405,6 +401,13 @@ void GitBackend::init()
 	PDEBUG << "git exec-path is " << m_gitpath << endl;
 
 	PDEBUG << "GIT_DIR has been set to " << getenv("GIT_DIR") << endl;
+}
+
+// Called after Report::run()
+void GitBackend::close()
+{
+	// Clean up any prefetching threads
+	finalize();
 }
 
 // Returns true if this backend is able to access the given repository

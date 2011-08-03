@@ -38,6 +38,8 @@ class Cache : public Backend
 		~Cache();
 
 		void init() { }
+		void open() { m_backend->open(); }
+		void close() { flush(); m_backend->close(); }
 
 		std::string name() const { return m_backend->name(); }
 

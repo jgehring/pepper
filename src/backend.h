@@ -57,6 +57,8 @@ class Backend
 		static void listBackends(std::ostream &out = std::cout);
 
 		virtual void init();
+		virtual void open();
+		virtual void close();
 
 		virtual std::string name() const = 0;
 

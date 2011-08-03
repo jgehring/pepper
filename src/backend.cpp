@@ -107,6 +107,18 @@ void Backend::init()
 	// The default implementation does nothing
 }
 
+// Called prior to Report::run()
+void Backend::open()
+{
+	// The default implementation does nothing
+}
+
+// Called after to Report::run()
+void Backend::close()
+{
+	// The default implementation does nothing
+}
+
 // Gives the backend the possibility to pre-fetch the given revisions
 void Backend::prefetch(const std::vector<std::string> &)
 {

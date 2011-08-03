@@ -69,6 +69,7 @@ class SubversionBackend : public Backend
 		~SubversionBackend();
 
 		void init();
+		void close();
 
 		std::string name() const { return "subversion"; }
 		static bool handles(const std::string &url);

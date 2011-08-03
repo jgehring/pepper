@@ -247,6 +247,9 @@ int Report::run(std::ostream &out, std::ostream &err)
 	std::ostream *prevout = m_out;
 	m_out = &out;
 
+	// Ensure the backend is ready
+	m_repo->backend()->open();
+
 	lua_State *L = setupLua();
 
 	// Wrap print() function to use custom output stream
@@ -278,6 +281,9 @@ int Report::run(std::ostream &out, std::ostream &err)
 	// Clean up
 	lua_gc(L, LUA_GCCOLLECT, 0);
 	lua_close(L);
+
+	// Inform backend that the report is done
+	m_repo->backend()->close();
 
 	PTRACE << "Popping report context for " << path <<  endl;
 	s_stack.pop();
