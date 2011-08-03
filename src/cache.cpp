@@ -395,44 +395,47 @@ void Cache::check()
 	std::vector<std::string> corrupted;
 	while (!in->eof()) {
 		*in >> id;
-		if (id.empty()) {
-			break;
+		if (!in->ok()) {
+			goto corrupt;
 		}
+
 		*in >> pos.first >> pos.second;
 		*in >> crc;
+		if (!in->ok()) {
+			goto corrupt;
+		}
 
 		index[id] = pos;
 		crcs[id] = crc;
 
-		bool ok = true;
 		if (cache_in == NULL || cache_index != pos.first) {
 			delete cache_in;
 			cache_in = new BIStream(str::printf("%s/cache.%u", path.c_str(), pos.first));
 			cache_index = pos.first;
 			if (!cache_in->ok()) {
 				delete cache_in; cache_in = NULL;
-				ok = false;
+				goto corrupt;
 			}
 		}
 		if (cache_in != NULL) {
 			if (!cache_in->seek(pos.second)) {
-				ok = false;
+				goto corrupt;
 			} else {
 				std::vector<char> data;
 				*cache_in >> data;
 				if (utils::crc32(data) != crc) {
-					ok = false;
+					goto corrupt;
 				}
 			}
 		}
 
-		if (!ok) {
-			PTRACE << "Revision " << id << " corrupted!" << endl;
-			std::cerr << "Cache: Revision " << id << " is corrupted, removing from index file" << std::endl;
-			corrupted.push_back(id);
-		} else {
-			PTRACE << "Revision " << id << " ok" << endl;
-		}
+		PTRACE << "Revision " << id << " ok" << endl;
+		continue;
+
+corrupt:
+		PTRACE << "Revision " << id << " corrupted!" << endl;
+		std::cerr << "Cache: Revision " << id << " is corrupted, removing from index file" << std::endl;
+		corrupted.push_back(id);
 	}
 	delete cache_in;
 	delete in;
