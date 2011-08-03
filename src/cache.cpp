@@ -169,6 +169,9 @@ void Cache::put(const std::string &id, const Revision &rev)
 	}
 	*m_iout << id;
 	*m_iout << m_coindex << offset << utils::crc32(compressed);
+
+	// Update cached index
+	m_index[id] = std::pair<uint32_t, uint32_t>(m_coindex, offset);
 }
 
 // Loads a revision from the cache
