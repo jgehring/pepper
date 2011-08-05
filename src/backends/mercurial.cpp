@@ -56,7 +56,9 @@ sys.stderr = stderr = StringIO()\n\
 myui = ui.ui() \n\
 myui.quiet = True \n\
 repo = hg.repository(myui, '%s') \n\n", repo.c_str()));
-	assert(res == 0);
+	if (res != 0) {
+		throw PEX(str::printf("Unable to load or setup Python modules (%d)", res));
+	}
 }
 
 // Returns true if this backend is able to access the given repository
