@@ -95,7 +95,7 @@ std::string Cache::cacheFile(Backend *backend, const std::string &name)
 {
 	std::string dir = backend->options().cacheDir() + "/" + backend->uuid();
 	checkDir(dir);
-	return dir + "/" + name;
+	return dir + "/" + sys::fs::escape(name);
 }
 
 // Flushes and closes the cache streams
