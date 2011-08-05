@@ -118,6 +118,24 @@ void chdir(const std::string &path)
 	}
 }
 
+// Escapes invalid / problematique characters from the given base name
+std::string escape(const std::string &base)
+{
+	// Replace most non-alphanumeric character with its hexadecimal
+	// represetation, prefixed by '#'
+	std::stringstream ss;
+	ss << std::hex << std::uppercase;
+	for (size_t i = 0; i < base.length(); i++) {
+		if (isalnum(base[i]) || base[i] == '.' || base[i] == '_') {
+			ss << base[i];
+		} else {
+			ss << '#' << int(base[i]);
+		}
+	}
+
+	return ss.str();
+}
+
 // Wrapper for mkdir()
 void mkdir(const std::string &path)
 {
