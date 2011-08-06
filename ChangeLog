@@ -1,3 +1,8 @@
+2011-08-06  --  version 0.2.4
+
+	* #3386735: Fixed Subverison log fetching for deeper subdirectories
+	* Fixes for thresholds and messages in age report
+
 2011-06-22  --  version 0.2.3
 
 	* Added punchcard report
