@@ -1,4 +1,5 @@
 [[!meta title="pepper 0.2.1 released"]]
+[[!meta date="2011-04-05 23:54 CEST"]]
 
 Version 0.2.1 of pepper is now available. This release focuses on the
 Subversion backend implementation and contains new features as well as

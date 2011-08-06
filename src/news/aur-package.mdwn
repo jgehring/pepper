@@ -1,4 +1,5 @@
 [[!meta title="AUR package"]]
+[[!meta date="2011-01-12 11:16 CET"]]
 
 I've added a [PKGBUILD for
 pepper](http://aur.archlinux.org/packages.php?ID=45324) to the [Arch User

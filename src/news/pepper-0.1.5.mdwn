@@ -1,4 +1,5 @@
 [[!meta title="pepper 0.1.5 released"]]
+[[!meta date="2011-01-31 23:48 CET"]]
 
 Version 0.1.5 of pepper is now available. This release
 adds a new report showing a histogram of file types in the

@@ -1,4 +1,5 @@
 [[!meta title="New Homepage"]]
+[[!meta date="2011-01-10 01:22 CET"]]
 
 I'm happy to announce that pepper's homepage is now generated using
 [IkiWiki](http://ikiwiki.info), a nifty wiki compiler. The homepage
