@@ -1,0 +1,12 @@
+[[!meta title="pepper 0.2.4 released"]]
+
+I'm happy to announce that version 0.2.4 of pepper is now available. This
+is a bugfix release only, fixing a file name issue [reported by Merve
+Yüzbaşıoğlu](http://sourceforge.net/tracker/index.php?func=detail&aid=3386735&group_id=386093&atid=1604684),
+that could cause errors when running the program against sub-directories of
+Subversion repositories. Additionally, some minor fixes have been made
+to the age report.
+
+A more detailed listing of the changes can be found in the [change
+log](ChangeLog). As usual, source tarballs can be found at the
+[[Download]] section.
