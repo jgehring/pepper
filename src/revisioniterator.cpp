@@ -35,8 +35,8 @@
 
 
 // Constructor
-RevisionIterator::RevisionIterator(Backend *backend, const std::string &branch, int64_t start, int64_t end)
-	: m_backend(backend), m_total(0), m_consumed(0), m_atEnd(false)
+RevisionIterator::RevisionIterator(Backend *backend, const std::string &branch, int64_t start, int64_t end, Flags flags)
+	: m_backend(backend), m_total(0), m_consumed(0), m_atEnd(false), m_flags(flags)
 {
 	m_logIterator = backend->iterator(branch, start, end);
 	m_logIterator->start();
@@ -106,7 +106,9 @@ void RevisionIterator::fetchLogs()
 		tq.pop();
 	}
 
-	m_backend->prefetch(ids);
+	if (m_flags & PrefetchRevisions) {
+		m_backend->prefetch(ids);
+	}
 }
 
 /*

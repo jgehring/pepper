@@ -26,7 +26,12 @@
 class RevisionIterator
 {
 	public:
-		RevisionIterator(Backend *backend, const std::string &branch = std::string(), int64_t start = -1, int64_t end = -1);
+		enum Flags {
+			PrefetchRevisions = 0x01
+		};
+
+	public:
+		RevisionIterator(Backend *backend, const std::string &branch = std::string(), int64_t start = -1, int64_t end = -1, Flags flags = PrefetchRevisions);
 		~RevisionIterator();
 
 		bool atEnd();
@@ -43,6 +48,7 @@ class RevisionIterator
 		std::queue<std::string> m_queue;
 		std::queue<std::string>::size_type m_total, m_consumed;
 		bool m_atEnd;
+		Flags m_flags;
 
 	// Lua binding
 	public:
