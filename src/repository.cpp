@@ -168,22 +168,27 @@ int Repository::iterator(lua_State *L)
 {
 	if (m_backend == NULL) return LuaHelpers::pushNil(L);
 
-	if (lua_gettop(L) < 1 || lua_gettop(L) > 3) {
-		return luaL_error(L, "Invalid number of arguments (1 to 3 expected)");
-	}
-
 	std::string branch;
 	int64_t start = -1, end = -1;
-	switch (lua_gettop(L)) {
-		case 3: end = LuaHelpers::popi(L);
-		case 2: start = LuaHelpers::popi(L);
-		case 1: branch = LuaHelpers::pops(L);
-		default: break;
+	RevisionIterator::Flags flags = RevisionIterator::PrefetchRevisions;
+
+	if (lua_gettop(L) == 2) {
+		start = LuaHelpers::tablevi(L, "start", -1);
+		end = LuaHelpers::tablevi(L, "stop", -1); // 'end' is a Lua keyword
+		if (!LuaHelpers::tablevb(L, "prefetch", true)) {
+			flags = RevisionIterator::Flags(int(flags) & ~RevisionIterator::PrefetchRevisions);
+		}
+		lua_pop(L, 1);
+	}
+	if (lua_gettop(L) == 1) {
+		branch = LuaHelpers::pops(L);
+	} else {
+		return luaL_error(L, "Invalid number of arguments (1 or 2 expected)");
 	}
 
 	RevisionIterator *it = NULL;
 	try {
-		it = new RevisionIterator(m_backend, branch, start, end);
+		it = new RevisionIterator(m_backend, branch, start, end, flags);
 	} catch (const PepperException &ex) {
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
 	}

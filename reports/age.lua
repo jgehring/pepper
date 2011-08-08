@@ -106,7 +106,7 @@ function run(self)
 	if repo:type() == "mercurial" then
 		print_age(repo:url(), repo:revision("0"):date())
 	else
-		local iterator = repo:iterator(branch)
+		local iterator = repo:iterator(branch, {prefetch=false})
 		for revision in iterator:revisions() do
 			print_age(repo:url(), revision:date())
 			break

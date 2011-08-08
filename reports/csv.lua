@@ -106,7 +106,7 @@ function run(self)
 	-- Gather data
 	local repo = self:repository()
 	local branch = self:getopt("b,branch", repo:default_branch())
-	repo:iterator(branch, datemin, datemax):map(
+	repo:iterator(branch, {start=datemin, stop=datemax}):map(
 		function (r)
 			if printheader then
 				local header = "# Timestamp, "

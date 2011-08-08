@@ -43,8 +43,14 @@ function cat(file, id)
 function revision(id)
 
 --- Returns a revision iterator for the given branch.
+--  The following options will be added:
+--  <table>
+--  <tr><th>Key</th><th>Description</th><th>Default value</td></tr>
+--  <tr><td>start</td><td>Minimum time stamp for commits</td><td>none</td></tr>
+--  <tr><td>stop</td><td>Maximum time stamp for commits</td><td>none</td></tr>
+--  <tr><td>prefetch</td><td>Turn pre-fetching of revisions on or off</td><td>true</td></tr>
+--  </table>
 --  @param branch The name of the branch
---  @param start Optional minimum timestamp for commits
---  @param end Optional maximum timestamp for commits
+--  @param options Optional table with additional parameters
 --  @see pepper.iterator
-function iterator(branch, start, end)
+function iterator(branch, options)

@@ -126,7 +126,7 @@ function run(self)
 	local repo = self:repository()
 	local branch = self:getopt("b,branch", repo:default_branch())
 	local data = {} -- {commits, changes}
-	repo:iterator(branch, start):map(
+	repo:iterator(branch, {start=start}):map(
 		function (r)
 			local slot = timeslot(r:date(), resolution)
 			if data[slot] == nil then data[slot] = {0, 0} end

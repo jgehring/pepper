@@ -140,7 +140,7 @@ function run(self)
 	-- Gather data
 	local repo = self:repository()
 	local branch = self:getopt("b,branch", repo:default_branch())
-	repo:iterator(branch, datemin, datemax):map(count)
+	repo:iterator(branch, {start=datemin, stop=datemax}):map(count)
 	if last == 0 then
 		error("No data on this branch")
 	end

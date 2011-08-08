@@ -4,7 +4,7 @@ A non-obligatory roadmap for pepper
 Planned features for 0.3:
 	- API overhaul (more OOP and report-centric)
 	- repository:cat()
-	* repository:log()
+	# repository:log() (Use repository:iterator() without prefetching instead)
 	* Time range arguments for all reports
 	* GUI report (using lgob.gtk)
 

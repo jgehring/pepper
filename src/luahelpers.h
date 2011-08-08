@@ -287,6 +287,40 @@ inline void calls(lua_State *L, const std::string &name, const T1 &arg1, const T
 }
 
 
+inline int tablevi(lua_State *L, const std::string &key, int def = -1, int index = -1) {
+	luaL_checktype(L, index, LUA_TTABLE);
+	push(L, key);
+	lua_gettable(L, index-1);
+	if (lua_isnil(L, -1)) {
+		lua_pop(L, 1);
+		return def;
+	}
+	return popi(L);
+}
+
+inline bool tablevb(lua_State *L, const std::string &key, bool def = false, int index = -1) {
+	luaL_checktype(L, index, LUA_TTABLE);
+	push(L, key);
+	lua_gettable(L, index-1);
+	if (lua_isnil(L, -1)) {
+		lua_pop(L, 1);
+		return def;
+	}
+	return popb(L);
+}
+
+inline std::string tablevb(lua_State *L, const std::string &key, const std::string &def = std::string(), int index = -1) {
+	luaL_checktype(L, index, LUA_TTABLE);
+	push(L, key);
+	lua_gettable(L, index-1);
+	if (lua_isnil(L, -1)) {
+		lua_pop(L, 1);
+		return def;
+	}
+	return pops(L);
+}
+
+
 inline size_t tablesize(lua_State *L, int index = -1) {
 	return lua_objlen(L, index);
 }
