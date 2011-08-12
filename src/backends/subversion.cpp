@@ -955,13 +955,26 @@ std::string SubversionBackend::cat(const std::string &path, const std::string &i
 		throw PEX(SvnConnection::strerr(err));
 	}
 
-	svn_string_t *result;
-	err = svn_string_from_stream(&result, stream, pool, pool);
-	if (err != NULL) {
+	// Subversion 1.6 offers this in svn_string_from_stream(), but for 1.5 we
+	// must copy the string manually.
+	svn_stringbuf_t *work = svn_stringbuf_create("", pool);
+	char *buffer = (char *)apr_palloc(pool, SVN__STREAM_CHUNK_SIZE);
+	while (1) {
+		apr_size_t len = SVN__STREAM_CHUNK_SIZE;
+		if ((err = svn_stream_read(stream, buffer, &len))) {
+			throw PEX(SvnConnection::strerr(err));
+		}
+		svn_stringbuf_appendbytes(work, buffer, len);
+		if (len < SVN__STREAM_CHUNK_SIZE) {
+			break;
+		}
+	}    
+
+	if ((err = svn_stream_close(stream))) {
 		throw PEX(SvnConnection::strerr(err));
 	}
 
-	std::string content = std::string(result->data, result->len);
+	std::string content = std::string(work->data, work->len);
 	svn_pool_destroy(pool);
 	return content;
 }
