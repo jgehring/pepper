@@ -91,6 +91,8 @@ int Repository::head(lua_State *L)
 		h = m_backend->head(branch);
 	} catch (const PepperException &ex) {
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
+	} catch (const std::exception &ex) {
+		return LuaHelpers::pushError(L, ex.what());
 	}
 	return LuaHelpers::push(L, h);
 }
@@ -109,6 +111,8 @@ int Repository::branches(lua_State *L)
 		b = m_backend->branches();
 	} catch (const PepperException &ex) {
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
+	} catch (const std::exception &ex) {
+		return LuaHelpers::pushError(L, ex.what());
 	}
 	return LuaHelpers::push(L, b);
 }
@@ -121,6 +125,8 @@ int Repository::tags(lua_State *L)
 		t = m_backend->tags();
 	} catch (const PepperException &ex) {
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
+	} catch (const std::exception &ex) {
+		return LuaHelpers::pushError(L, ex.what());
 	}
 
 	lua_createtable(L, t.size(), 0);
@@ -145,6 +151,8 @@ int Repository::tree(lua_State *L)
 		t = m_backend->tree(id);
 	} catch (const PepperException &ex) {
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
+	} catch (const std::exception &ex) {
+		return LuaHelpers::pushError(L, ex.what());
 	}
 	return LuaHelpers::push(L, t);
 }
@@ -160,6 +168,8 @@ int Repository::revision(lua_State *L)
 		m_backend->filterDiffstat(&(rev->m_diffstat));
 	} catch (const PepperException &ex) {
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
+	} catch (const std::exception &ex) {
+		return LuaHelpers::pushError(L, ex.what());
 	}
 	return LuaHelpers::push(L, rev); // TODO: Memory leak!
 }
@@ -191,6 +201,8 @@ int Repository::iterator(lua_State *L)
 		it = new RevisionIterator(m_backend, branch, start, end, flags);
 	} catch (const PepperException &ex) {
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
+	} catch (const std::exception &ex) {
+		return LuaHelpers::pushError(L, ex.what());
 	}
 	return LuaHelpers::push(L, it);
 }
@@ -214,6 +226,8 @@ int Repository::cat(lua_State *L)
 		return LuaHelpers::push(L, m_backend->cat(path, id));
 	} catch (const PepperException &ex) {
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
+	} catch (const std::exception &ex) {
+		return LuaHelpers::pushError(L, ex.what());
 	}
 }
 
