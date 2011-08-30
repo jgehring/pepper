@@ -480,7 +480,7 @@ int Plot::flush(lua_State *L)
 // Sends a command to GNUPlot (and logs it)
 void Plot::gcmd(const std::string &c)
 {
-	PDEBUG << c << endl;
+	PTRACE << c << endl;
 	g->cmd(c);
 }
 
