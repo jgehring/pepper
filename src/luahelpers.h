@@ -85,7 +85,7 @@ inline int push(lua_State *L, const char *s) {
 }
 
 inline int push(lua_State *L, const std::string &s) {
-	lua_pushstring(L, s.c_str());
+	lua_pushlstring(L, s.c_str(), s.length());
 	return 1;
 }
 
