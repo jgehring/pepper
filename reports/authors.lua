@@ -10,6 +10,7 @@
 	Visualizes code contribution by author.
 --]]
 
+require "pepper.datetime"
 require "pepper.plotutils"
 
 
@@ -23,6 +24,7 @@ function describe(self)
 		{"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with a regular expression"},
 		{"-nARG", "Show the ARG busiest authors"}
 	}
+	pepper.datetime.add_daterange_options(r)
 	pepper.plotutils.add_plot_options(r)
 	return r
 end
@@ -32,7 +34,6 @@ function callback(r)
 	if r:author() == "" then
 		return
 	end
-
 
 	-- Save commit and LOC count
 	local loc = r:diffstat():lines_added()
@@ -49,10 +50,12 @@ function run(self)
 	commits = {}   -- Commit list by timestamp with LOC delta
 	authors = {}   -- Total LOC by author
 
-	-- Gather data
+	-- Gather data, but start at the beginning of the repository
+	-- to get a proper LOC count.
 	local repo = self:repository()
 	local branch = self:getopt("b,branch", repo:default_branch())
-	repo:iterator(branch):map(callback)
+	local datemin, datemax = pepper.datetime.date_range(self)
+	repo:iterator(branch, {stop=datemax}):map(callback)
 
 	-- Determine the "busiest" authors (by LOC)
 	local authorloc = {}
@@ -70,7 +73,8 @@ function run(self)
 	-- Sort commits by time
 	table.sort(commits, function (a,b) return (a[1] < b[1]) end)
 
-	-- Generate data arrays for the authors
+	-- Generate data arrays for the authors, skipping data points
+	-- prior to datemin.
 	local keys = {}
 	local series = {}
 	local loc = {}
@@ -78,13 +82,17 @@ function run(self)
 		loc[a[1]] = 0
 	end
 	for t,v in ipairs(commits) do
-		table.insert(keys, v[1])
-		table.insert(series, {});
+		if datemin < 0 or v[1] >= datemin then
+			table.insert(keys, v[1])
+			table.insert(series, {});
+		end
 		for i,a in ipairs(authorloc) do
 			if a[1] == v[2] then
 				loc[a[1]] = loc[a[1]] + v[3]
 			end
-			table.insert(series[#series], loc[a[1]])
+			if datemin < 0 or v[1] >= datemin then
+				table.insert(series[#series], loc[a[1]])
+			end
 		end
 	end
 

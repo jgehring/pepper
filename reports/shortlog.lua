@@ -10,6 +10,8 @@
 	Generates a summarized revision log (like "git shortlog")
 --]]
 
+require "pepper.datetime"
+
 
 -- Describes the report
 function describe(self)
@@ -20,6 +22,7 @@ function describe(self)
 		{"-bARG, --branch=ARG", "Select branch"},
 		{"-s, --summary", "Print commit count summary only"}
 	}
+	pepper.datetime.add_daterange_options(r)
 	return r
 end
 
@@ -41,7 +44,8 @@ function run(self)
 	-- Gather data
 	local repo = self:repository()
 	local branch = self:getopt("b,branch", repo:default_branch())
-	repo:iterator(branch):map(callback)
+	local datemin, datemax = pepper.datetime.date_range(self)
+	repo:iterator(branch, {start=datemin, stop=datemax}):map(callback)
 
 	-- Sort commit dictionary by name
 	local authors = {}

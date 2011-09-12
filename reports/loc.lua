@@ -10,6 +10,7 @@
 	Visualizes lines of code changes on a given branch.
 --]]
 
+require "pepper.datetime"
 require "pepper.plotutils"
 
 
@@ -22,6 +23,7 @@ function describe(self)
 		{"-bARG, --branch=ARG", "Select branch"},
 		{"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with Lua pattern ARG"}
 	}
+	pepper.datetime.add_daterange_options(r)
 	pepper.plotutils.add_plot_options(r)
 	return r
 end
@@ -46,18 +48,24 @@ function run(self)
 	dates = {}
 	locdeltas = {}
 
-	-- Gather data
+	-- Gather data, but start at the beginning of the repository
+	-- to get a proper LOC count.
 	local repo = self:repository()
 	local branch = self:getopt("b,branch", repo:default_branch())
-	repo:iterator(branch):map(callback)
+	local datemin, datemax = pepper.datetime.date_range(self)
+	repo:iterator(branch, {stop=datemax}):map(callback)
 
 	-- Sort loc data by date
 	table.sort(dates)
 	local loc = {}
+	local keys = {}
 	local total = 0
 	for k,v in ipairs(dates) do
 		total = total + locdeltas[v]
-		table.insert(loc, total)
+		if datemin < 0 or v >= datemin then
+			table.insert(keys, v)
+			table.insert(loc, total)
+		end
 	end
 
 	-- Generate graph
@@ -70,6 +78,6 @@ function run(self)
 		pepper.plotutils.add_tagmarks(p, repo, self:getopt("tags", "*"))
 	end
 
-	p:set_xrange_time(dates[1], dates[#dates])
-	p:plot_series(dates, loc)
+	p:set_xrange_time(keys[1], keys[#keys])
+	p:plot_series(keys, loc)
 end

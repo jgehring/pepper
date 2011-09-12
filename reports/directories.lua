@@ -10,6 +10,7 @@
 	Visualizes directory size changes on a given branch.
 --]]
 
+require "pepper.datetime"
 require "pepper.plotutils"
 
 
@@ -23,6 +24,7 @@ function describe(self)
 		{"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with a regular expression"},
 		{"-nARG", "Show the ARG largest directories"}
 	}
+	pepper.datetime.add_daterange_options(r)
 	pepper.plotutils.add_plot_options(r)
 	return r
 end
@@ -62,10 +64,12 @@ function main(self)
 	commits = {}     -- Commit list by timestamp with diffstat
 	directories = {} -- Total LOC by directory
 
-	-- Gather data
+	-- Gather data, but start at the beginning of the repository
+	-- to get a proper LOC count.
 	local repo = self:repository()
 	local branch = self:getopt("b,branch", repo:default_branch())
-	repo:iterator(branch):map(count)
+	local datemin, datemax = pepper.datetime.date_range(self)
+	repo:iterator(branch, {stop=datemax}):map(count)
 
 	-- Determine the largest directories (by current LOC)
 	local dirloc = {}
@@ -83,7 +87,8 @@ function main(self)
 	-- Sort commits by time
 	table.sort(commits, commitcmp)
 
-	-- Generate data arrays for the directories
+	-- Generate data arrays for the directories, skipping data points
+	-- prior to datemin.
 	local keys = {}
 	local series = {}
 	local loc = {}
@@ -91,8 +96,10 @@ function main(self)
 		loc[a[1]] = 0
 	end
 	for t,v in ipairs(commits) do
-		table.insert(keys, v[1])
-		table.insert(series, {});
+		if datemin < 0 or v[1] >= datemin then
+			table.insert(keys, v[1])
+			table.insert(series, {});
+		end
 
 		-- Update directory sizes
 		local s = v[2];
@@ -103,8 +110,10 @@ function main(self)
 			end
 		end
 
-		for i,a in ipairs(dirloc) do
-			table.insert(series[#series], loc[a[1]])
+		if datemin < 0 or v[1] >= datemin then
+			for i,a in ipairs(dirloc) do
+				table.insert(series[#series], loc[a[1]])
+			end
 		end
 	end
 

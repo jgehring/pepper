@@ -11,6 +11,7 @@
 	This is a port of http://labs.freehackers.org/wiki/hgactivity
 --]]
 
+require "pepper.datetime"
 require "pepper.plotutils"
 
 
@@ -24,10 +25,9 @@ function describe(self)
 		{"--tags[=ARG]", "Add tag markers to the graph, optionally filtered with a regular expression"},
 		{"-c, --changes, -l", "Count line changes instead of commit counts"},
 		{"--split=ARG", "Split the graph by 'authors', 'files', 'directories', or 'none' (the default)"},
-		{"-nARG", "Maximum number of series when using --split"},
-		{"--datemin=ARG", "Start date (format is YYYY-MM-DD)"},
-		{"--datemax=ARG", "End date (format is YYYY-MM-DD)"}
+		{"-nARG", "Maximum number of series when using --split"}
 	}
+	pepper.datetime.add_daterange_options(r)
 	pepper.plotutils.add_plot_options(r)
 	return r
 end
@@ -122,14 +122,6 @@ function run(self)
 	firstdate = os.time()
 	lastdate = 0
 
-	-- Parse date range
-	local datemin = self:getopt("datemin")
-	if datemin ~= nil then datemin = pepper.utils.strptime(datemin, "%Y-%m-%d")
-	else datemin = -1 end
-	local datemax = self:getopt("datemax")
-	if datemax ~= nil then datemax = pepper.utils.strptime(datemax, "%Y-%m-%d")
-	else datemax = -1 end
-
 	count_changes = self:getopt("c,changes,l")
 	split = self:getopt("split", "none")
 	local valid = {none=1, authors=1, files=1, directories=1}
@@ -140,6 +132,7 @@ function run(self)
 	-- Gather data
 	local repo = self:repository()
 	local branch = self:getopt("b,branch", repo:default_branch())
+	local datemin, datemax = pepper.datetime.date_range(self)
 	repo:iterator(branch, {start=datemin, stop=datemax}):map(count)
 	if last == 0 then
 		error("No data on this branch")

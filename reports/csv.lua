@@ -10,6 +10,8 @@
 	Dumps commits in a CSV format
 --]]
 
+require "pepper.datetime"
+
 
 -- Describes the report
 function describe(self)
@@ -23,10 +25,9 @@ function describe(self)
 			"Possible values (and abbreviations) are 'id', " ..
 			"'author' (a), 'added' (+), 'removed' (-), " ..
 			"'delta' (d), 'total' (t), 'files' (f), " ..
-			"'message' (m)"},
-		{"--datemin=ARG", "Start date (format is YYYY-MM-DD)"},
-		{"--datemax=ARG", "End date (format is YYYY-MM-DD)"}
+			"'message' (m)"}
 	}
+	pepper.datetime.add_daterange_options(r)
 	return r
 end
 
@@ -84,26 +85,33 @@ function info(r, code)
 	end
 end
 
+-- Checks if a table contains a value
+function contains(t, v)
+	for _,u in ipairs(t) do
+		if u == v then
+			return true
+		end
+	end
+	return false
+end
+
 -- Main report function
 function run(self)
 	-- Global counters
 	loc = 0
 
-	-- Parse date range
-	local datemin = self:getopt("datemin")
-	if datemin ~= nil then datemin = pepper.utils.strptime(datemin, "%Y-%m-%d")
-	else datemin = -1 end
-	local datemax = self:getopt("datemax")
-	if datemax ~= nil then datemax = pepper.utils.strptime(datemax, "%Y-%m-%d")
-	else datemax = -1 end
-
 	local columns = pepper.utils.split(self:getopt("c,columns", "a,d,t"), ",")
 	local printheader = true
 
-	-- Gather data
+	-- Gather data, but start at the beginning of the repository
+	-- to get a proper LOC count if needed
 	local repo = self:repository()
 	local branch = self:getopt("b,branch", repo:default_branch())
-	repo:iterator(branch, {start=datemin, stop=datemax}):map(
+	local datemin, datemax = pepper.datetime.date_range(self)
+	local itstart = datemin
+	if contains(columns, "t") or contains(columns, "total") then itstart = -1 end
+
+	repo:iterator(branch, {start=itstart, stop=datemax}):map(
 		function (r)
 			if printheader then
 				local header = "# Timestamp, "

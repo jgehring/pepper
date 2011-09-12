@@ -11,7 +11,7 @@
 	or "git timecard" (http://dustin.github.com/2009/01/11/timecard.html)
 --]]
 
-
+require "pepper.datetime"
 require "pepper.plotutils"
 
 
@@ -24,6 +24,7 @@ function describe(self)
 		{"-bARG, --branch=ARG", "Select branch"},
 		{"-aARG, --author=ARG", "Show commits of author ARG"}
 	}
+	pepper.datetime.add_daterange_options(r)
 	pepper.plotutils.add_plot_options(r)
 	return r
 end
@@ -58,7 +59,8 @@ function run(self)
 	-- Gather data
 	local repo = self:repository()
 	local branch = self:getopt("b,branch", repo:default_branch())
-	repo:iterator(branch):map(callback)
+	local datemin, datemax = pepper.datetime.date_range(self)
+	repo:iterator(branch, {start=datemin, stop=datemax}):map(callback)
 
 	max = max * 2
 

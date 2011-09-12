@@ -10,6 +10,7 @@
 	Visualizes commit times using a scatter plot.
 --]]
 
+require "pepper.datetime"
 require "pepper.plotutils"
 
 
@@ -19,6 +20,7 @@ function describe(self)
 	r.title = "Times"
 	r.description = "Scatter plot of commit times"
 	r.options = {{"-bARG, --branch=ARG", "Select branch"}}
+	pepper.datetime.add_daterange_options(r)
 	pepper.plotutils.add_plot_options(r)
 	return r
 end
@@ -50,7 +52,8 @@ function run(self)
 	-- Gather data
 	local repo = self:repository()
 	local branch = self:getopt("b,branch", repo:default_branch())
-	repo:iterator(branch):map(callback)
+	local datemin, datemax = pepper.datetime.date_range(self)
+	repo:iterator(branch, {start=datemin, stop=datemax}):map(callback)
 
 	-- Generate graph
 	local p = pepper.gnuplot:new()
