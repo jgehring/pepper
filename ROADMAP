@@ -5,7 +5,7 @@ Planned features for 0.3:
 	- API overhaul (more OOP and report-centric)
 	- repository:cat()
 	# repository:log() (Use repository:iterator() without prefetching instead)
-	* Time range arguments for all reports
+	- Time range arguments for all reports
 	* GUI report (using lgob.gtk)
 
 Planned for 0.3.x:
