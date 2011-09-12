@@ -55,9 +55,6 @@ end
 
 -- Returns revision information given a field code
 function info(r, code)
-	local delta = r:diffstat():lines_added() - r:diffstat():lines_removed()
-	loc = loc + delta
-
 	if code == "id" then
 		return r:id()
 	elseif code == "a" or code == "author" then
@@ -75,7 +72,7 @@ function info(r, code)
 	elseif code == "t" or code == "total" then
 		return loc
 	elseif code == "d" or code == "delta" then
-		return delta
+		return r:diffstat():lines_added() - r:diffstat():lines_removed()
 	elseif code == "m" or code == "message" then
 		local str = r:message()
 		str = str:gsub('[,"]', "\\%1")
@@ -116,6 +113,8 @@ function run(self)
 				print(header:sub(0, #header-2))
 				printheader = false
 			end
+
+			loc = loc + r:diffstat():lines_added() - r:diffstat():lines_removed()
 
 			local str = tostring(r:date())
 			for i,v in ipairs(columns) do
