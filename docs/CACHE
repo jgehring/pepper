@@ -14,7 +14,7 @@ UUID and containing two or more files:
 		...
 
 	$VERSION is a 32bit unsigned integer definining the format
-	version, which is currently 4.	$REVISION_i is a null-terminated
+	version, which is currently 5.	$REVISION_i is a null-terminated
 	string, representing a revision ID. Immediately afer the null
 	byte, a 4-byte unsigned integer specifying the index of the
 	cache file. Finally, there's a nother 4-byte unsigned integer
