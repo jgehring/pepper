@@ -164,6 +164,11 @@ public:
 		if (pos2 == std::string::npos || !utils::str2int(header[line].substr(pos2, pos - pos2), &(dest->date), 10)) {
 			throw PEX(utils::strprintf("Unable to parse commit date from line: %s", header[line].c_str()));
 		}
+		int64_t offset_hr = 0, offset_min = 0;
+		if (!utils::str2int(header[line].substr(pos+1, 3), &offset_hr, 10) || !utils::str2int(header[line].substr(pos+4, 2), &offset_min, 10)) {
+			throw PEX(utils::strprintf("Unable to parse commit date from line: %s", header[line].c_str()));
+		}
+		dest->date += offset_hr * 60 * 60 + offset_min * 60;
 
 		// Commit message
 		dest->message.clear();

@@ -26,8 +26,7 @@
 
 #include "cache.h"
 
-
-#define CACHE_VERSION (uint32_t)4
+#define CACHE_VERSION (uint32_t)5
 #define MAX_CACHEFILE_SIZE 4194304
 
 
@@ -301,7 +300,7 @@ Cache::VersionCheckResult Cache::checkVersion(int version)
 		// Invalid diffstats for deleted files in version 2 (Subversion backend)
 		goto outofdate;
 	}
-	if (version <= 3 && m_backend->name() == "git") {
+	if (version <= 4 && m_backend->name() == "git") {
 		// Invalid commit times in version 3 (Git backend)
 		goto outofdate;
 	}
