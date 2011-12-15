@@ -71,6 +71,13 @@ class Logger
 			return *this;
 		}
 
+		inline Logger &operator<<(const char *s) {
+			if (m_level > s_level) return *this;
+			s_mutex.lock();
+			*m_out << (s ? s : "(null)");
+			s_mutex.unlock();
+			return *this;
+		}
 		inline Logger &operator<<(std::ios_base& (* pf)(std::ios_base &)) {
 			if (m_level > s_level) return *this;
 			s_mutex.lock();
