@@ -49,6 +49,24 @@ namespace {
 // Report entry function names
 const char *funcs[] = {"run", "main", NULL};
 
+// Custom hook for detect function invocations from within the main chunk of a script
+void checkFunctionCallHook(lua_State *L, lua_Debug *ar)
+{
+	lua_getinfo(L, "nSl", ar);
+	PTRACE << ar->currentline << " " << ar->what << " " << ar->name << " " << ar->namewhat << " " << ar->source << endl;
+
+	/*
+	 * NOTE: This check can't be used as a safety measure, as it allows the following calls:
+	 *  - Loading of modules (require)
+	 *  - Definition of modules (module)
+	 *  - Assertions, as they are used by some of the built-in modules for feature testing (assert)
+	 */
+	if ((ar->currentline >= 0 && ar->what && strcmp(ar->what, "main")) ||
+		(ar->name != 0 && strcmp(ar->name, "require") && strcmp(ar->name, "module") && strcmp(ar->name, "assert") && strcmp(ar->namewhat, "field"))) {
+		LuaHelpers::pushError(L, "Calling functions from the main chunk is not allowed");
+	}
+}
+
 // Checks if the given report is "executable", i.e. contains a main() function
 bool isExecutable(lua_State *L, std::string *entryPoint = NULL)
 {
@@ -155,13 +173,38 @@ lua_State *setupLua()
 	LuaHelpers::push(L, path);
 	lua_setfield(L, -2, "path");
 	lua_pop(L, 1);
-	PDEBUG << "Lua package path has been set to " << path << endl;
+	PTRACE << "Lua package path has been set to " << path << endl;
 
 	// Setup (deprecated) meta table
 	luaL_newmetatable(L, "meta");
 	lua_setglobal(L, "meta");
 
 	return L;
+}
+
+// Opens a lua script, checks if it is a valid report and returns its entry point
+std::string loadReport(lua_State *L, const std::string &path)
+{
+	// Check script syntax by loading the file
+	if (luaL_loadfile(L, path.c_str()) != 0) {
+		throw PEX(lua_tostring(L, -1));
+	}
+
+	// Run the main chunk, but check for function invocations
+	// The purpose of this check is to abort execution of "bad" scripts, i.e. scripts
+	// that are not report scripts and that would be executed normally here.
+	// NOTE: This check is not complete; see checkFunctionCallHook() for further comments.
+	lua_sethook(L, checkFunctionCallHook, LUA_MASKCALL, 1);
+	if (lua_pcall(L, 0, LUA_MULTRET, 0) != 0) {
+		throw PEX(lua_tostring(L, -1));
+	}
+	lua_sethook(L, checkFunctionCallHook, 0, 1);
+
+	std::string main;
+	if (!isExecutable(L, &main)) {
+		throw PEX("Not executable (no run function)");
+	}
+	return main;
 }
 
 // Wrapper for print(), mostly from VIM - Vi IMproved by Bram Moolenaar
@@ -257,28 +300,27 @@ int Report::run(std::ostream &out, std::ostream &err)
 	lua_setglobal(L, "print");
 
 	// Run the script
+	std::string main;
 	int ret = EXIT_SUCCESS;
-	if (luaL_dofile(L, path.c_str()) != 0) {
-		err << "Error opening report: " << lua_tostring(L, -1) << std::endl;
-		ret = EXIT_FAILURE;
-	} else {
-		// Find report entry point
-		std::string func;
-		if (!isExecutable(L, &func)) {
-			err << "Error opening report '" << path << "': Not executable (no run function)" << std::endl;
-			ret = EXIT_FAILURE;
-		} else {
-			// Call the report function, with the current report context as an argument
-			lua_getglobal(L, func.c_str());
-			LuaHelpers::push(L, this);
-			if (lua_pcall(L, 1, 1, 0) != 0) {
-				err << "Error running report: " << lua_tostring(L, -1) << std::endl;
-				ret = EXIT_FAILURE;
-			}
-		}
+	try {
+		main = loadReport(L, path);
+	} catch (const std::exception &ex) {
+		err << "Error opening report: " << ex.what() << std::endl;
+		goto error;
 	}
 
-	// Clean up
+	// Call the report function, with the current report context as an argument
+	lua_getglobal(L, main.c_str());
+	LuaHelpers::push(L, this);
+	if (lua_pcall(L, 1, 1, 0) != 0) {
+		err << "Error running report: " << lua_tostring(L, -1) << std::endl;
+		goto error;
+	}
+	goto cleanup;
+
+error:
+	ret = EXIT_FAILURE;
+cleanup:
 	lua_gc(L, LUA_GCCOLLECT, 0);
 	lua_close(L);
 
@@ -322,11 +364,10 @@ bool Report::valid()
 	lua_State *L = setupLua();
 
 	bool valid = true;
-	if (luaL_dofile(L, path.c_str()) != 0) {
-		PDEBUG << "Invalid report: " << lua_tostring(L, -1) << std::endl;
-		valid = false;
-	} else if (!isExecutable(L)) {
-		PDEBUG << "Report not executable: " << lua_tostring(L, -1) << std::endl;
+	try {
+		loadReport(L, path);
+	} catch (const std::exception &ex) {
+		PDEBUG << "Invalid report: " << ex.what() << endl;
 		valid = false;
 	}
 
@@ -431,8 +472,10 @@ void Report::readMetaData()
 
 	// Open the script
 	std::string path = findScript(m_script);
-	if (luaL_dofile(L, path.c_str()) != 0) {
-		throw PEX(str::printf("Error opening report: %s", lua_tostring(L, -1)));
+	try {
+		loadReport(L, path);
+	} catch (const std::exception &ex) {
+		throw PEX(str::printf("Error opening report: %s", ex.what()));
 	}
 
 	// Try to run describe()
