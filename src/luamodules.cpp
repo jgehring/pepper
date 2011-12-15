@@ -60,11 +60,18 @@ int list_reports(lua_State *L)
 	return LuaHelpers::push(L, paths);
 }
 
+// Returns the program version string
+int version(lua_State *L)
+{
+	return LuaHelpers::push(L, PACKAGE_VERSION);
+}
+
 // Function table of main functions
 const struct luaL_reg table[] = {
 	{"current_report", current_report},
 	{"run", run},
 	{"list_reports", list_reports},
+	{"version", version},
 	{NULL, NULL}
 };
 

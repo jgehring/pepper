@@ -24,3 +24,7 @@ function run(report, options)
 --- Returns a listing of all reports in the current search directories.
 --  @return An array of report paths that can be used in run()
 function list_reports()
+
+--- Returns the version of the main program as a string
+--  @return A version string
+function version()
