@@ -6,17 +6,22 @@ Planned features for 0.3:
 	- repository:cat()
 	# repository:log() (Use repository:iterator() without prefetching instead)
 	- Time range arguments for all reports
-	* GUI report (using lgob.gtk)
+	- GUI report (using lgob.gtk)
 
-Planned for 0.3.x:
+Planned features for 0.3.x:
 	* Bazaar backend
 	* libgit2 backend
 	* Meta data pre-fetching for Subversion backend
+	* Windows version using the GUI report
+	* HTML module for generating custom HTML reports
 
 Planned features for 0.4:
+	* Diff access
+	* Report-specific caches
 	* Filter module (cloc and friends)
-	* HTML module for generating custom HTML reports
 	* Cache backends using "real" databases
 
-Planned:
-	* Windows version?
+Legend:
+	* : todo
+	# : wontfix
+	- : done
