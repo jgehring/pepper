@@ -8,8 +8,8 @@ module "pepper.iterator"
 --- Returns the next revision, or <code>nil</code> if there are no more revisions.
 function next()
 
---- Returns an iterator for the remaining revisions.
-function iterator()
+--- Returns a Lua iterator for the remaining revision ids.
+function revisions()
 
 --- Calls <code>callback</code> for all remaining revisions.
 --  @param callback The callback function

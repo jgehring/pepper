@@ -18,7 +18,7 @@ function current_report()
 --  will be pushed to the calling report.
 --  @param report Name or path of the report script
 --  @param options Optional dictionary with command-line options
---  @return The report outut
+--  @return The report output on success, an error message on failure
 function run(report, options)
 
 --- Returns a listing of all reports in the current search directories.

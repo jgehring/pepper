@@ -1,12 +1,15 @@
 --- Report script context.
---  This module provides functions for retrieving the current repository
---  as well as command-line option handling.
+--  This module provides functions for the current program execution environment
+--  as well as report inspection and execution facilities.
 
 module "pepper.report"
 
 
 --- Constructor.
-function report:new()
+--  @param path The report script path
+--  @param options Optional table of report options. If not given, the options
+--  of the current report will be used.
+function report:new(path, options)
 
 --- Returns a command line option for the report script.
 --  @param option The command line flags, separated with commas
@@ -18,7 +21,18 @@ function report:getopt(option, default)
 --  @see pepper.repository
 function report:repository()
 
---- Runs a report.
---  @deprecated Plese use pepper.repository:revision()
---  @see pepper.repository
-function report:run(id)
+--- Runs this report.
+--  This function is similar to pepper.run(), except that is uses this report
+--  context instead of constructing a new one
+--  @see pepper
+function report:run()
+
+--- Returns the report's accepted options.
+--  @return A table with 2 entries per option (synopsis and description).
+function report:options()
+
+--- Returns the report's name.
+function report:name()
+
+--- Returns the report's description.
+function report:description()
