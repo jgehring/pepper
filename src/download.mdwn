@@ -30,10 +30,13 @@ Here's a list of packages, ready to install for the respective
 distributions:
 
 * [Arch Linux (AUR)](http://aur.archlinux.org/packages.php?ID=45324)
+* [Gentoo (James Rowe's misc-overlay)](http://jnrowe.github.com/misc-overlay/packages/dev-vcs.html)
 
 For source packages, please remember to install optional build-time
 dependencies for the repository backends first (e.g., `subversion`
 and `mercurial` on Arch Linux).
+
+Thanks to all maintainers!
 
 
 ---
