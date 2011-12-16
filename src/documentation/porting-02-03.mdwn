@@ -1,0 +1,95 @@
+[[!meta title="porting reports from 0.2.x to 0.3"]]
+[[!toc startlevel="3" levels="1"]]
+<div class="clear"></div>
+
+---
+
+### Introduction
+
+In pepper 0.3, the report API has been changed in a way that breaks reports written for version
+0.2.x or 0.1.x. This document provides instructions for porting old reports to the new API and
+lists the necessary and recommended changes for doing so.
+
+
+### Necessary changes
+
+The breakage with old report scripts is caused by the introduction of
+a report context class. This class replaces the former `pepper.report`
+module and enables writing reports in a more object-oriented way. Thus,
+all invocations of functions from the old module will need to replaced
+by calls to the current report context or their respective replacements.
+
+First, the main report function (`main()` or `run()`) should be changed to
+accept the current report context as an argument
+
+[[!format lua """
+-- Main report function
+function run(self)
+	-- The report context is given by self
+end
+"""]]
+
+Next, all invocations of functions from `pepper.report` need to be
+replaced.  The following table lists a replacement for every function
+of the former `pepper.report` module. `report` is the current report
+context, which corresponds to `self` in the code above.
+
+<div class="listing">
+<table style="font-family: normal" width="100%" rules="cols" cellpadding="2">
+<tr><td><b>Old syntax</b<</th><td><b>Replacement</b></td></tr>
+<tr>
+	<td><code>pepper.report.getopt(option, default)</code></td>
+	<td><code><a href="../api/modules/pepper.report.html#report:getopt">report:getopt(option, value)</code></a></td>
+</tr>
+<tr>
+	<td><code>pepper.report.repository()</code></td>
+	<td><code><a href="../api/modules/pepper.report.html#report:repository">report:repository()</code></a></td>
+</tr>
+<tr>
+	<td><code>pepper.report.revision(id)</code></td>
+	<td><code><a href="../api/modules/pepper.repository.html#revision">report:repository():revision(id)</code></a></td>
+</tr>
+<tr>
+	<td><code>pepper.report.run(report, options)</code></td>
+	<td><code><a href="../api/modules/pepper.html#run">pepper.run(report, options)</code></a></td>
+</tr>
+<tr>
+	<td><code>pepper.report.walk_branch(callback, branch)</code></td>
+	<td><code><a href="../api/modules/pepper.iterator.html#map">report:repository():iterator(branch):map(callback)</code></a></td>
+</tr>
+</table>
+</div>
+
+These changes should make your script usable with pepper
+0.3. Since you're at porting anyway, please take the time to read the
+following section about recommended changes as well.
+
+
+### Recommended changes
+
+It is now recommended for reports to define their meta data (e.g.,
+their name or their options) in a `describe()` function rather than
+using a global meta table. Thus, a meta table like
+
+[[!format lua """
+meta.title = "Branch HEAD"
+meta.description = "Prints the HEAD revision of a branch"
+meta.options = {{"-bARG, --branch=ARG", "Select branch"}}
+"""]]
+
+should be replaced with
+
+[[!format lua """
+-- Describes the report
+function describe()
+	local r = {}
+	r.title = "Branch HEAD"
+	r.description = "Prints the HEAD revision of a branch"
+	r.options = {{"-bARG, --branch=ARG", "Select branch"}}
+	return r
+end
+"""]]
+
+
+Please note that the old meta table style is still supported, although
+this may change in future versions.

@@ -84,6 +84,14 @@ tutorial for writing custom reports is available at [[ScriptingGuide]].
 An API reference for Lua scripts is available [here](api/). It has been
 generated with [LuaDoc](http://luadoc.luaforge.net).
 
+#### Porting of report scripts
+
+pepper 0.3 introduced API changes that rendered reports written for
+previous version unusable. The small set of fixes required to make
+those reports (i.e., from version 0.2.4 and below) usable with the
+current version is described in detail in [[porting reports from 0.2.x
+to 0.3|porting-02-03]].
+
 #### Source code repository
 
 pepper's [Git](http://git-scm.com) repository is hosted at
