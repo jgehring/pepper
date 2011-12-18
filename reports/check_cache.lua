@@ -16,10 +16,11 @@ function describe(self)
 	local r = {}
 	r.title = "Cache check"
 	r.description = "Checks and cleans up the revision cache"
+	r.options = {{"-f,--force", "Force clearing of cache if necessary"}}
 	return r
 end
 
 -- Main script function
 function run(self)
-	pepper.internal.check_cache(self:repository())
+	pepper.internal.check_cache(self:repository(), self:getopt("f,force"))
 end

@@ -237,15 +237,12 @@ void Cache::load()
 	uint32_t version;
 	*in >> version;
 	switch (checkVersion(version)) {
-		case Abort:
+		case OutOfDate:
 			delete in;
-			return;
-		case Clear:
-			delete in;
-			clear();
-			return;
+			throw PEX(str::printf("Cache is out of date - please run the check_cache report", version));
 		case UnknownVersion:
-			throw PEX(str::printf("Unknown cache version number %u", version));
+			delete in;
+			throw PEX(str::printf("Unknown cache version number %u - please run the check_cache report", version));
 		default:
 			break;
 	}
@@ -298,25 +295,21 @@ Cache::VersionCheckResult Cache::checkVersion(int version)
 	if (version <= 1) {
 		// The diffstats for Mercurial and Git have been flawed in version 1.
 		// The Subversion backend uses repository-wide diffstats now.
-		goto outofdate;
+		return OutOfDate;
 	}
 	if (version <= 2 && m_backend->name() == "subversion") {
 		// Invalid diffstats for deleted files in version 2 (Subversion backend)
-		goto outofdate;
+		return OutOfDate;
 	}
 	if (version <= 4 && m_backend->name() == "git") {
 		// Invalid commit times in version 3 (Git backend)
-		goto outofdate;
+		return OutOfDate;
 	}
 	if ((uint32_t)version <= CACHE_VERSION) {
 		return Ok;
 	}
 
 	return UnknownVersion;
-
-outofdate:
-	Logger::warn() << "Warning: Cache is out of date, clearing" << endl;
-	return Clear;
 }
 
 // Ensures that the cache dir is writable and exists
@@ -340,7 +333,7 @@ void Cache::checkDir(const std::string &path, bool *created)
 }
 
 // Checks cache entries and removes invalid ones from the index file
-void Cache::check()
+void Cache::check(bool force)
 {
 	std::map<std::string, std::pair<uint32_t, uint32_t> > index;
 
@@ -367,20 +360,26 @@ void Cache::check()
 
 	uint32_t version;
 	*in >> version;
-	if (version == 0 || version > CACHE_VERSION) {
-		Logger::warn() << "Cache: Unkown cache version number " << version << ", clearing" << endl;
-		delete in;
-		clear();
-		return;
-	}
-
 	switch (checkVersion(version)) {
-		case Abort:
+		case OutOfDate:
 			delete in;
+			Logger::warn() << "Cache: Cache is out of date";
+			if (!force) {
+				Logger::warn() << " - won't clear it until forced to do so" << endl;
+			} else {
+				Logger::warn() << ", clearing" << endl;
+				clear();
+			}
 			return;
-		case Clear:
+		case UnknownVersion:
 			delete in;
-			clear();
+			Logger::warn() << "Cache: Unkown cache version number " << version;
+			if (!force) {
+				Logger::warn() << " - won't clear it until forced to do so" << endl;
+			} else {
+				Logger::warn() << ", clearing" << endl;
+				clear();
+			}
 			return;
 		default:
 			break;

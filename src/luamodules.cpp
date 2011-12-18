@@ -204,6 +204,14 @@ namespace internal
 // Runs a cache check for the given repository
 int check_cache(lua_State *L)
 {
+	bool force = false;
+	if (lua_gettop(L) != 1 && lua_gettop(L) != 2) {
+		return LuaHelpers::pushError(L, "Invalid number of arguments (1 or 2 expected)");
+	}
+	if (lua_gettop(L) > 1) {
+		force = lua_type(L, 0) != LUA_TNIL;
+		lua_pop(L, 1);
+	}
 	Repository *repo = LuaHelpers::popl<Repository>(L);
 	Cache *cache = dynamic_cast<Cache *>(repo->backend());
 	if (cache == NULL) {
@@ -211,7 +219,7 @@ int check_cache(lua_State *L)
 	}
 
 	try {
-		cache->check();
+		cache->check(force);
 	} catch (const PepperException &ex) {
 		return LuaHelpers::pushError(L, str::printf("Error checking cache: %s: %s", ex.where(), ex.what()));
 	}

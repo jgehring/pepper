@@ -29,8 +29,8 @@ class Cache : public Backend
 		typedef enum {
 			Ok,
 			Abort,
-			Clear,
-			UnknownVersion
+			UnknownVersion,
+			OutOfDate
 		} VersionCheckResult;
 
 	public:
@@ -62,7 +62,7 @@ class Cache : public Backend
 		static std::string cacheFile(Backend *backend, const std::string &name);
 
 		void flush();
-		void check();
+		void check(bool force = false);
 
 	private:
 		bool lookup(const std::string &id);
