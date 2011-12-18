@@ -221,12 +221,12 @@ void Cache::load()
 	std::string path = m_opts.cacheDir() + "/" + uuid();
 	PDEBUG << "Using cache dir: " << path << endl;
 
-	lock();
 	m_index.clear();
 	m_loaded = true;
 
 	bool created;
 	checkDir(path, &created);
+	lock();
 	if (created) {
 		return;
 	}
