@@ -309,7 +309,7 @@ void Cache::lock()
 
 	PTRACE << "Locking file " << lock << endl;
 	struct flock flck;
-	memset(&flck, 0x00, sizeof(flock));
+	memset(&flck, 0x00, sizeof(struct flock));
 	flck.l_type = F_WRLCK;
 	if (fcntl(m_lock, F_SETLK, &flck) == -1) {
 		throw PEX(str::printf("Unable to lock cache %s, it may be used by another instance", path.c_str()));
@@ -327,7 +327,7 @@ void Cache::unlock()
 	std::string path = m_opts.cacheDir() + "/" + uuid();
 	PTRACE << "Unlocking file " << path + "/lock" << endl;
 	struct flock flck;
-	memset(&flck, 0x00, sizeof(flock));
+	memset(&flck, 0x00, sizeof(struct flock));
 	flck.l_type = F_UNLCK;
 	if (fcntl(m_lock, F_SETLK, &flck) == -1) {
 		throw PEX(str::printf("Unable to unlock cache, please delete %s/lock manually if required", path.c_str()));
