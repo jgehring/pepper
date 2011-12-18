@@ -13,6 +13,10 @@
 
 #include "main.h"
 
+#include <cstring>
+#include <fcntl.h>
+#include <unistd.h>
+
 #include "bstream.h"
 #include "diffstat.h"
 #include "logger.h"
@@ -34,7 +38,7 @@
 // Constructor
 Cache::Cache(Backend *backend, const Options &options)
 	: Backend(options), m_backend(backend), m_iout(NULL), m_cout(NULL),
-	  m_cin(0), m_coindex(0), m_ciindex(0), m_loaded(false)
+	  m_cin(0), m_coindex(0), m_ciindex(0), m_loaded(false), m_lock(-1)
 {
 
 }
@@ -43,6 +47,7 @@ Cache::Cache(Backend *backend, const Options &options)
 Cache::~Cache()
 {
 	flush();
+	unlock();
 }
 
 // Returns a diffstat for the specified revision
@@ -213,11 +218,12 @@ Revision *Cache::get(const std::string &id)
 // Loads the index file
 void Cache::load()
 {
-	m_index.clear();
-	m_loaded = true;
-
 	std::string path = m_opts.cacheDir() + "/" + uuid();
 	PDEBUG << "Using cache dir: " << path << endl;
+
+	lock();
+	m_index.clear();
+	m_loaded = true;
 
 	bool created;
 	checkDir(path, &created);
@@ -283,6 +289,51 @@ void Cache::clear()
 		std::string fullpath = path + "/" + files[i];
 		PDEBUG << "Unlinking " << fullpath << endl;
 		sys::fs::unlink(fullpath);
+	}
+}
+
+// Locks the cache directory for this process
+void Cache::lock()
+{
+	if (m_lock >= 0) {
+		PDEBUG << "Already locked (" << m_lock << ")" << endl;
+		return;
+	}
+
+	std::string path = m_opts.cacheDir() + "/" + uuid();
+	std::string lock = path + "/lock";
+	m_lock = ::open(lock.c_str(), O_WRONLY | O_CREAT, S_IWUSR);
+	if (m_lock == -1) {
+		throw PEX(str::printf("Unable to lock cache %s: %s", path.c_str(), PepperException::strerror(errno).c_str()));
+	}
+
+	PTRACE << "Locking file " << lock << endl;
+	struct flock flck;
+	memset(&flck, 0x00, sizeof(flock));
+	flck.l_type = F_WRLCK;
+	if (fcntl(m_lock, F_SETLK, &flck) == -1) {
+		throw PEX(str::printf("Unable to lock cache %s, it may be used by another instance", path.c_str()));
+	}
+}
+
+// Unlocks the cache directory
+void Cache::unlock()
+{
+	if (m_lock < 0) {
+		PDEBUG << "Not locked yet (" << m_lock << ")" << endl;
+		return;
+	}
+
+	std::string path = m_opts.cacheDir() + "/" + uuid();
+	PTRACE << "Unlocking file " << path + "/lock" << endl;
+	struct flock flck;
+	memset(&flck, 0x00, sizeof(flock));
+	flck.l_type = F_UNLCK;
+	if (fcntl(m_lock, F_SETLK, &flck) == -1) {
+		throw PEX(str::printf("Unable to unlock cache, please delete %s/lock manually if required", path.c_str()));
+	}
+	if (::close(m_lock) == -1) {
+		throw PEX_ERRNO();
 	}
 }
 

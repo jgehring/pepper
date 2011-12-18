@@ -70,6 +70,8 @@ class Cache : public Backend
 		Revision *get(const std::string &id);
 		void load();
 		void clear();
+		void lock();
+		void unlock();
 		VersionCheckResult checkVersion(int version);
 
 		static void checkDir(const std::string &path, bool *created = NULL);
@@ -81,6 +83,7 @@ class Cache : public Backend
 		BIStream *m_cin;
 		uint32_t m_coindex, m_ciindex;
 		bool m_loaded;
+		int m_lock;
 
 		std::map<std::string, std::pair<uint32_t, uint32_t> > m_index;
 };
