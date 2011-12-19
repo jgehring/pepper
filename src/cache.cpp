@@ -7,7 +7,7 @@
  * terms and conditions, or see http://www.gnu.org/licenses/.
  *
  * file: cache.cpp
- * Revision cache
+ * Revision cache with custom binary format
  */
 
 
@@ -37,7 +37,7 @@
 
 // Constructor
 Cache::Cache(Backend *backend, const Options &options)
-	: Backend(options), m_backend(backend), m_iout(NULL), m_cout(NULL),
+	: AbstractCache(backend, options), m_iout(NULL), m_cout(NULL),
 	  m_cin(0), m_coindex(0), m_ciindex(0), m_loaded(false), m_lock(-1)
 {
 
@@ -48,59 +48,6 @@ Cache::~Cache()
 {
 	flush();
 	unlock();
-}
-
-// Returns a diffstat for the specified revision
-Diffstat Cache::diffstat(const std::string &id)
-{
-	if (!lookup(id)) {
-		PTRACE << "Cache miss: " << id << endl;
-		return m_backend->diffstat(id);
-	}
-
-	PTRACE << "Cache hit: " << id << endl;
-	Revision *r = get(id);
-	Diffstat stat = r->diffstat();
-	delete r;
-	return stat;
-}
-
-// Tells the wrapped backend to pre-fetch revisions that are not cached yet
-void Cache::prefetch(const std::vector<std::string> &ids)
-{
-	std::vector<std::string> missing;
-	for (unsigned int i = 0; i < ids.size(); i++) {
-		if (!lookup(ids[i])) {
-			missing.push_back(ids[i]);
-		}
-	}
-
-	PDEBUG << "Cache: " << (ids.size() - missing.size()) << " of " << ids.size() << " revisions already cached, prefetching " << missing.size() << endl;
-	if (!missing.empty()) {
-		m_backend->prefetch(missing);
-	}
-}
-
-// Returns the revision data for the given ID
-Revision *Cache::revision(const std::string &id)
-{
-	if (!lookup(id)) {
-		PTRACE << "Cache miss: " << id << endl;
-		Revision *r = m_backend->revision(id);
-		put(id, *r);
-		return r;
-	}
-
-	PTRACE << "Cache hit: " << id << endl;
-	return get(id);
-}
-
-// Returns the full path for a cache file for the given backend
-std::string Cache::cacheFile(Backend *backend, const std::string &name)
-{
-	std::string dir = backend->options().cacheDir() + "/" + backend->uuid();
-	checkDir(dir);
-	return dir + "/" + sys::fs::escape(name);
 }
 
 // Flushes and closes the cache streams
@@ -186,7 +133,7 @@ Revision *Cache::get(const std::string &id)
 		load();
 	}
 
-	std::string dir = m_opts.cacheDir() + "/" + uuid();
+	std::string dir = cacheDir();
 	std::pair<uint32_t, uint32_t> offset = m_index[id];
 	std::string path = str::printf("%s/cache.%u", dir.c_str(), offset.first);
 	if (m_cin == NULL || offset.first != m_ciindex) {
@@ -218,7 +165,7 @@ Revision *Cache::get(const std::string &id)
 // Loads the index file
 void Cache::load()
 {
-	std::string path = m_opts.cacheDir() + "/" + uuid();
+	std::string path = cacheDir();
 	PDEBUG << "Using cache dir: " << path << endl;
 
 	m_index.clear();
@@ -278,7 +225,7 @@ void Cache::clear()
 {
 	flush();
 
-	std::string path = m_opts.cacheDir() + "/" + uuid();
+	std::string path = cacheDir();
 	if (!sys::fs::dirExists(path)) {
 		return;
 	}
@@ -300,7 +247,7 @@ void Cache::lock()
 		return;
 	}
 
-	std::string path = m_opts.cacheDir() + "/" + uuid();
+	std::string path = cacheDir();
 	std::string lock = path + "/lock";
 	m_lock = ::open(lock.c_str(), O_WRONLY | O_CREAT, S_IWUSR);
 	if (m_lock == -1) {
@@ -324,7 +271,7 @@ void Cache::unlock()
 		return;
 	}
 
-	std::string path = m_opts.cacheDir() + "/" + uuid();
+	std::string path = cacheDir();
 	PTRACE << "Unlocking file " << path + "/lock" << endl;
 	struct flock flck;
 	memset(&flck, 0x00, sizeof(struct flock));
@@ -363,32 +310,12 @@ Cache::VersionCheckResult Cache::checkVersion(int version)
 	return UnknownVersion;
 }
 
-// Ensures that the cache dir is writable and exists
-void Cache::checkDir(const std::string &path, bool *created)
-{
-	if (!sys::fs::dirExists(path)) {
-		// Create the cache directory
-		try {
-			sys::fs::mkpath(path);
-		} catch (const std::exception &ex) {
-			throw PEX(str::printf("Unable to create cache directory: %s", ex.what()));
-		}
-		PDEBUG << "Cache: Creating cache directory '" << path << '\'' << endl;
-
-		if (created) {
-			*created = true;
-		}
-	} else if (created) {
-		*created = false;
-	}
-}
-
 // Checks cache entries and removes invalid ones from the index file
 void Cache::check(bool force)
 {
 	std::map<std::string, std::pair<uint32_t, uint32_t> > index;
 
-	std::string path = m_opts.cacheDir() + "/" + uuid();
+	std::string path = cacheDir();
 	PDEBUG << "Checking cache in dir: " << path << endl;
 
 	bool created;

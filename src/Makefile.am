@@ -13,6 +13,7 @@ noinst_LIBRARIES = libpepper.a
 bin_PROGRAMS = pepper
 
 libpepper_a_SOURCES = \
+	abstractcache.h abstractcache.cpp \
 	backend.h backend.cpp \
 	bstream.h bstream.cpp \
 	cache.h cache.cpp \
