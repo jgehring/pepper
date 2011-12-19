@@ -21,7 +21,6 @@ class BIStream;
 class BOStream;
 
 
-// This cache should be transparent and inherits the wrapped class
 class Cache : public AbstractCache
 {
 	private:

@@ -22,10 +22,16 @@
 #endif
 
 #include "backend.h"
-#include "cache.h"
+#include "abstractcache.h"
 #include "logger.h"
 #include "options.h"
 #include "report.h"
+
+#ifdef USE_LDBCACHE
+ #include "ldbcache.h"
+#else
+ #include "cache.h"
+#endif
 
 #include "syslib/sigblock.h"
 
@@ -33,7 +39,7 @@
 // Signal handler
 struct SignalHandler : public sys::sigblock::Handler
 {
-	SignalHandler(Cache *cache = NULL) : cache(cache) { }
+	SignalHandler(AbstractCache *cache = NULL) : cache(cache) { }
 
 	void operator()(int signum)
 	{
@@ -48,7 +54,7 @@ struct SignalHandler : public sys::sigblock::Handler
 		}
 	}
 
-	Cache *cache;
+	AbstractCache *cache;
 };
 
 
@@ -167,12 +173,16 @@ int start(const Options &opts)
 
 	SignalHandler sighandler;
 
-	Cache *cache = NULL;
+	AbstractCache *cache = NULL;
 	try {
 		if (opts.useCache()) {
 			backend->init();
 
+#ifdef USE_LDBCACHE
+			cache = new LdbCache(backend, opts);
+#else
 			cache = new Cache(backend, opts);
+#endif
 			sighandler.cache = cache;
 
 			cache->init();

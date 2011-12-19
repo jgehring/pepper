@@ -140,6 +140,7 @@ FEATURES_CHECK()
 
 AM_CONDITIONAL([GNUPLOT], [test "x$gnuplot" = "xyes"])
 AM_CONDITIONAL([MANPAGE], [test "x$manpage" = "xyes"])
+AM_CONDITIONAL([LEVELDB], [test "x$leveldb" = "xyes"])
 
 
 #

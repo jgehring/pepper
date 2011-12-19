@@ -113,6 +113,17 @@ AM_CPPFLAGS += \
 	-DUSE_GNUPLOT
 endif
 
+if LEVELDB
+libpepper_a_SOURCES += \
+	ldbcache.h ldbcache.cpp
+AM_CXXFLAGS += \
+	$(LEVELDB_CPPFLAGS)
+LIBS += \
+	$(LEVELDB_LIBS)
+AM_CPPFLAGS += \
+	-DUSE_LDBCACHE
+endif
+
 
 # Last but not least, the CFLAGS
 AM_CFLAGS = $(AM_CXXFLAGS)

@@ -9,6 +9,7 @@ dnl
 
 AC_ARG_ENABLE([gnuplot], [AS_HELP_STRING([--disable-gnuplot], [Disable Gnuplot backend for graphical reports])], [gnuplot="$enableval"], [gnuplot="auto"])
 AC_ARG_ENABLE([man], [AS_HELP_STRING([--disable-man], [Don't generate the man page])], [manpage="$enableval"], [manpage="auto"])
+AC_ARG_ENABLE([leveldb], [AS_HELP_STRING([--enable-leveldb], [Use LevelDB for caching revisions])], [leveldb="$enableval"], [leveldb="no"])
 
 
 dnl Run checks for manpage programs
@@ -80,6 +81,51 @@ AC_DEFUN([CHECK_MANPROGS], [
 	fi
 ])
 
+dnl Run checks for LevelDB headers and libraries
+AC_DEFUN([CHECK_LEVELDB], [
+	AC_ARG_WITH([leveldb], [AC_HELP_STRING([--with-leveldb=PATH], [prefix for LevelDB installation])], [leveldb_prefix=$withval])
+
+	AC_LANG_PUSH([C++])
+	header_found="no"
+	if test "x$leveldb_prefix" != x; then
+		LDB_OLD_CPPFLAGS="$CPPFLAGS"
+		CPPFLAGS="$CPPFLAGS -I$leveldb_prefix/include"
+		AC_CHECK_HEADER([leveldb/db.h], [header_found="yes"])
+		CPPFLAGS="$LDB_OLD_CPPFLAGS"
+		LEVELDB_CPPFLAGS="-I$leveldb_prefix/include"
+		AC_SUBST([LEVELDB_CPPFLAGS])
+	else
+		AC_CHECK_HEADER([leveldb/db.h], [header_found="yes"])
+	fi
+    if test "x$header_found" != "xyes"; then
+		if test "x$leveldb" = "xyes"; then
+			AC_MSG_ERROR([LevelDB headers not found.])
+		else
+			leveldb="no"
+		fi
+	fi
+
+	lib_found="no"
+	if test "x$leveldb_prefix" != x; then
+		LDB_OLD_LIBS="$LIBS"
+		LIBS="$LIBS -L$leveldb_prefix/lib"
+		AC_CHECK_LIB([leveldb], [leveldb_open], [lib_found="yes"], [], [-lpthread])
+		LIBS="$LDB_OLD_LIBS"
+		LEVELDB_LIBS="-L$leveldb_prefix/lib -lleveldb"
+		AC_SUBST([LEVELDB_LIBS])
+	else
+		AC_CHECK_LIB([leveldb], [leveldb_open], [lib_found="yes"], [], [-lpthread])
+	fi
+    if test "x$lib_found" != "xyes"; then
+		if test "x$leveldb" = "xyes"; then
+			AC_MSG_ERROR([LevelDB library not found.])
+		else
+			leveldb="no"
+		fi
+	fi
+	AC_LANG_POP([C++])
+])
+
 dnl Run checks for the features
 AC_DEFUN([FEATURES_CHECK], [
 	if test "x$gnuplot" != "xno"; then
@@ -101,6 +147,13 @@ AC_DEFUN([FEATURES_CHECK], [
 			manpage="yes"
 		fi
 	fi
+
+	if test "x$leveldb" != "xno"; then
+		CHECK_LEVELDB()
+		if test "x$leveldb" != "xno"; then
+			leveldb="yes"
+		fi
+	fi
 ])
 
 dnl Print a feature configuration report
@@ -111,4 +164,6 @@ AC_DEFUN([FEATURES_REPORT], [
 	if test "x$gnuplot" = "xno"; then echo "      - Gnuplot"; fi
 	if test "x$manpage" = "xyes"; then echo "      + Manpage"; fi
 	if test "x$manpage" = "xno"; then echo "      - Manpage"; fi
+	if test "x$leveldb" = "xyes"; then echo "      + LevelDB"; fi
+	if test "x$leveldb" = "xno"; then echo "      - LevelDB"; fi
 ])

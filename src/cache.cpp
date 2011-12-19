@@ -18,7 +18,6 @@
 #include <unistd.h>
 
 #include "bstream.h"
-#include "diffstat.h"
 #include "logger.h"
 #include "options.h"
 #include "revision.h"
@@ -73,7 +72,7 @@ bool Cache::lookup(const std::string &id)
 	return (m_index.find(id) != m_index.end());
 }
 
-// Adds the revision of the given revision to the cache
+// Adds the revision to the cache
 void Cache::put(const std::string &id, const Revision &rev)
 {
 	if (!m_loaded) {
