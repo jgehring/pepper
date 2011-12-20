@@ -230,6 +230,28 @@ int check_cache(lua_State *L)
 	return LuaHelpers::pushNil(L);
 }
 
+// Lua wrapper for sys::datetime::Watch
+class Watch : public sys::datetime::Watch
+{
+public:
+	Watch(lua_State *) : sys::datetime::Watch() { }
+
+	int start(lua_State *) { sys::datetime::Watch::start(); return 0; }
+	int elapsed(lua_State *L) { return LuaHelpers::push(L, sys::datetime::Watch::elapsed()); }
+	int elapsedMSecs(lua_State *L) { return LuaHelpers::push(L, sys::datetime::Watch::elapsedMSecs()); }
+
+	static const char className[];
+	static Lunar<Watch>::RegType methods[];
+};
+
+const char Watch::className[] = "watch";
+Lunar<Watch>::RegType Watch::methods[] = {
+	LUNAR_DECLARE_METHOD(Watch, start),
+	LUNAR_DECLARE_METHOD(Watch, elapsed),
+	LUNAR_DECLARE_METHOD(Watch, elapsedMSecs),
+	{0,0}
+};
+
 // Function table of internal functions
 const struct luaL_reg table[] = {
 	{"check_cache", check_cache},
@@ -245,6 +267,7 @@ void registerModules(lua_State *L)
 	luaL_register(L, "pepper", pepper::table);
 	luaL_register(L, "pepper.utils", utils::table);
 	luaL_register(L, "pepper.internal", internal::table);
+	Lunar<internal::Watch>::Register(L, "pepper");
 }
 
 } // namespace LuaModules
