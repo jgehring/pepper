@@ -54,6 +54,7 @@ Lunar<Plot>::RegType Plot::methods[] = {
 	LUNAR_DECLARE_METHOD(Plot, plot_series),
 	LUNAR_DECLARE_METHOD(Plot, plot_multi_series),
 	LUNAR_DECLARE_METHOD(Plot, plot_histogram),
+	LUNAR_DECLARE_METHOD(Plot, plot_pie),
 	LUNAR_DECLARE_METHOD(Plot, flush),
 	{0,0}
 };
@@ -464,6 +465,72 @@ int Plot::plot_histogram(lua_State *L)
 			cmd << ", ";
 		}
 	}
+	gcmd(cmd.str());
+	return 0;
+}
+
+// Plots a pie chart
+int Plot::plot_pie(lua_State *L)
+{
+	// Validate arguments
+	if (lua_gettop(L) != 2) {
+		return LuaHelpers::pushError(L, str::printf("Invalid number of arguments (expected 2, got %d)", lua_gettop(L)));
+	}
+
+	std::vector<double> values;
+	std::vector<std::string> keys;
+	switch (lua_gettop(L)) {
+		default: 
+			values = LuaHelpers::popvd(L);
+			keys = LuaHelpers::popvs(L);
+			break;
+	}
+	if (keys.size() != values.size()) {
+		return LuaHelpers::pushError(L, str::printf("Argument dimensions don't match (%d != %d)", keys.size(), values.size()));
+	}
+
+	// Prepare data, i.e. accumulate values to get [from,to] intervals
+	size_t n = keys.size();
+	for (size_t i = 1; i < n; i++) {
+		values[i] += values[i-1];
+	}
+
+	// Open stream to data file
+	std::ostringstream cmd;
+
+	// First, print plot-specific data and helper functions to the file
+	cmd <<
+"set parametric\n"
+"set trange [0:1]\n"
+"set xrange [-1:1]\n"
+"set yrange [-1:1]\n"
+"set offsets 0.25,0.25,0.25,0.25\n" // For percentage labels
+"unset border\n"
+"unset tics\n"
+"p2rad(x)=pi * (x/0.5)\n"
+"fs(t,s,e)=sin(t * p2rad((e-s)) + p2rad(s))\n"
+"fc(t,s,e)=cos(t * p2rad((e-s)) + p2rad(s))" << std::endl;
+
+	// Print percentage labels
+	double last = 0;
+	for (size_t i = 0; i < n; i++) {
+		double m = last + (values[i] - last) / 2.0;
+		cmd << "set label " << i+1 << " \"" << int(100 * (values[i] - last) + 0.5) << "%\" at first " <<
+			"1.05*cos(p2rad(" << m << ")),1.05*sin(p2rad(" << m << ")) front " <<
+			(m > 0.25 && m < 0.76 ? "right" : "left") << std::endl;
+		last = values[i];
+	}
+
+	// Plot arcs
+	cmd << "plot \\" << std::endl;
+	last = 0;
+	for (size_t i = 0; i < n; i++) {
+		cmd << "  fc(t," << last << "," << values[i] << "),fs(t," << last << "," << values[i] <<
+		   ") w filledcu xy=0,0 title " << "\"" << keys[i] << "\"" <<
+		   (i != n-1 ? ",\\" : "") << std::endl;
+		last = values[i];
+	}
+
 	gcmd(cmd.str());
 	return 0;
 }

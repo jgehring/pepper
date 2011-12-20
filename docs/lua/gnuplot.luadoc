@@ -80,5 +80,14 @@ function plot_multi_series(keys, values, titles, style)
 --- @param options Additional options (see above)
 function plot_histogram(keys, values, titles, style)
 
+--- Plots a pie chart.
+--  <code>titles</code> is an array with titles that should be placed
+--  in the key. <code>values</code> has the same number of elements and
+--  defines percentage values for the titles. The values are expected to
+--  fall inside the interval [0,1].
+--  @param titles Element titles
+--  @param values Element percentage values from [0,1]
+function plot_pie(titles, values)
+
 --- Finish plotting and restart the Gnuplot process.
 function flush()

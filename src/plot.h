@@ -38,6 +38,7 @@ class Plot
 		int plot_series(lua_State *L);
 		int plot_multi_series(lua_State *L);
 		int plot_histogram(lua_State *L);
+		int plot_pie(lua_State *L);
 
 		int flush(lua_State *L);
 
