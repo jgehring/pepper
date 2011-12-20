@@ -33,6 +33,7 @@ The following dependencies are optional:
 	* The standard Git command line client (for the Git backend)
 	* Gnuplot (for graphical reports)
 	* Asciidoc and xmlto (for the man page)
+	* lgob bindings to GTK3 (for the GUI report)
 
 pepper has been written in a hopefully platform-independent manner,
 and should compile and run on all major Unix platforms, e.g. Linux,

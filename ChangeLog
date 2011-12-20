@@ -1,3 +1,36 @@
+2011-12-21  --  version 0.3
+
+	- Changes affecting the report API:
+		* Added explicit report context that is being passed to all
+		  report functions
+		* Added top-level pepper module
+	    * Improved report access inside of reports (listing reports,
+		  meta-data information, execution)
+		* Reports should provide a describe() function instead of
+		  a global meta table
+		* Added cat() function to repository class
+		* Added optional recursion to pepper.utils.unlink()
+		* Made revision prefetching during iteration optional (enabled
+		  by default)
+		* Added date range command line option handling to pepper.datetime
+	- Built-in reports:
+		* Added a graphical user interface report, using the lgob Lua
+		  bindings to GTK
+		* Fixed LOC calculation in CSV report
+		* Added date range options to most reports
+	- Backends:
+		* Restored compatibility with Subversion 1.5
+		* Minor bugfixes for the Mercurial backend
+	- Replaced gnuplot-cpp with a custom Gnuplot interface to be able to
+	  redirect Gnuplot output to an arbitrary std::ostream
+	- Added locking of cache directories to prevent data corruption upon
+	  simultaneous access from multiple program instances
+
+2011-08-06  --  version 0.2.4
+
+	* #3386735: Fixed Subverison log fetching for deeper subdirectories
+	* Fixes for thresholds and messages in age report
+
 2011-06-22  --  version 0.2.3
 
 	* Added punchcard report
