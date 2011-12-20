@@ -498,12 +498,14 @@ function OutputDialog.new(data)
 	scroll = gtk.ScrolledWindow.new()
 	scroll:add_with_viewport(self.output_textual)
 	self.views:insert_page(scroll, gtk.Label.new("Textual"), 0)
+	scroll:show()
 
 	scroll = gtk.ScrolledWindow.new()
 	self.aspect_graphical = gtk.AspectFrame.new()
 	self.aspect_graphical:add(self.output_graphical)
 	scroll:add_with_viewport(self.aspect_graphical)
 	self.views:insert_page(scroll, gtk.Label.new("Graphical"), 1)
+	scroll:show()
 
 	if glib.utf8_validate(data, data:len()) then
 		self.output_textual:get("buffer"):set("text", data)
