@@ -209,13 +209,9 @@ int Plot::plot_series(lua_State *L)
 	++index;
 	std::vector<double> keys = LuaHelpers::topvd(L, index);
 
+	// Read data entries and write them to a temporary string
+	std::stringstream out;
 	size_t nseries = 0;
-
-	// Open stream to data file
-	std::ofstream out;
-	std::string file = tempfile(out);;
-
-	// Read data entries and write them to a file
 	++index;
 	if (LuaHelpers::tablesize(L, index) != keys.size()) {
 		return LuaHelpers::pushError(L, str::printf("Number of keys and values doesn't match (%d != %d)", LuaHelpers::tablesize(L, index), keys.size()));
@@ -246,9 +242,6 @@ int Plot::plot_series(lua_State *L)
 	}
 	lua_pop(L, 1);
 
-	out.flush();
-	out.close();
-
 	// Read titles (if any)
 	++index;
 	std::vector<std::string> titles;
@@ -260,7 +253,7 @@ int Plot::plot_series(lua_State *L)
 	cmd << "plot ";
 	if (options.find("command") == options.end()) {
 		for (size_t i = 0; i < nseries; i++) {
-			cmd << "\"" << file << "\" using 1:" << (i+2);
+			cmd << (i == 0 ? "'-'" : "''") << " using 1:" << (i+2);
 			if (titles.size() > i) {
 				cmd << " title \"" << titles[i] << "\"";
 			} else {
@@ -274,10 +267,12 @@ int Plot::plot_series(lua_State *L)
 			}
 		}
 	} else {
-		cmd << "\"" << file << "\" " << options["command"];
+		cmd << "'-' " << options["command"];
 	}
 	PDEBUG << "Running plot with command: " << cmd.str() << endl;
 	gcmd(cmd.str());
+	gcmd(out.str());
+	gcmd("e"); // Marks end of data
 	return 0;
 }
 
@@ -311,11 +306,9 @@ int Plot::plot_multi_series(lua_State *L)
 	++index;
 	size_t nseries = LuaHelpers::tablesize(L, index);
 
-	std::string *files = new std::string[nseries];
-
+	std::ostringstream *outs = new std::ostringstream[nseries];
 	for (size_t i = 0; i < nseries; i++) {
-		std::ofstream out;
-		files[i] = tempfile(out);
+		std::ostringstream &out = outs[i];
 
 		// Read keys
 		lua_rawgeti(L, index, i+1);
@@ -338,9 +331,6 @@ int Plot::plot_multi_series(lua_State *L)
 		}
 		lua_pop(L, 2);
 
-		out.flush();
-		out.close();
-
 		// Reset index back to keys
 		--index;
 	}
@@ -355,7 +345,7 @@ int Plot::plot_multi_series(lua_State *L)
 	std::ostringstream cmd;
 	cmd << "plot ";
 	for (size_t i = 0; i < nseries; i++) {
-		cmd << "\"" << files[i] << "\" using 1:2";
+		cmd << "'-' using 1:2";
 		if (titles.size() > i) {
 			cmd << " title \"" << titles[i] << "\"";
 		} else {
@@ -371,7 +361,13 @@ int Plot::plot_multi_series(lua_State *L)
 	PDEBUG << "Running plot with command: " << cmd.str() << endl;
 	gcmd(cmd.str());
 
-	delete[] files;
+	// Write data
+	for (size_t i = 0; i < nseries; i++) {
+		gcmd(outs[i].str());
+		gcmd("e"); // Marks end of data
+	}
+
+	delete[] outs;
 	return 0;
 }
 
@@ -404,13 +400,9 @@ int Plot::plot_histogram(lua_State *L)
 	++index;
 	std::vector<std::string> keys = LuaHelpers::topvs(L, index);
 
+	// Read data entries and write them to a temporary string
+	std::ostringstream out;
 	size_t nseries = 0;
-
-	// Open stream to data file
-	std::ofstream out;
-	std::string file = tempfile(out);
-
-	// Read data entries and write them to a file
 	++index;
 	if (LuaHelpers::tablesize(L, index) != keys.size()) {
 		return LuaHelpers::pushError(L, str::printf("Number of keys and values doesn't match (%d != %d)", LuaHelpers::tablesize(L, index), keys.size()));
@@ -441,9 +433,6 @@ int Plot::plot_histogram(lua_State *L)
 	}
 	lua_pop(L, 1);
 
-	out.flush();
-	out.close();
-
 	// Read titles (if any)
 	++index;
 	std::vector<std::string> titles;
@@ -455,7 +444,7 @@ int Plot::plot_histogram(lua_State *L)
 	std::ostringstream cmd;
 	cmd << "plot ";
 	for (size_t i = 0; i < nseries; i++) {
-		cmd << "\"" << file << "\" using  " << (i+2) << ":xtic(1)";
+		cmd << (i == 0 ? "'-'" : "''") << " using  " << (i+2) << ":xtic(1)";
 		if (titles.size() > i) {
 			cmd << " title \"" << titles[i] << "\"";
 		} else {
@@ -469,6 +458,8 @@ int Plot::plot_histogram(lua_State *L)
 		}
 	}
 	gcmd(cmd.str());
+	gcmd(out.str());
+	gcmd("e"); // Marks end of data
 	return 0;
 }
 
