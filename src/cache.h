@@ -23,6 +23,8 @@ class BOStream;
 
 class Cache : public AbstractCache
 {
+	friend class LdbCache; // For importing revisions
+
 	private:
 		typedef enum {
 			Ok,

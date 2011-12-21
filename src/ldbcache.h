@@ -17,6 +17,8 @@
 
 #include "abstractcache.h"
 
+class Cache;
+
 namespace leveldb {
 	class DB;
 }
@@ -39,6 +41,7 @@ class LdbCache : public AbstractCache
 	private:
 		void opendb();
 		void closedb();
+		void import(Cache *cache);
 
 	private:
 		leveldb::DB *m_db;
