@@ -21,6 +21,7 @@ dist_pkgdata_DATA = \
 	diffstat.lua \
 	directories.lua \
 	filetypes.lua \
+	gui.lua \
 	loc.lua \
 	participation.lua \
 	punchcard.lua \
