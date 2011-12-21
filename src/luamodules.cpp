@@ -213,19 +213,17 @@ int check_cache(lua_State *L)
 		lua_pop(L, 1);
 	}
 	Repository *repo = LuaHelpers::popl<Repository>(L);
-	Cache *cache = dynamic_cast<Cache *>(repo->backend());
+	AbstractCache *cache = dynamic_cast<AbstractCache *>(repo->backend());
 	if (cache == NULL) {
-		cache = new Cache(repo->backend(), repo->backend()->options());
+		return LuaHelpers::pushError(L, "No active cache found");
 	}
 
 	try {
 		cache->check(force);
 	} catch (const PepperException &ex) {
 		return LuaHelpers::pushError(L, str::printf("Error checking cache: %s: %s", ex.where(), ex.what()));
-	}
-
-	if (cache != repo->backend()) {
-		delete cache;
+	} catch (const std::exception &ex) {
+		return LuaHelpers::pushError(L, str::printf("Error checking cache: %s", ex.what()));
 	}
 	return LuaHelpers::pushNil(L);
 }
