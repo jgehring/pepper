@@ -1,0 +1,19 @@
+[[!meta title="pepper 0.3 released"]]
+
+Version 0.3 of pepper is now available. This release features an improved
+report API, a new report for running other reports from a graphical user
+interface and numerous bugfixes and smaller improvements.
+
+The report API has received a big update. In particular, the ability
+to access and run other reports from within the current report has been
+improved. Among other things, this enables the creation of meta-reports
+that aggregate existing reports. These features are also heavily
+used by the new GUI report.
+
+*NOTE:* This update breaks compatibility with existing scripts. However,
+the changes required to make old reports working have been kept small and
+are described in detail in the respective [[porting guide|porting-02-03]].
+
+A more detailed listing of the changes can be found in the [change
+log](ChangeLog). As usual, source tarballs can be found at the
+[[Download]] section.

@@ -19,7 +19,8 @@ repos = {
 #	"pepper" => { :dir => srcdir, :branch => "master", :tags => "" },
 	"hg" => { :dir => home + "/data/repos/hg", :branch => "default", :tags => "'^[0-9].[0-9]$'", :maintainer => "Matt Mackall" },
 	"git" => { :dir => home + "/data/repos/git", :branch => "master", :tags => "'^v[1-9].[4-9].[0-9]$'", :maintainer => "Junio C Hamano" },
-	"linux" => { :dir => home + "/data/repos/linux-2.6", :branch => "master", :tags => "'^v2.6.[0-9]*$'", :maintainer => "Linus Torvalds" }
+	"linux" => { :dir => home + "/data/repos/linux-2.6", :branch => "master", :tags => "'^v2.6.[0-9]*$'", :maintainer => "Linus Torvalds" },
+	"mediawiki" => { :dir => "svn://rudy/mediawiki", :branch => "trunk", :tags => "'^REL.*_0$'", :maintainer => "siebrand" }
 }
 
 repos.keys.each do |repo|

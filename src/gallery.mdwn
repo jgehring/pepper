@@ -1,21 +1,24 @@
 ### Gallery
 
-These example images have been generated using the pepper's built-in
-reports.  The output type has been set to `svg` in order to render both
-thumbnails and high-resolution versions of each plot after wards. The
-latter can be accessed by clicking on a thumbnail image.
+These example images have been generated using the
+pepper's built-in reports.  The output type has been set to
+[SVG](http://en.wikipedia.org/wiki/SVG) in order to render both thumbnails
+and high-resolution versions of each plot after wards. The latter can
+be accessed by clicking on a thumbnail image.
 
-The repository data is from the self-hosting repositories of
-[Git](http://git.kernel.org/?p=git/git.git;a=summary) and
-[Mercurial](http://selenic.com/repo/hg). Additionally,
-a clone of [Linus Torvald's kernel
+The repository data is from the self-hosting repositories
+of [Git](http://git.kernel.org/?p=git/git.git;a=summary) and
+[Mercurial](http://selenic.com/repo/hg). The [MediaWiki Subversion
+repository](http://svn.wikimedia.org/svnroot/mediawiki/)
+has been used as an example of a large SVN repository
+(>100000 revisions).  Additionally,a clone of [Linus Torvald's kernel
 tree](http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=summary)
-has been used.
+is presented.
 
 ---
 
 
-##### Lines of Code
+#### Lines of Code
 
 The `loc` report shows the total lines of code in the repository. Like
 most graphical reports, tag marks can be added to the plot.
@@ -24,6 +27,7 @@ most graphical reports, tag marks can be added to the plot.
 <tr>
 <td><a href="loc-git.png"><img src="loc-git-thumb.png" title="Git" width="80%"></a></td>
 <td><a href="loc-hg.png"><img src="loc-hg-thumb.png" title="Mercurial" width="80%"></a></td>
+<td><a href="loc-mediawiki.png"><img src="loc-mediawiki-thumb.png" title="MediaWiki" width="80%"></a></td>
 <td><a href="loc-linux.png"><img src="loc-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
 </tr>
 </table>
@@ -39,6 +43,7 @@ The `authors` report plots the contributions made by the "busiest" authors.
 <tr>
 <td><a href="authors-git.png"><img src="authors-git-thumb.png" title="Git" width="80%"></a></td>
 <td><a href="authors-hg.png"><img src="authors-hg-thumb.png" title="Mercurial" width="80%"></a></td>
+<td><a href="authors-mediawiki.png"><img src="authors-mediawiki-thumb.png" title="MediaWiki" width="80%"></a></td>
 <td><a href="authors-linux.png"><img src="authors-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
 </tr>
 </table>
@@ -57,6 +62,7 @@ splitted by directories.
 <tr>
 <td><a href="activity-git.png"><img src="activity-git-thumb.png" title="Git" width="80%"></a></td>
 <td><a href="activity-hg.png"><img src="activity-hg-thumb.png" title="Mercurial" width="80%"></a></td>
+<td><a href="activity-mediawiki.png"><img src="activity-mediawiki-thumb.png" title="MediaWiki" width="80%"></a></td>
 <td><a href="activity-linux.png"><img src="activity-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
 </tr>
 </table>
@@ -75,6 +81,7 @@ visualize the sum of the number of files touched per commit.
 <tr>
 <td><a href="commits-git.png"><img src="commits-git-thumb.png" title="Git" width="80%"></a></td>
 <td><a href="commits-hg.png"><img src="commits-hg-thumb.png" title="Mercurial" width="80%"></a></td>
+<td><a href="commits-mediawiki.png"><img src="commits-mediawiki-thumb.png" title="MediaWiki" width="80%"></a></td>
 <td><a href="commits-linux.png"><img src="commits-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
 </tr>
 </table>
@@ -92,6 +99,7 @@ In pepper, this report is called `times`.
 <tr>
 <td><a href="times-git.png"><img src="times-git-thumb.png" title="Git" width="80%"></a></td>
 <td><a href="times-hg.png"><img src="times-hg-thumb.png" title="Mercurial" width="80%"></a></td>
+<td><a href="times-mediawiki.png"><img src="times-mediawiki-thumb.png" title="MediaWiki" width="80%"></a></td>
 <td><a href="times-linux.png"><img src="times-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
 </tr>
 </table>
@@ -108,6 +116,7 @@ corresponding histogram.
 <tr>
 <td><a href="filetypes-git.png"><img src="filetypes-git-thumb.png" title="Git" width="80%"></a></td>
 <td><a href="filetypes-hg.png"><img src="filetypes-hg-thumb.png" title="Mercurial" width="80%"></a></td>
+<td><a href="filetypes-mediawiki.png"><img src="filetypes-mediawiki-thumb.png" title="MediaWiki" width="80%"></a></td>
 <td><a href="filetypes-linux.png"><img src="filetypes-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
 </tr>
 </table>
@@ -128,6 +137,7 @@ For each repository, the author with the most commits has been selected.
 <tr>
 <td><a href="participation-git.png"><img src="participation-git-thumb.png" title="Git" width="80%"></a></td>
 <td><a href="participation-hg.png"><img src="participation-hg-thumb.png" title="Mercurial" width="80%"></a></td>
+<td><a href="participation-mediawiki.png"><img src="participation-mediawiki-thumb.png" title="MediaWiki" width="80%"></a></td>
 <td><a href="participation-linux.png"><img src="participation-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
 </tr>
 </table>
