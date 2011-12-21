@@ -14,6 +14,7 @@ dist_pkgdata_DATA = \
 	age.lua \
 	activity.lua \
 	authors.lua \
+	authors_pie.lua \
 	branches.lua \
 	check_cache.lua \
 	commit_counts.lua \
