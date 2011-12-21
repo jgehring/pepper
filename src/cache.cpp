@@ -104,7 +104,7 @@ void Cache::put(const std::string &id, const Revision &rev)
 
 	uint32_t offset = m_cout->tell();
 	MOStream rout;
-	rev.write(rout);
+	rev.write03(rout);
 	std::vector<char> compressed = utils::compress(rout.data());
 	*m_cout << compressed;
 
@@ -155,7 +155,7 @@ Revision *Cache::get(const std::string &id)
 		throw PEX(str::printf("Unable to read from cache file: %s", path.c_str()));
 	}
 	MIStream rin(data);
-	if (!rev->load(rin)) {
+	if (!rev->load03(rin)) {
 		throw PEX(str::printf("Unable to read from cache file: %s", path.c_str()));
 	}
 	return rev;

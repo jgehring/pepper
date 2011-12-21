@@ -42,6 +42,8 @@ class Revision
 
 		void write(BOStream &out) const;
 		bool load(BIStream &in);
+		void write03(BOStream &out) const;  // for pepper <= 0.3
+		bool load03(BIStream &in);          // for pepper <= 0.3
 
 	PEPPER_PVARS:
 		std::string m_id;

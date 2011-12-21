@@ -14,6 +14,7 @@
 #include "main.h"
 
 #include "bstream.h"
+#include "logger.h"
 #include "luahelpers.h"
 #include "strlib.h"
 
@@ -55,15 +56,53 @@ Diffstat Revision::diffstat() const
 // Writes the revision to a binary stream (not writing the ID)
 void Revision::write(BOStream &out) const
 {
+	out << 'R' << char(1); // Head and version
 	out << m_date << m_author << m_message;
 	m_diffstat.write(out);
+	out << 'V'; // Tail
 }
 
 // Loads the revision from a binary stream (not changing the ID)
 bool Revision::load(BIStream &in)
 {
+	char c, v;
+	in >> c;
+	if (c != 'R') { // Head
+		return false;
+	}
+	in >> v;
+	if (v != 1) {
+		PDEBUG << "Unkown version number " << int(v) << ", aborting" << endl;
+		return false;
+	}
+
 	in >> m_date >> m_author >> m_message;
-	return m_diffstat.load(in);
+	if (!m_diffstat.load(in)) {
+		return false;
+	}
+
+	in >> c;
+	if (c != 'V') { // Tail
+		return false;
+	}
+	return in.ok();
+}
+
+// Writes the revision to a binary stream (not writing the ID)
+void Revision::write03(BOStream &out) const
+{
+	out << m_date << m_author << m_message;
+	m_diffstat.write(out);
+}
+
+// Loads the revision from a binary stream (not changing the ID)
+bool Revision::load03(BIStream &in)
+{
+	in >> m_date >> m_author >> m_message;
+	if (!m_diffstat.load(in)) {
+		return false;
+	}
+	return in.ok();
 }
 
 /*
