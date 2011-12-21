@@ -73,8 +73,7 @@ void LdbCache::check(bool /* force */)
 	for (it->SeekToFirst(); it->Valid(); it->Next()) {
 		Revision rev(it->key().ToString());
 		std::string value = it->value().ToString();
-		std::vector<char> data = std::vector<char>(value.begin(), value.end());
-		MIStream rin(data);
+		MIStream rin(value.c_str(), value.length());
 		if (!rev.load(rin)) {
 			PDEBUG << "Revision " << it->key().ToString() << " corrupted!" << endl;
 			corrupted.push_back(it->key().ToString());
@@ -138,8 +137,7 @@ Revision *LdbCache::get(const std::string &id)
 	}
 
 	Revision *rev = new Revision(id);
-	std::vector<char> data = std::vector<char>(value.begin(), value.end());
-	MIStream rin(data);
+	MIStream rin(value.c_str(), value.length());
 	if (!rev->load(rin)) {
 		throw PEX(str::printf("Unable to read from cache: Data corrupted"));
 	}
