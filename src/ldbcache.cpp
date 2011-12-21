@@ -47,27 +47,29 @@ void LdbCache::flush()
 }
 
 // Checks cache consistency
-void LdbCache::check(bool /* force */)
+void LdbCache::check(bool force)
 {
 	try {
 		if (!m_db) opendb();
-		Logger::info() << "LdbCache: Database opened, everything's alright" << endl;
 	} catch (const std::exception &ex) {
 		PDEBUG << "Exception while opening database: " << ex.what() << endl;
-		PDEBUG << "Trying to repair it" << endl;
-
 		Logger::info() << "LdbCache: Database can't be opened, trying to repair it" << endl;
+	}
+
+	if (force || !m_db) {
 		std::string path = cacheDir() + "/ldb";
 		leveldb::Status status = leveldb::RepairDB(path, leveldb::Options());
 		if (!status.ok()) {
 			Logger::err() << "Error repairing database: " << status.ToString() << endl;
 		} else {
-			Logger::info() << "LdbCache: Database repaired, please re-run to check revisions" << endl;
+			Logger::info() << "LdbCache: Database repaired" << endl;
 		}
-		return;
+		closedb();
+		opendb();
 	}
 
 	// Simply try to read all revisions
+	Logger::info() << "LdbCache: Checking revisions..." << endl;
 	std::vector<std::string> corrupted;
 	size_t n = 0;
 	leveldb::Iterator* it = m_db->NewIterator(leveldb::ReadOptions());
@@ -83,6 +85,7 @@ void LdbCache::check(bool /* force */)
 	}
 	if (!it->status().ok()) {
 		Logger::err() << "Error iterating over cached revisions: " << it->status().ToString() << endl;
+		Logger::err() << "Please re-run with --force to repair the database (might cause data loss)" << endl;
 		return;
 	}
 	Logger::info() << "LdbCache: Checked " << n << " revisions, found " << corrupted.size() << " to be corrupted" << endl;
