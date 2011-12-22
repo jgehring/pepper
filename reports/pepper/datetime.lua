@@ -21,6 +21,7 @@ module("pepper.datetime", package.seeall)
 --  @param r If not null, options will be added to this table
 function add_daterange_options(r)
 	if r then
+		if not r.options then r.options = {} end
 		table.insert(r.options, {"--datemin=ARG", "Start date (format is YYYY-MM-DD)"})
 		table.insert(r.options, {"--datemax=ARG", "End date (format is YYYY-MM-DD)"})
 	else

@@ -33,6 +33,7 @@ module("pepper.plotutils", package.seeall)
 --  @param r If not null, options will be added to this table
 function add_plot_options(r)
 	if r then
+		if not r.options then r.options = {} end
 		table.insert(r.options, {"-oARG, --output=ARG", "Select output file"})
 		table.insert(r.options, {"-tARG, --type=ARG", "Explicitly set image type"})
 		table.insert(r.options, {"-sW[xH], --size=W[xH]", "Set image size to width W and height H"})
