@@ -117,21 +117,21 @@ std::vector<std::string> reportDirs()
 // Returns the full path to the given script
 std::string findScript(const std::string &script)
 {
-	if (sys::fs::exists(script)) {
+	if (sys::fs::fileExists(script)) {
 		return script;
 	}
-	if (sys::fs::exists(script + ".lua")) {
+	if (sys::fs::fileExists(script + ".lua")) {
 		return script + ".lua";
 	}
 
 	std::vector<std::string> dirs = reportDirs();
 	for (size_t i = 0; i < dirs.size(); i++) {
 		std::string path = dirs[i] + "/" + script;
-		if (sys::fs::exists(path)) {
+		if (sys::fs::fileExists(path)) {
 			return path;
 		}
 		path += ".lua";
-		if (sys::fs::exists(path)) {
+		if (sys::fs::fileExists(path)) {
 			return path;
 		}
 	}
