@@ -18,23 +18,27 @@ manual](http://www.lua.org/manual/5.1/).
 
 ### Script layout
 
-Report scripts should encapsulate their actions in functions, i.e. they
-should do nothing unless their entry function is being called. The entry
-function is called `main()`, and is not expected to return a value.
-
-The only code outside of functions is the declaration of the global
-`meta` table, which can be used to set up the name of the script,
-a short description and command-line options.
+Report scripts should encapsulate all of their code, except
+from module imports, in functions. The function which
+will be used to run the report is mandatory and is called
+`run` . A single argument will be passed to it - the current [report
+context](../documentation/api/modules/pepper.report.html). Meta-data
+like the report title, description or accepted options will be queried
+by calling `describe()`.
 
 A skeleton script might look light the following:
 
 [[!format lua """
 -- Meta-data
-meta.title = "Skeleton"
-meta.description = "Just a skeleton"
+function describe()
+	local r = {}
+	r.title = "Skeleton"
+	r.description = "Just a skeleton"
+	return r
+endf
 
--- Entry point
-function main()
+-- Entry point with report context "self"
+function run(self)
 	-- Nothing here
 end
 """]]
@@ -42,16 +46,15 @@ end
 
 ### Using repository information
 
-Report scripts can use the global `pepper.report`
-table to access the current environment. The
-[`repository`](../documentation/api/modules/pepper.repository.html)
+Report scripts can use the their context to access the current environment
+The [`repository`](../documentation/api/modules/pepper.repository.html)
 object provides numerous functions to access the source code repository
 selected by the user. The following code will print the repository's type,
 its location and the current head revision.
 
 [[!format lua """
-function main()
-	local repository = pepper.report.repository()
+function run(self)
+	local repository = self:repository()
 	print(repository:type() .. " repository at " .. repository:url())
 	print("HEAD is " .. repository:head())
 end
@@ -61,22 +64,24 @@ end
 ### Examining a revision range
 
 A revision range can be accessed using a [revision
-iterator](../documentation/api/modules/pepper.iterator.html),
-that can be obtained by calling the repository's
+iterator](../documentation/api/modules/pepper.iterator.html)
+obtained by calling the repository's
 [`iterator()`](../documentation/api/modules/pepper.repository.html#iterator)
-function. The iterator's `revisions()` function can be used as a standard
-Lua iterator wrapping `next()`. Furthermore, a `map()` function is
-provided that maps a callback function to every revision. When using
-`map()`, the iterator will also write progress information to `stderr`.
+function. The iterator's
+[`revisions()`](../documentation/api/modules/pepper.iterator.html#revisions)
+function can be used as a standard Lua
+iterator as shown in the code below. Furthermore, a
+[`map()`](../documentation/api/modules/pepper.iterator.html#map) function
+is provided that maps a callback function to every revision.
 
 The following code will gather information about the number of commits
 and the number of authors on a branch.
 
 [[!format lua """
 -- Entry point
-function main()
-	local repository = pepper.report.repository()
-	local branch = repository:main_branch()
+function run(self)
+	local repository = self:repository()
+	local branch = repository:default_branch()
 
 	local authors = {} -- Dictionary to mark authors
 	local num_authors = 0
@@ -101,10 +106,28 @@ end
 """]]
 
 Here,
-[`main_branch()`](../documentation/api/modules/pepper.repository.html#main_branch)
-will return the branch that is currently checked out for local
-repositories.
+[`default_branch()`](../documentation/api/modules/pepper.repository.html#default_branch)
+will return the branch that is currently checked out for
+local repositories. The equivalent revision iteration
+using `map()` would look like the following, using a
+[closure](http://www.lua.org/pil/6.1.html) containing the
+previous the loop body.  As opposed to iteration by using
+[`revisions()`](../documentation/api/modules/pepper.iterator.html#revisions),
+progress information will be written to the console.
 
+[[!format lua """
+	-- Initialize iterator and loop over all revisions
+	local iterator = repository:iterator(branch)
+	iterator:map(function (revision)
+		-- Check if the author has already been counted
+		if authors[revision:author()] == nil then
+			num_authors = num_authors + 1
+			authors[revision:author()] = true
+		end
+
+		num_commits = num_commits + 1
+	end)
+"""]]
 
 #### Technical information regarding revision iterators
 
@@ -133,19 +156,23 @@ two parts:
 * Declaration of available options using the `meta` table. These options
   will be presented to the user if help is requested at the command line.
 * Retrieval of option values using
-  [`pepper.report.getopt()`](../documentation/api/modules/pepper.report.html#getopt).
+  [`report:getopt()`](../documentation/api/modules/pepper.report.html#getopt).
   Default option values can be specified, too.
 
 Here's a short script that prints the head revision of a given branch for
 illustrative purposes:
 
 [[!format lua """
-meta.title = "Branch HEAD"
-meta.options = {{"-bARG, --branch=ARG", "Select branch"}}
+function describe()
+	local r = {}
+	r.title = "Branch HEAD"
+	r.options = {{"-bARG, --branch=ARG", "Select branch"}}
+	return r
+end
 
-function main()
-	local repository = pepper.report.repository()
-	local branch = pepper.report.getopt("b,branch", repository:main_branch())
+function run(self)
+	local repository = self:repository()
+	local branch = self:getopt("b,branch", repository:default_branch())
 	print("Branch " .. branch .. " is at " .. repository:head(branch))
 end
 """]]
@@ -162,11 +189,18 @@ module provides support for common command-line options and plot setup.
 The following report plots a histogram of commits by week days.
 
 [[!format lua """
-meta.title = "Commits by Week Days"
-
--- Include plotutils module and add common command-line options
+-- Include the plotutils module
 require "pepper.plotutils"
-pepper.plotutils.add_plot_options()
+
+-- Meta-data
+function describe()
+	local r = {}
+	r.title = "Commits by Week Days"
+
+	-- Add common plotting options
+	pepper.plotutils.add_plot_options(r)
+	return r
+end
 
 -- This function will be called for every revision
 function callback(revision)
@@ -178,22 +212,22 @@ function callback(revision)
 end
 
 -- Entry point
-function main()
-    local repository = pepper.report.repository()
+function run(self)
+    local repository = self:repository()
     local days = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}
     -- Global table of commit counts with an entry for each day
     commits = {0, 0, 0, 0, 0, 0, 0}
 
-	-- Gather data by iterating over the main branch
-    local branch = repository:main_branch()
+	-- Gather data by iterating over the default branch
+    local branch = repository:default_branch()
     repository:iterator(branch):map(callback)
 
 	-- Create a new plot with a title including the current branch
     local plot = pepper.gnuplot:new()
     plot:set_title("Commits by Week Days (on " .. branch .. ")")
 
-	-- This will setup the plot output according to the command-line
-	-- options added above
+	-- This will setup the plot output using to the command-line
+	-- options added in describe()
     pepper.plotutils.setup_output(plot)
 
 	-- Make sure the Y axis starts at zero
