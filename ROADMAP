@@ -1,12 +1,10 @@
 A non-obligatory roadmap for pepper
 ===================================
 
-Planned features for 0.3:
-	- API overhaul (more OOP and report-centric)
-	- repository:cat()
-	# repository:log() (Use repository:iterator() without prefetching instead)
-	- Time range arguments for all reports
-	- GUI report (using lgob.gtk)
+Planned features for 0.3.1:
+	* Support for pie charts
+	* Experimental LevelDB revision cache
+	* Speed improvements for Subversion backend
 
 Planned features for 0.3.x:
 	* Bazaar backend
