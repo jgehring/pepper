@@ -12,7 +12,7 @@ used by the new GUI report.
 
 *NOTE:* This update breaks compatibility with existing scripts. However,
 the changes required to make old reports working have been kept small and
-are described in detail in the respective [[porting guide|porting-02-03]].
+are described in detail in the respective [[porting guide|documentation/porting-02-03]].
 
 A more detailed listing of the changes can be found in the [change
 log](ChangeLog). As usual, source tarballs can be found at the
