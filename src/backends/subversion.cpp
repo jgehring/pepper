@@ -718,17 +718,8 @@ std::string SubversionBackend::uuid()
 // Returns the HEAD revision for the current branch
 std::string SubversionBackend::head(const std::string &branch)
 {
-	std::string prefix;
-	if (branch == "trunk") {
-		prefix = m_opts.value("trunk", "trunk");
-	} else if (!branch.empty()) {
-		prefix = m_opts.value("branches", "branches");
-		prefix += "/";
-		prefix += branch;
-	}
-	PDEBUG << "branch = " << branch << " -> prefix = " << prefix << endl;
-
 	apr_pool_t *pool = svn_pool_create(d->pool);
+	std::string prefix = this->prefix(branch, pool);
 	svn_dirent_t *dirent;
 	svn_error_t *err = svn_ra_stat(d->ra, svn_path_join(d->prefix, prefix.c_str(), pool), SVN_INVALID_REVNUM, &dirent, pool);
 	if (err == NULL && dirent == NULL && branch == "trunk") {
@@ -985,19 +976,9 @@ std::string SubversionBackend::cat(const std::string &path, const std::string &i
 // Returns a log iterator for the given branch
 Backend::LogIterator *SubversionBackend::iterator(const std::string &branch, int64_t start, int64_t end)
 {
-	std::string prefix;
-	if (branch == "trunk") {
-		prefix = m_opts.value("trunk", "trunk");
-	} else if (!branch.empty()) {
-		prefix = m_opts.value("branches", "branches");
-		prefix += "/";
-		prefix += branch;
-	}
-
-	PDEBUG << "Iterator requested for branch " << branch << " -> prefix = " << prefix << endl;
-
 	// Check if the branch exists
 	apr_pool_t *pool = svn_pool_create(d->pool);
+	std::string prefix = this->prefix(branch, pool);;
 	svn_dirent_t *dirent;
 	svn_error_t *err = svn_ra_stat(d->ra, svn_path_join(d->prefix, prefix.c_str(), pool), SVN_INVALID_REVNUM, &dirent, pool);
 	if (err != NULL) {
@@ -1081,6 +1062,22 @@ void SubversionBackend::printHelp() const
 	Options::print("--branches=ARG", "Branches are in subdirectory ARG");
 	Options::print("--tags=ARG", "Tags are in subdirectory ARG");
 	Options::print("--threads=ARG", "Use ARG threads for requesting diffstats");
+}
+
+// Returns the prefix for the given branch
+std::string SubversionBackend::prefix(const std::string &branch, apr_pool_t *pool)
+{
+	std::string p;
+	if (branch == "trunk") {
+		p = m_opts.value("trunk", "trunk");
+	} else if (!branch.empty()) {
+		p = m_opts.value("branches", "branches");
+		p += "/";
+		p += branch;
+	}
+
+	PDEBUG << "Iterator requested for branch " << branch << " -> prefix = " << p << endl;
+	return std::string(svn_path_canonicalize(p.c_str(), pool));
 }
 
 // Returns the revision data for the given ID

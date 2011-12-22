@@ -92,6 +92,9 @@ class SubversionBackend : public Backend
 		void printHelp() const;
 
 	private:
+		std::string prefix(const std::string &branch, struct apr_pool_t *pool);
+
+	private:
 		SvnConnection *d;
 		SvnDiffstatPrefetcher *m_prefetcher;
 };
