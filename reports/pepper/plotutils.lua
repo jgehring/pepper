@@ -22,7 +22,7 @@ assert(pepper.gnuplot ~= nil, "pepper built without Gnuplot support")
 module("pepper.plotutils", package.seeall)
 
 
---- Adds common options for graphical reports to <code>meta.options</code>.
+--- Adds common options for graphical reports to the given table.
 --  The following options will be added:
 --  <table>
 --  <tr><th>Option</th><th>Description</th></tr>
@@ -30,7 +30,7 @@ module("pepper.plotutils", package.seeall)
 --  <tr><td>-tARG, --type=ARG</td><td>Explicitly set image type</td></tr>
 --  <tr><td>-sW[xH], --size=W[xH]</td><td>Set image size to width W and height H</td></tr>
 --  </table>
---  @param r If not null, options will be added to this table
+--  @param r If not null, options will be added to this table. Else, the global meta.options table will be used.
 function add_plot_options(r)
 	if r then
 		if not r.options then r.options = {} end
