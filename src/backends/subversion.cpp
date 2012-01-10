@@ -890,7 +890,7 @@ std::vector<std::string> SubversionBackend::tree(const std::string &id)
 
 	// Pseudo-recursively list directory entries
 	std::stack<std::pair<std::string, int> > stack;
-	stack.push(std::pair<std::string, int>("", svn_node_dir));
+	stack.push(std::pair<std::string, int>(d->prefix, svn_node_dir));
 	while (!stack.empty()) {
 		svn_pool_clear(iterpool);
 
@@ -902,7 +902,7 @@ std::vector<std::string> SubversionBackend::tree(const std::string &id)
 		}
 		stack.pop();
 
-		PTRACE << "Listing directory contents in " << node << "@" << revision << endl;
+		PDEBUG << "Listing directory contents in " << node << "@" << revision << endl;
 
 		apr_hash_t *dirents;
 		svn_error_t *err = svn_ra_get_dir2(d->ra, &dirents, NULL, NULL, node.c_str(), revision, SVN_DIRENT_KIND, iterpool);
@@ -916,6 +916,9 @@ std::vector<std::string> SubversionBackend::tree(const std::string &id)
 		for (int i = 0; i < array->nelts; i++) {
 			svn_sort__item_t *item = &APR_ARRAY_IDX(array, i, svn_sort__item_t);
 			svn_dirent_t *dirent = (svn_dirent_t *)apr_hash_get(dirents, item->key, item->klen);
+			if (str::endsWith(node, (const char *)item->key) || str::endsWith(d->url, (const char *)item->key)) {
+				continue;
+			}
 			if (dirent->kind == svn_node_file || dirent->kind == svn_node_dir) {
 				next.push(std::pair<std::string, int>(prefix + (const char *)item->key, dirent->kind));
 			}
