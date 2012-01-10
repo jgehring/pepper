@@ -683,7 +683,7 @@ bool SubversionBackend::handles(const std::string &url)
 {
 	const char *schemes[] = {"svn://", "svn+ssh://", "http://", "https://", "file://"};
 	for (unsigned int i = 0; i < sizeof(schemes)/sizeof(schemes[0]); i++) {
-		if (url.compare(0, strlen(schemes[i]), schemes[i]) == 0) {
+		if (str::startsWith(url, schemes[i])) {
 			return true;
 		}
 	}
@@ -693,9 +693,17 @@ bool SubversionBackend::handles(const std::string &url)
 		return true;
 	}
 
-	// Working copy with .svn directory
-	if (sys::fs::dirExists(url+"/.svn")) {
-		return true;
+	// Working copy with .svn directory here or in a parent directory
+	std::string dir = url;
+	while (!dir.empty()) {
+		if (sys::fs::dirExists(dir + "/.svn")) {
+			return true;
+		}
+		std::string parent = sys::fs::dirname(dir);
+		if (parent == dir) {
+			break;
+		}
+		dir = parent;
 	}
 
 	return false;
