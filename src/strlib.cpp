@@ -110,6 +110,24 @@ std::string quote(const std::string &str)
 	return std::string("'") + str + "'";
 }
 
+// Checks if a starts with b
+bool startsWith(const std::string &a, const std::string &b)
+{
+	if (a.length() < b.length()) {
+		return false;
+	}
+	return (a.compare(0, b.length(), b) == 0);
+}
+
+// Checks if a ends with b
+bool endsWith(const std::string &a, const std::string &b)
+{
+	if (a.length() < b.length()) {
+		return false;
+	}
+	return (a.compare(a.length() - b.length(), b.length(), b) == 0);
+}
+
 // sprintf for std::string
 std::string printf(const char *format, ...)
 {

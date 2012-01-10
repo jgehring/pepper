@@ -70,6 +70,8 @@ std::vector<std::string> split(const std::string &str, const std::string &token,
 std::string join(const std::vector<std::string> &v, const std::string &c = std::string());
 std::string join(std::vector<std::string>::const_iterator start, std::vector<std::string>::const_iterator end, const std::string &c = std::string());
 std::string quote(const std::string &str);
+bool startsWith(const std::string &a, const std::string &b);
+bool endsWith(const std::string &a, const std::string &b);
 
 std::string printf(const char *format, ...);
 

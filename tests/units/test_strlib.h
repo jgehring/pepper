@@ -97,6 +97,28 @@ TEST_CASE("str/join", "str::join()")
 	}
 }
 
+TEST_CASE("str/startsWith", "str::startsWith()")
+{
+	REQUIRE(str::startsWith("test", "te") == true);
+	REQUIRE(str::startsWith("test", "fe") == false);
+	REQUIRE(str::startsWith("test", "test") == true);
+	REQUIRE(str::startsWith("test", "testing") == false);
+	REQUIRE(str::startsWith(std::string(), std::string()) == true);
+	REQUIRE(str::startsWith(std::string(), "test") == false);
+	REQUIRE(str::startsWith("test", std::string()) == true);
+}
+
+TEST_CASE("str/endsWith", "str::endsWith()")
+{
+	REQUIRE(str::endsWith("test", "st") == true);
+	REQUIRE(str::endsWith("test", "at") == false);
+	REQUIRE(str::endsWith("test", "test") == true);
+	REQUIRE(str::endsWith("test", "atest") == false);
+	REQUIRE(str::endsWith(std::string(), std::string()) == true);
+	REQUIRE(str::endsWith(std::string(), "test") == false);
+	REQUIRE(str::endsWith("test", std::string()) == true);
+}
+
 TEST_CASE("str/printf", "str::printf()")
 {
 	struct inout_t {
