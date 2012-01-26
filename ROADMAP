@@ -3,8 +3,6 @@ A non-obligatory roadmap for pepper
 
 Planned features for 0.3.1:
 	* Support for pie charts
-	* Experimental LevelDB revision cache
-	* Speed improvements for Subversion backend
 
 Planned features for 0.3.x:
 	* Bazaar backend
@@ -12,6 +10,7 @@ Planned features for 0.3.x:
 	* Meta data pre-fetching for Subversion backend
 	* Windows version using the GUI report
 	* HTML module for generating custom HTML reports
+	* Speed improvements for Subversion backend
 
 Planned features for 0.4:
 	* Diff access
