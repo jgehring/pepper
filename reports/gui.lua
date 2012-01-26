@@ -534,7 +534,7 @@ function OutputDialog.new(data)
 	return self
 end
 
-function OutputDialog:zoom_in()
+function OutputDialog:zoom_out()
 	if self.original_image then
 		local w = self.output_graphical:get_pixbuf():get_width() * 0.8
 		local h = self.output_graphical:get_pixbuf():get_height() * 0.8
@@ -544,7 +544,7 @@ function OutputDialog:zoom_in()
 	end
 end
 
-function OutputDialog:zoom_out()
+function OutputDialog:zoom_in()
 	if self.original_image then
 		local w = self.output_graphical:get_pixbuf():get_width() * 1.2
 		local h = self.output_graphical:get_pixbuf():get_height() * 1.2
