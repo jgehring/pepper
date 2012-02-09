@@ -471,16 +471,17 @@ void SubversionBackend::SvnLogIterator::readIntervalsFromCache(const std::string
 		Logger::warn() << "Unknown version number in cache file " << cachefile  << ": " << version << endl;
 		return;
 	}
-	while (!in.eof()) {
-		Interval interval;
+
+	Interval interval;
+	while (!(in >> interval.start).eof()) {
 		uint64_t i = 0, num;
-		in >> interval.start >> interval.end >> num;
+		in >> interval.end >> num;
 		interval.revisions.resize(num);
-		while (i < num && !in.eof()) {
+		while (i < num) {
 			in >> interval.revisions[i++];
 		}
 
-		if (interval.revisions.empty() || interval.start >= interval.end) {
+		if (!in.ok() || interval.revisions.empty() || interval.start >= interval.end) {
 			PTRACE << "Skipping bogus interval: [" << interval.start << ":" << interval.end
 				<< "] with " << interval.revisions.size() << " revisions" << endl;
 			continue;

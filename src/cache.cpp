@@ -204,8 +204,7 @@ void Cache::load()
 	std::string buffer;
 	std::pair<uint32_t, uint32_t> pos;
 	uint32_t crc;
-	while (!in->eof()) {
-		*in >> buffer;
+	while (!(*in >> buffer).eof()) {
 		if (buffer.empty()) {
 			break;
 		}
@@ -369,8 +368,7 @@ void Cache::check(bool force)
 	uint32_t crc;
 	std::map<std::string, uint32_t> crcs;
 	std::vector<std::string> corrupted;
-	while (!in->eof()) {
-		*in >> id;
+	while (!(*in >> id).eof()) {
 		if (!in->ok()) {
 			goto corrupt;
 		}

@@ -24,7 +24,9 @@
 
 
 // read()/write() macros with assertions
-#ifdef NDEBUG
+#if defined(NDEBUG) || 1
+ // Don't use assertions, since realiable EOF testing requires
+ // stream operators to fail silently.
  #define ASSERT_READ(p, n) do { read(p, n); } while (0)
  #define ASSERT_WRITE(p, n) do { write(p, n); } while (0)
 #else
