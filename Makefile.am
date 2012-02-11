@@ -7,7 +7,7 @@
 # terms and conditions, or see http://www.gnu.org/licenses/.
 #
 
-SUBDIRS = src reports
+SUBDIRS = 3rdparty src reports
 if MANPAGE
 SUBDIRS += docs
 endif

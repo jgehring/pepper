@@ -141,6 +141,7 @@ FEATURES_CHECK()
 AM_CONDITIONAL([GNUPLOT], [test "x$gnuplot" = "xyes"])
 AM_CONDITIONAL([MANPAGE], [test "x$manpage" = "xyes"])
 AM_CONDITIONAL([LEVELDB], [test "x$leveldb" = "xyes"])
+AM_CONDITIONAL([BUILTIN_LEVELDB], [test "x$builtin_leveldb" = "xyes"])
 
 
 #
@@ -179,6 +180,7 @@ AC_CONFIG_FILES([
 	reports/Makefile
 	reports/pepper/Makefile
 	docs/Makefile
+	3rdparty/Makefile
 ])
 AC_OUTPUT()
 

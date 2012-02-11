@@ -86,43 +86,64 @@ AC_DEFUN([CHECK_LEVELDB], [
 	AC_ARG_WITH([leveldb], [AC_HELP_STRING([--with-leveldb=PATH], [prefix for LevelDB installation])], [leveldb_prefix=$withval])
 
 	AC_LANG_PUSH([C++])
-	header_found="no"
+
+	builtin_leveldb="no"
+	if test "x$leveldb_prefix" = x; then
+		dnl No prefix specified. Check system locations first, and fall back
+		dnl to builtin version if necessary
+		AC_CHECK_HEADER([leveldb/db.h], [header_found="yes"], [header_found="no"])
+
+		if test "x$header_found" = "xyes"; then
+			AC_CHECK_LIB([leveldb], [leveldb_open], [lib_found="yes"], [lib_found="no"], [-lpthread])
+		else
+			dnl Fall back to builtin in version, and make sure to clear
+			dnl the cached header check.
+			dnl TODO: A crappy way to get abs_srcdir...
+			leveldb_prefix="`cd $srcdir && pwd`/3rdparty/leveldb"
+			builtin_leveldb="yes"
+			AS_UNSET(AS_TR_SH([ac_cv_header_leveldb/db.h]))
+		fi
+	fi
+
 	if test "x$leveldb_prefix" != x; then
+		dnl Run tests with prefix
 		LDB_OLD_CPPFLAGS="$CPPFLAGS"
 		CPPFLAGS="$CPPFLAGS -I$leveldb_prefix/include"
-		AC_CHECK_HEADER([leveldb/db.h], [header_found="yes"])
+		AC_CHECK_HEADER([leveldb/db.h], [header_found="yes"], [header_found="no"])
 		CPPFLAGS="$LDB_OLD_CPPFLAGS"
 		LEVELDB_CPPFLAGS="-I$leveldb_prefix/include"
 		AC_SUBST([LEVELDB_CPPFLAGS])
-	else
-		AC_CHECK_HEADER([leveldb/db.h], [header_found="yes"])
+
+		if test "x$builtin_leveldb" != "xyes"; then
+			LDB_OLD_LIBS="$LIBS"
+			LIBS="$LIBS -L$leveldb_prefix/lib"
+			AC_CHECK_LIB([leveldb], [leveldb_open], [lib_found="yes"], [lib_found="no"], [-lpthread])
+			LIBS="$LDB_OLD_LIBS"
+			LEVELDB_LIBS="-L$leveldb_prefix/lib -lleveldb"
+			AC_SUBST([LEVELDB_LIBS])
+		else
+			dnl Libs are still to be built
+			lib_found="yes"
+			LEVELDB_LIBS="-L$leveldb_prefix -lleveldb"
+			AC_CHECK_HEADER([snappy.h], [LEVELDB_LIBS="$LEVELDB_LIBS -lsnappy"], [])
+			AC_SUBST([LEVELDB_LIBS])
+		fi
 	fi
-    if test "x$header_found" != "xyes"; then
+
+    if test "x$header_found" != "xyes" || test "x$lib_found" != "xyes"; then
 		if test "x$leveldb" = "xyes"; then
-			AC_MSG_ERROR([LevelDB headers not found.])
+			if test "x$builtin_leveldb" = "xyes"; then
+				AC_MSG_ERROR([LevelDB headers or libraries not found.
+Make sure you ran 'git submodule init' and 'git submodule update' if
+you want to use the builtin version.])
+			else
+				AC_MSG_ERROR([LevelDB headers or libraries not found.])
+			fi
 		else
 			leveldb="no"
 		fi
 	fi
 
-	lib_found="no"
-	if test "x$leveldb_prefix" != x; then
-		LDB_OLD_LIBS="$LIBS"
-		LIBS="$LIBS -L$leveldb_prefix/lib"
-		AC_CHECK_LIB([leveldb], [leveldb_open], [lib_found="yes"], [], [-lpthread])
-		LIBS="$LDB_OLD_LIBS"
-		LEVELDB_LIBS="-L$leveldb_prefix/lib -lleveldb"
-		AC_SUBST([LEVELDB_LIBS])
-	else
-		AC_CHECK_LIB([leveldb], [leveldb_open], [lib_found="yes"], [], [-lpthread])
-	fi
-    if test "x$lib_found" != "xyes"; then
-		if test "x$leveldb" = "xyes"; then
-			AC_MSG_ERROR([LevelDB library not found.])
-		else
-			leveldb="no"
-		fi
-	fi
 	AC_LANG_POP([C++])
 ])
 
@@ -164,6 +185,9 @@ AC_DEFUN([FEATURES_REPORT], [
 	if test "x$gnuplot" = "xno"; then echo "      - Gnuplot"; fi
 	if test "x$manpage" = "xyes"; then echo "      + Manpage"; fi
 	if test "x$manpage" = "xno"; then echo "      - Manpage"; fi
-	if test "x$leveldb" = "xyes"; then echo "      + LevelDB"; fi
+	if test "x$leveldb" = "xyes"; then
+		if test "x$builtin_leveldb" = "xyes"; then echo "      + LevelDB (builtin)";
+		else echo "      + LevelDB"; fi
+	fi
 	if test "x$leveldb" = "xno"; then echo "      - LevelDB"; fi
 ])
