@@ -1,3 +1,4 @@
 [submodule "3rdparty/leveldb"]
 	path = 3rdparty/leveldb
 	url = https://code.google.com/p/leveldb/
+	ignore = untracked
