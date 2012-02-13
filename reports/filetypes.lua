@@ -79,17 +79,6 @@ function extension(filename)
 	return string.lower(ext)
 end 
 
--- Compares two {name, value} pairs
-function countcmp(a, b)
-	if a[1] == "unknown" then
-		return false
-	end
-	if b[1] == "unknown" then
-		return true
-	end
-	return (a[2] > b[2])
-end
-
 -- Main report function
 function run(self)
 	local rev = self:getopt("r, revision", "")
@@ -119,25 +108,30 @@ function run(self)
 	for k,v in pairs(count) do
 		table.insert(extcount, {k, v})
 	end
-	table.sort(extcount, countcmp)
+	table.sort(extcount, function (a, b) return a[2] > b[2] end)
 
 	-- Use descriptive titles
 	local keys = {}
 	local values = {}
-	local n = 1 + tonumber(self:getopt("n", 6))
+	local n = tonumber(self:getopt("n", 6))
+	local others = 0
+	local unknown_idx = -1
 	for i,v in pairs(extcount) do
-		if i > n then
-			break
-		end
-		if v[1] ~= "unknown" then
+		if i <= n then
 			table.insert(keys, v[1])
 			table.insert(values, v[2])
+			if v[1] == "unknown" then
+				unknown_idx = #keys
+			end
+		else
+			others = others + v[2]
 		end
 	end
 	
-	if count["unknown"] ~= nil then
-		table.insert(keys, "unknown")
-		table.insert(values, count["unknown"])
+	-- "unkown" should go last in the list
+	if unknown_idx >= 0 then
+		keys[unknown_idx],keys[#keys] = keys[#keys],keys[unknown_idx]
+		values[unknown_idx],values[#values] = values[#values],values[unknown_idx]
 	end
 
 	local p = pepper.gnuplot:new()
