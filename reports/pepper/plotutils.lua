@@ -148,3 +148,22 @@ set grid x2tics
 ]])
 	plot:cmd("set x2tics " .. x2tics)
 end
+
+--- Normalizes the given values for using the in a pie chart.
+--  @param values A table of values
+--  @returns A table with normalized values that sum up to one
+function normalize_pie(values)
+	local sum = 0
+	for i,v in ipairs(values) do
+		sum = sum + v
+	end
+	if sum == 0 then
+		return values
+	end
+
+	nvalues = {}
+	for i,v in ipairs(values) do
+		table.insert(nvalues, v / sum)
+	end
+	return nvalues
+end
