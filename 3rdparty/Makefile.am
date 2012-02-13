@@ -10,4 +10,5 @@
 SUBDIRS = 
 if BUILTIN_LEVELDB
 SUBDIRS += leveldb
+DIST_SUBDIRS =
 endif
