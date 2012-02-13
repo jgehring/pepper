@@ -69,6 +69,9 @@ Plot::Plot(lua_State *L)
 		m_standardTerminal = "x11";
 	}
 #endif
+	if (getenv("GNUTERM")) {
+		m_standardTerminal = getenv("GNUTERM");
+	}
 
 	try {
 		g = new Gnuplot(args, Report::current()->out());
