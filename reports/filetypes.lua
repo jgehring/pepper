@@ -20,7 +20,8 @@ function describe(self)
 	r.description = "Histogram of the file types distribution"
 	r.options = {
 		{"-rARG, --revision=ARG", "Select revision (defaults to HEAD)"},
-		{"-nARG", "Show the ARG most frequent file types"}
+		{"-nARG", "Show the ARG most frequent file types"},
+		{"-p, --pie", "Generate pie chart instead of histogram"},
 	}
 	pepper.plotutils.add_plot_options(r)
 	return r
@@ -135,18 +136,32 @@ function run(self)
 	end
 
 	local p = pepper.gnuplot:new()
-	pepper.plotutils.setup_output(p, 600, 300)
+
+	if self:getopt("p, pie") then
+		pepper.plotutils.setup_output(p, 600, 600)
+	else
+		pepper.plotutils.setup_output(p, 600, 300)
+	end
+
 	if #rev > 0 then
 		p:set_title("File types (at " .. rev .. ")")
 	else
 		p:set_title("File types")
 	end
 
-	p:cmd([[
+	if self:getopt("p, pie") then
+		if others > 0 then
+			table.insert(keys, "Other")
+			table.insert(values, others)
+		end
+		p:plot_pie(keys, pepper.plotutils.normalize_pie(values))
+	else
+		p:cmd([[
 set style fill solid border -1
 set style histogram cluster gap 1
 set xtics nomirror
 set ylabel "Number of files"
 ]])
-	p:plot_histogram(keys, values)
+		p:plot_histogram(keys, values)
+	end
 end
