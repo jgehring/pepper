@@ -1,9 +1,6 @@
 A non-obligatory roadmap for pepper
 ===================================
 
-Planned features for 0.3.1:
-	* Support for pie charts
-
 Planned features for 0.3.x:
 	* Bazaar backend
 	* libgit2 backend
