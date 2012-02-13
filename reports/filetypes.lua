@@ -38,7 +38,7 @@ extmap = {
 	[".txx"] = "C/C++",
 	[".java"] = "Java",
 	[".lua"] = "Lua",
-	[".s"] = "Assembler",
+	[".s"] = "Assembly",
 	[".pl"] = "Perl",
 	[".pm"] = "Perl",
 	[".sh"] = "Shell",
@@ -64,7 +64,9 @@ extmap = {
 	[".ss"] = "Scheme",
 	[".vb"] = "Visual Basic",
 	[".vbs"] = "Visual Basic",
-	[".go"] = "Go"
+	[".go"] = "Go",
+	[".rb"] = "Ruby",
+	[".m"] = "Objective-C"
 }
 
 -- Returns the extension of a file
