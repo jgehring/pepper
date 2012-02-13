@@ -1,6 +1,6 @@
 #
 # pepper - SCM statistics report generator
-# Copyright (C) 2010-2011 Jonas Gehring
+# Copyright (C) 2010-2012 Jonas Gehring
 #
 # Released under the GNU General Public License, version 3.
 # Please see the COPYING file in the source distribution for license
@@ -8,7 +8,7 @@
 #
 
 AT_INIT()
-AT_COPYRIGHT([Copyright (C) 2010-2011 Jonas Gehring])
+AT_COPYRIGHT([Copyright (C) 2010-2012 Jonas Gehring])
 
 m4_include([test_diffstat.at])
 m4_include([test_units.at])
