@@ -248,13 +248,13 @@ Revision *MercurialBackend::revision(const std::string &id)
 	std::string meta = sys::io::exec(hgcmd()+" log -r "+id+" --template=\"{date|hgdate}\n{author|person}\n{desc}\"");
 #endif
 	std::vector<std::string> lines = str::split(meta, "\n");
-	int64_t date;
+	int64_t date = 0;
 	std::string author;
 	if (!lines.empty()) {
 		// Date is given as seconds and timezone offset from UTC
 		std::vector<std::string> parts = str::split(lines[0], " ");
 		if (parts.size() > 1) {
-			int64_t offset;
+			int64_t offset = 0;
 			str::str2int(parts[0], &date);
 			str::str2int(parts[1], &offset);
 			date += offset;
