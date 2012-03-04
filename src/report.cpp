@@ -49,24 +49,6 @@ namespace {
 // Report entry function names
 const char *funcs[] = {"run", "main", NULL};
 
-// Custom hook for detect function invocations from within the main chunk of a script
-void checkFunctionCallHook(lua_State *L, lua_Debug *ar)
-{
-	lua_getinfo(L, "nSl", ar);
-	PTRACE << ar->currentline << " " << ar->what << " " << ar->name << " " << ar->namewhat << " " << ar->source << endl;
-
-	/*
-	 * NOTE: This check can't be used as a safety measure, as it allows the following calls:
-	 *  - Loading of modules (require)
-	 *  - Definition of modules (module)
-	 *  - Assertions, as they are used by some of the built-in modules for feature testing (assert)
-	 */
-	if ((ar->currentline >= 0 && ar->what && strcmp(ar->what, "main")) ||
-		(ar->name != 0 && strcmp(ar->name, "require") && strcmp(ar->name, "module") && strcmp(ar->name, "assert") && strcmp(ar->namewhat, "field"))) {
-		LuaHelpers::pushError(L, "Calling functions from the main chunk is not allowed");
-	}
-}
-
 // Checks if the given report is "executable", i.e. contains a main() function
 bool isExecutable(lua_State *L, std::string *entryPoint = NULL)
 {
@@ -182,7 +164,7 @@ lua_State *setupLua()
 	return L;
 }
 
-// Opens a lua script, checks if it is a valid report and returns its entry point
+// Opens a lua script and returns its entry point
 std::string loadReport(lua_State *L, const std::string &path)
 {
 	// Check script syntax by loading the file
@@ -190,15 +172,10 @@ std::string loadReport(lua_State *L, const std::string &path)
 		throw PEX(lua_tostring(L, -1));
 	}
 
-	// Run the main chunk, but check for function invocations
-	// The purpose of this check is to abort execution of "bad" scripts, i.e. scripts
-	// that are not report scripts and that would be executed normally here.
-	// NOTE: This check is not complete; see checkFunctionCallHook() for further comments.
-	lua_sethook(L, checkFunctionCallHook, LUA_MASKCALL, 1);
+	// Execute the main chunk
 	if (lua_pcall(L, 0, LUA_MULTRET, 0) != 0) {
 		throw PEX(lua_tostring(L, -1));
 	}
-	lua_sethook(L, checkFunctionCallHook, 0, 1);
 
 	std::string main;
 	if (!isExecutable(L, &main)) {
