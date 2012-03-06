@@ -11,9 +11,9 @@ systems, including Git and Subversion. Using native language bindings,
 multi-threading and a local revision cache, it provides fast access to
 repository data.
 
-This README file contains brief installation and usage
-instructions. Additional documentation is available at
-http://scm-pepper.sourceforge.net.
+This README file contains brief configuration, installation and usage
+instructions. Additional documentation is available at the project
+homepage at <http://scm-pepper.sourceforge.net>.
 
 
 Requirements
@@ -23,7 +23,7 @@ pepper depends on the following third-party software:
 
 	* zlib
 	* POSIX threads
-	* Lua >= 5.1
+	* Lua 5.1
 
 The following dependencies are optional:
 
@@ -33,6 +33,7 @@ The following dependencies are optional:
 	* The standard Git command line client (for the Git backend)
 	* Gnuplot (for graphical reports)
 	* Asciidoc and xmlto (for the man page)
+	* LevelDB for the experimental LevelDB revision cache
 	* lgob bindings to GTK3 (for the GUI report)
 
 pepper has been written in a hopefully platform-independent manner,
@@ -89,6 +90,13 @@ file for more information about the respective libraries, if any)
 	and xmlto will be needed to generate it.
 	This feature is enabled by default if the necessary programs
 	are present.
+
+	* LevelDB support (--[en|dis]able-leveldb, --with-leveldb)
+	This is an experimental feature which allows you to use LevelDB
+	<http://code.google.com/p/leveldb/> for the revision cache. You
+	can either use a propertly installed version or clone the official
+	git repository into 3rdparty/leveldb.
+	This feature is disabled by default.
 
 
 License
