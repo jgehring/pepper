@@ -31,6 +31,7 @@ class Gnuplot
 		~Gnuplot();
 
 		void cmd(const std::string &str);
+		void cmd(const char *ptr, size_t len);
 
 		inline Gnuplot& operator<<(const std::string &str) {
 			cmd(str);

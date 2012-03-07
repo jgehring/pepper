@@ -74,3 +74,10 @@ void Gnuplot::cmd(const std::string &str)
 {
 	*m_pipe << str << "\n" << std::flush;
 }
+
+// Writes a command to the Gnuplot pipe
+void Gnuplot::cmd(const char *str, size_t len)
+{
+	m_pipe->write(str, len);
+	*m_pipe << std::flush;
+}
