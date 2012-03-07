@@ -209,36 +209,22 @@ int Plot::plot_series(lua_State *L)
 	++index;
 	std::vector<double> keys = LuaHelpers::topvd(L, index);
 
-	// Read data entries and write them to a temporary string
-	std::stringstream out;
+	// Check data entries
 	size_t nseries = 0;
 	++index;
 	if (LuaHelpers::tablesize(L, index) != keys.size()) {
 		return LuaHelpers::pushError(L, str::printf("Number of keys and values doesn't match (%d != %d)", LuaHelpers::tablesize(L, index), keys.size()));
 	}
+
 	lua_pushvalue(L, index);
 	lua_pushnil(L);
-	int j = 0;
-	while (lua_next(L, -2) != 0) {
-		out << keys[j++] << " ";
+	if (lua_next(L, -2) != 0) {
 		if (lua_type(L, -1) == LUA_TTABLE) {
-			if (nseries == 0) {
-				nseries = LuaHelpers::tablesize(L, -1);
-			} else if (nseries != LuaHelpers::tablesize(L, -1)) {
-				return LuaHelpers::pushError(L, "Inconsistent number of series");
-			}
-			
-			lua_pushvalue(L, -1);
-			lua_pushnil(L);
-			while (lua_next(L, -2) != 0) {
-				out << LuaHelpers::popd(L) << " ";
-			}
-			lua_pop(L, 2);
+			nseries = LuaHelpers::tablesize(L, -1);
 		} else {
 			nseries = 1;
-			out << LuaHelpers::popd(L);
 		}
-		out << std::endl;
+		lua_pop(L, 2);
 	}
 	lua_pop(L, 1);
 
@@ -253,7 +239,7 @@ int Plot::plot_series(lua_State *L)
 	cmd << "plot ";
 	if (options.find("command") == options.end()) {
 		for (size_t i = 0; i < nseries; i++) {
-			cmd << (i == 0 ? "'-'" : "''") << " using 1:" << (i+2);
+			cmd << (i == 0 ? "'-'" : "''") << " using 1:2";
 			if (titles.size() > i) {
 				cmd << " title \"" << titles[i] << "\"";
 			} else {
@@ -271,8 +257,39 @@ int Plot::plot_series(lua_State *L)
 	}
 	PDEBUG << "Running plot with command: " << cmd.str() << endl;
 	gcmd(cmd.str());
-	gcmd(out.str());
-	gcmd("e"); // Marks end of data
+
+	// Write data to pipe, separately for each series
+	--index;
+	std::ostringstream ss;
+	for (size_t i = 0; i < nseries; i++) {
+		ss.clear(); // Reset stringstream, but keep buffer
+		ss.seekp(0);
+
+		lua_pushvalue(L, index);
+		lua_pushnil(L);
+		int j = 0;
+		while (lua_next(L, -2) != 0) {
+			ss << keys[j++] << " ";
+			if (lua_type(L, -1) == LUA_TTABLE) {
+				if (nseries != LuaHelpers::tablesize(L, -1)) {
+					return LuaHelpers::pushError(L, "Inconsistent number of series");
+				}
+
+
+				lua_pushnumber(L, i+1);
+				lua_gettable(L, -2);
+				ss << LuaHelpers::popd(L);
+				lua_pop(L, 1);
+			} else {
+				ss << LuaHelpers::popd(L);
+			}
+			ss << "\n";
+		}
+		lua_pop(L, 1);
+
+		ss << "e\n"; // Marks end of data
+		g->cmd(ss.str().c_str(), ss.tellp());
+	}
 	return 0;
 }
 
@@ -302,7 +319,7 @@ int Plot::plot_multi_series(lua_State *L)
 			break;
 	}
 
-	// First, read the keys (at index)
+	// Read data
 	++index;
 	size_t nseries = LuaHelpers::tablesize(L, index);
 
@@ -363,8 +380,8 @@ int Plot::plot_multi_series(lua_State *L)
 
 	// Write data
 	for (size_t i = 0; i < nseries; i++) {
-		gcmd(outs[i].str());
-		gcmd("e"); // Marks end of data
+		g->cmd(outs[i].str());
+		g->cmd("e"); // Marks end of data
 	}
 
 	delete[] outs;
@@ -400,36 +417,22 @@ int Plot::plot_histogram(lua_State *L)
 	++index;
 	std::vector<std::string> keys = LuaHelpers::topvs(L, index);
 
-	// Read data entries and write them to a temporary string
-	std::ostringstream out;
+	// Check data entries
 	size_t nseries = 0;
 	++index;
 	if (LuaHelpers::tablesize(L, index) != keys.size()) {
 		return LuaHelpers::pushError(L, str::printf("Number of keys and values doesn't match (%d != %d)", LuaHelpers::tablesize(L, index), keys.size()));
 	}
+
 	lua_pushvalue(L, index);
 	lua_pushnil(L);
-	int j = 0;
-	while (lua_next(L, -2) != 0) {
-		out << '"' << keys[j++] << "\" ";
+	if (lua_next(L, -2) != 0) {
 		if (lua_type(L, -1) == LUA_TTABLE) {
-			if (nseries == 0) {
-				nseries = LuaHelpers::tablesize(L, -1);
-			} else if (nseries != LuaHelpers::tablesize(L, -1)) {
-				return LuaHelpers::pushError(L, "Inconsistent number of series");
-			}
-			
-			lua_pushvalue(L, -1);
-			lua_pushnil(L);
-			while (lua_next(L, -2) != 0) {
-				out << LuaHelpers::popd(L) << " ";
-			}
-			lua_pop(L, 2);
+			nseries = LuaHelpers::tablesize(L, -1);
 		} else {
 			nseries = 1;
-			out << LuaHelpers::popd(L);
 		}
-		out << std::endl;
+		lua_pop(L, 2);
 	}
 	lua_pop(L, 1);
 
@@ -444,7 +447,7 @@ int Plot::plot_histogram(lua_State *L)
 	std::ostringstream cmd;
 	cmd << "plot ";
 	for (size_t i = 0; i < nseries; i++) {
-		cmd << (i == 0 ? "'-'" : "''") << " using  " << (i+2) << ":xtic(1)";
+		cmd << (i == 0 ? "'-'" : "''") << " using  2:xtic(1)";
 		if (titles.size() > i) {
 			cmd << " title \"" << titles[i] << "\"";
 		} else {
@@ -457,9 +460,41 @@ int Plot::plot_histogram(lua_State *L)
 			cmd << ", ";
 		}
 	}
+	PDEBUG << "Running plot with command: " << cmd.str() << endl;
 	gcmd(cmd.str());
-	gcmd(out.str());
-	gcmd("e"); // Marks end of data
+
+	// Write data to pipe, separately for each series
+	--index;
+	std::ostringstream ss;
+	for (size_t i = 0; i < nseries; i++) {
+		ss.clear(); // Reset stringstream, but keep buffer
+		ss.seekp(0);
+
+		lua_pushvalue(L, index);
+		lua_pushnil(L);
+		int j = 0;
+		while (lua_next(L, -2) != 0) {
+			ss << '"' << keys[j++] << "\" ";
+			if (lua_type(L, -1) == LUA_TTABLE) {
+				if (nseries != LuaHelpers::tablesize(L, -1)) {
+					return LuaHelpers::pushError(L, "Inconsistent number of series");
+				}
+
+
+				lua_pushnumber(L, i+1);
+				lua_gettable(L, -2);
+				ss << LuaHelpers::popd(L);
+				lua_pop(L, 1);
+			} else {
+				ss << LuaHelpers::popd(L);
+			}
+			ss << "\n";
+		}
+		lua_pop(L, 1);
+
+		ss << "e\n"; // Marks end of data
+		g->cmd(ss.str().c_str(), ss.tellp());
+	}
 	return 0;
 }
 
