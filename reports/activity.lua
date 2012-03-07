@@ -158,7 +158,7 @@ function run(self)
 
 	if split == "none" then
 		local dates, values = convolution(firstdate, lastdate, activity)
-		p:plot_series(dates, values, {}, "lines smooth bezier")
+		p:plot_series(dates, values, {}, "lines smooth bezier linewidth 1.5")
 	else 
 		-- Determine contributions (i.e. frequent entries)
 		local freqs = {}
