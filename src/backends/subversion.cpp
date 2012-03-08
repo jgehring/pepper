@@ -492,7 +492,7 @@ void SubversionBackend::SvnLogIterator::readIntervalsFromCache(const std::string
 		m_cachedIntervals.push_back(interval);
 	}
 
-	if (!in.ok()) {
+	if (!in.ok() && !in.eof()) {
 		m_cachedIntervals.clear();
 		Logger::warn() << "Error reading from cache file " << cachefile << endl;
 	}
