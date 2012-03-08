@@ -322,11 +322,13 @@ PopenStreambuf::int_type PopenStreambuf::overflow(int_type c)
 	}
 
 	// Write characters to pipe
-	size_t n = end - base;
+	ssize_t n = end - base;
 	n = write(d->pipe.w, base, n);
-	if (n <= 0) { // TODO: Error if n < 0
+	if (n == 0) {
 		setp(0, 0);
 		return traits_type::eof();
+	} else if (n < 0) {
+		throw PEX_ERRNO();
 	}
 
 	// Set buffer pointers
