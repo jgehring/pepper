@@ -32,6 +32,7 @@ struct Handler
 };
 
 void block(int n, int *signumn, Handler *handler);
+void ignore(int signumn);
 
 // This class guard sensitive code segments with its life
 class Deferrer

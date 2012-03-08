@@ -52,6 +52,12 @@ void block(int n, int *signums, Handler *handler)
 	}
 }
 
+// Ignores the given signal
+void ignore(int signum)
+{
+	signal(signum, SIG_IGN);
+}
+
 
 // Constructor
 Deferrer::Deferrer()

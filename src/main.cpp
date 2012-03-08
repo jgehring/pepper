@@ -197,6 +197,7 @@ int start(const Options &opts)
 
 	int signums[] = {SIGINT, SIGTERM};
 	sys::sigblock::block(2, signums, &sighandler);
+	sys::sigblock::ignore(SIGPIPE);
 
 	int ret;
 	try {
