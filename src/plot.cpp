@@ -37,7 +37,7 @@ static inline int64_t convepoch(int64_t t)
 
 // Gnuplot arguments
 #ifndef POS_DARWIN
- const char *args[] = {"-persist", NULL};
+ const char *args[] = {"-persist", "-", NULL};
 #else
  const char *args[] = {NULL}; // -persist doesn't seem to work on Mac OS X
 #endif
