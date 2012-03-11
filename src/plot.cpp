@@ -14,6 +14,7 @@
 #include "main.h"
 
 #include <cmath>
+#include <cstring>
 #include <fstream>
 
 #include "gnuplot.h"
@@ -35,12 +36,9 @@ static inline int64_t convepoch(int64_t t)
 	return t - 946684800;
 }
 
-// Gnuplot arguments
-#ifndef POS_DARWIN
- const char *args[] = {"-persist", "-", NULL};
-#else
- const char *args[] = {NULL}; // -persist doesn't seem to work on Mac OS X
-#endif
+// Gnuplot arguments (-persist only works with the X11 or wxt terminal)
+static const char *gp_args[] = {NULL};
+static const char *gp_args_persist[] = {"-persist", NULL};
 
 
 // Static variables for the lua bindings
@@ -60,21 +58,32 @@ Lunar<Plot>::RegType Plot::methods[] = {
 };
 
 
+bool Plot::s_hasX11Term = false;
+bool Plot::s_detectTerminals = true;
+
+
 // Constructor
 Plot::Plot(lua_State *L)
 {
 	m_standardTerminal = "svg";
+	m_args = gp_args;
+
 #if ( defined(unix) || defined(__unix) || defined(__unix__) ) && !defined(__APPLE__)
 	if (getenv("DISPLAY") && sys::io::isterm(stdout) && !Report::current()->outputRedirected()) {
 		m_standardTerminal = "x11";
+		detectTerminals();
 	}
 #endif
 	if (getenv("GNUTERM")) {
 		m_standardTerminal = getenv("GNUTERM");
 	}
 
+	if (m_standardTerminal == "x11" && s_hasX11Term) {
+		m_args = gp_args_persist;
+	}
+
 	try {
-		g = new Gnuplot(args, Report::current()->out());
+		g = new Gnuplot(m_args, Report::current()->out());
 	} catch (const PepperException &ex) {
 		LuaHelpers::pushError(L, ex.what(), ex.where());
 	}
@@ -570,7 +579,7 @@ int Plot::flush(lua_State *L)
 {
 	try {
 		delete g;
-		g = new Gnuplot(args, Report::current()->out());
+		g = new Gnuplot(m_args, Report::current()->out());
 	} catch (const PepperException &ex) {
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
 	}
@@ -606,4 +615,42 @@ void Plot::removeTempfiles()
 		sys::fs::unlink(m_tempfiles[i]);
 	}
 	m_tempfiles.clear();
+}
+
+// Detects Gnuplot terminals, and checks wheter the X11 terminal is available
+void Plot::detectTerminals()
+{
+	if (!s_detectTerminals) { // Run only once
+		return;
+	}
+
+	std::string terms;
+	try {
+		// Set dummy pager for terminal listing
+		char *oldPager = getenv("PAGER");
+		if (oldPager) {
+			oldPager = strdup(oldPager);
+		}
+		setenv("PAGER", "cat", 1);
+
+		int ret;
+		std::string path = sys::fs::which("gnuplot");
+		terms = sys::io::exec(&ret, path.c_str(), "-e", "set terminal; quit");
+		if (ret != 0) {
+			throw PEX(terms);
+		}
+
+		if (!oldPager) {
+			unsetenv("PAGER");
+		} else {
+			setenv("PAGER", oldPager, 1);
+			free(oldPager);
+		}
+	} catch (const std::exception &ex) {
+		Logger::info() << "Can't query list of supported Gnuplot terminals ("
+			<< ex.what() << ")" << std::endl;
+	}
+
+	s_hasX11Term = (terms.find("x11") != std::string::npos);
+	s_detectTerminals = false;
 }

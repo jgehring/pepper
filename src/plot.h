@@ -50,11 +50,15 @@ class Plot
 		void gcmd(const std::string &c);
 		std::string tempfile(std::ofstream &out);
 		void removeTempfiles();
+		static void detectTerminals();
 
 	private:
 		Gnuplot *g;
 		std::vector<std::string> m_tempfiles;
 		std::string m_standardTerminal;
+		const char **m_args;
+		static bool s_hasX11Term;
+		static bool s_detectTerminals;
 };
 
 
