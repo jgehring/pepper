@@ -284,10 +284,17 @@ int Plot::plot_series(lua_State *L)
 					return LuaHelpers::pushError(L, "Inconsistent number of series");
 				}
 
-
 				lua_pushnumber(L, i+1);
 				lua_gettable(L, -2);
-				ss << LuaHelpers::popd(L);
+				if (lua_type(L, -1) == LUA_TTABLE) {
+					lua_pushnil(L);
+					while (lua_next(L, -2) != 0) {
+						ss << LuaHelpers::popd(L) << " ";
+					}
+					lua_pop(L, 1);
+				} else {
+					ss << LuaHelpers::popd(L);
+				}
 				lua_pop(L, 1);
 			} else {
 				ss << LuaHelpers::popd(L);
@@ -489,10 +496,17 @@ int Plot::plot_histogram(lua_State *L)
 					return LuaHelpers::pushError(L, "Inconsistent number of series");
 				}
 
-
 				lua_pushnumber(L, i+1);
 				lua_gettable(L, -2);
-				ss << LuaHelpers::popd(L);
+				if (lua_type(L, -1) == LUA_TTABLE) {
+					lua_pushnil(L);
+					while (lua_next(L, -2) != 0) {
+						ss << LuaHelpers::popd(L) << " ";
+					}
+					lua_pop(L, 1);
+				} else {
+					ss << LuaHelpers::popd(L);
+				}
 				lua_pop(L, 1);
 			} else {
 				ss << LuaHelpers::popd(L);

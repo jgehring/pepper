@@ -70,7 +70,7 @@ function run(self)
 	for k,v in pairs(commits) do
 		local a,b,day,hour = string.find(k, "(%d+) (%d+)")
 		table.insert(hours, hour)
-		table.insert(days_nums, {day, v / max})
+		table.insert(days_nums, {{day, v / max}}) -- Two values for a single series
 	end
 
 	-- Generate graph
