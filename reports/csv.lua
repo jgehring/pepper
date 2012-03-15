@@ -7,7 +7,7 @@
 	terms and conditions, or see http://www.gnu.org/licenses/.
 
 	file: csv.lua
-	Dumps commits in a CSV format
+	Dumps commit data in a CSV format
 --]]
 
 require "pepper.datetime"
@@ -17,7 +17,7 @@ require "pepper.datetime"
 function describe(self)
 	local r = {}
 	r.title = "CSV"
-	r.description = "Dumps commits in CSV format"
+	r.description = "Dumps commit data in CSV format"
 	r.options = {
 		{"-bARG, --branch=ARG", "Select branch"},
 		{"-cARG, --columns=ARG",
@@ -123,12 +123,13 @@ function run(self)
 			end
 
 			loc = loc + r:diffstat():lines_added() - r:diffstat():lines_removed()
-
-			local str = tostring(r:date())
-			for i,v in ipairs(columns) do
-				str = str .. "," .. info(r, v)
+			if r:date() >= datemin then
+				local str = tostring(r:date())
+				for i,v in ipairs(columns) do
+					str = str .. "," .. info(r, v)
+				end
+				print(str)
 			end
-			print(str)
 		end
 	)
 end
