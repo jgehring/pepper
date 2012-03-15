@@ -30,12 +30,12 @@ end
 
 -- Subtracts a time period in text form from a timestamp
 function subdate(t, period)
-	n = tonumber(period:match("^[%d]+")) - 1
+	local n = tonumber(period:match("^[%d]+")) - 1
 	assert(n >= 0, string.format("Invalid time range: %q", period))
-	m = period:match("[%a]+$")
+	local m = period:match("[%a]+$")
 
 	-- Round towards zero and subtract time
-	date = os.date("*t", t)
+	local date = os.date("*t", t)
 	date.hour = 0
 	date.min = 0
 	date.sec = 0
