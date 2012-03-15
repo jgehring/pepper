@@ -79,6 +79,7 @@ const char *PepperException::trace() const throw()
 std::string PepperException::stackTrace()
 {
 #if defined(__GLIBC__)
+try {
 	std::string str = "Stack trace:\n";
 
 	// storage array for stack trace address data
@@ -154,6 +155,9 @@ std::string PepperException::stackTrace()
 	delete[] funcname;
 	free(symbollist);
 	return str;
+} catch (...) {
+	return std::string();
+}
 #else
 	return std::string();
 #endif
