@@ -138,7 +138,7 @@ function run(self)
 	local p = pepper.gnuplot:new()
 
 	if self:getopt("p, pie") then
-		pepper.plotutils.setup_output(p, 600, 600)
+		pepper.plotutils.setup_output(p, 740, 600)
 	else
 		pepper.plotutils.setup_output(p, 600, 300)
 	end
@@ -154,6 +154,10 @@ function run(self)
 			table.insert(keys, "Other")
 			table.insert(values, others)
 		end
+		p:cmd([[
+set key box
+set key right outside
+]])
 		p:plot_pie(keys, pepper.plotutils.normalize_pie(values))
 	else
 		p:cmd([[
