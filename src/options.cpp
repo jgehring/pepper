@@ -293,9 +293,9 @@ bool Options::parseOpt(const std::string &arg, std::string *key, std::string *va
 	 */
 
 	if (!arg.compare(0, 2, "--") && arg.find("=") != std::string::npos && arg.find("=") > 2) {
-		std::vector<std::string> parts = str::split(arg, "=");
-		*key = parts[0].substr(2);
-		*value = parts[1];
+		size_t idx = arg.find("=");
+		*key = arg.substr(2, idx - 2);
+		*value = arg.substr(idx+1);
 		return true;
 	} else if (!arg.compare(0, 2, "--")) {
 		*key = arg.substr(2);
