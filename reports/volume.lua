@@ -184,7 +184,7 @@ function run(self)
 	end
 
 	local p = pepper.gnuplot:new()
-	pepper.plotutils.setup_output(p)
+	pepper.plotutils.setup_output(p, 800, 480)
 	p:cmd([[
 set style histogram rowstacked
 set style fill solid border -1
@@ -194,9 +194,14 @@ set style histogram rowstacked
 set boxwidth 0.75
 set key box
 set key right outside
-unset ytics
 set yrange [0:100]
-set ylabel "% of Commits"
 ]])
+	if count_changes then
+		p:cmd("set ylabel \"% of Contribution\"")
+		p:set_title("Contribution Volume by Author (on " .. branch .. ")")
+	else
+		p:cmd("set ylabel \"% of Commits\"")
+		p:set_title("Commit Volume by Author (on " .. branch .. ")")
+	end
 	p:plot_histogram(keys, values, author_names)
 end
