@@ -28,4 +28,5 @@ dist_pkgdata_DATA = \
 	participation.lua \
 	punchcard.lua \
 	shortlog.lua \
-	times.lua
+	times.lua \
+	volume.lua
