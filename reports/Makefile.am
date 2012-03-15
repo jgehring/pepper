@@ -19,6 +19,7 @@ dist_pkgdata_DATA = \
 	check_cache.lua \
 	commit_counts.lua \
 	csv.lua \
+	data.lua \
 	diffstat.lua \
 	directories.lua \
 	filetypes.lua \

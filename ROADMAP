@@ -14,6 +14,7 @@ Planned features for 0.4:
 	* Report-specific caches
 	* Filter module (cloc and friends)
 	* Cache backends using "real" databases
+	* Drop deprecated CSV report
 
 Legend:
 	* : todo
