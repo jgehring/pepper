@@ -68,5 +68,5 @@ set grid
 set pointsize 1
 ]])
 	p:set_xrange_time(firstdate, lastdate)
-	p:plot_series(dates, daytimes, {}, "dots")
+	p:plot_series(dates, daytimes, {}, "points")
 end
