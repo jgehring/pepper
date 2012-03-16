@@ -21,11 +21,11 @@ INCLUDES = \
 	-I$(top_srcdir)/tests/catch \
 	-I$(top_srcdir)/src \
 	-I$(top_srcdir)/src/3rdparty
+backends_LDADD = $(top_builddir)/src/libpepper.a
 LIBS += \
 	$(PTHREAD_LIBS) \
 	$(FRAMEWORKS) \
-	$(LUA_LIB) \
-	$(top_builddir)/src/libpepper.a
+	$(LUA_LIB)
 AM_LDFLAGS = 
 
 if SVN_BACKEND

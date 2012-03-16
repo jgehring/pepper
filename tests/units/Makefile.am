@@ -25,11 +25,11 @@ INCLUDES = \
 	-I$(top_srcdir)/tests/catch \
 	-I$(top_srcdir)/src \
 	-I$(top_srcdir)/src/3rdparty
+units_LDADD = $(top_builddir)/src/libpepper.a
 LIBS += \
 	$(PTHREAD_LIBS) \
 	$(LUA_LIB) \
-	$(FRAMEWORKS) \
-	$(top_builddir)/src/libpepper.a
+	$(FRAMEWORKS)
 
 
 # Last but not least, the CFLAGS
