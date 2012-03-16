@@ -1,0 +1,22 @@
+[[!meta title="pepper 0.3.1 released"]]
+
+I'm happy to announce that version 0.3.1 of pepper is now available. This
+release brings the usual fixes as well as new features. Experimental
+support for using [LevelDB](http://code.google.com/p/leveldb/) as a
+backend for the revision cache has been added. The built-in Gnuplot
+interface received a function for pie charts, which is already
+used by the new `authors_pie` report and the new `--pie` flag for
+the `filetypes` report. Furthermore, there's a new report called
+`volume` which closely resembles the [commit volume report from
+Ohloh](http://www.ohloh.net/p/ohcount/analyses/latest).
+
+The list of bugs that have been fixed in this release includes an issue
+that broke plotting on Mac OS X and some headless environments. Repository
+detection for working copies handled with Subversion 1.7 has been fixed, too.
+
+A more detailed listing of the changes can be found in the [change
+log](ChangeLog), source tarballs are available at the [[Download]] section.
+
+The [[Gallery]] has been updated with new examples, now
+using a pretty Gnuplot style based on [this GuidoLabs
+article](http://guidolan.blogspot.com/2010/03/how-to-create-beautiful-gnuplot-graphs.html).

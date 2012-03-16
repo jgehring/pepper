@@ -10,6 +10,11 @@ sed -i 's/jonas\.gehring/$FORENAME.$SURENAME/' src/documentation/manpage.mdwn
 sed -i 's/<html><head>.*<div class="refnamediv"/<div class="refnamediv"/' src/documentation/manpage.mdwn
 sed -i 's/<\/body>//' src/documentation/manpage.mdwn
 
+# Generate examples
+if [ "$1" = "--full" ]; then
+	(cd src/gallery; ../../scripts/make_examples.sh ../../../src/pepper)
+fi
+
 ikiwiki --setup setup
 
 # Copy static files from pepper's source code directory

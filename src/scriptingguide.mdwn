@@ -153,7 +153,7 @@ Users can specify report options at the command line after defining
 the path to the report script. Option handling in scripts consists of
 two parts:
 
-* Declaration of available options using the `meta` table. These options
+* Declaration of available options in the table returned by `describe()`. These options
   will be presented to the user if help is requested at the command line.
 * Retrieval of option values using
   [`report:getopt()`](../documentation/api/modules/pepper.report.html#getopt).

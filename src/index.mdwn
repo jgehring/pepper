@@ -40,6 +40,10 @@
 
 ### <a name="about"></a>About
 
+<div class="index-thumbs">
+  <a href="gallery"><img src="reports.png" /></a>
+</div>
+
 pepper is a flexible command-line tool for retrieving statistics
 and generating reports from source code repositories. It ships with
 several graphical and textual reports, and is easily extendable using the

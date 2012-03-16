@@ -78,7 +78,7 @@ use IkiWiki::Setup::Standard {
 	# environment variables
 	ENV => {},
 	# regexp of normally excluded files to include
-	#include => '^\\.htaccess$',
+	include => '^gallery/\\.gnuplot$',
 	# regexp of files that should be skipped
 	#exclude => '^(*\\.private|Makefile)$',
 	# specifies the characters that are allowed in source filenames

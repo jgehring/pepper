@@ -6,138 +6,73 @@ pepper's built-in reports.  The output type has been set to
 and high-resolution versions of each plot after wards. The latter can
 be accessed by clicking on a thumbnail image.
 
-The repository data is from the self-hosting repositories
-of [Git](http://git.kernel.org/?p=git/git.git;a=summary) and
-[Mercurial](http://selenic.com/repo/hg). The [MediaWiki Subversion
-repository](http://svn.wikimedia.org/svnroot/mediawiki/)
-has been used as an example of a large SVN repository
-(>100000 revisions).  Additionally,a clone of [Linus Torvald's kernel
-tree](http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=summary)
-is presented.
+The corresponding command-line arguments for pepper are listed
+below the thumbnails.  In order to achieve similar output in
+quality and color, you should use the `pngcairo` terminal and
+place [this .gnuplot file](.gnuplot) in your home directory. The
+Gnuplot style has been mostly copied from [this GuidoLabs
+article](http://guidolan.blogspot.com/2010/03/how-to-create-beautiful-gnuplot-graphs.html).
+
+Several large repositories of free and open-source software have been
+used for generating the reports below (the links to the repositories
+can be found in the respective captions).
 
 ---
 
-
-#### Lines of Code
-
-The `loc` report shows the total lines of code in the repository. Like
-most graphical reports, tag marks can be added to the plot.
-
-<table width="100%">
-<tr>
-<td><a href="loc-git.png"><img src="loc-git-thumb.png" title="Git" width="80%"></a></td>
-<td><a href="loc-hg.png"><img src="loc-hg-thumb.png" title="Mercurial" width="80%"></a></td>
-<td><a href="loc-mediawiki.png"><img src="loc-mediawiki-thumb.png" title="MediaWiki" width="80%"></a></td>
-<td><a href="loc-linux.png"><img src="loc-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
-</tr>
-</table>
-
----
-
-
-#### Busiest authors
-
-The `authors` report plots the contributions made by the "busiest" authors.
-
-<table width="100%">
-<tr>
-<td><a href="authors-git.png"><img src="authors-git-thumb.png" title="Git" width="80%"></a></td>
-<td><a href="authors-hg.png"><img src="authors-hg-thumb.png" title="Mercurial" width="80%"></a></td>
-<td><a href="authors-mediawiki.png"><img src="authors-mediawiki-thumb.png" title="MediaWiki" width="80%"></a></td>
-<td><a href="authors-linux.png"><img src="authors-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
-</tr>
-</table>
-
----
-
-
-#### Smooth activity curve
-
-The `activity` report is a port of the [activity
-extension](http://labs.freehackers.org/wiki/hgactivity) for Mercurial by
-Thomas Capricelli. These images visualize the general repository activity,
-splitted by directories.
-
-<table width="100%">
-<tr>
-<td><a href="activity-git.png"><img src="activity-git-thumb.png" title="Git" width="80%"></a></td>
-<td><a href="activity-hg.png"><img src="activity-hg-thumb.png" title="Mercurial" width="80%"></a></td>
-<td><a href="activity-mediawiki.png"><img src="activity-mediawiki-thumb.png" title="MediaWiki" width="80%"></a></td>
-<td><a href="activity-linux.png"><img src="activity-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
-</tr>
-</table>
-
----
-
-
-#### Commit counts
-
-The `commit_counts` report plots a histogram of the commits during a
-user-defined period which defaults to the last twelve months as shown
-here. The red bars represent the number of commits, while the green bars
-visualize the sum of the number of files touched per commit.
-
-<table width="100%">
-<tr>
-<td><a href="commits-git.png"><img src="commits-git-thumb.png" title="Git" width="80%"></a></td>
-<td><a href="commits-hg.png"><img src="commits-hg-thumb.png" title="Mercurial" width="80%"></a></td>
-<td><a href="commits-mediawiki.png"><img src="commits-mediawiki-thumb.png" title="MediaWiki" width="80%"></a></td>
-<td><a href="commits-linux.png"><img src="commits-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
-</tr>
-</table>
-
----
-
-
-#### Commit times
-
-This is a scatter plot of the commit times, similar to the one provided by
-[StatSVN](http://www.statsvn.org/statsvn/developers.html#Developer_Activity_).
-In pepper, this report is called `times`.
-
-<table width="100%">
-<tr>
-<td><a href="times-git.png"><img src="times-git-thumb.png" title="Git" width="80%"></a></td>
-<td><a href="times-hg.png"><img src="times-hg-thumb.png" title="Mercurial" width="80%"></a></td>
-<td><a href="times-mediawiki.png"><img src="times-mediawiki-thumb.png" title="MediaWiki" width="80%"></a></td>
-<td><a href="times-linux.png"><img src="times-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
-</tr>
-</table>
-
----
-
-
-#### File types
-
-The `filetypes` report maps file extensions to types and plots a
-corresponding histogram.
-
-<table width="100%">
-<tr>
-<td><a href="filetypes-git.png"><img src="filetypes-git-thumb.png" title="Git" width="80%"></a></td>
-<td><a href="filetypes-hg.png"><img src="filetypes-hg-thumb.png" title="Mercurial" width="80%"></a></td>
-<td><a href="filetypes-mediawiki.png"><img src="filetypes-mediawiki-thumb.png" title="MediaWiki" width="80%"></a></td>
-<td><a href="filetypes-linux.png"><img src="filetypes-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
-</tr>
-</table>
-
----
-
-
-#### Participation
-
-This report is very similar to the ones used on the [GitHub author
-pages](https://github.com/jgehring/). However, there's an option to count
-contributed lines of code instead of commits as well as a configurable
-time range and resolution.
-
-For each repository, the author with the most commits has been selected.
-
-<table width="100%">
-<tr>
-<td><a href="participation-git.png"><img src="participation-git-thumb.png" title="Git" width="80%"></a></td>
-<td><a href="participation-hg.png"><img src="participation-hg-thumb.png" title="Mercurial" width="80%"></a></td>
-<td><a href="participation-mediawiki.png"><img src="participation-mediawiki-thumb.png" title="MediaWiki" width="80%"></a></td>
-<td><a href="participation-linux.png"><img src="participation-linux-thumb.png" title="Linux-2.6" width="80%"></a></td>
-</tr>
-</table>
+<div class="thumbnail">
+  <p class="caption">
+  <a href="http://selenic.com/repo/hg">Mercurial</a>: Lines of code</p>
+  <a href="loc_hg.png"><img src="loc_hg-thumb.png" alt="" width="100%"></a><br>
+  <code>loc --tags="^%d.%d$"</code>
+</div>
+<div class="thumbnail">
+  <p class="caption">
+  <a href="http://selenic.com/repo/hg">Mercurial</a>: Code contribution by author</p>
+  <a href="authors_hg.png"><img src="authors_hg-thumb.png" alt="" width="100%"></a><br>
+  <code>authors --tags="^%d.%d$"</code>
+</div>
+<div class="thumbnail">
+  <p class="caption">
+  <a href="http://selenic.com/repo/hg">Mercurial</a>: Most active directories</p>
+  <a href="activity_hg.png"><img src="activity_hg-thumb.png" alt="" width="100%"></a><br>
+  <code>activity --split=d -n4 --tags="^%d.%d$"</code>
+</div>
+<div class="thumbnail">
+  <p class="caption">
+  <a href="http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=summary">Linux</a>: Most active directories</p>
+  <a href="activity_linux.png"><img src="activity_linux-thumb.png" alt="" width="100%"></a><br>
+  <code>activity --split=d --tags="^%d.%d$"</code>
+</div>
+<div class="thumbnail">
+  <p class="caption">
+  <a href="http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=summary">Linux</a>: Punchcard for Linus Torvalds</p>
+  <a href="punchcard_linux.png"><img src="punchcard_linux-thumb.png" alt="" width="100%"></a><br>
+  <code>pepper punchcard --author="Linus Torvalds"</code>
+</div>
+<div class="thumbnail">
+  <p class="caption">
+  <a href="http://git.kernel.org/?p=git/git.git;a=summary">Git</a>: Most active files</p>
+  <a href="files_git.png"><img src="files_git-thumb.png" alt="" width="100%"></a><br>
+  <code>activity --split=f --tags="^%d.%d$"</code>
+</div>
+  <div class="thumbnail">
+  <p class="caption"><a href="http://svn.wikimedia.org/svnroot/mediawiki/">Mediawiki</a>: Contribution by Author</p>
+  <a href="volume_mediawiki.png"><img src="volume_mediawiki-thumb.png" alt="" width="100%"></a><br>
+  <code>volume -c --slots=a,4y,2y,y</code>
+</div>
+<div class="thumbnail">
+  <p class="caption"><a href="http://svn.wikimedia.org/svnroot/mediawiki/">Mediawiki</a>: File types</p>
+  <a href="files_mediawiki.png"><img src="files_mediawiki-thumb.png" alt="" width="100%"></a><br>
+  <code>filetypes --pie trunk</code>
+</div>
+<div class="thumbnail">
+  <p class="caption"><a href="http://hg.mozilla.org/mozilla-central/">Firefox</a>: Commits over past 18 months</p>
+  <a href="commits_firefox.png"><img src="commits_firefox-thumb.png" alt="" width="100%"></a><br>
+  <code>commit&#95;counts --period=18m</code>
+</div>
+<div class="thumbnail">
+  <p class="caption"><a href="http://hg.mozilla.org/mozilla-central/">Firefox</a>: Most active authors</p>
+  <a href="authors_firefox.png"><img src="authors_firefox-thumb.png" alt="" width="100%"></a><br>
+  <code>activity --split=a -n6 tags=</code>
+</div>
+<div class="clearboth"></div>
