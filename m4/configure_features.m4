@@ -95,6 +95,10 @@ AC_DEFUN([CHECK_LEVELDB], [
 
 		if test "x$header_found" = "xyes"; then
 			AC_CHECK_LIB([leveldb], [leveldb_open], [lib_found="yes"], [lib_found="no"], [-lpthread])
+			if test "x$lib_found" = "xyes"; then
+				LEVELDB_LIBS="-lleveldb"
+				AC_SUBST([LEVELDB_LIBS])
+			fi
 		else
 			dnl Fall back to builtin in version, and make sure to clear
 			dnl the cached header check.
