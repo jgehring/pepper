@@ -1,3 +1,20 @@
+2011-03-16  --  version 0.3.1
+
+	- Fixed Gnuplot invocation if compiled without X11 backend (e.g.,
+	  on Mac OS X or headless environments).
+	- Experimental support for LevelDB cache backend
+	- Support for pie charts via
+	- Fixed working copy detection for Subversion 1.7
+	- Fixed tree listing for Subversion repositories
+	- New reports or report options:
+		* Added authors_pie report (author contribution pie chart)
+		* Added volume report (commit or contribution volume by author)
+		* Added --pie flag to files report
+	- Internal changes:
+		* Directly write data to Gnuplot, i.e. don't use a temporary file
+		* Removed rather useless safety check for report modules
+		* Added checks for pipe I/O errors
+
 2011-12-21  --  version 0.3
 
 	- Changes affecting the report API:
