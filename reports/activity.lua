@@ -124,7 +124,10 @@ function run(self)
 
 	count_changes = self:getopt("c,changes,l")
 	split = self:getopt("split", "none")
-	local valid = {none=1, authors=1, files=1, directories=1}
+	if split == "n" then split="none"
+	elseif split == "a" then split="authors"
+	elseif split == "f" then split="files"
+	elseif split == "d" then split="directories" end
 	if ({none=1, authors=1, files=1, branches=1, directories=1})[split] == nil then
 		error("Unknown split option '" .. split .. "'")
 	end
