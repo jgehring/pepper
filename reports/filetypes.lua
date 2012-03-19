@@ -164,6 +164,7 @@ set key right outside
 set style fill solid border -1
 set style histogram cluster gap 1
 set xtics nomirror
+set yrange [0:]
 set ylabel "Number of files"
 ]])
 		p:plot_histogram(keys, values)
