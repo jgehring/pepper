@@ -1,21 +1,17 @@
 ### Gallery
 
-These example images have been generated using the
-pepper's built-in reports.  The output type has been set to
-[SVG](http://en.wikipedia.org/wiki/SVG) in order to render both thumbnails
-and high-resolution versions of each plot after wards. The latter can
-be accessed by clicking on a thumbnail image.
-
-The corresponding command-line arguments for pepper are listed
-below the thumbnails.  In order to achieve similar output in
-quality and color, you should use the `pngcairo` terminal and
+These example images have been generated using pepper's built-in
+reports.  The corresponding command-line arguments for pepper are
+listed below the thumbnails.  In order to achieve similar output
+in quality and color, you should use the `pngcairo` terminal and
 place [this .gnuplot file](.gnuplot) in your home directory. The
 Gnuplot style has been mostly copied from [this GuidoLabs
 article](http://guidolan.blogspot.com/2010/03/how-to-create-beautiful-gnuplot-graphs.html).
 
 Several large repositories of free and open-source software have been
 used for generating the reports below (the links to the repositories
-can be found in the respective captions).
+can be found in the respective captions). Please click on an image
+to access its full-resolution version.
 
 ---
 
@@ -41,7 +37,7 @@ can be found in the respective captions).
   <p class="caption">
   <a href="http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=summary">Linux</a>: Most active directories</p>
   <a href="activity_linux.png"><img src="activity_linux-thumb.png" alt="" width="100%"></a><br>
-  <code>activity --split=d --tags="^%d.%d$"</code>
+  <code>activity --split=d --tags="^v[%d%.]+$"</code>
 </div>
 <div class="thumbnail">
   <p class="caption">
@@ -53,26 +49,36 @@ can be found in the respective captions).
   <p class="caption">
   <a href="http://git.kernel.org/?p=git/git.git;a=summary">Git</a>: Most active files</p>
   <a href="files_git.png"><img src="files_git-thumb.png" alt="" width="100%"></a><br>
-  <code>activity --split=f --tags="^%d.%d$"</code>
+  <code>activity --split=f -n4 --tags="^v%d%.%d%.0$"</code>
 </div>
-  <div class="thumbnail">
-  <p class="caption"><a href="http://svn.wikimedia.org/svnroot/mediawiki/">Mediawiki</a>: Contribution by Author</p>
+<div class="thumbnail">
+  <p class="caption">
+  <a href="http://git.kernel.org/?p=git/git.git;a=summary">Git</a>: Commit times</p>
+  <a href="times_git.png"><img src="times_git-thumb.png" alt="" width="100%"></a><br>
+  <code>times"</code>
+</div>
+<div class="thumbnail">
+  <p class="caption">
+  <a href="http://svn.wikimedia.org/svnroot/mediawiki/">Mediawiki</a>: Contribution by Author</p>
   <a href="volume_mediawiki.png"><img src="volume_mediawiki-thumb.png" alt="" width="100%"></a><br>
   <code>volume -c --slots=a,4y,2y,y</code>
 </div>
 <div class="thumbnail">
-  <p class="caption"><a href="http://svn.wikimedia.org/svnroot/mediawiki/">Mediawiki</a>: File types</p>
+  <p class="caption">
+  <a href="http://svn.wikimedia.org/svnroot/mediawiki/">Mediawiki</a>: File types</p>
   <a href="files_mediawiki.png"><img src="files_mediawiki-thumb.png" alt="" width="100%"></a><br>
   <code>filetypes --pie trunk</code>
 </div>
 <div class="thumbnail">
-  <p class="caption"><a href="http://hg.mozilla.org/mozilla-central/">Firefox</a>: Commits over past 18 months</p>
+  <p class="caption">
+  <a href="http://hg.mozilla.org/mozilla-central/">Firefox</a>: Commits over past 18 months</p>
   <a href="commits_firefox.png"><img src="commits_firefox-thumb.png" alt="" width="100%"></a><br>
   <code>commit&#95;counts --period=18m</code>
 </div>
 <div class="thumbnail">
-  <p class="caption"><a href="http://hg.mozilla.org/mozilla-central/">Firefox</a>: Most active authors</p>
+  <p class="caption">
+  <a href="http://hg.mozilla.org/mozilla-central/">Firefox</a>: Most active authors</p>
   <a href="authors_firefox.png"><img src="authors_firefox-thumb.png" alt="" width="100%"></a><br>
-  <code>activity --split=a -n6 tags=</code>
+  <code>activity --split=a<code>
 </div>
 <div class="clearboth"></div>
