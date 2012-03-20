@@ -211,6 +211,7 @@ void Thread::cleanup(void *obj)
 	reinterpret_cast<Thread *>(obj)->m_mutex.lock();
 	reinterpret_cast<Thread *>(obj)->m_running = 0;
 	reinterpret_cast<Thread *>(obj)->m_mutex.unlock();
+	pthread_detach(reinterpret_cast<Thread *>(obj)->m_pth);
 }
 
 // Do initial setup and call run()
