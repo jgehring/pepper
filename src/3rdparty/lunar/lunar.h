@@ -161,10 +161,24 @@ template <typename T> class Lunar
 	static int thunk(lua_State *L) {
 		// stack has userdata, followed by method args
 		T *obj = check(L, 1);  // get 'self', or if you prefer, 'this'
+
+		// In order to prevent garbage collection of this object while the function
+		// is running, store a reference in the global index.
+		char buf[34];
+		sprintf(buf, "__%p", (void*)obj);
+		lua_pushvalue(L, 1);
+		lua_setglobal(L, buf);
+
 		lua_remove(L, 1);  // remove self so member function args start at index 1
 		// get member function from upvalue
 		RegType *l = static_cast<RegType*>(lua_touserdata(L, lua_upvalueindex(1)));
-		return (obj->*(l->mfunc))(L);  // call member function
+		int ret = (obj->*(l->mfunc))(L);  // call member function
+
+		// Remove temporary reference
+		lua_pushnil(L);
+		lua_setglobal(L, buf);
+
+		return ret;
 	}
 
 	// create a new T object and

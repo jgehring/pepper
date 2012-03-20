@@ -171,7 +171,7 @@ int Repository::revision(lua_State *L)
 	} catch (const std::exception &ex) {
 		return LuaHelpers::pushError(L, ex.what());
 	}
-	return LuaHelpers::push(L, rev); // TODO: Memory leak!
+	return LuaHelpers::push(L, rev, true);
 }
 
 int Repository::iterator(lua_State *L)
@@ -204,7 +204,7 @@ int Repository::iterator(lua_State *L)
 	} catch (const std::exception &ex) {
 		return LuaHelpers::pushError(L, ex.what());
 	}
-	return LuaHelpers::push(L, it);
+	return LuaHelpers::push(L, it, true);
 }
 
 int Repository::cat(lua_State *L)
