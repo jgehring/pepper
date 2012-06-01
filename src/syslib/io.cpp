@@ -19,6 +19,8 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <unistd.h>
+
 #include <sys/wait.h>
 
 #include "logger.h"

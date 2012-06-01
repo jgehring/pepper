@@ -16,6 +16,8 @@
 #include <algorithm>
 #include <fstream>
 
+#include <unistd.h>
+
 #include "jobqueue.h"
 #include "logger.h"
 #include "options.h"

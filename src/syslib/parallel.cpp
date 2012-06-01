@@ -13,6 +13,8 @@
 
 #include <cassert>
 
+#include <unistd.h>
+
 #include <sys/time.h>
 
 #include "main.h"
