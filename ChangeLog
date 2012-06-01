@@ -1,4 +1,10 @@
-2011-03-16  --  version 0.3.1
+2012-06-01  --  version 0.3.2
+
+	- Fixed compilation with GCC 4.7
+	- Fixed memory leaks
+	- Use points instead of dots for the times report
+
+2012-03-16  --  version 0.3.1
 
 	- Fixed Gnuplot invocation if compiled without X11 backend (e.g.,
 	  on Mac OS X or headless environments).
