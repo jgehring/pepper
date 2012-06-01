@@ -1,0 +1,15 @@
+[[!meta title="peprserv - A repository statistics server for pepper"]]
+[[!meta date="2012-03-20 16:16 CET"]]
+
+I've just pushed the first version of a repository statistics
+server to [GitHub](https://github.com/jgehring/peprserv). peprserv
+is actually a Lua report script for pepper, utilizing the
+[Xavante](http://keplerproject.github.com/xavante/) HTTP web server. The
+main intention for this project is providing a backend for serving
+repository statistics to other web applications, like repository
+interfaces or bug trackers.
+
+A live demo using [the official Git
+repository](https://github.com/gitster/git) is running at
+[http://jgehring.net:9000](http://jgehring.net:9000), and the source
+code is available [on GitHub](https://github.com/jgehring/peprserv).
