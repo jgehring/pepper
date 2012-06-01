@@ -1,4 +1,5 @@
 [[!meta title="pepper 0.3.1 released"]]
+[[!meta date="2012-03-16 01:46 CEST"]]
 
 I'm happy to announce that version 0.3.1 of pepper is now available. This
 release brings the usual fixes as well as new features. Experimental

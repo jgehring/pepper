@@ -1,4 +1,5 @@
 [[!meta title="pepper 0.3 released"]]
+[[!meta date="2011-12-21 02:17 CET"]]
 
 Version 0.3 of pepper is now available. This release features an improved
 report API, a new report for running other reports from a graphical user

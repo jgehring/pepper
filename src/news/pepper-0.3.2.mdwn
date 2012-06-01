@@ -1,0 +1,6 @@
+[[!meta title="pepper 0.3.2 released"]]
+[[!meta date="2012-06-01 14:56 EDT"]]
+
+I'm happy to announce that version 0.3.2 of pepper is now available. This
+release fixes compilation with GCC 4.7 as well as some minor memory
+leaks. As usual, you can find source tarballs the [[Download]] section.

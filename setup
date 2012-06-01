@@ -76,7 +76,7 @@ use IkiWiki::Setup::Standard {
 	# extra library and plugin directory
 	libdir => '',
 	# environment variables
-	ENV => {},
+	ENV => {TZ => "CET"},
 	# regexp of normally excluded files to include
 	include => '^gallery/\\.gnuplot$',
 	# regexp of files that should be skipped
