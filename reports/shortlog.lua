@@ -20,7 +20,8 @@ function describe(self)
 	r.description = "Summarized revision log"
 	r.options = {
 		{"-bARG, --branch=ARG", "Select branch"},
-		{"-s, --summary", "Print commit count summary only"}
+		{"-s, --summary", "Print commit count summary only"},
+		{"-n, --numbered", "Sort output according to number of commits"},
 	}
 	pepper.datetime.add_daterange_options(r)
 	return r
@@ -47,12 +48,18 @@ function run(self)
 	local datemin, datemax = pepper.datetime.date_range(self)
 	repo:iterator(branch, {start=datemin, stop=datemax}):map(callback)
 
-	-- Sort commit dictionary by name
+	-- Sort commit dictionary
 	local authors = {}
 	for author,revisions in pairs(messages) do
 		table.insert(authors, author)
 	end
-	table.sort(authors)
+	if self:getopt("n,numbered") then
+		table.sort(authors, function (a,b)
+			return #messages[a] > #messages[b]
+		end)
+	else
+		table.sort(authors)
+	end
 
 	-- Print results
 	if self:getopt("s,summary") == nil then
