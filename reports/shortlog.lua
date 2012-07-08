@@ -80,7 +80,7 @@ function run(self)
 			while #str < 6 do
 				str = " " .. str
 			end
-			print(str .. "  " .. author)
+			print(str .. "\t" .. author)
 		end
 	end
 end
