@@ -66,7 +66,7 @@ AC_HEADER_STDBOOL()
 
 AC_FUNC_MALLOC()
 AC_FUNC_MKTIME()
-AC_CHECK_FUNCS([atexit getcwd gettimeofday memmove mkdir realpath setenv strtol strchr])
+AC_CHECK_FUNCS([atexit getcwd gettimeofday memmove mkdir realpath setenv strtol strchr vsnprintf])
 AC_FUNC_STRERROR_R()
 
 if test "x$popen_noshell" = "xyes"; then

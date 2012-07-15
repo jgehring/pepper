@@ -129,79 +129,34 @@ bool endsWith(const std::string &a, const std::string &b)
 }
 
 // sprintf for std::string
+// Code sample originally form the vsnprintf man page:
+// http://www.tin.org/bin/man.cgi?section=3&topic=vsnprintf)
 std::string printf(const char *format, ...)
 {
-	va_list vl;
-	va_start(vl, format);
+	int size = 128;
+	va_list ap;
+	std::string str;
 
-	std::ostringstream os;
+	// Try using vsnprintf() until the buffer is large enough
+	while (true) {
+		str.resize(size);
 
-	const char *ptr = format-1;
-	int lmod = 0;
-	while (*(++ptr) != '\0') {
-		if (*ptr != '%') {
-			os << *ptr;
-			continue;
-		}
+		va_start(ap, format);
+		int n = vsnprintf((char *)str.c_str(), size, format, ap);
+		va_end(ap);
 
-format:
-		if (*(++ptr) == '\0') {
+		// Check result
+		if (n > -1 && n < size) {
+			str.resize(n);
 			break;
+		} else if (n > -1) {
+			size = n + 1; // glibc 2.1: Returns amount of memory needed
+		} else {
+			n *= 2;
 		}
-
-		// Only a subset of format specifiers is supported
-		switch (*ptr) {
-			case 'd':
-			case 'i':
-				if (lmod > 1)  os << va_arg(vl, int64_t);
-				else if (lmod > 0) os << va_arg(vl, long int);
-				else os << va_arg(vl, int);
-				break;
-
-			case 'u':
-				if (lmod > 1)  os << va_arg(vl, uint64_t);
-				else if (lmod > 0) os << va_arg(vl, long unsigned int);
-				else os << va_arg(vl, unsigned int);
-				break;
-
-			case 'c':
-				os << (unsigned char)va_arg(vl, int);
-				break;
-
-			case 'e':
-			case 'E':
-			case 'f':
-			case 'F':
-			case 'g':
-			case 'G':
-				os << va_arg(vl, double);
-				break;
-
-			case 's':
-				os << va_arg(vl, const char *);
-				break;
-
-			case '%':
-				os << '%';
-				break;
-
-			case 'l':
-				++lmod;
-				goto format;
-				break;
-
-			default:
-#ifndef NDEBUG
-				throw PEX(std::string("Unknown format specifier ") + *ptr);
-#endif
-				break;
-		}
-
-		lmod = 0;
 	}
 
-	va_end(vl);
-	return os.str();
+	return str;
 }
 
 } // namespace str

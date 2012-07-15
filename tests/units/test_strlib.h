@@ -129,7 +129,7 @@ TEST_CASE("str/printf", "str::printf()")
 		{ "Hello, world", "Hello, world", "" },
 		{ "Ints: %d + %i = %u", "Ints: 2 + 2 = 4", "" },
 		{ "Strings: %c and %s", "Strings: a and abc", "" },
-		{ "Floats: %e, %E, %f, %F, %g, %G", "Floats: 3.14, 1.41421, -1, 1, 3, -3", ""},
+		{ "Floats: %e, %E, %f, %F, %g, %G", "Floats: 3.140000e+00, 1.414214E+00, -1.000000, 1.000000, 3, -3", ""},
 		{ "Escaping %% works", "Escaping % works", ""},
 		{ "Longs for %ld and %lu are ok", "Longs for -23 and 100 are ok", ""},
 		{ "64bit integers are working: %lld and %llu", "64bit integers are working: -4294967296 and 4294967296", ""}
