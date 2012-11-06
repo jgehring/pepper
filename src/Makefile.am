@@ -45,7 +45,10 @@ libpepper_a_SOURCES = \
 pepper_SOURCES = \
 	main.cpp
 pepper_LDADD = \
-	libpepper.a
+	libpepper.a \
+	$(PTHREAD_LIBS) \
+	$(LUA_LIB) \
+	$(FRAMEWORKS)
 
 AM_CXXFLAGS = \
 	-Wall -W -pipe \
@@ -55,10 +58,7 @@ INCLUDES = \
 AM_CPPFLAGS = \
 	$(LUA_INCLUDE) \
 	-DDATADIR=\"$(pkgdatadir)\"
-AM_LDFLAGS = \
-	$(PTHREAD_LIBS) \
-	$(LUA_LIB) \
-	$(FRAMEWORKS)
+AM_LDFLAGS = 
 
 # Debugging?
 if DEBUG
@@ -84,7 +84,7 @@ AM_CPPFLAGS += \
 	-DUSE_MERCURIAL
 AM_CXXFLAGS += \
 	$(PYTHON_CPPFLAGS)
-AM_LDFLAGS += \
+pepper_LDADD += \
 	$(PYTHON_LDFLAGS)
 endif
 
@@ -100,7 +100,8 @@ AM_CXXFLAGS += \
 	$(APR_CFLAGS) \
 	$(SVN_CFLAGS)
 AM_LDFLAGS += \
-	$(SVN_LDFLAGS) \
+	$(SVN_LDFLAGS)
+pepper_LDADD += \
 	$(SVN_LIBS) \
 	$(APR_LIBS)
 endif
