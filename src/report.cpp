@@ -124,7 +124,7 @@ std::string findScript(const std::string &script)
 lua_State *setupLua()
 {
 	// Setup lua context
-	lua_State *L = lua_open();
+	lua_State *L = luaL_newstate();
 	luaL_openlibs(L);
 
 	lua_atpanic(L, atpanic);

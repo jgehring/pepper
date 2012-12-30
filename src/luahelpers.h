@@ -322,7 +322,11 @@ inline std::string tablevb(lua_State *L, const std::string &key, const std::stri
 
 
 inline size_t tablesize(lua_State *L, int index = -1) {
+#if LUA_VERSION_NUM<502
 	return lua_objlen(L, index);
+#else
+	return lua_rawlen(L, index);
+#endif
 }
 
 inline bool hasFunction(lua_State *L, const std::string &name) {
