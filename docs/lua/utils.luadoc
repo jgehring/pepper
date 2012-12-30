@@ -4,6 +4,8 @@ module "pepper.utils"
 
 
 --- Opens a unique temporary file.
+-- <br>
+-- NOTE: This function is only available when using Lua 5.1!
 -- @param template An optional filename template
 -- @return A pair containing the file handle and the file name
 function mkstemp(template)

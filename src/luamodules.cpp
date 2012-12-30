@@ -11,6 +11,8 @@
  */
 
 
+#define LUA_COMPAT_ALL
+
 #include "main.h"
 
 #include <cstring>
@@ -67,7 +69,7 @@ int version(lua_State *L)
 }
 
 // Function table of main functions
-const struct luaL_reg table[] = {
+const struct luaL_Reg table[] = {
 	{"current_report", current_report},
 	{"run", run},
 	{"list_reports", list_reports},
@@ -90,6 +92,8 @@ int fclose(lua_State *L)
 	if (rc == 0) *p = NULL;
 	return 1;
 }
+
+#if LUA_VERSION_NUM<502
 
 // Generates a temporary file, and returns a file handle as well as the file name
 int mkstemp(lua_State *L)
@@ -128,6 +132,8 @@ int mkstemp(lua_State *L)
 	LuaHelpers::push(L, filename);
 	return 2;
 }
+
+#endif // LUA_VERSION_NUM<502
 
 // Removes a file
 int unlink(lua_State *L)
@@ -184,8 +190,10 @@ int basename(lua_State *L)
 }
 
 // Function table of the utils library
-const struct luaL_reg table[] = {
+const struct luaL_Reg table[] = {
+#if LUA_VERSION_NUM<502
 	{"mkstemp", mkstemp},
+#endif
 	{"unlink", unlink},
 	{"split", split},
 	{"strptime", strptime},
@@ -251,7 +259,7 @@ Lunar<Watch>::RegType Watch::methods[] = {
 };
 
 // Function table of internal functions
-const struct luaL_reg table[] = {
+const struct luaL_Reg table[] = {
 	{"check_cache", check_cache},
 	{NULL, NULL}
 };
