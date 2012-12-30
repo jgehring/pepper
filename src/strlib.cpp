@@ -131,7 +131,7 @@ bool endsWith(const std::string &a, const std::string &b)
 
 // sprintf for std::string
 // Code sample originally form the vsnprintf man page:
-// http://www.tin.org/bin/man.cgi?section=3&topic=vsnprintf)
+// http://www.tin.org/bin/man.cgi?section=3&topic=vsnprintf
 std::string printf(const char *format, ...)
 {
 	int size = 128;
