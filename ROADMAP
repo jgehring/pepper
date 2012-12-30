@@ -8,6 +8,7 @@ Planned features for 0.3.x:
 	* Windows version using the GUI report
 	* HTML module for generating custom HTML reports
 	* Speed improvements for Subversion backend
+	* Lua 5.2 compability
 
 Planned features for 0.4:
 	* Diff access
@@ -15,6 +16,7 @@ Planned features for 0.4:
 	* Filter module (cloc and friends)
 	* Cache backends using "real" databases
 	* Drop deprecated CSV report
+	* Interactive shell
 
 Legend:
 	* : todo
