@@ -85,7 +85,7 @@ AX_PTHREAD()
 
 LUA_SUFFIXES="$with_lua_suffix"
 if test "x$LUA_SUFFIXES" = "x"; then
-	LUA_SUFFIXES="- 51 5.1 51/lua"
+	LUA_SUFFIXES="- 52 5.2 52/lua 51 5.1 51/lua"
 fi
 LUA_FOUND="no"
 for with_lua_suffix in $LUA_SUFFIXES; do
@@ -96,9 +96,9 @@ for with_lua_suffix in $LUA_SUFFIXES; do
 	if test "x$LUA" = "x"; then
 		continue
 	fi
-	AX_LUA_VERSION([501])
+	AX_LUA_VERSION([501],[503])
 	AX_LUA_HEADERS()
-	AX_LUA_HEADERS_VERSION([501])
+	AX_LUA_HEADERS_VERSION([501],[503])
 	if test "x$LUA_HEADERS_IN_RANGE" != "xyes"; then
 		continue
 	fi

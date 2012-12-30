@@ -137,6 +137,9 @@ AC_DEFUN([AX_LUA_VERSION],
   if test "x$LUA" != x; then
     lua_text_version=$(LUA_INIT= $LUA -e 'print(_VERSION)' 2>&1 | cut -d' ' -f2)
     case $lua_text_version in
+    5.3*)
+      lua_version=503
+      ;;
     5.2*)
       lua_version=502
       ;;
@@ -194,7 +197,7 @@ AC_DEFUN([AX_LUA_LIBS],
   AC_CHECK_LIB([m], [exp], [lua_extra_libs="$lua_extra_libs -lm"], [])
   AC_CHECK_LIB([dl], [dlopen], [lua_extra_libs="$lua_extra_libs -ldl"], [])
   AC_CHECK_LIB([lua$with_lua_suffix],
-    [lua_call],
+    [lua_load],
     [LUA_LIB="$LUA_LIB -llua$with_lua_suffix $lua_extra_libs"],
     [],
     [$LUA_LIB $lua_extra_libs])])dnl
