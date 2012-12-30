@@ -4,6 +4,7 @@
  *
  * Changes by Jonas Gehring <jonas.gehring@boolsoft.org>:
  *   * An optional table argument has been added to Lunar::Register()
+ *   * Compatibility with Lua-5.2
  */
 
 
@@ -15,6 +16,11 @@ extern "C" {
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
+
+// Backwards compability with lua-5.1
+#if LUA_VERSION_NUM<502
+ #define lua_pushglobaltable(L) lua_pushvalue(L, LUA_GLOBALSINDEX)
+#endif
 }
 
 template <typename T> class Lunar
@@ -37,15 +43,19 @@ template <typename T> class Lunar
 		// store method table in globals so that
 		// scripts can add functions written in Lua.
 		if (table == NULL) {
+			lua_pushglobaltable(L);
+			lua_pushstring(L, T::className);
 			lua_pushvalue(L, methods);
-			set(L, LUA_GLOBALSINDEX, T::className);
+			lua_settable(L, -3);
 		} else {
+			lua_pushglobaltable(L);
 			lua_pushstring(L, table);
-			lua_gettable(L, LUA_GLOBALSINDEX);
+			lua_gettable(L, -2);
 			if (lua_isnil(L, -1)) { // Don't create the table, but fail silently
 				lua_pop(L, 1);
+				lua_pushstring(L, T::className);
 				lua_pushvalue(L, methods);
-				set(L, LUA_GLOBALSINDEX, T::className);
+				lua_settable(L, -3);
 			} else {
 				lua_pushstring(L, T::className);
 				lua_pushvalue(L, methods);
@@ -148,7 +158,7 @@ template <typename T> class Lunar
 		userdataType *ud =
 			static_cast<userdataType*>(luaL_checkudata(L, narg, T::className));
 		if(!ud) {
-			luaL_typerror(L, narg, T::className);
+			luaL_error(L, "%s: bad argument %d to 'check()' (%s expexted)", T::className, narg, T::className);
 			return NULL;
 		}
 		return ud->pT;  // pointer to T object
