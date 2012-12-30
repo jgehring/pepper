@@ -12,6 +12,7 @@
 
 
 #include <cstdarg>
+#include <cstdio>
 
 #include "strlib.h"
 
