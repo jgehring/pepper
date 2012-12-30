@@ -85,7 +85,7 @@ namespace utils
 {
 
 // Custom fclose() handler for lua file handles
-int fclose(lua_State *L)
+int stempclose(lua_State *L)
 {
 	FILE **p = (FILE **)lua_touserdata(L, 1);
 	int rc = fclose(*p);
@@ -115,7 +115,7 @@ int mkstemp(lua_State *L)
 		lua_pop(L, 1);
 		lua_newtable(L);
 		lua_pushvalue(L, -1);
-		lua_pushcfunction(L, fclose);
+		lua_pushcfunction(L, stempclose);
 		lua_setfield(L, -2, "__close");
 		lua_setfield(L, LUA_REGISTRYINDEX, "PEPPER_UTILS_FILE");
 	}
