@@ -1,4 +1,11 @@
 #!/bin/sh
+set -e
+set -x
+
+if [ "`uname`" = "Darwin" ]; then
+	# Fix sed error on Mountain Lion: "illegal byte sequence"
+	export LC_ALL=C
+fi
 
 if [ -z "$PEPPER_SRCDIR" ]; then
 	PEPPER_SRCDIR=".."
@@ -6,9 +13,9 @@ fi
 
 # Generate the man page
 (cd $PEPPER_SRCDIR/docs; make pepper.1.html &> /dev/null; cat pepper.1.html) > src/documentation/manpage.mdwn
-sed -i 's/jonas\.gehring/$FORENAME.$SURENAME/' src/documentation/manpage.mdwn
-sed -i 's/<html><head>.*<div class="refnamediv"/<div class="refnamediv"/' src/documentation/manpage.mdwn
-sed -i 's/<\/body>//' src/documentation/manpage.mdwn
+sed -i -e 's/jonas\.gehring/$FORENAME.$SURENAME/' src/documentation/manpage.mdwn
+sed -i -e 's/<html><head>.*<div class="refnamediv"/<div class="refnamediv"/' src/documentation/manpage.mdwn
+sed -i -e 's/<\/body>//' src/documentation/manpage.mdwn
 
 # Generate examples
 if [ "$1" = "--full" ]; then
@@ -25,4 +32,4 @@ cp -r "$PEPPER_SRCDIR/luadoc" pub/documentation/api
 cp "$PEPPER_SRCDIR/ChangeLog" pub/download/
 
 # Fix pages
-sed -i 's/<title>pepper</<title>pepper - Repository statistics and report tool</' pub/index.html
+sed -i -e 's/<title>pepper</<title>pepper - Repository statistics and report tool</' pub/index.html

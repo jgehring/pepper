@@ -163,7 +163,7 @@ use IkiWiki::Setup::Standard {
 	# location of highlight's filetypes.conf
 	filetypes_conf => '/etc/highlight/filetypes.conf',
 	# location of highlight's langDefs directory
-	langdefdir => '/usr/share/highlight/langDefs',
+	langdefdir => '/usr/local/share/highlight/langDefs',
 
 	# mdwn plugin
 	# enable multimarkdown features?
