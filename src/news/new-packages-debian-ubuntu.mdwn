@@ -1,0 +1,8 @@
+[[!meta title="Debian and Ubuntu packages"]]
+[[!meta date="2013-04-26 11:48 CEST"]]
+
+I'm happy to announce that source and binary packages are now
+available for both [Debian
+Sid](http://packages.debian.org/unstable/main/pepper) and [Ubuntu
+13.04 "Raring Ringtail"](http://packages.ubuntu.com/raring/vcs/pepper).
+Thanks go out to the respective maintainers!

@@ -31,6 +31,8 @@ distributions:
 
 * [Arch Linux (AUR)](http://aur.archlinux.org/packages.php?ID=45324)
 * [Gentoo (James Rowe's misc-overlay)](http://jnrowe.github.com/jnrowe-misc-docs/packages/dev-vcs.html)
+* [Debian Sid](http://packages.debian.org/unstable/main/pepper)
+* [Ubuntu Raring Ringtail](http://packages.ubuntu.com/raring/vcs/pepper)
 
 For source packages, please remember to install optional build-time
 dependencies for the repository backends first (e.g., `subversion`
