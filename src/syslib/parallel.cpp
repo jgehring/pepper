@@ -19,9 +19,7 @@
 
 #include "main.h"
 
-#if defined(POS_DARWIN) && defined(HAVE_CORESERVICES)
- #include <CoreServices/CoreServices.h>
-#elif defined(POS_BSD)
+#if defined(POS_BSD)
  #include <sys/sysctl.h>
 #endif
 
@@ -35,14 +33,12 @@ namespace parallel
 {
 
 // Returns the ideal number of threads, based on the system's CPU resources
-// This function is mainly from Qt, version 4.7.1, but the more exotic systems
+// This function is mainly from Qt, version 4.8, but the more exotic systems
 // will fall back to '1'
 int idealThreadCount()
 {
 	int cores = 1;
-#if defined(POS_DARWIN) && defined(HAVE_CORESERVICES)
-	cores = MPProcessorsScheduled();
-#elif defined(POS_BSD)
+#if defined(POS_BSD)
 	size_t len = sizeof(cores);
 	int mib[2];
 	mib[0] = CTL_HW;

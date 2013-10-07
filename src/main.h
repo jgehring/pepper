@@ -21,6 +21,7 @@
 // Operating system detection (mostly from Qt, qglobal.h)
 #if defined(__APPLE__) && (defined(__GNUC__) || defined(__xlC__) || defined(__xlc__))
  #define POS_DARWIN
+ #define POS_BSD
 #elif defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__bsdi__)
  #define POS_BSD
 #elif defined(__linux__) || defined(__linux)
