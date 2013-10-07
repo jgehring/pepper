@@ -15,6 +15,7 @@
 
 #include <cstdio>
 #include <cstring>
+#include <climits>
 
 #include <dirent.h>
 #include <unistd.h>
