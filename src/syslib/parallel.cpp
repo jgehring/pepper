@@ -58,7 +58,7 @@ int idealThreadCount()
 	GetSystemInfo(&sysinfo);
 	cores = sysinfo.dwNumberOfProcessors;
 #else
- #warning "Unkown operating system; sys::parallel::idealThreadCount() will always return 1"
+ #warning "Unknown operating system; sys::parallel::idealThreadCount() will always return 1"
 #endif
 	return cores;
 }

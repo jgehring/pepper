@@ -72,7 +72,7 @@ bool Revision::load(BIStream &in)
 	}
 	in >> v;
 	if (v != 1) {
-		PDEBUG << "Unkown version number " << int(v) << ", aborting" << endl;
+		PDEBUG << "Unknown version number " << int(v) << ", aborting" << endl;
 		return false;
 	}
 
