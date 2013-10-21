@@ -204,13 +204,13 @@ int start(const Options &opts)
 		Report r(opts.report(), (cache ? cache : backend));
 		ret = r.run();
 	} catch (const PepperException &ex) {
-		std::cerr << "Recieved exception while running report:" << std::endl;
+		std::cerr << "Received exception while running report:" << std::endl;
 		std::cerr << "  what():  " << ex.what() << std::endl;
 		std::cerr << "  where(): " << ex.where() << std::endl;
 		std::cerr << "  trace(): " << ex.trace() << std::endl;
 		ret = EXIT_FAILURE;
 	} catch (const std::exception &ex) {
-		std::cerr << "Recieved exception while running report:" << std::endl;
+		std::cerr << "Received exception while running report:" << std::endl;
 		std::cerr << "  what(): " << ex.what() << std::endl;
 		ret = EXIT_FAILURE;
 	}
@@ -254,13 +254,13 @@ int main(int argc, char **argv)
 	try {
 		ret = start(opts);
 	} catch (const PepperException &ex) {
-		std::cerr << "Recieved unhandled exception:" << std::endl;
+		std::cerr << "Received unhandled exception:" << std::endl;
 		std::cerr << "  what():  " << ex.what() << std::endl;
 		std::cerr << "  where(): " << ex.where() << std::endl;
 		std::cerr << "  trace(): " << ex.trace() << std::endl;
 		ret = EXIT_FAILURE;
 	} catch (const std::exception &ex) {
-		std::cerr << "Recieved unhandled exception:" << std::endl;
+		std::cerr << "Received unhandled exception:" << std::endl;
 		std::cerr << "  what(): " << ex.what() << std::endl;
 		ret = EXIT_FAILURE;
 	}
