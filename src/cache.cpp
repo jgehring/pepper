@@ -349,7 +349,7 @@ void Cache::check(bool force)
 			return;
 		case UnknownVersion:
 			delete in;
-			Logger::warn() << "Cache: Unkown cache version number " << version;
+			Logger::warn() << "Cache: Unknown cache version number " << version;
 			if (!force) {
 				Logger::warn() << " - won't clear it until forced to do so" << endl;
 			} else {

@@ -50,7 +50,7 @@ function codename(code)
 	elseif code == "m" or code == "message" then
 		return "Message"
 	else
-		error("Unkown column code: " .. code)
+		error("Unknown column code: " .. code)
 	end
 end
 
@@ -73,7 +73,7 @@ function info(r, code)
 	elseif code == "m" or code == "message" then
 		return r:message()
 	else
-		error("Unkown column code: " .. code)
+		error("Unknown column code: " .. code)
 	end
 end
 

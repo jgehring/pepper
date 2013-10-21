@@ -52,7 +52,7 @@ function subdate(t, period)
 		date.month = 1
 		date.year = date.year - n
 	else
-		error(string.format("Unkown time unit %q", m))
+		error(string.format("Unknown time unit %q", m))
 	end
 
 	return os.time(date)
@@ -71,7 +71,7 @@ function resolution(d, arg)
 		elseif date.day > 15 or date.month ~= 1 then return "weeks"
 		else return "days" end
 	else
-		error(string.format("Unkown resolution %q", arg))
+		error(string.format("Unknown resolution %q", arg))
 	end
 end
 

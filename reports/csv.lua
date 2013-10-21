@@ -50,7 +50,7 @@ function codename(code)
 	elseif code == "m" or code == "message" then
 		return "Message"
 	else
-		error("Unkown column code: " .. code)
+		error("Unknown column code: " .. code)
 	end
 end
 
@@ -81,7 +81,7 @@ function info(r, code)
 		str = str:gsub('\r', "\\r")
 		return '"' .. str .. '"'
 	else
-		error("Unkown column code: " .. code)
+		error("Unknown column code: " .. code)
 	end
 end
 
