@@ -162,6 +162,9 @@ if test "x$testsuite" = "xifdebug" -a "x$debug" = "xyes"; then
 fi
 AM_CONDITIONAL([TESTSUITE], [test "x$testsuite" = "xyes"])
 
+# Use -rdynamic for stack traces on non-OS X
+AM_CONDITIONAL([RDYNAMIC], [test "x$debug" = "xyes" && test "x`uname`" != "xDarwin"])
+
 
 #
 # Write Makefiles

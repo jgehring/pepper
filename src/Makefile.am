@@ -60,8 +60,7 @@ AM_CPPFLAGS = \
 	-DDATADIR=\"$(pkgdatadir)\"
 AM_LDFLAGS = 
 
-# Debugging?
-if DEBUG
+if RDYNAMIC
 AM_CXXFLAGS += \
 	-rdynamic
 AM_LDFLAGS += \
