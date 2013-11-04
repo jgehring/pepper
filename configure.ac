@@ -9,7 +9,7 @@
 
 AC_PREREQ([2.6])
 AC_INIT(pepper, 0.3.2, jonas.gehring@boolsoft.org)
-AM_INIT_AUTOMAKE()
+AM_INIT_AUTOMAKE([subdir-objects])
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_TESTDIR([tests])
 
