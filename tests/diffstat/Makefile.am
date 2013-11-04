@@ -17,7 +17,7 @@ AM_CXXFLAGS = \
 AM_CPPFLAGS = \
 	-DPEPPER_UNIT_TESTS \
 	$(LUA_INCLUDE)
-INCLUDES = \
+AM_CPPFLAGS += \
 	-I$(top_srcdir)/src \
 	-I$(top_srcdir)/src/3rdparty
 pdiffstat_LDADD = $(top_builddir)/src/libpepper.a

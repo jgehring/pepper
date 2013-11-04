@@ -16,7 +16,7 @@ AM_CXXFLAGS = \
 	$(PTHREAD_CFLAGS)
 AM_CPPFLAGS = \
 	-DPEPPER_UNIT_TESTS
-INCLUDES = \
+AM_CPPFLAGS += \
 	$(LUA_INCLUDE) \
 	-I$(top_srcdir)/tests/catch \
 	-I$(top_srcdir)/src \
