@@ -137,6 +137,7 @@ void Thread::start()
 	m_mutex.lock();
 	assert(m_running == 0);
 	if (m_running != 0) {
+		m_mutex.unlock();
 		return;
 	}
 	m_running = 1;
