@@ -106,7 +106,7 @@ class Semaphore
 {
 	public:
 		Semaphore(int n = 0);
-		~Semaphore();
+		~Semaphore() { };
 
 		int available();
 		void acquire(int n = 1);
@@ -115,8 +115,8 @@ class Semaphore
 
 	private:
 		int m_avail;
-		pthread_mutex_t m_mutex;
-		pthread_cond_t m_cond;
+		Mutex m_mutex;
+		WaitCondition m_cond;
 };
 
 } // namespace parallel

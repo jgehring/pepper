@@ -300,42 +300,34 @@ void WaitCondition::wakeAll()
 Semaphore::Semaphore(int n)
 	: m_avail(n)
 {
-	pthread_mutex_init(&m_mutex, NULL);
-	pthread_cond_init(&m_cond, NULL);
-}
 
-// Destructor
-Semaphore::~Semaphore()
-{
-	pthread_mutex_destroy(&m_mutex);
-	pthread_cond_destroy(&m_cond);
 }
 
 int Semaphore::available()
 {
 	int t;
-	pthread_mutex_lock(&m_mutex);
+	m_mutex.lock();
 	t = m_avail;
-	pthread_mutex_unlock(&m_mutex);
+	m_mutex.unlock();
 	return t;
 }
 
 void Semaphore::acquire(int n)
 {
-	pthread_mutex_lock(&m_mutex);
+	m_mutex.lock();
 	while (n > m_avail) {
-		pthread_cond_wait(&m_cond, &m_mutex);
+		m_cond.wait(&m_mutex);
 	}
 	m_avail -= n;
-	pthread_mutex_unlock(&m_mutex);
+	m_mutex.unlock();
 }
 
 int Semaphore::maxAcquire(int n)
 {
 	int ac;
-	pthread_mutex_lock(&m_mutex);
+	m_mutex.lock();
 	while (1 > m_avail) {
-		pthread_cond_wait(&m_cond, &m_mutex);
+		m_cond.wait(&m_mutex);
 	}
 	if (m_avail > n) {
 		ac = n;
@@ -344,16 +336,16 @@ int Semaphore::maxAcquire(int n)
 		ac = m_avail;
 		m_avail = 0;
 	}
-	pthread_mutex_unlock(&m_mutex);
+	m_mutex.unlock();
 	return ac;
 }
 
 void Semaphore::release(int n)
 {
-	pthread_mutex_lock(&m_mutex);
+	m_mutex.lock();
 	m_avail += n;
-	pthread_cond_broadcast(&m_cond);
-	pthread_mutex_unlock(&m_mutex);
+	m_cond.wakeAll();
+	m_mutex.unlock();
 }
 
 } // namespace parallel
