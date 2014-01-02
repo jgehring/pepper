@@ -14,7 +14,8 @@ units_SOURCES = \
 	test_options.h \
 	test_strlib.h \
 	test_sys_fs.h \
-	test_utils.h
+	test_utils.h \
+	test_parallel.h
 
 AM_CXXFLAGS = \
 	-Wall -W -pipe \
