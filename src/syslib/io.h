@@ -31,6 +31,7 @@ bool isterm(FILE *f);
 std::string execv(int *ret, const char *cmd, const char * const *argv);
 std::string exec(int *ret, const char *cmd, const char *arg1 = NULL, const char *arg2 = NULL, const char *arg3 = NULL, const char *arg4 = NULL, const char *arg5 = NULL, const char *arg6 = NULL, const char *arg7 = NULL);
 
+// Kudos to http://www.mr-edd.co.uk/blog/beginners_guide_streambuf!
 class PopenStreambufData;
 class PopenStreambuf : public std::streambuf
 {

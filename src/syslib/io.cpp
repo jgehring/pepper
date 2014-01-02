@@ -181,7 +181,7 @@ PopenStreambuf::PopenStreambuf(const char *cmd, const char *arg1, const char *ar
 		setg(0, 0, 0);
 	}
 	if (m & std::ios::out) {
-		m_outbuffer = std::vector<char>(4096 + m_putback);
+		m_outbuffer = std::vector<char>(4096);
 		setp(&m_outbuffer.front(), &m_outbuffer.front() + m_outbuffer.size() - 1);
 	}
 
@@ -211,7 +211,7 @@ PopenStreambuf::PopenStreambuf(const char *cmd, const char * const *argv, std::i
 		setg(0, 0, 0);
 	}
 	if (m & std::ios::out) {
-		m_outbuffer = std::vector<char>(4096 + m_putback);
+		m_outbuffer = std::vector<char>(4096);
 		setp(&m_outbuffer.front(), &m_outbuffer.front() + m_outbuffer.size() - 1);
 	}
 
@@ -282,8 +282,9 @@ PopenStreambuf::int_type PopenStreambuf::underflow()
 
 	if (eback() == base) { // true when this isn't the first fill
 		// Make arrangements for putback characters
-		memmove(base, egptr() - m_putback, m_putback);
-		start += m_putback;
+		size_t pb = std::min(size_t(egptr() - base), m_putback);
+		memmove(base, egptr() - pb, pb);
+		start += pb;
 	}
 
 	// start is now the start of the buffer, proper.

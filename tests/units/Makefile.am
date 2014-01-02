@@ -14,6 +14,7 @@ units_SOURCES = \
 	test_options.h \
 	test_strlib.h \
 	test_sys_fs.h \
+	test_sys_io.h \
 	test_utils.h \
 	test_parallel.h
 
