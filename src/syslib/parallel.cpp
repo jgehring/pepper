@@ -23,6 +23,8 @@
  #include <sys/sysctl.h>
 #endif
 
+#include "logger.h"
+
 #include "parallel.h"
 
 
@@ -63,25 +65,43 @@ int idealThreadCount()
 // Constructor
 Mutex::Mutex()
 {
-	pthread_mutex_init(&m_pmx, NULL);
+	int ret = pthread_mutex_init(&m_pmx, NULL);
+	switch (ret) {
+		case 0: break;
+		case EBUSY: throw PEX("Mutex is locked by a thread");
+		default: throw PEX_ERR(ret);
+	}
 }
 
 // Destructor
 Mutex::~Mutex()
 {
-	pthread_mutex_destroy(&m_pmx);
+	int ret = pthread_mutex_destroy(&m_pmx);
+	switch (ret) {
+		case 0: break;
+		case EBUSY: throw PEX("Mutex is locked by a thread");
+		default: throw PEX_ERR(ret);
+	}
 }
 
 // Locks the mutex
 void Mutex::lock()
 {
-	pthread_mutex_lock(&m_pmx);
+	int ret = pthread_mutex_lock(&m_pmx);
+	switch (ret) {
+		case 0: break;
+		default: throw PEX_ERR(ret);
+	}
 }
 
 // Unlocks the mutex
 void Mutex::unlock()
 {
-	pthread_mutex_unlock(&m_pmx);
+	int ret = pthread_mutex_unlock(&m_pmx);
+	switch (ret) {
+		case 0: break;
+		default: throw PEX_ERR(ret);
+	}
 }
 
 
@@ -228,31 +248,51 @@ void Thread::setupAndRun()
 // Constructor
 WaitCondition::WaitCondition()
 {
-	pthread_cond_init(&m_pcond, NULL);
+	int ret = pthread_cond_init(&m_pcond, NULL);
+	switch (ret) {
+		case 0: break;
+		default: throw PEX_ERR(ret);
+	}
 }
 
 // Destructor
 WaitCondition::~WaitCondition()
 {
-	pthread_cond_destroy(&m_pcond);
+	int ret = pthread_cond_destroy(&m_pcond);
+	switch (ret) {
+		case 0: break;
+		default: throw PEX_ERR(ret);
+	}
 }
 
 // Blocks the current thread and waits for a signal
 void WaitCondition::wait(Mutex *mutex)
 {
-	pthread_cond_wait(&m_pcond, &mutex->m_pmx);
+	int ret = pthread_cond_wait(&m_pcond, &mutex->m_pmx);
+	switch (ret) {
+		case 0: break;
+		default: throw PEX_ERR(ret);
+	}
 }
 
 // Wakes a single waiting thread
 void WaitCondition::wake()
 {
-	pthread_cond_signal(&m_pcond);
+	int ret = pthread_cond_signal(&m_pcond);
+	switch (ret) {
+		case 0: break;
+		default: throw PEX_ERR(ret);
+	}
 }
 
 // Wakes all waiting threads
 void WaitCondition::wakeAll()
 {
-	pthread_cond_broadcast(&m_pcond);
+	int ret = pthread_cond_broadcast(&m_pcond);
+	switch (ret) {
+		case 0: break;
+		default: throw PEX_ERR(ret);
+	}
 }
 
 

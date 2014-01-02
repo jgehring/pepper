@@ -44,9 +44,11 @@ private:
 // Generates an exception with where() information
 #ifdef DEBUG
  #define PEX(str) PepperException(str, __FILE__, __LINE__, PepperException::stackTrace())
+ #define PEX_ERR(c) PepperException(c, __FILE__, __LINE__, PepperException::stackTrace())
  #define PEX_ERRNO() PepperException(errno, __FILE__, __LINE__, PepperException::stackTrace())
 #else
  #define PEX(str) PepperException(str, __FILE__, __LINE__)
+ #define PEX_ERR(c) PepperException(c, __FILE__, __LINE__)
  #define PEX_ERRNO() PepperException(errno, __FILE__, __LINE__)
 #endif
 
