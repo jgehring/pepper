@@ -65,8 +65,8 @@ Gnuplot::~Gnuplot()
 	delete m_pipe;
 	m_buf->closeWrite();
 	m_reader->wait();
-	delete m_buf;
 	delete m_reader;
+	delete m_buf;
 }
 
 // Writes a command to the Gnuplot pipe
