@@ -51,39 +51,12 @@ class MutexLocker
 		MutexLocker(Mutex *mutex);
 		~MutexLocker();
 
+		Mutex *mutex();
 		void relock();
 		void unlock();
 
 	private:
 		Mutex *m_mutex;
-};
-
-
-class Thread
-{
-	public:
-		Thread();
-		virtual ~Thread();
-
-		void start();
-		void abort();
-		void wait();
-		bool running();
-
-		static void msleep(int msecs);
-
-	protected:
-		virtual void run() = 0;
-
-	private:
-		static void *main(void *obj);
-		static void cleanup(void *obj);
-		void setupAndRun();
-
-	private:
-		pthread_t m_pth;
-		volatile int m_running;
-		Mutex m_mutex;
 };
 
 
@@ -118,6 +91,36 @@ class Semaphore
 		Mutex m_mutex;
 		WaitCondition m_cond;
 };
+
+class Thread
+{
+	public:
+		Thread();
+		virtual ~Thread();
+
+		void start();
+		void abort();
+		void wait();
+		bool running();
+
+		static void msleep(int msecs);
+
+	protected:
+		virtual void run() = 0;
+
+	private:
+		static void *main(void *obj);
+		static void cleanup(void *obj);
+		void cancel();
+
+	private:
+		pthread_t m_pth;
+		volatile int m_running;
+		Mutex m_mutex;
+		WaitCondition m_done;
+};
+
+
 
 } // namespace parallel
 

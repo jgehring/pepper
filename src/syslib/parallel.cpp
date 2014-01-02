@@ -118,6 +118,12 @@ MutexLocker::~MutexLocker()
 	m_mutex->unlock();
 }
 
+// Returns the internal mutex
+Mutex *MutexLocker::mutex()
+{
+	return m_mutex;
+}
+
 // Re-locks the mutex
 void MutexLocker::relock()
 {
@@ -145,10 +151,11 @@ Thread::~Thread()
 	assert(m_running == 0);
 	if (m_running != 0) {
 		m_mutex.unlock();
-		pthread_cancel(m_pth);
-		pthread_join(m_pth, 0);
+		cancel();
+		wait();
+	} else {
+		m_mutex.unlock();
 	}
-	m_mutex.unlock();
 }
 
 // Starts the thread
@@ -162,14 +169,27 @@ void Thread::start()
 	}
 	m_running = 1;
 	m_mutex.unlock();
-	pthread_create(&m_pth, NULL, &Thread::main, this);
+
+	/*
+	 * Create a detached thread as we're joining with a wait
+	 * condition rather then with pthread_join(). This was much
+	 * more stable during tests on Mac OS X 10.9.1.
+	 */
+	pthread_attr_t attr;
+	pthread_attr_init(&attr);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+	pthread_create(&m_pth, &attr, &Thread::main, this);
 }
 
 // Blocks the current thread until this thread has finished
 void Thread::wait()
 {
-	if (running()) {
-		pthread_join(m_pth, 0);
+	MutexLocker locker(&m_mutex);
+	if (m_pth == pthread_self()) {
+		return;
+	}
+	while (m_running != 0) {
+		m_done.wait(locker.mutex());
 	}
 }
 
@@ -187,7 +207,8 @@ bool Thread::running()
 void Thread::abort()
 {
 	if (running()) {
-		pthread_cancel(m_pth);
+		cancel();
+		wait();
 	}
 }
 
@@ -220,28 +241,40 @@ void Thread::msleep(int msecs)
 // Start function
 void *Thread::main(void *obj)
 {
-	reinterpret_cast<Thread *>(obj)->setupAndRun();
+	Thread *thr = reinterpret_cast<Thread *>(obj);
+
+	thr->m_mutex.lock();
+	thr->m_running = 2;
+	thr->m_mutex.unlock();
+
+	pthread_cleanup_push(Thread::cleanup, thr);
+	thr->run();
+	pthread_cleanup_pop(1);
+
 	return NULL;
 }
 
 // Cleanup function
 void Thread::cleanup(void *obj)
 {
-	reinterpret_cast<Thread *>(obj)->m_mutex.lock();
-	reinterpret_cast<Thread *>(obj)->m_running = 0;
-	reinterpret_cast<Thread *>(obj)->m_mutex.unlock();
-	pthread_detach(reinterpret_cast<Thread *>(obj)->m_pth);
+	Thread *thr = reinterpret_cast<Thread *>(obj);
+
+	thr->m_mutex.lock();
+	thr->m_running = 0;
+	thr->m_mutex.unlock();
+
+	thr->m_done.wakeAll();
 }
 
-// Do initial setup and call run()
-void Thread::setupAndRun()
+// Wrapper for pthread_cancel()
+void Thread::cancel()
 {
-	m_mutex.lock();
-	m_running = 2;
-	pthread_cleanup_push(Thread::cleanup, this);
-	m_mutex.unlock();
-	run();
-	pthread_cleanup_pop(1);
+	int ret = pthread_cancel(m_pth);
+	switch (ret) {
+		case 0: break;
+		case ESRCH: throw PEX("No such thread");
+		default: throw PEX_ERR(ret);
+	}
 }
 
 
