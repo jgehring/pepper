@@ -70,7 +70,6 @@ class BStream
 				| ((source & 0x0000ff00) << 8)
 				| ((source & 0x00ff0000) >> 8)
 				| ((source & 0xff000000) >> 24);
-
 		}
 		static inline uint64_t bswap(uint64_t source) {
 			char *t = (char *)&source;
