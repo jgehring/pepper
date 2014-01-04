@@ -23,7 +23,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#if defined(__GLIBC__)
+#if defined(__GLIBC__) || defined(POS_DARWIN)
  #include <cxxabi.h>
  #include <execinfo.h>
 #endif
@@ -78,7 +78,7 @@ const char *PepperException::trace() const throw()
 // Credits go out to Timo Bingmann (http://idlebox.net/2008/0901-stacktrace-demangled/)
 std::string PepperException::stackTrace()
 {
-#if defined(__GLIBC__)
+#if defined(__GLIBC__) || defined(POS_DARWIN)
 try {
 	std::string str = "Stack trace:\n";
 
