@@ -22,6 +22,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <sstream>
 
 #if defined(__GLIBC__) || defined(POS_DARWIN)
  #include <cxxabi.h>
@@ -170,10 +171,15 @@ std::string PepperException::strerror(int code)
 	char buf[512];
 #ifdef HAVE_STRERROR_R
 #ifdef _GNU_SOURCE
-	str = std::string(strerror_r(code, buf, sizeof(buf)));
+	std::ostringstream s;
+	s << strerror_r(code, buf, sizeof(buf));
+	s << " (" << code << ")";
+	str = s.str();
 #else
 	if (strerror_r(code, buf, sizeof(buf)) == 0) {
-		str = std::string(buf);
+		std::ostringstream s;
+		s << buf << " (" << code << ")";
+		str = s.str();
 	} else {
 		sprintf(buf, "System error code %d", code);
 		str = std::string(buf);
