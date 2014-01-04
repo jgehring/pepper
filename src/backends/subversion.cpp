@@ -285,9 +285,9 @@ SubversionBackend::SvnLogIterator::~SvnLogIterator()
 // Returns the next revision IDs, or an empty vector
 bool SubversionBackend::SvnLogIterator::nextIds(std::queue<std::string> *queue)
 {
-	m_mutex.lock();
+	sys::parallel::MutexLocker locker(&m_mutex);
 	while (m_index >= m_ids.size() && !m_finished) {
-		m_cond.wait(&m_mutex);
+		m_cond.wait(locker.mutex());
 	}
 
 	if (m_failed) {
@@ -300,7 +300,6 @@ bool SubversionBackend::SvnLogIterator::nextIds(std::queue<std::string> *queue)
 	while (m_index < m_ids.size()) {
 		queue->push(m_ids[m_index++]);
 	}
-	m_mutex.unlock();
 	return true;
 }
 
