@@ -148,5 +148,5 @@ SEE ALSO
 
 AUTHOR
 ------
-Copyright (C) 2010-2012 Jonas Gehring {email}.
+Copyright (C) 2010-2014 Jonas Gehring {email}.
 Released under the GNU General Public License.
