@@ -43,6 +43,12 @@ std::string Tag::name() const
 	return m_name;
 }
 
+// Compares tags by their name
+bool Tag::operator<(const Tag &other) const
+{
+	return m_name < other.m_name;
+}
+
 /*
  * Lua binding
  */

@@ -29,6 +29,8 @@ class Tag
 		std::string id() const;
 		std::string name() const;
 
+		bool operator<(const Tag &other) const;
+
 	private:
 		std::string m_id;
 		std::string m_name;

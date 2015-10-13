@@ -850,14 +850,15 @@ std::vector<Tag> SubversionBackend::tags()
 		throw PEX(SvnConnection::strerr(err));
 	}
 
-	std::vector<HashKey> keys = getHashKeys(dirents, pool);
-	std::sort(keys.begin(), keys.end());
-	for (size_t i = 0; i < keys.size(); i++) {
-		svn_dirent_t *dirent = (svn_dirent_t *)apr_hash_get(dirents, keys[i].data, keys[i].len);
+	for (apr_hash_index_t *hi = apr_hash_first(pool, dirents); hi; hi = apr_hash_next(hi)) {
+		const char *key;
+		svn_dirent_t *dirent;
+		apr_hash_this(hi, (const void **)&key, NULL, (void **)&dirent);
 		if (dirent->kind == svn_node_dir) {
-			tags.push_back(Tag(str::itos(dirent->created_rev), keys[i].data));
+			tags.push_back(Tag(str::itos(dirent->created_rev), key));
 		}
 	}
+	std::sort(tags.begin(), tags.end());
 
 	svn_pool_destroy(pool);
 	return tags;
