@@ -25,7 +25,6 @@
 #include <svn_path.h>
 #include <svn_pools.h>
 #include <svn_ra.h>
-#include <svn_sorts.h>
 #include <svn_time.h>
 #include <svn_utf.h>
 
@@ -42,6 +41,32 @@
 
 #include "backends/subversion.h"
 #include "backends/subversion_p.h"
+
+
+namespace {
+
+struct HashKey {
+	const char *data;
+	apr_ssize_t len;
+
+	HashKey(const char *data, apr_ssize_t len) : data(data), len(len) { }
+
+	bool operator<(const HashKey &other) const {
+		return memcmp(data, other.data, std::min(len, other.len)) < 0;
+	}
+};
+
+// Returns a vector of all keys in a APR hash
+std::vector<HashKey> getHashKeys(apr_hash_t *hash, apr_pool_t *pool)
+{
+	std::vector<HashKey> keys;
+	for (apr_hash_index_t *hi = apr_hash_first(pool, hash); hi; hi = apr_hash_next(hi)) {
+		keys.push_back(HashKey((const char *)apr_hash_this_key(hi), apr_hash_this_key_len(hi)));
+	}
+	return keys;
+}
+
+} // anonymous namespace
 
 
 // Constructor
@@ -825,12 +850,12 @@ std::vector<Tag> SubversionBackend::tags()
 		throw PEX(SvnConnection::strerr(err));
 	}
 
-	apr_array_header_t *array = svn_sort__hash(dirents, &svn_sort_compare_items_lexically,  pool);
-	for (int i = 0; i < array->nelts; i++) {
-		svn_sort__item_t *item = &APR_ARRAY_IDX(array, i, svn_sort__item_t);
-		svn_dirent_t *dirent = (svn_dirent_t *)apr_hash_get(dirents, item->key, item->klen);
+	std::vector<HashKey> keys = getHashKeys(dirents, pool);
+	std::sort(keys.begin(), keys.end());
+	for (size_t i = 0; i < keys.size(); i++) {
+		svn_dirent_t *dirent = (svn_dirent_t *)apr_hash_get(dirents, keys[i].data, keys[i].len);
 		if (dirent->kind == svn_node_dir) {
-			tags.push_back(Tag(str::itos(dirent->created_rev), (const char *)item->key));
+			tags.push_back(Tag(str::itos(dirent->created_rev), keys[i].data));
 		}
 	}
 
@@ -920,15 +945,16 @@ std::vector<std::string> SubversionBackend::tree(const std::string &id)
 
 		std::string prefix = (node.empty() ? "" : node + "/");
 		std::stack<std::pair<std::string, int> > next;
-		apr_array_header_t *array = svn_sort__hash(dirents, &svn_sort_compare_items_lexically,  iterpool);
-		for (int i = 0; i < array->nelts; i++) {
-			svn_sort__item_t *item = &APR_ARRAY_IDX(array, i, svn_sort__item_t);
-			svn_dirent_t *dirent = (svn_dirent_t *)apr_hash_get(dirents, item->key, item->klen);
-			if (str::endsWith(node, (const char *)item->key) || str::endsWith(d->url, (const char *)item->key)) {
+
+		std::vector<HashKey> keys = getHashKeys(dirents, iterpool);
+		std::sort(keys.begin(), keys.end());
+		for (size_t i = 0; i < keys.size(); i++) {
+			svn_dirent_t *dirent = (svn_dirent_t *)apr_hash_get(dirents, keys[i].data, keys[i].len);
+			if (str::endsWith(node, keys[i].data) || str::endsWith(d->url, keys[i].data)) {
 				continue;
 			}
 			if (dirent->kind == svn_node_file || dirent->kind == svn_node_dir) {
-				next.push(std::pair<std::string, int>(prefix + (const char *)item->key, dirent->kind));
+				next.push(std::pair<std::string, int>(prefix + keys[i].data, dirent->kind));
 			}
 		}
 		while (!next.empty()) {

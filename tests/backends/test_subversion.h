@@ -269,6 +269,32 @@ TEST_CASE("subversion/tags", "Tag listing")
 	REQUIRE(tags[0].name() == dtags[0].name());
 }
 
+TEST_CASE("subversion/tree", "Tree listing")
+{
+	std::string repo = setupTestRepo();
+
+	Options options;
+	options.m_options["repository"] = repo;
+	options.m_options["cache"] = "false";
+	Logger::setLevel(Logger::Debug);
+	Logger::setOutput(std::cout);
+	SubversionBackend backend(options);
+	backend.init();
+
+	std::vector<std::string> dtree;
+	dtree.push_back("branches/swearing/jeffrey");
+	dtree.push_back("branches/swearing/other");
+	dtree.push_back("branches/swearing/walter");
+	dtree.push_back("tags/1.0/jeffrey");
+	dtree.push_back("tags/1.0/other");
+	dtree.push_back("tags/1.0/walter");
+	dtree.push_back("trunk/jeffrey");
+	dtree.push_back("trunk/other");
+	dtree.push_back("trunk/walter");
+	std::vector<std::string> tree = backend.tree();
+	REQUIRE(tree == dtree);
+}
+
 
 /*
  * Test repository dump
