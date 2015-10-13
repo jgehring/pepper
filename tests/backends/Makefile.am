@@ -38,7 +38,8 @@ AM_CXXFLAGS += \
 	$(APR_CFLAGS) \
 	$(SVN_CFLAGS)
 AM_LDFLAGS += \
-	$(SVN_LDFLAGS) \
+	$(SVN_LDFLAGS)
+backends_LDADD += \
 	$(SVN_LIBS) \
 	$(APR_LIBS)
 endif
@@ -48,7 +49,7 @@ AM_CPPFLAGS += \
 	-DUSE_MERCURIAL
 AM_CXXFLAGS += \
 	$(PYTHON_CPPFLAGS)
-AM_LDFLAGS += \
+backends_LDADD += \
 	$(PYTHON_LDFLAGS)
 endif
 
