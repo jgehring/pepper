@@ -8,7 +8,29 @@
 
 <description>pepper news</description>
 <generator>ikiwiki</generator>
-<pubDate>Wed, 09 Dec 2015 07:55:51 +0100</pubDate>
+<pubDate>Wed, 09 Dec 2015 22:09:37 +0100</pubDate>
+<item>
+	<title>pepper 0.3.3 released, homepage moved to GitHub</title>
+
+	<guid isPermaLink="false">https://jgehring.github.io/pepper/news/pepper-0.3.3/</guid>
+
+	<link>https://jgehring.github.io/pepper/news/pepper-0.3.3/</link>
+
+
+	<pubDate>Wed, 09 Dec 2015 22:09:00 +0100</pubDate>
+	<dcterms:modified>2015-12-09T21:09:37Z</dcterms:modified>
+
+
+	<description>&lt;p&gt;pepper-0.3.3 is now available. This release includes a number of bug-fixes and
+stability enhancements and enables compilation with Subversion 1.9. Mac OS X
+compatibility has been improved, too.&lt;/p&gt;
+
+&lt;p&gt;The homepage is now hosted by GitHub at https://jgehring.github.io/pepper. Old
+Sourceforge URLs will automaticelly redirect to the new location.&lt;/p&gt;
+</description>
+
+
+</item>
 <item>
 	<title>Debian and Ubuntu packages</title>
 
@@ -18,7 +40,7 @@
 
 
 	<pubDate>Fri, 26 Apr 2013 11:48:00 +0200</pubDate>
-	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+	<dcterms:modified>2015-12-09T21:08:02Z</dcterms:modified>
 
 
 	<description>&lt;p&gt;I&#39;m happy to announce that source and binary packages are now
@@ -39,7 +61,7 @@ Thanks go out to the respective maintainers!&lt;/p&gt;
 
 
 	<pubDate>Fri, 01 Jun 2012 20:56:00 +0200</pubDate>
-	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+	<dcterms:modified>2015-12-09T21:08:02Z</dcterms:modified>
 
 
 	<description>&lt;p&gt;I&#39;m happy to announce that version 0.3.2 of pepper is now available. This
@@ -58,7 +80,7 @@ leaks. As usual, you can find source tarballs the &lt;a href=&quot;https://jgehr
 
 
 	<pubDate>Tue, 20 Mar 2012 16:16:00 +0100</pubDate>
-	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+	<dcterms:modified>2015-12-09T21:08:02Z</dcterms:modified>
 
 
 	<description>&lt;p&gt;I&#39;ve just pushed the first version of a repository statistics
@@ -86,7 +108,7 @@ code is available &lt;a href=&quot;https://github.com/jgehring/peprserv&quot;&gt
 
 
 	<pubDate>Fri, 16 Mar 2012 00:46:00 +0100</pubDate>
-	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+	<dcterms:modified>2015-12-09T21:08:02Z</dcterms:modified>
 
 
 	<description>&lt;p&gt;I&#39;m happy to announce that version 0.3.1 of pepper is now available. This
@@ -109,39 +131,6 @@ log&lt;/a&gt;, source tarballs are available at the &lt;a href=&quot;https://jge
 &lt;p&gt;The &lt;a href=&quot;https://jgehring.github.io/pepper/./gallery/&quot;&gt;Gallery&lt;/a&gt; has been updated with new examples, now
 using a pretty Gnuplot style based on &lt;a href=&quot;http://guidolan.blogspot.com/2010/03/how-to-create-beautiful-gnuplot-graphs.html&quot;&gt;this GuidoLabs
 article&lt;/a&gt;.&lt;/p&gt;
-</description>
-
-
-</item>
-<item>
-	<title>pepper 0.3 released</title>
-
-	<guid isPermaLink="false">https://jgehring.github.io/pepper/news/pepper-0.3/</guid>
-
-	<link>https://jgehring.github.io/pepper/news/pepper-0.3/</link>
-
-
-	<pubDate>Wed, 21 Dec 2011 02:17:00 +0100</pubDate>
-	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
-
-
-	<description>&lt;p&gt;Version 0.3 of pepper is now available. This release features an improved
-report API, a new report for running other reports from a graphical user
-interface and numerous bugfixes and smaller improvements.&lt;/p&gt;
-
-&lt;p&gt;The report API has received a big update. In particular, the ability
-to access and run other reports from within the current report has been
-improved. Among other things, this enables the creation of meta-reports
-that aggregate existing reports. These features are also heavily
-used by the new GUI report.&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;NOTE:&lt;/em&gt; This update breaks compatibility with existing scripts. However,
-the changes required to make old reports working have been kept small and
-are described in detail in the respective &lt;a href=&quot;https://jgehring.github.io/pepper/./documentation/porting-02-03/&quot;&gt;porting guide&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;A more detailed listing of the changes can be found in the &lt;a href=&quot;https://jgehring.github.io/pepper/ChangeLog&quot;&gt;change
-log&lt;/a&gt;. As usual, source tarballs can be found at the
-&lt;a href=&quot;https://jgehring.github.io/pepper/./download/&quot;&gt;Download&lt;/a&gt; section.&lt;/p&gt;
 </description>
 
 

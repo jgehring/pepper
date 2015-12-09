@@ -1,8 +1,9 @@
-2015-10-14  --  version 0.3.3
+2015-12-09  --  version 0.3.3
 
 	- Support for Subversion 1.9
 	- Numerous fixes for multi-threading
 	- Improved Mac OS X compatibility
+	- Bug fixes regarding the lifetime of wrapped Lua objects
 
 2012-06-01  --  version 0.3.2
 

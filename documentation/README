@@ -50,11 +50,9 @@ way of running
 	$ make
 	# make install
 
-should be fine. You can pass `--help` to the configuration script for
-a brief version of the next two sections.
-
-Additional instructions can be found in the INSTALL file included in
-the source code distribution.
+should be fine. If the configure script is not provided, generate it by
+running ./autogen.sh. Additional instructions can be found in the INSTALL
+file included in the source code distribution.
 
 
 Usage

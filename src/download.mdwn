@@ -10,8 +10,8 @@ pepper is distributed as a source code package. You
 can grab the latest release from the [list at
 GitHub](https://github.com/jgehring/pepper/releases) or use these links:
 
-* [pepper-0.3.2.tar.gz](https://github.com/jgehring/pepper/archive/0.3.2.tar.gz)
-* [pepper-0.3.2.zip](https://github.com/jgehring/pepper/archive/0.3.2.zip)
+* [pepper-0.3.2.tar.gz](https://github.com/jgehring/pepper/archive/0.3.3.tar.gz)
+* [pepper-0.3.2.zip](https://github.com/jgehring/pepper/archive/0.3.3.zip)
 
 All releases are available at
 [GitHub](//github.com/jgehring/pepper/releases). The plain-text

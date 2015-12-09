@@ -8,7 +8,29 @@
 
 <description>pepper news</description>
 <generator>ikiwiki</generator>
-<pubDate>Wed, 09 Dec 2015 07:55:51 +0100</pubDate>
+<pubDate>Wed, 09 Dec 2015 22:09:37 +0100</pubDate>
+<item>
+	<title>pepper 0.3.3 released, homepage moved to GitHub</title>
+
+	<guid isPermaLink="false">https://jgehring.github.io/pepper/news/pepper-0.3.3/</guid>
+
+	<link>https://jgehring.github.io/pepper/news/pepper-0.3.3/</link>
+
+
+	<pubDate>Wed, 09 Dec 2015 22:09:00 +0100</pubDate>
+	<dcterms:modified>2015-12-09T21:09:37Z</dcterms:modified>
+
+
+	<description>&lt;p&gt;pepper-0.3.3 is now available. This release includes a number of bug-fixes and
+stability enhancements and enables compilation with Subversion 1.9. Mac OS X
+compatibility has been improved, too.&lt;/p&gt;
+
+&lt;p&gt;The homepage is now hosted by GitHub at https://jgehring.github.io/pepper. Old
+Sourceforge URLs will automaticelly redirect to the new location.&lt;/p&gt;
+</description>
+
+
+</item>
 <item>
 	<title>Debian and Ubuntu packages</title>
 
@@ -18,7 +40,7 @@
 
 
 	<pubDate>Fri, 26 Apr 2013 11:48:00 +0200</pubDate>
-	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+	<dcterms:modified>2015-12-09T21:08:02Z</dcterms:modified>
 
 
 	<description>&lt;p&gt;I&#39;m happy to announce that source and binary packages are now
@@ -39,7 +61,7 @@ Thanks go out to the respective maintainers!&lt;/p&gt;
 
 
 	<pubDate>Fri, 01 Jun 2012 20:56:00 +0200</pubDate>
-	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+	<dcterms:modified>2015-12-09T21:08:02Z</dcterms:modified>
 
 
 	<description>&lt;p&gt;I&#39;m happy to announce that version 0.3.2 of pepper is now available. This
@@ -58,7 +80,7 @@ leaks. As usual, you can find source tarballs the &lt;a href=&quot;https://jgehr
 
 
 	<pubDate>Tue, 20 Mar 2012 16:16:00 +0100</pubDate>
-	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+	<dcterms:modified>2015-12-09T21:08:02Z</dcterms:modified>
 
 
 	<description>&lt;p&gt;I&#39;ve just pushed the first version of a repository statistics
@@ -86,7 +108,7 @@ code is available &lt;a href=&quot;https://github.com/jgehring/peprserv&quot;&gt
 
 
 	<pubDate>Fri, 16 Mar 2012 00:46:00 +0100</pubDate>
-	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+	<dcterms:modified>2015-12-09T21:08:02Z</dcterms:modified>
 
 
 	<description>&lt;p&gt;I&#39;m happy to announce that version 0.3.1 of pepper is now available. This
@@ -122,7 +144,7 @@ article&lt;/a&gt;.&lt;/p&gt;
 
 
 	<pubDate>Wed, 21 Dec 2011 02:17:00 +0100</pubDate>
-	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+	<dcterms:modified>2015-12-09T21:08:02Z</dcterms:modified>
 
 
 	<description>&lt;p&gt;Version 0.3 of pepper is now available. This release features an improved
@@ -155,7 +177,7 @@ log&lt;/a&gt;. As usual, source tarballs can be found at the
 
 
 	<pubDate>Sat, 06 Aug 2011 22:41:00 +0200</pubDate>
-	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+	<dcterms:modified>2015-12-09T21:08:02Z</dcterms:modified>
 
 
 	<description>&lt;p&gt;I&#39;m happy to announce that version 0.2.4 of pepper is now available. This
@@ -181,7 +203,7 @@ log&lt;/a&gt;. As usual, source tarballs can be found at the
 
 
 	<pubDate>Wed, 22 Jun 2011 22:50:00 +0200</pubDate>
-	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+	<dcterms:modified>2015-12-09T21:08:02Z</dcterms:modified>
 
 
 	<description>&lt;p&gt;I&#39;m happy to announce that version 0.2.3 of pepper is now
@@ -209,7 +231,7 @@ log&lt;/a&gt;. As usual, source tarballs can be found at the
 
 
 	<pubDate>Mon, 02 May 2011 22:12:00 +0200</pubDate>
-	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+	<dcterms:modified>2015-12-09T21:08:02Z</dcterms:modified>
 
 
 	<description>&lt;p&gt;Version 0.2.2 of pepper is now available. This release greatly improves
@@ -233,7 +255,7 @@ log&lt;/a&gt;. As usual, source tarballs can be found at the
 
 
 	<pubDate>Tue, 05 Apr 2011 23:54:00 +0200</pubDate>
-	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+	<dcterms:modified>2015-12-09T21:08:02Z</dcterms:modified>
 
 
 	<description>&lt;p&gt;Version 0.2.1 of pepper is now available. This release focuses on the
@@ -261,7 +283,7 @@ log&lt;/a&gt;. As usual, source tarballs can be found at the
 
 
 	<pubDate>Mon, 28 Mar 2011 01:02:00 +0200</pubDate>
-	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+	<dcterms:modified>2015-12-09T21:08:02Z</dcterms:modified>
 
 
 	<description>&lt;p&gt;Version 0.2 of pepper is now available. This release
@@ -294,7 +316,7 @@ a pepper box and changed some of the colors.&lt;/p&gt;
 
 
 	<pubDate>Mon, 31 Jan 2011 23:48:00 +0100</pubDate>
-	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+	<dcterms:modified>2015-12-09T21:08:02Z</dcterms:modified>
 
 
 	<description>&lt;p&gt;Version 0.1.5 of pepper is now available. This release
@@ -323,7 +345,7 @@ section.&lt;/p&gt;
 
 
 	<pubDate>Thu, 20 Jan 2011 12:13:00 +0100</pubDate>
-	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+	<dcterms:modified>2015-12-09T21:08:02Z</dcterms:modified>
 
 
 	<description>&lt;p&gt;Version 0.1.4 of pepper is now available. This release adds additional
@@ -348,7 +370,7 @@ section.&lt;/p&gt;
 
 
 	<pubDate>Sat, 15 Jan 2011 01:15:00 +0100</pubDate>
-	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+	<dcterms:modified>2015-12-09T21:08:02Z</dcterms:modified>
 
 
 	<description>&lt;p&gt;pepper 0.1.3 is now available. This release adds a new report for
@@ -375,7 +397,7 @@ report script.&lt;/p&gt;
 
 
 	<pubDate>Wed, 12 Jan 2011 11:16:00 +0100</pubDate>
-	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+	<dcterms:modified>2015-12-09T21:08:02Z</dcterms:modified>
 
 
 	<description>&lt;p&gt;I&#39;ve added a &lt;a href=&quot;http://aur.archlinux.org/packages.php?ID=45324&quot;&gt;PKGBUILD for
@@ -398,7 +420,7 @@ now using their favorite AUR package manager, e.g. &lt;code&gt;yaourt -S scm-pep
 
 
 	<pubDate>Wed, 12 Jan 2011 01:08:00 +0100</pubDate>
-	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+	<dcterms:modified>2015-12-09T21:08:02Z</dcterms:modified>
 
 
 	<description>&lt;p&gt;pepper 0.1.2 is now available. This release adds tag access for
@@ -420,7 +442,7 @@ signal handling code for protecting cache writes has been rewritten.&lt;/p&gt;
 
 
 	<pubDate>Mon, 10 Jan 2011 01:22:00 +0100</pubDate>
-	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+	<dcterms:modified>2015-12-09T21:08:02Z</dcterms:modified>
 
 
 	<description>&lt;p&gt;I&#39;m happy to announce that pepper&#39;s homepage is now generated using
@@ -444,7 +466,7 @@ top of the index page. There&#39;s also a lot of new content, including
 
 
 	<pubDate>Tue, 28 Dec 2010 00:00:00 +0100</pubDate>
-	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+	<dcterms:modified>2015-12-09T21:08:02Z</dcterms:modified>
 
 
 	<description>&lt;p&gt;pepper 0.1.1 is now available. This release adds a new report showing
@@ -468,7 +490,7 @@ distributions now.&lt;/p&gt;
 
 
 	<pubDate>Mon, 20 Dec 2010 00:00:00 +0100</pubDate>
-	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+	<dcterms:modified>2015-12-09T21:08:02Z</dcterms:modified>
 
 
 	<description>&lt;p&gt;Initial release: pepper 0.1&lt;/p&gt;

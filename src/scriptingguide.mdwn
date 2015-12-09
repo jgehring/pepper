@@ -21,7 +21,7 @@ manual](http://www.lua.org/manual/5.1/).
 Report scripts should encapsulate all of their code, except
 from module imports, in functions. The function which
 will be used to run the report is mandatory and is called
-`run` . A single argument will be passed to it - the current [report
+`run`. A single argument will be passed to it - the current [report
 context](../documentation/api/modules/pepper.report.html). Meta-data
 like the report title, description or accepted options will be queried
 by calling `describe()`.
