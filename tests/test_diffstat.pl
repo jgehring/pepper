@@ -1,6 +1,6 @@
 #
 # pepper - SCM statistics report generator
-# Copyright (C) 2010-2014 Jonas Gehring
+# Copyright (C) 2010-present Jonas Gehring
 #
 # Released under the GNU General Public License, version 3.
 # Please see the COPYING file in the source distribution for license

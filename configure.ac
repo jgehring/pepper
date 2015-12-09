@@ -1,6 +1,6 @@
 #
 # pepper - SCM statistics report generator
-# Copyright (C) 2010-2014 Jonas Gehring
+# Copyright (C) 2010-present Jonas Gehring
 #
 # Released under the GNU General Public License, version 3.
 # Please see the COPYING file in the source distribution for license
@@ -8,7 +8,7 @@
 #
 
 AC_PREREQ([2.6])
-AC_INIT(pepper, 0.3.2, jonas.gehring@boolsoft.org)
+AC_INIT(pepper, 0.3.3, jonas.gehring@boolsoft.org)
 AM_INIT_AUTOMAKE([subdir-objects])
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_TESTDIR([tests])
