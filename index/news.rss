@@ -8,7 +8,7 @@
 
 <description>pepper news</description>
 <generator>ikiwiki</generator>
-<pubDate>Wed, 09 Dec 2015 22:09:37 +0100</pubDate>
+<pubDate>Wed, 09 Dec 2015 22:11:12 +0100</pubDate>
 <item>
 	<title>pepper 0.3.3 released, homepage moved to GitHub</title>
 
@@ -18,15 +18,16 @@
 
 
 	<pubDate>Wed, 09 Dec 2015 22:09:00 +0100</pubDate>
-	<dcterms:modified>2015-12-09T21:09:37Z</dcterms:modified>
+	<dcterms:modified>2015-12-09T21:11:12Z</dcterms:modified>
 
 
-	<description>&lt;p&gt;pepper-0.3.3 is now available. This release includes a number of bug-fixes and
-stability enhancements and enables compilation with Subversion 1.9. Mac OS X
-compatibility has been improved, too.&lt;/p&gt;
+	<description>&lt;p&gt;pepper-0.3.3 is now available. This release includes a number of
+bug-fixes and stability enhancements and enables compilation with
+Subversion 1.9. Mac OS X compatibility has been improved, too.&lt;/p&gt;
 
-&lt;p&gt;The homepage is now hosted by GitHub at https://jgehring.github.io/pepper. Old
-Sourceforge URLs will automaticelly redirect to the new location.&lt;/p&gt;
+&lt;p&gt;The homepage is now hosted by GitHub at
+&lt;a href=&quot;https://jgehring.github.io/pepper&quot;&gt;https://jgehring.github.io/pepper&lt;/a&gt;. Old Sourceforge URLs will
+automaticelly redirect to the new location.&lt;/p&gt;
 </description>
 
 
