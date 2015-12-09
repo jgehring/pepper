@@ -26,11 +26,6 @@
     <td><a href="http://flattr.com/thing/345535/pepper">
       <img src="flattrbutton.png" alt="Flattr this" border=0 />
     </a></td>
-    <td><a href="http://sourceforge.net/projects/scm-pepper">
-    <img src="http://sflogo.sourceforge.net/sflogo.php?group_id=386093&amp;type=16"
-      alt="Get pepper at SourceForge.net. Fast, secure and Free Open Source software downloads"
-      style="border: 1px solid black"  />
-    </a></td>
   </tr></table>
 </div>
 <div class="clear"></div>
@@ -80,31 +75,6 @@ welcome](https://sourceforge.net/tracker/?group_id=386093)!
 ---
 
 
-### <a name="news"></a>News
+### <a name="news"></a>News <a href="index/news.rss"><img src="feedicon.png"></a>
 
-<table class="news"><tr>
-	<td class="news">
-		<h4>Project news <a href="index/news.rss"><img src="feedicon.png"></a></h4>
-		[[!inline pages="news/*" and !"*/Discussion" show=5 description="pepper news" rss="yes" feedfile="news" timeformat="%B %d, %Y, %H:%M %Z"]]
-	</td>
-	<td class="commits">
-		<h4>Latest commits <a href="https://github.com/jgehring/pepper/commits/master.atom"><img src="feedicon.png"></a></h4>
-		<script type="text/javascript" src="js/jquery.js"></script>
-		<script type="text/javascript" src="js/strftime-min.js"></script>
-		<script type="text/javascript" src="js/libgithub.js"></script>
-		<script type="text/javascript">
-			$(window).load(function () {
-				var c = new libgithub.Badge('jgehring', 'pepper');
-				c.numCommitsIs(10);
-				c.targetIs('#commits');
-			});
-			document.write("<div id=\"commits\"></div>");
-		</script>
-		<noscript>
-			<p>In order to display the latest commits on
-			the master branch, please turn on JavaScript or go
-			to the <a href="http://github.com/jgehring/pepper/commits/master">commits
-			page</a> at github.com.</p>
-		</noscript>
-	</td>
-</tr></table>
+[[!inline pages="news/*" and !"*/Discussion" show=5 description="pepper news" rss="yes" feedfile="news" timeformat="%B %d, %Y, %H:%M %Z"]]

@@ -1,0 +1,51 @@
+#!/bin/bash
+set -e
+#set -x
+
+if [ "`uname`" = "Darwin" ]; then
+	# Fix sed error on Mountain Lion: "illegal byte sequence"
+	export LC_ALL=C
+fi
+
+# Grep version from master configure.ac
+AC_INIT=$(git show master:configure.ac | grep AC_INIT)
+AC_INIT=(${AC_INIT//,/})
+VERSION=${AC_INIT[1]}
+
+# Generate HTML man page from master branch
+TFILE=$(mktemp -t XXXXXX.xml)
+git show master:docs/manpage.txt \
+	| asciidoc -b docbook -d manpage -o ${TFILE} -a "version=$VERSION" -a "email=&lt;\$FORENAME@jgehring.net&gt;" -
+xmlto html-nochunks --skip-validation ${TFILE}
+TFILE=$(basename $TFILE .xml).html
+sed -i -e 's/<html><head>.*<div class="refnamediv"/<div class="refnamediv"/' ${TFILE}
+sed -i -e 's/<\/body>//' ${TFILE}
+mv ${TFILE} src/documentation/manpage.mdwn
+
+# Generate examples
+#if [ "$1" = "--full" ]; then
+#	(cd src/gallery; ../../scripts/make_examples.sh ../../../src/pepper)
+#fi
+
+ikiwiki --setup setup
+
+# Copy static files from pepper's source code directory
+git show master:README > documentation/README
+git show master:ChangeLog > download/ChangeLog
+
+# Generate Lua documentation
+TDIR=$(mktemp -d)
+LUADOCS=($(git show master:Makefile.am \
+	| tr '\n' '\t' \
+	| sed 's/.*LUADOCS = \(.*\)luadoc:.*/\1/' \
+	| sed 's/[\\\t]//g'))
+for DOC in "${LUADOCS[@]}"; do
+	git show master:$DOC > $TDIR/$(basename $DOC)
+done
+(cd $TDIR; luadoc -d api --nofiles *)
+rm -rf documentation/api
+cp -r $TDIR/api documentation/api
+rm -rf $TDIR
+
+# Fix pages
+sed -i -e 's/<title>pepper</<title>pepper - Repository statistics and report tool</' index.html

@@ -18,9 +18,9 @@ use IkiWiki::Setup::Standard {
 	# where the source of the wiki is located
 	srcdir => 'src',
 	# where to build the wiki
-	destdir => 'pub',
+	destdir => '.',
 	# base url to the wiki
-	url => 'http://scm-pepper.sourceforge.net',
+	url => 'https://jgehring.github.io/pepper',
 	# url to the ikiwiki.cgi
 	cgiurl => '',
 	# filename of cgi wrapper to generate

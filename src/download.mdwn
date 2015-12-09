@@ -7,15 +7,14 @@
 ### Tarballs
 
 pepper is distributed as a source code package. You
-can grab the latest release from the [file list at
-SourceForge](http://sourceforge.net/projects/scm-pepper/files/) or use
-these direct links:
+can grab the latest release from the [list at
+GitHub](https://github.com/jgehring/pepper/releases) or use these links:
 
-* [pepper-0.3.2.tar.gz](http://prdownloads.sourceforge.net/scm-pepper/pepper-0.3.2.tar.gz)
-* [pepper-0.3.2.tar.bz2](http://prdownloads.sourceforge.net/scm-pepper/pepper-0.3.2.tar.bz2)
+* [pepper-0.3.2.tar.gz](https://github.com/jgehring/pepper/archive/0.3.2.tar.gz)
+* [pepper-0.3.2.zip](https://github.com/jgehring/pepper/archive/0.3.2.zip)
 
-Previous releases are available at
-[SourceForge](http://sourceforge.net/projects/scm-pepper/files/). The plain-text
+All releases are available at
+[GitHub](//github.com/jgehring/pepper/releases). The plain-text
 [change log](ChangeLog) summarizes the changes between subsequent releases.
 
 Please see the [[Documentation]] page for installation instructions and
