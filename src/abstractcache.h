@@ -38,8 +38,8 @@ class AbstractCache : public Backend
 		std::string mainBranch() { return m_backend->mainBranch(); }
 		std::vector<std::string> branches() { return m_backend->branches(); }
 		std::vector<Tag> tags() { return m_backend->tags(); }
-		Diffstat diffstat(const std::string &id);
-		void filterDiffstat(Diffstat *stat) { m_backend->filterDiffstat(stat); }
+		DiffstatPtr diffstat(const std::string &id);
+		void filterDiffstat(DiffstatPtr stat) { m_backend->filterDiffstat(stat); }
 		std::vector<std::string> tree(const std::string &id = std::string()) { return m_backend->tree(id); }
 		std::string cat(const std::string &path, const std::string &id = std::string()) { return m_backend->cat(path, id); };
 

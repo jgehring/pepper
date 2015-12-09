@@ -79,8 +79,8 @@ class SubversionBackend : public Backend
 		std::string mainBranch();
 		std::vector<std::string> branches();
 		std::vector<Tag> tags();
-		Diffstat diffstat(const std::string &id);
-		void filterDiffstat(Diffstat *stat);
+		DiffstatPtr diffstat(const std::string &id);
+		void filterDiffstat(DiffstatPtr stat);
 		std::vector<std::string> tree(const std::string &id = std::string());
 		std::string cat(const std::string &path, const std::string &id = std::string());
 

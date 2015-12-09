@@ -17,6 +17,7 @@
 
 #include <iostream>
 #include <map>
+#include <memory>
 #include <string>
 
 #include "main.h"
@@ -74,22 +75,24 @@ class Diffstat
 		static Lunar<Diffstat>::RegType methods[];
 };
 
+typedef std::shared_ptr<Diffstat> DiffstatPtr;
+
 
 class DiffParser : public sys::parallel::Thread
 {
 	public:
 		DiffParser(std::istream &in);
 
-		Diffstat stat() const;
+		DiffstatPtr stat() const;
 
-		static Diffstat parse(std::istream &in);
+		static DiffstatPtr parse(std::istream &in);
 
 	protected:
 		void run();
 
 	private:
 		std::istream &m_in;
-		Diffstat m_stat;
+		DiffstatPtr m_stat;
 };
 
 

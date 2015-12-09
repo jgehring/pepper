@@ -426,7 +426,7 @@ svn_error_t *close_edit(void * /*edit_baton*/, apr_pool_t * /*pool*/)
 
 
 // Constructor
-SvnDiffstatThread::SvnDiffstatThread(SvnConnection *connection, JobQueue<std::string, Diffstat> *queue)
+SvnDiffstatThread::SvnDiffstatThread(SvnConnection *connection, JobQueue<std::string, DiffstatPtr> *queue)
 	: d(new SvnConnection()), m_queue(queue)
 {
 	d->open(connection);
@@ -440,10 +440,10 @@ SvnDiffstatThread::~SvnDiffstatThread()
 
 // This function will always perform a diff on the full repository in
 // order to avoid errors due to non-existent paths and to cache consistency.
-Diffstat SvnDiffstatThread::diffstat(SvnConnection *c, svn_revnum_t r1, svn_revnum_t r2, apr_pool_t *pool)
+DiffstatPtr SvnDiffstatThread::diffstat(SvnConnection *c, svn_revnum_t r1, svn_revnum_t r2, apr_pool_t *pool)
 {
 	if (r2 <= 0) {
-		return Diffstat();
+		return std::make_shared<Diffstat>();
 	}
 
 	svn_opt_revision_t rev1, rev2;
@@ -551,7 +551,7 @@ void SvnDiffstatThread::run()
 		}
 
 		try {
-			Diffstat stat = diffstat(d, r1, r2, subpool);
+			DiffstatPtr stat = diffstat(d, r1, r2, subpool);
 			m_queue->done(revision, stat);
 		} catch (const PepperException &ex) {
 			Logger::err() << "Error: " << ex.where() << ": " << ex.what() << endl;

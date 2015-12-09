@@ -138,7 +138,7 @@ int RevisionIterator::next(lua_State *L)
 	Revision *revision = NULL;
 	try {
 		revision = m_backend->revision(next());
-		m_backend->filterDiffstat(&(revision->m_diffstat));
+		m_backend->filterDiffstat(revision->m_diffstat);
 	} catch (const PepperException &ex) {
 		return LuaHelpers::pushError(L, ex.what(), ex.where());
 	}
@@ -180,10 +180,10 @@ int RevisionIterator::map(lua_State *L)
 		Logger::status() << "Fetching revisions... " << flush;
 	}
 	while (!atEnd()) {
-		Revision *revision = NULL;
+		std::shared_ptr<Revision> revision;
 		try {
-			revision = m_backend->revision(next());
-			m_backend->filterDiffstat(&(revision->m_diffstat));
+			revision = std::move(std::shared_ptr<Revision>(m_backend->revision(next())));
+			m_backend->filterDiffstat(revision->m_diffstat);
 		} catch (const PepperException &ex) {
 			return LuaHelpers::pushError(L, ex.what(), ex.where());
 		}
@@ -205,7 +205,6 @@ int RevisionIterator::map(lua_State *L)
 				Logger::status() << "Fetching revisions... " << progress << "%" << flush;
 			}
 		}
-		delete revision;
 	}
 
 	Logger::status() << "\r\033[0K";

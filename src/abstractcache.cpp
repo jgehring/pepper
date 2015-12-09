@@ -40,7 +40,7 @@ AbstractCache::~AbstractCache()
 }
 
 // Returns a diffstat for the specified revision
-Diffstat AbstractCache::diffstat(const std::string &id)
+DiffstatPtr AbstractCache::diffstat(const std::string &id)
 {
 	if (!lookup(id)) {
 		PTRACE << "Cache miss: " << id << endl;
@@ -49,7 +49,7 @@ Diffstat AbstractCache::diffstat(const std::string &id)
 
 	PTRACE << "Cache hit: " << id << endl;
 	Revision *r = get(id);
-	Diffstat stat = r->diffstat();
+	DiffstatPtr stat = r->diffstat();
 	delete r;
 	return stat;
 }

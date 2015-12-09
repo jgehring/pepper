@@ -126,7 +126,7 @@ void Backend::prefetch(const std::vector<std::string> &)
 }
 
 // Optional diffstat filtering before it is presented to the report script
-void Backend::filterDiffstat(Diffstat *)
+void Backend::filterDiffstat(DiffstatPtr)
 {
 	// The default implementation does nothing
 }

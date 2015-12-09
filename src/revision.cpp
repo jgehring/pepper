@@ -23,13 +23,13 @@
 
 // Constructor
 Revision::Revision(const std::string &id)
-	: m_id(id), m_date(0)
+	: m_id(id), m_date(0), m_diffstat(std::make_shared<Diffstat>())
 {
 
 }
 
 // Constructor
-Revision::Revision(const std::string &id, int64_t date, const std::string &author, const std::string &message, const Diffstat &diffstat)
+Revision::Revision(const std::string &id, int64_t date, const std::string &author, const std::string &message, DiffstatPtr diffstat)
 	: m_id(id), m_date(date), m_author(author), m_message(message), m_diffstat(diffstat)
 {
 
@@ -48,7 +48,7 @@ std::string Revision::id() const
 }
 
 // Returns the diffstat object
-Diffstat Revision::diffstat() const
+DiffstatPtr Revision::diffstat() const
 {
 	return m_diffstat;
 }
@@ -58,7 +58,7 @@ void Revision::write(BOStream &out) const
 {
 	out << 'R' << char(1); // Head and version
 	out << m_date << m_author << m_message;
-	m_diffstat.write(out);
+	m_diffstat->write(out);
 	out << 'V'; // Tail
 }
 
@@ -77,7 +77,7 @@ bool Revision::load(BIStream &in)
 	}
 
 	in >> m_date >> m_author >> m_message;
-	if (!m_diffstat.load(in)) {
+	if (!m_diffstat->load(in)) {
 		return false;
 	}
 
@@ -92,14 +92,14 @@ bool Revision::load(BIStream &in)
 void Revision::write03(BOStream &out) const
 {
 	out << m_date << m_author << m_message;
-	m_diffstat.write(out);
+	m_diffstat->write(out);
 }
 
 // Loads the revision from a binary stream (not changing the ID)
 bool Revision::load03(BIStream &in)
 {
 	in >> m_date >> m_author >> m_message;
-	if (!m_diffstat.load(in)) {
+	if (!m_diffstat->load(in)) {
 		return false;
 	}
 	return in.ok();
@@ -148,5 +148,5 @@ int Revision::message(lua_State *L) {
 }
 
 int Revision::diffstat(lua_State *L) {
-	return LuaHelpers::push(L, &m_diffstat);
+	return LuaHelpers::push(L, m_diffstat);
 }

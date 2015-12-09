@@ -274,7 +274,7 @@ public:
 		m_queue.put(revisions);
 	}
 
-	bool get(const std::string &revision, Diffstat *dest)
+	bool get(const std::string &revision, DiffstatPtr *dest)
 	{
 		return m_queue.getResult(revision, dest);
 	}
@@ -285,7 +285,7 @@ public:
 	}
 
 private:
-	JobQueue<std::string, Diffstat> m_queue;
+	JobQueue<std::string, DiffstatPtr> m_queue;
 	std::vector<SvnDiffstatThread *> m_threads;
 };
 
@@ -865,11 +865,11 @@ std::vector<Tag> SubversionBackend::tags()
 }
 
 // Returns a diffstat for the specified revision
-Diffstat SubversionBackend::diffstat(const std::string &id)
+DiffstatPtr SubversionBackend::diffstat(const std::string &id)
 {
 	if (m_prefetcher && m_prefetcher->willFetch(id)) {
 		PTRACE << "Revision " << id << " will be prefetched" << endl;
-		Diffstat stat;
+		DiffstatPtr stat;
 		if (!m_prefetcher->get(id, &stat)) {
 			throw PEX(std::string("Failed to retrieve diffstat for revision ") + id);
 		}
@@ -893,13 +893,13 @@ Diffstat SubversionBackend::diffstat(const std::string &id)
 	PDEBUG << "Fetching revision " << id << " manually" << endl;
 
 	apr_pool_t *pool = svn_pool_create(d->pool);
-	Diffstat stat = SvnDiffstatThread::diffstat(d, r1, r2, pool);
+	DiffstatPtr stat = SvnDiffstatThread::diffstat(d, r1, r2, pool);
 	svn_pool_destroy(pool);
 	return stat;
 }
 
 // Filters a diffstat by prefix
-void SubversionBackend::filterDiffstat(Diffstat *stat)
+void SubversionBackend::filterDiffstat(DiffstatPtr stat)
 {
 	// Strip prefix
 	if (d->prefix && strlen(d->prefix)) {

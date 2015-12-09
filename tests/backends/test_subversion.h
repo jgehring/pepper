@@ -189,16 +189,16 @@ TEST_CASE("subversion/revisions", "Revision retrieval")
 	REQUIRE(rev->m_author == "jonas");
 	REQUIRE(rev->m_message == "Use real names");
 	REQUIRE(rev->m_date == 1299447342);
-	Diffstat d = rev->m_diffstat;
-	REQUIRE(d.m_stats.size() == 2);
-	REQUIRE(d.m_stats["trunk/dude"].ladd == 0);
-	REQUIRE(d.m_stats["trunk/dude"].ldel == 4);
-	REQUIRE(d.m_stats["trunk/dude"].cadd == 0);
-	REQUIRE(d.m_stats["trunk/dude"].cdel == 240);
-	REQUIRE(d.m_stats["trunk/jeffrey"].ladd == 4);
-	REQUIRE(d.m_stats["trunk/jeffrey"].ldel == 0);
-	REQUIRE(d.m_stats["trunk/jeffrey"].cadd == 240);
-	REQUIRE(d.m_stats["trunk/jeffrey"].cdel == 0);
+	DiffstatPtr d = rev->m_diffstat;
+	REQUIRE(d->m_stats.size() == 2);
+	REQUIRE(d->m_stats["trunk/dude"].ladd == 0);
+	REQUIRE(d->m_stats["trunk/dude"].ldel == 4);
+	REQUIRE(d->m_stats["trunk/dude"].cadd == 0);
+	REQUIRE(d->m_stats["trunk/dude"].cdel == 240);
+	REQUIRE(d->m_stats["trunk/jeffrey"].ladd == 4);
+	REQUIRE(d->m_stats["trunk/jeffrey"].ldel == 0);
+	REQUIRE(d->m_stats["trunk/jeffrey"].cadd == 240);
+	REQUIRE(d->m_stats["trunk/jeffrey"].cdel == 0);
 	delete rev;
 }
 

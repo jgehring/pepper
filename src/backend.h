@@ -67,8 +67,8 @@ class Backend
 		virtual std::string mainBranch() = 0;
 		virtual std::vector<std::string> branches() = 0;
 		virtual std::vector<Tag> tags() = 0;
-		virtual Diffstat diffstat(const std::string &id) = 0;
-		virtual void filterDiffstat(Diffstat *stat);
+		virtual DiffstatPtr diffstat(const std::string &id) = 0;
+		virtual void filterDiffstat(DiffstatPtr stat);
 		virtual std::vector<std::string> tree(const std::string &id = std::string()) = 0;
 		virtual std::string cat(const std::string &path, const std::string &id = std::string()) = 0;
 

@@ -143,7 +143,7 @@ std::vector<Tag> MercurialBackend::tags()
 }
 
 // Returns a diffstat for the specified revision
-Diffstat MercurialBackend::diffstat(const std::string &id)
+DiffstatPtr MercurialBackend::diffstat(const std::string &id)
 {
 	std::vector<std::string> ids = str::split(id, ":");
 #if 1

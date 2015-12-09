@@ -190,18 +190,18 @@ DiffParser::DiffParser(std::istream &in)
 }
 
 // Returns the internal diffstat object
-Diffstat DiffParser::stat() const
+DiffstatPtr DiffParser::stat() const
 {
 	return m_stat;
 }
 
 // Static diff parsing function for unified diffs
-Diffstat DiffParser::parse(std::istream &in)
+DiffstatPtr DiffParser::parse(std::istream &in)
 {
 	static const char marker[] = "===================================================================";
 
 	std::string str, file;
-	Diffstat ds;
+	DiffstatPtr ds = std::make_shared<Diffstat>();
 	Diffstat::Stat stat;
 	int chunk[2] = {0, 0};
 
@@ -209,7 +209,7 @@ Diffstat DiffParser::parse(std::istream &in)
 		std::getline(in, str);
 		if (chunk[0] <= 0 && chunk[1] <= 0 && (!str.compare(0, 4, "--- ") || !str.compare(0, 4, "+++ "))) {
 			if (!file.empty() && !stat.empty()) {
-				ds.m_stats[file] = stat;
+				ds->m_stats[file] = stat;
 				file = std::string();
 			}
 			stat = Diffstat::Stat();
@@ -266,7 +266,7 @@ Diffstat DiffParser::parse(std::istream &in)
 	}
 
 	if (!file.empty() && !stat.empty()) {
-		ds.m_stats[file] = stat;
+		ds->m_stats[file] = stat;
 	}
 	return ds;
 }

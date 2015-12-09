@@ -34,11 +34,11 @@ class Revision
 
 	public:
 		Revision(const std::string &id);
-		Revision(const std::string &id, int64_t date, const std::string &author, const std::string &message, const Diffstat &diffstat);
+		Revision(const std::string &id, int64_t date, const std::string &author, const std::string &message, DiffstatPtr diffstat);
 		~Revision();
 
 		std::string id() const;
-		Diffstat diffstat() const;
+		DiffstatPtr diffstat() const;
 
 		void write(BOStream &out) const;
 		bool load(BIStream &in);
@@ -50,7 +50,7 @@ class Revision
 		int64_t m_date;
 		std::string m_author;
 		std::string m_message;
-		Diffstat m_diffstat;
+		DiffstatPtr m_diffstat;
 
 	// Lua binding
 	public:

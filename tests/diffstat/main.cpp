@@ -19,7 +19,7 @@
 // Program entry point
 int main(int, char **)
 {
-	std::map<std::string, Diffstat::Stat> stat = DiffParser::parse(std::cin).stats();
+	std::map<std::string, Diffstat::Stat> stat = DiffParser::parse(std::cin)->stats();
 
 	uint64_t ins = 0, del = 0;
 	for (std::map<std::string, Diffstat::Stat>::const_iterator it = stat.begin(); it != stat.end(); ++it) {

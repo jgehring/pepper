@@ -37,30 +37,30 @@
 class GitDiffstatPipe : public sys::parallel::Thread
 {
 public:
-	GitDiffstatPipe(const std::string &gitpath, JobQueue<std::string, Diffstat> *queue)
+	GitDiffstatPipe(const std::string &gitpath, JobQueue<std::string, DiffstatPtr> *queue)
 		: m_gitpath(gitpath), m_queue(queue)
 	{
 	}
 
-	static Diffstat diffstat(const std::string &gitpath, const std::string &id, const std::string &parent = std::string())
+	static DiffstatPtr diffstat(const std::string &gitpath, const std::string &id, const std::string &parent = std::string())
 	{
+		DiffstatPtr stat;
 		if (!parent.empty()) {
 			sys::io::PopenStreambuf buf((gitpath+"/git-diff-tree").c_str(), "-U0", "--no-renames", parent.c_str(), id.c_str());
 			std::istream in(&buf);
-			Diffstat stat = DiffParser::parse(in);
+			stat = DiffParser::parse(in);
 			if (buf.close() != 0) {
 				throw PEX("git diff-tree command failed");
 			}
-			return stat;
 		} else {
 			sys::io::PopenStreambuf buf((gitpath+"/git-diff-tree").c_str(), "-U0", "--no-renames", "--root", id.c_str());
 			std::istream in(&buf);
-			Diffstat stat = DiffParser::parse(in);
+			stat = DiffParser::parse(in);
 			if (buf.close() != 0) {
 				throw PEX("git diff-tree command failed");
 			}
-			return stat;
 		}
+		return stat;
 	}
 
 protected:
@@ -86,14 +86,14 @@ protected:
 			// and simply write the EOF.
 			out << (char)EOF << '\n' << std::flush;
 
-			Diffstat stat = DiffParser::parse(in);
+			DiffstatPtr stat = DiffParser::parse(in);
 			m_queue->done(revision, stat);
 		}
 	}
 
 private:
 	std::string m_gitpath;
-	JobQueue<std::string, Diffstat> *m_queue;
+	JobQueue<std::string, DiffstatPtr> *m_queue;
 };
 
 
@@ -326,7 +326,7 @@ public:
 		m_metaQueue.put(children);
 	}
 
-	bool getDiffstat(const std::string &revision, Diffstat *dest)
+	bool getDiffstat(const std::string &revision, DiffstatPtr *dest)
 	{
 		return m_diffQueue.getResult(revision, dest);
 	}
@@ -347,7 +347,7 @@ public:
 	}
 
 private:
-	JobQueue<std::string, Diffstat> m_diffQueue;
+	JobQueue<std::string, DiffstatPtr> m_diffQueue;
 	JobQueue<std::string, GitMetaDataThread::Data> m_metaQueue;
 	std::vector<sys::parallel::Thread *> m_threads;
 };
@@ -610,11 +610,11 @@ std::vector<Tag> GitBackend::tags()
 }
 
 // Returns a diffstat for the specified revision
-Diffstat GitBackend::diffstat(const std::string &id)
+DiffstatPtr GitBackend::diffstat(const std::string &id)
 {
 	// Maybe it's prefetched
 	if (m_prefetcher && m_prefetcher->willFetchDiffstat(id)) {
-		Diffstat stat;
+		DiffstatPtr stat;
 		if (!m_prefetcher->getDiffstat(id, &stat)) {
 			throw PEX(str::printf("Failed to retrieve diffstat for revision %s", id.c_str()));
 		}
