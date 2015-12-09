@@ -18,7 +18,7 @@
 <div class="toc">
 	<ol>
 		<li class="L3">[[Documentation]]</li>
-		<li class="L3"><a href="http://sourceforge.net/tracker/?group_id=386093">Tracker</a></li>
+		<li class="L3"><a href="https://github.com/jgehring/pepper/issues">Tracker</a></li>
 	</ol>
 </div>
 <div class="logos">
