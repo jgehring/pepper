@@ -18,9 +18,10 @@ end
 # Get repository type by running a sample report 
 puts("Probing repository...")
 tmp = Tempfile.new('type')
-tmp << "function main()
-	print(pepper.report.repository():type())
-	print(pepper.report.repository():url())
+tmp << "function run(self)
+	local repo = self:repository()
+	print(repo:type())
+	print(repo:url())
 end"
 tmp.flush()
 pipe = IO.popen("#{pepper} -q #{tmp.path} #{repo}")
@@ -84,8 +85,8 @@ end
 
 # Generate diffstats with the native client and pepper
 tmp = Tempfile.new('diff')
-tmp << "function main()
-	d = pepper.report.repository():revision(pepper.report.getopt('r')):diffstat()
+tmp << "function run(self)
+	local d = self:repository():revision(self:getopt('r')):diffstat()
 	print('INSERTED,DELETED,MODIFIED,FILENAME')
 	for i,v in pairs(d:files()) do
 		print(tostring(d:lines_added(v)) .. ',' .. tostring(d:lines_removed(v)) .. ',0,' .. v)
