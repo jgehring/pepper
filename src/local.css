@@ -25,6 +25,10 @@ div #pagebody {
 	background-color: #FFFFFF;
 }
 
+div #content {
+  position: relative;
+}
+
 div.toc {
 	float: left;
 }
@@ -45,12 +49,17 @@ div.logos {
 	float: right;
 }
 
+div.logos table {
+  border-spacing: 0px;
+}
+
 div.logos td {
   padding-left: 20px;
+  padding-top: 0.5em;
 }
 
 div.logos img {
-  height: 3em;
+  height: 3.5em;
 }
 
 img {
