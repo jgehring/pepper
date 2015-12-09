@@ -1,0 +1,228 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>pepper - documentation</title>
+
+<link rel="icon" href="../favicon.ico" type="image/x-icon" />
+
+<link rel="stylesheet" href="../style.css" type="text/css" />
+
+<link rel="stylesheet" href="../local.css" type="text/css" />
+
+
+
+
+
+</head>
+<body>
+
+<div class="page">
+
+<div class="pageheader">
+<div class="header">
+<span>
+<span class="parentlinks">
+
+<a href="../">pepper</a>/ 
+
+</span>
+<span class="title">
+documentation
+
+</span>
+</span>
+
+</div>
+
+
+
+
+
+</div>
+
+
+
+<div id="pagebody">
+
+<div id="content">
+
+
+<div class="toc">
+		<ol>
+			<li class="L3"><a href="#index1h3">Users</a>
+			</li>
+			<li class="L3"><a href="#index2h3">Developers</a>
+			</li>
+		</ol>
+</div>
+
+
+
+
+<div class="clear"></div>
+
+
+<hr />
+
+<h3><a name="index1h3"></a>Users</h3>
+
+<h4><a name="index1h4"></a>Building the source package</h4>
+
+<p>If you're on unix, you should check if your distribution offers a package
+for pepper first (see the <a href="../download/">Download</a> page for a list of packages). If
+it doesn't, you need to grab a source tarball from the <a href="../download/">Download</a>
+page and extract it using tar:</p>
+
+<pre><code>$ tar xvzf pepper-0.3.2.tar.gz
+$ cd pepper-0.3.2
+</code></pre>
+
+<p>Next, you should make sure that all compile-time dependencies are
+satisfied. In general, you'll need a C++ compiler and Lua 5.1 (e.g.,
+provided by <code>lua5.1</code> and <code>liblua5.1-dev</code> on Debian). Some backends have
+additional dependencies that can be found in the <a href="README">README</a> file.</p>
+
+<p>pepper's build system uses
+<a href="http://www.gnu.org/software/autoconf">Autoconf</a> and
+<a href="http://www.gnu.org/software/automake">Automake</a>, so configuration and
+installation is accomplished with</p>
+
+<pre><code>$ ./configure
+$ make
+# make install
+</code></pre>
+
+<p>The configuration script will print a feature summary after its job has
+been finished.  A detailed listing of available backends and optional
+features can be found in pepper's <a href="README">README</a> file.</p>
+
+<h4><a name="index2h4"></a>Basic usage</h4>
+
+<p>pepper's command line syntax is printed to your terminal if you pass
+<code>--help</code> (as a main option) to the program:</p>
+
+<pre><code>$ pepper [options] [report] [report options] &lt;repository&gt;
+</code></pre>
+
+<p>As a short example, you can generate a graph visualizing the lines of
+code in your repository located at <code>/home/joe/myrepo</code> by running</p>
+
+<pre><code>$ pepper loc /home/joe/myrepo &gt; loc.svg
+</code></pre>
+
+<p>The command-line options for the current report and backend can be
+printed by passing <code>help</code> as a main option:</p>
+
+<pre><code>$ pepper --help loc /home/joe/myrepo
+</code></pre>
+
+<p>For example, if you want to render the LOC graph including tag markers
+into a 800x600 PNG file and also watch more detailed progress information,
+you will run</p>
+
+<pre><code>$ pepper --verbose loc --tags --output=loc.png --size=800x600 /home/joe/myrepo
+</code></pre>
+
+<p>Some options can be abbreviated as shown in the help screen:</p>
+
+<pre><code>$ pepper -v loc --tags -oloc.png -s800x600 /home/joe/myrepo
+</code></pre>
+
+<p>The built-in reports can be listed by passing <code>--list-reports</code> to
+the program.  Your might also want to take a look at the <a href="../scriptingguide/">scripting
+guide</a> to learn how to write your own custom reports.</p>
+
+<h4><a name="index3h4"></a>Man page</h4>
+
+<p>An online version of pepper's man page is available <a href="./manpage/">here</a>.</p>
+
+<hr />
+
+<h3><a name="index2h3"></a>Developers</h3>
+
+<h4><a name="index4h4"></a>Scripting tutorial</h4>
+
+<p>In pepper, reports are scripts written in <a href="http://www.lua.org">Lua</a>. A short
+tutorial for writing custom reports is available at <a href="../scriptingguide/">ScriptingGuide</a>.</p>
+
+<h4><a name="index5h4"></a>API reference</h4>
+
+<p>An API reference for Lua scripts is available <a href="api/">here</a>. It has been
+generated with <a href="http://luadoc.luaforge.net">LuaDoc</a>.</p>
+
+<h4><a name="index6h4"></a>Porting of report scripts</h4>
+
+<p>pepper 0.3 introduced API changes that rendered reports written for
+previous version unusable. The small set of fixes required to make
+those reports (i.e., from version 0.2.4 and below) usable with the
+current version is described in detail in <a href="./porting-02-03/">porting reports from 0.2.x
+to 0.3</a>.</p>
+
+<h4><a name="index7h4"></a>Source code repository</h4>
+
+<p>pepper's <a href="http://git-scm.com">Git</a> repository is hosted at
+<a href="http://github.com/jgehring/pepper">GitHub</a> and is eager to get cloned
+and forked. You can get your local copy using</p>
+
+<pre><code>$ git clone git://github.com/jgehring/pepper
+</code></pre>
+
+<!-- TODO
+#### Implementing a new SCM backend
+
+There's also a short guide for implementing new backends at
+<span class="createlink">BackendImplementation</span>.
+-->
+
+
+</div>
+
+
+
+
+
+</div>
+
+<div id="footer" class="pagefooter">
+
+<div id="pageinfo">
+
+
+
+
+<div id="backlinks">
+Links:
+
+<a href="../download/">download</a>
+
+<a href="../">index</a>
+
+<a href="../news/new-homepage/">news/new-homepage</a>
+
+
+</div>
+
+
+
+
+
+
+<div class="pagedate">
+Last edited <span class="date">December 09, 2015, 20:08 CET</span>
+<!-- Created <span class="date">December 09, 2015, 07:55 CET</span> -->
+</div>
+
+</div>
+
+
+<!-- from pepper -->
+</div>
+
+</div>
+
+</body>
+</html>

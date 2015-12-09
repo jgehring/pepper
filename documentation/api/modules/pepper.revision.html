@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+    <title>pepper.revision: Module Index</title>
+    <link rel="stylesheet" href="../luadoc.css" type="text/css" />
+    <!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/-->
+</head>
+
+<body>
+<div id="container">
+
+<div id="product">
+    <div id="product_logo"></div>
+    <div id="product_name"><big><b></b></big></div>
+    <div id="product_description"></div>
+</div> <!-- id="product" -->
+
+<div id="main">
+
+<div id="navigation">
+
+
+<h1>LuaDoc</h1>
+<ul>
+	
+	<li><a href="../index.html">Index</a></li>
+	
+</ul>
+
+
+<!-- Module list -->
+
+<h1>Modules</h1>
+<ul>
+
+	<li>
+		<a href="../modules/pepper.html">pepper</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.datetime.html">pepper.datetime</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.diffstat.html">pepper.diffstat</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.gnuplot.html">pepper.gnuplot</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.iterator.html">pepper.iterator</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.plotutils.html">pepper.plotutils</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.report.html">pepper.report</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.repository.html">pepper.repository</a>
+	</li>
+
+	<li><strong>pepper.revision</strong></li>
+	
+	<li>
+		<a href="../modules/pepper.tag.html">pepper.tag</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.utils.html">pepper.utils</a>
+	</li>
+
+</ul>
+
+
+
+<!-- File list -->
+
+
+
+
+
+
+</div><!-- id="navigation" -->
+
+<div id="content">
+
+<h1>Module <code>pepper.revision</code></h1>
+
+<p>This object represents a single revision.</p>
+
+
+
+
+
+<h2>Functions</h2>
+<table class="function_list">
+
+    <tr>
+    <td class="name" nowrap><a href="#author">author</a>&nbsp;()</td>
+    <td class="summary">Returns the author of the revision.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#date">date</a>&nbsp;()</td>
+    <td class="summary">Returns the date of the revision.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#diffstat">diffstat</a>&nbsp;()</td>
+    <td class="summary">Returns the diffstat of the revision.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#id">id</a>&nbsp;()</td>
+    <td class="summary">Returns the id of the revision.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#message">message</a>&nbsp;()</td>
+    <td class="summary">Returns the commit message of the revision.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#parent_id">parent_id</a>&nbsp;()</td>
+    <td class="summary">Returns the id of the parent revision, if any.</td>
+    </tr>
+
+</table>
+
+
+
+
+
+
+<br/>
+<br/>
+
+
+
+<h2><a name="functions"></a>Functions</h2>
+<dl class="function">
+
+
+
+<dt><a name="author"></a><strong>author</strong>&nbsp;()</dt>
+<dd>
+Returns the author of the revision.
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="date"></a><strong>date</strong>&nbsp;()</dt>
+<dd>
+Returns the date of the revision. The date will be returned as a UNIX timestamp (in seconds).
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="diffstat"></a><strong>diffstat</strong>&nbsp;()</dt>
+<dd>
+Returns the diffstat of the revision.
+
+
+
+
+
+
+
+
+
+<h3>See also:</h3>
+<ul>
+	
+	<li><a href="../modules/pepper.diffstat.html">
+		pepper.diffstat
+	</a>
+	
+</ul>
+
+</dd>
+
+
+
+
+<dt><a name="id"></a><strong>id</strong>&nbsp;()</dt>
+<dd>
+Returns the id of the revision. For Git and Mercurial repositories, this is the commit hash. For Subversion, this is the revision number (as a string).
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="message"></a><strong>message</strong>&nbsp;()</dt>
+<dd>
+Returns the commit message of the revision.
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="parent_id"></a><strong>parent_id</strong>&nbsp;()</dt>
+<dd>
+Returns the id of the parent revision, if any. When examining a revision range, the repository history will need be linearized for repositories like Git and Mercurial. Thus, a revision might have an explicit parent revision that is being used when retrieving the diffstat.
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+</dl>
+
+
+
+
+
+
+</div> <!-- id="content" -->
+
+</div> <!-- id="main" -->
+
+<div id="about">
+    <p><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0!" height="31" width="88" /></a></p>
+</div> <!-- id="about" -->
+
+</div> <!-- id="container" -->
+</body>
+</html>

@@ -1,0 +1,184 @@
+2015-10-14  --  version 0.3.3
+
+	- Support for Subversion 1.9
+	- Numerous fixes for multi-threading
+	- Improved Mac OS X compatibility
+
+2012-06-01  --  version 0.3.2
+
+	- Fixed compilation with GCC 4.7
+	- Fixed memory leaks
+	- Use points instead of dots for the times report
+
+2012-03-16  --  version 0.3.1
+
+	- Fixed Gnuplot invocation if compiled without X11 backend (e.g.,
+	  on Mac OS X or headless environments).
+	- Experimental support for LevelDB cache backend
+	- Support for pie charts via
+	- Fixed working copy detection for Subversion 1.7
+	- Fixed tree listing for Subversion repositories
+	- New reports or report options:
+		* Added authors_pie report (author contribution pie chart)
+		* Added volume report (commit or contribution volume by author)
+		* Added --pie flag to files report
+	- Internal changes:
+		* Directly write data to Gnuplot, i.e. don't use a temporary file
+		* Removed rather useless safety check for report modules
+		* Added checks for pipe I/O errors
+
+2011-12-21  --  version 0.3
+
+	- Changes affecting the report API:
+		* Added explicit report context that is being passed to all
+		  report functions
+		* Added top-level pepper module
+	    * Improved report access inside of reports (listing reports,
+		  meta-data information, execution)
+		* Reports should provide a describe() function instead of
+		  a global meta table
+		* Added cat() function to repository class
+		* Added optional recursion to pepper.utils.unlink()
+		* Made revision prefetching during iteration optional (enabled
+		  by default)
+		* Added date range command line option handling to pepper.datetime
+	- Built-in reports:
+		* Added a graphical user interface report, using the lgob Lua
+		  bindings to GTK
+		* Fixed LOC calculation in CSV report
+		* Added date range options to most reports
+	- Backends:
+		* Restored compatibility with Subversion 1.5
+		* Minor bugfixes for the Mercurial backend
+	- Replaced gnuplot-cpp with a custom Gnuplot interface to be able to
+	  redirect Gnuplot output to an arbitrary std::ostream
+	- Added locking of cache directories to prevent data corruption upon
+	  simultaneous access from multiple program instances
+
+2011-08-06  --  version 0.2.4
+
+	* #3386735: Fixed Subverison log fetching for deeper subdirectories
+	* Fixes for thresholds and messages in age report
+
+2011-06-22  --  version 0.2.3
+
+	* Added punchcard report
+	* #3314428: Fixed Subversion log fetching when there is no
+	  cache directory yet.
+	* Fixed possible memory leaks in Subversion backend
+	* #3314434: Check for Gnuplot in configure
+
+2011-05-02  --  version 0.2.2
+
+	- Improvements and bugfixes for the Git backend:
+		* Faster prefetching of diffstats
+		* Added prefetching of meta-data
+		* Fixed parsing of commit dates
+	- New reports:
+		* Added participation report which renders a histogram
+		  visualizing the contribution of a single author compared
+		  to the whole development team.
+		* Added age report, printing the age and next birthday of
+		  a repository.
+	- Added datetime Lua module
+
+2011-04-06  --  version 0.2.1
+
+	- Improvements and bugfixes for the Subversion backend:
+		* Added log caching
+		* Added working copy detection
+		* Fixed possible "too many open files" error when
+		  fetching diffstats
+		* Fixed diffstats for deleted files
+		* Fixed issues with subdirectory handling
+
+2011-03-28  --  version 0.2
+
+	- Built-in reports:
+		* Added activity report, a port of Thomas Capricelli's
+		  activity extension for Mercurial
+		* Added commit_counts report, a general version of the former
+		  commits_per_month report with a variable time range
+		* Added CSV report to extract repository data for further
+		  processing
+		* Fixed possible bug in LOC report for simultaneous commits
+		* Renamed commit_scatter report to "times"
+	- Changes affecting the report API:
+		* Added plotutils Lua module that facilitates common
+		  plot setup tasks
+		* Added iterator class for flexible revision iteration, including
+		  specification of date ranges.
+		* Many new API functions, including the ability to run other
+		  reports
+		* Renamed API functions (note that the old ones are
+		  still available for compatibility reasons):
+			- repository.default_branch() (instead of main_branch())
+	- Documentation:
+		* Added man page, generated if AsciiDoc and xmlto are present
+	- Implementation:
+		* Rewrote diffstat fetching for the Subversion backend, and
+		  now diff data for deleted files is fetched, too.
+		* The number of threads for the Subversion backend can now
+		  be changed using the --threads command-line option
+		* Removed popen-noshell
+		* Now using Phil Nash's CATCH for unit testing
+
+2011-01-31  --  version 0.1.5
+
+	* Added filetypes report
+	* New Lua API functions: gnuplot:plot_histogram() and
+	  repository:tree()
+	* The cache can be checked by running the "check_cache"
+	  report now, which replaces the "--check-cache" flag
+	* If the repository argument is omitted, the current
+	  directory will be used now
+	* Fixed gnuplot invocation with some non-US locales
+	  (#3162914, reported by Dominik Geyer)
+	* Fixed possible segmentation fault when reading from cache
+	  (#3162922, reported by Dominik Geyer)
+	* Fixed help screen for reports without meta.title
+
+2011-01-20  --  version 0.1.4
+
+	* Added additional arguments for controlling the output of
+	  graphical reports. The default is now stdout, using the
+	  SVG format.
+	* Added support for custom Subversion repository layouts
+	* Added support for searching report scripts in the directories
+	  specified via the PEPPER_REPORTS environment variable
+	* Added lazy cache inizialization
+	* The cache check will clear caches with a wrong version
+	  number now
+	* Fixed problems caused by special characters in Git branches
+	  and tags
+
+2011-01-15  --  version 0.1.3
+
+	* Added directories report, visualizing directory sizes over time
+	* Added tag markers in authors report
+	* Fixed ambiguous (and wrong) diffs for merge commits in Git and
+	  Mercurial repositories.
+	* Fixed branch walking on subdirectories in Subversion repositories
+	* Linearized branch walking in Git and Mercurial repositories
+	* Fixed plotting in headless environments
+	* Fixed wrong date calculations in commits_per_month report
+
+2011-01-12  --  version 0.1.2
+
+	* Added tag access for scripts, and optional tag markers in
+	  "Lines of Code" report
+	* Fixed tags and branches listing for Subversion repositories
+	  accessed via http://
+	* Fixed signal blocking during cache file writing
+	* Removed test suite from default non-debug build
+
+2010-12-28  --  version 0.1.1
+
+	* Fixed running built-in reports without specifying the full path
+	* Fixed multi-threading issues
+	* Improved Lua detection in configuration
+	* Added status message for cache check
+
+2010-12-20  --  version 0.1
+
+	* Initial release

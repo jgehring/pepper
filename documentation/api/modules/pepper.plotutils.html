@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+    <title>pepper.plotutils: Module Index</title>
+    <link rel="stylesheet" href="../luadoc.css" type="text/css" />
+    <!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/-->
+</head>
+
+<body>
+<div id="container">
+
+<div id="product">
+    <div id="product_logo"></div>
+    <div id="product_name"><big><b></b></big></div>
+    <div id="product_description"></div>
+</div> <!-- id="product" -->
+
+<div id="main">
+
+<div id="navigation">
+
+
+<h1>LuaDoc</h1>
+<ul>
+	
+	<li><a href="../index.html">Index</a></li>
+	
+</ul>
+
+
+<!-- Module list -->
+
+<h1>Modules</h1>
+<ul>
+
+	<li>
+		<a href="../modules/pepper.html">pepper</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.datetime.html">pepper.datetime</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.diffstat.html">pepper.diffstat</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.gnuplot.html">pepper.gnuplot</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.iterator.html">pepper.iterator</a>
+	</li>
+
+	<li><strong>pepper.plotutils</strong></li>
+	
+	<li>
+		<a href="../modules/pepper.report.html">pepper.report</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.repository.html">pepper.repository</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.revision.html">pepper.revision</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.tag.html">pepper.tag</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.utils.html">pepper.utils</a>
+	</li>
+
+</ul>
+
+
+
+<!-- File list -->
+
+
+
+
+
+
+</div><!-- id="navigation" -->
+
+<div id="content">
+
+<h1>Module <code>pepper.plotutils</code></h1>
+
+<p>Common utility functions for plotting. Please note that this is a Lua module. If you want to use it, add <pre>require "pepper.plotutils"</pre> to your script. The functions in this module are provided to facilate common plotting tasks and to remove duplicate code for the built-in reports.</p>
+
+
+
+
+
+<h2>Functions</h2>
+<table class="function_list">
+
+    <tr>
+    <td class="name" nowrap><a href="#add_plot_options">add_plot_options</a>&nbsp;(r)</td>
+    <td class="summary">Adds common options for graphical reports to the given table.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#add_tagmarks">add_tagmarks</a>&nbsp;(plot, repo, pattern)</td>
+    <td class="summary">Adds x2tics for repository tags.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#convepoch">convepoch</a>&nbsp;(time)</td>
+    <td class="summary">Converts from UNIX to Gnuplot epoch.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#normalize_pie">normalize_pie</a>&nbsp;(values)</td>
+    <td class="summary">Normalizes the given values for using the in a pie chart.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#setup_output">setup_output</a>&nbsp;(plot, width, height)</td>
+    <td class="summary">Sets the plot output size, type and filename from command-line options.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#setup_std_time">setup_std_time</a>&nbsp;(plot, options)</td>
+    <td class="summary">Performs a standard plot setup for time data.</td>
+    </tr>
+
+</table>
+
+
+
+
+
+
+<br/>
+<br/>
+
+
+
+<h2><a name="functions"></a>Functions</h2>
+<dl class="function">
+
+
+
+<dt><a name="add_plot_options"></a><strong>add_plot_options</strong>&nbsp;(r)</dt>
+<dd>
+Adds common options for graphical reports to the given table. The following options will be added: <table> <tr><th>Option</th><th>Description</th></tr> <tr><td>-oARG, --output=ARG</td><td>Select output file</td></tr> <tr><td>-tARG, --type=ARG</td><td>Explicitly set image type</td></tr> <tr><td>-sW[xH], --size=W[xH]</td><td>Set image size to width W and height H</td></tr> </table>
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  r: If not null, options will be added to this table. Else, the global meta.options table will be used.
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="add_tagmarks"></a><strong>add_tagmarks</strong>&nbsp;(plot, repo, pattern)</dt>
+<dd>
+Adds x2tics for repository tags. If <code>pattern</code> is not <code>nil</code>, only tags matching the <code>pattern</code> will be added.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  plot: pepper.plot obejct
+	</li>
+	
+	<li>
+	  repo: pepper.repository object
+	</li>
+	
+	<li>
+	  pattern: Optional pattern for filtering tags
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="convepoch"></a><strong>convepoch</strong>&nbsp;(time)</dt>
+<dd>
+Converts from UNIX to Gnuplot epoch.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  time: UNIX timestamp
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="normalize_pie"></a><strong>normalize_pie</strong>&nbsp;(values)</dt>
+<dd>
+Normalizes the given values for using the in a pie chart.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  values: A table of values
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="setup_output"></a><strong>setup_output</strong>&nbsp;(plot, width, height)</dt>
+<dd>
+Sets the plot output size, type and filename from command-line options.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  plot: pepper.plot object
+	</li>
+	
+	<li>
+	  width: Optional width, 640 by default
+	</li>
+	
+	<li>
+	  height: Optional height, 480 by default
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="setup_std_time"></a><strong>setup_std_time</strong>&nbsp;(plot, options)</dt>
+<dd>
+Performs a standard plot setup for time data. Basically, this evaluates to the following GNUPlot commands (without comments): <pre> set xdata time           # X values of data are time values<br> set timefmt "%s"         # Time values are given as UNIX timestamps<br> set yrange [0:*]         # Start Y axis at 0<br> set xtics nomirror       # Don't mirror X axis tics<br> set xtics rotate by -45  # Rotate X axis labels<br> set rmargin 8            # Make sure there's enough space for the rotated labels<br> set grid ytics           # Show grid lines for the Y axis tics<br></pre> The <code>options</code> parameter can be used to customize the plot. The following keys are supported: <table> <tr><th>Key</th><th>Description</th><th>Default value</th></tr> <tr><td><code>key</code></td><td>Key position</td><td>No key</td></tr> <tr><td><code>xformat</code></td><td>X axis labels format</td><td><code>"%b %y"</code></td></tr> <tr><td><code>yformat</code></td><td>Y axis labels format</td><td><code>"%'.0f"</code></td></tr> </table><br>
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  plot: pepper.plot object
+	</li>
+	
+	<li>
+	  options: Optional dictionary with additional options
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+</dl>
+
+
+
+
+
+
+</div> <!-- id="content" -->
+
+</div> <!-- id="main" -->
+
+<div id="about">
+    <p><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0!" height="31" width="88" /></a></p>
+</div> <!-- id="about" -->
+
+</div> <!-- id="container" -->
+</body>
+</html>

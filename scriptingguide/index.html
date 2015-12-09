@@ -1,0 +1,368 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>pepper - scripting guide</title>
+
+<link rel="icon" href="../favicon.ico" type="image/x-icon" />
+
+<link rel="stylesheet" href="../style.css" type="text/css" />
+
+<link rel="stylesheet" href="../local.css" type="text/css" />
+
+
+
+
+
+</head>
+<body>
+
+<div class="page">
+
+<div class="pageheader">
+<div class="header">
+<span>
+<span class="parentlinks">
+
+<a href="../">pepper</a>/ 
+
+</span>
+<span class="title">
+scripting guide
+
+</span>
+</span>
+
+</div>
+
+
+
+
+
+</div>
+
+
+
+<div id="pagebody">
+
+<div id="content">
+
+
+<div class="toc">
+		<ol>
+			<li class="L3"><a href="#index1h3">Language</a>
+			</li>
+			<li class="L3"><a href="#index2h3">Script layout</a>
+			</li>
+			<li class="L3"><a href="#index3h3">Using repository information</a>
+			</li>
+			<li class="L3"><a href="#index4h3">Examining a revision range</a>
+			</li>
+			<li class="L3"><a href="#index5h3">Option handling</a>
+			</li>
+			<li class="L3"><a href="#index6h3">Graphical reports</a>
+			</li>
+		</ol>
+</div>
+
+
+
+
+<div class="clear"></div>
+
+
+<hr />
+
+<p>This short guide explains the main report concepts by using illustrative examples
+scripts. The API reference is available <a href="../documentation/api/">here</a>.</p>
+
+<h3><a name="index1h3"></a>Language</h3>
+
+<p>pepper's report scripts are written in Lua. There's extensive
+online information about the programming language, including a
+<a href="http://www.lua.org/pil/">detailed introduction</a> and a <a href="http://www.lua.org/manual/5.1/">reference
+manual</a>.</p>
+
+<h3><a name="index2h3"></a>Script layout</h3>
+
+<p>Report scripts should encapsulate all of their code, except
+from module imports, in functions. The function which
+will be used to run the report is mandatory and is called
+<code>run</code> . A single argument will be passed to it - the current <a href="../documentation/api/modules/pepper.report.html">report
+context</a>. Meta-data
+like the report title, description or accepted options will be queried
+by calling <code>describe()</code>.</p>
+
+<p>A skeleton script might look light the following:</p>
+
+<div class="highlight-lua"><pre class="hl"><span class="hl slc">-- Meta-data</span>
+<span class="hl kwa">function</span> <span class="hl kwd">describe</span><span class="hl opt">()</span>
+    <span class="hl kwa">local</span> r <span class="hl opt">= {}</span>
+    r<span class="hl opt">.</span>title <span class="hl opt">=</span> <span class="hl str">&quot;Skeleton&quot;</span>
+    r<span class="hl opt">.</span>description <span class="hl opt">=</span> <span class="hl str">&quot;Just a skeleton&quot;</span>
+    <span class="hl kwa">return</span> r
+endf
+
+<span class="hl slc">-- Entry point with report context &quot;self&quot;</span>
+<span class="hl kwa">function</span> <span class="hl kwd">run</span><span class="hl opt">(</span>self<span class="hl opt">)</span>
+    <span class="hl slc">-- Nothing here</span>
+<span class="hl kwa">end</span>
+</pre></div>
+
+
+<h3><a name="index3h3"></a>Using repository information</h3>
+
+<p>Report scripts can use the their context to access the current environment
+The <a href="../documentation/api/modules/pepper.repository.html"><code>repository</code></a>
+object provides numerous functions to access the source code repository
+selected by the user. The following code will print the repository's type,
+its location and the current head revision.</p>
+
+<div class="highlight-lua"><pre class="hl"><span class="hl kwa">function</span> <span class="hl kwd">run</span><span class="hl opt">(</span>self<span class="hl opt">)</span>
+    <span class="hl kwa">local</span> repository <span class="hl opt">=</span> self<span class="hl opt">:</span><span class="hl kwd">repository</span><span class="hl opt">()</span>
+    <span class="hl kwb">print</span><span class="hl opt">(</span>repository<span class="hl opt">:</span><span class="hl kwb">type</span><span class="hl opt">() ..</span> <span class="hl str">&quot; repository at &quot;</span> <span class="hl opt">..</span> repository<span class="hl opt">:</span><span class="hl kwd">url</span><span class="hl opt">())</span>
+    <span class="hl kwb">print</span><span class="hl opt">(</span><span class="hl str">&quot;HEAD is &quot;</span> <span class="hl opt">..</span> repository<span class="hl opt">:</span><span class="hl kwd">head</span><span class="hl opt">())</span>
+<span class="hl kwa">end</span>
+</pre></div>
+
+
+<h3><a name="index4h3"></a>Examining a revision range</h3>
+
+<p>A revision range can be accessed using a <a href="../documentation/api/modules/pepper.iterator.html">revision
+iterator</a>
+obtained by calling the repository's
+<a href="../documentation/api/modules/pepper.repository.html#iterator"><code>iterator()</code></a>
+function. The iterator's
+<a href="../documentation/api/modules/pepper.iterator.html#revisions"><code>revisions()</code></a>
+function can be used as a standard Lua
+iterator as shown in the code below. Furthermore, a
+<a href="../documentation/api/modules/pepper.iterator.html#map"><code>map()</code></a> function
+is provided that maps a callback function to every revision.</p>
+
+<p>The following code will gather information about the number of commits
+and the number of authors on a branch.</p>
+
+<div class="highlight-lua"><pre class="hl"><span class="hl slc">-- Entry point</span>
+<span class="hl kwa">function</span> <span class="hl kwd">run</span><span class="hl opt">(</span>self<span class="hl opt">)</span>
+    <span class="hl kwa">local</span> repository <span class="hl opt">=</span> self<span class="hl opt">:</span><span class="hl kwd">repository</span><span class="hl opt">()</span>
+    <span class="hl kwa">local</span> branch <span class="hl opt">=</span> repository<span class="hl opt">:</span><span class="hl kwd">default_branch</span><span class="hl opt">()</span>
+
+    <span class="hl kwa">local</span> authors <span class="hl opt">= {}</span> <span class="hl slc">-- Dictionary to mark authors</span>
+    <span class="hl kwa">local</span> num_authors <span class="hl opt">=</span> <span class="hl num">0</span>
+    <span class="hl kwa">local</span> num_commits <span class="hl opt">=</span> <span class="hl num">0</span>
+
+    <span class="hl slc">-- Initialize iterator and loop over all revisions</span>
+    <span class="hl kwa">local</span> iterator <span class="hl opt">=</span> repository<span class="hl opt">:</span><span class="hl kwd">iterator</span><span class="hl opt">(</span>branch<span class="hl opt">)</span>
+    <span class="hl kwa">for</span> revision <span class="hl kwa">in</span> iterator<span class="hl opt">:</span><span class="hl kwd">revisions</span><span class="hl opt">()</span> <span class="hl kwa">do</span>
+        <span class="hl slc">-- Check if the author has already been counted</span>
+        <span class="hl kwa">if</span> authors<span class="hl opt">[</span>revision<span class="hl opt">:</span><span class="hl kwd">author</span><span class="hl opt">()] ==</span> <span class="hl kwa">nil then</span>
+            num_authors <span class="hl opt">=</span> num_authors <span class="hl opt">+</span> <span class="hl num">1</span>
+            authors<span class="hl opt">[</span>revision<span class="hl opt">:</span><span class="hl kwd">author</span><span class="hl opt">()] =</span> <span class="hl kwa">true</span>
+        <span class="hl kwa">end</span>
+
+        num_commits <span class="hl opt">=</span> num_commits <span class="hl opt">+</span> <span class="hl num">1</span>
+    <span class="hl kwa">end</span>
+
+    <span class="hl slc">-- Print result</span>
+    <span class="hl kwb">print</span><span class="hl opt">(</span><span class="hl str">&quot;Commits on branch &quot;</span> <span class="hl opt">..</span> branch <span class="hl opt">..</span> <span class="hl str">&quot;:&quot;</span><span class="hl opt">)</span>
+    <span class="hl kwb">print</span><span class="hl opt">(</span>num_commits <span class="hl opt">..</span> <span class="hl str">&quot; commits from &quot;</span> <span class="hl opt">..</span> num_authors <span class="hl opt">..</span> <span class="hl str">&quot; author(s)&quot;</span><span class="hl opt">)</span>
+<span class="hl kwa">end</span>
+</pre></div>
+
+
+<p>Here,
+<a href="../documentation/api/modules/pepper.repository.html#default_branch"><code>default_branch()</code></a>
+will return the branch that is currently checked out for
+local repositories. The equivalent revision iteration
+using <code>map()</code> would look like the following, using a
+<a href="http://www.lua.org/pil/6.1.html">closure</a> containing the
+previous the loop body.  As opposed to iteration by using
+<a href="../documentation/api/modules/pepper.iterator.html#revisions"><code>revisions()</code></a>,
+progress information will be written to the console.</p>
+
+<div class="highlight-lua"><pre class="hl"> <span class="hl slc">-- Initialize iterator and loop over all revisions</span>
+    <span class="hl kwa">local</span> iterator <span class="hl opt">=</span> repository<span class="hl opt">:</span><span class="hl kwd">iterator</span><span class="hl opt">(</span>branch<span class="hl opt">)</span>
+    iterator<span class="hl opt">:</span><span class="hl kwd">map</span><span class="hl opt">(</span><span class="hl kwa">function</span> <span class="hl opt">(</span>revision<span class="hl opt">)</span>
+        <span class="hl slc">-- Check if the author has already been counted</span>
+        <span class="hl kwa">if</span> authors<span class="hl opt">[</span>revision<span class="hl opt">:</span><span class="hl kwd">author</span><span class="hl opt">()] ==</span> <span class="hl kwa">nil then</span>
+            num_authors <span class="hl opt">=</span> num_authors <span class="hl opt">+</span> <span class="hl num">1</span>
+            authors<span class="hl opt">[</span>revision<span class="hl opt">:</span><span class="hl kwd">author</span><span class="hl opt">()] =</span> <span class="hl kwa">true</span>
+        <span class="hl kwa">end</span>
+
+        num_commits <span class="hl opt">=</span> num_commits <span class="hl opt">+</span> <span class="hl num">1</span>
+    <span class="hl kwa">end</span><span class="hl opt">)</span>
+</pre></div>
+
+
+<h4><a name="index1h4"></a>Technical information regarding revision iterators</h4>
+
+<p>Internally, revision iterators are designed in a asynchronous manner. The
+actual revisions on the branch and range selected don't need to be
+known at the time of construction since fetching this information
+from the repository may be time-consuming. Thus, the revision iterator
+will probably block during iteration when waiting for further revision
+identifiers from the backend. Currently, this kind of background
+log fetching is implemented for the Subversion backend only as it is
+the the only repository backend that operates on remote repositories.</p>
+
+<p>Once a bunch of revision identifiers is known to be part of an iteration,
+meta-data and diffstats can be prefetched by the respective backend
+implementation in background threads. Most of the backends are using
+this kind of prefetching. Currently, the only exception is the Mercurial
+backend.</p>
+
+<h3><a name="index5h3"></a>Option handling</h3>
+
+<p>Users can specify report options at the command line after defining
+the path to the report script. Option handling in scripts consists of
+two parts:</p>
+
+<ul>
+<li>Declaration of available options in the table returned by <code>describe()</code>. These options
+will be presented to the user if help is requested at the command line.</li>
+<li>Retrieval of option values using
+<a href="../documentation/api/modules/pepper.report.html#getopt"><code>report:getopt()</code></a>.
+Default option values can be specified, too.</li>
+</ul>
+
+
+<p>Here's a short script that prints the head revision of a given branch for
+illustrative purposes:</p>
+
+<div class="highlight-lua"><pre class="hl"><span class="hl kwa">function</span> <span class="hl kwd">describe</span><span class="hl opt">()</span>
+    <span class="hl kwa">local</span> r <span class="hl opt">= {}</span>
+    r<span class="hl opt">.</span>title <span class="hl opt">=</span> <span class="hl str">&quot;Branch HEAD&quot;</span>
+    r<span class="hl opt">.</span>options <span class="hl opt">= {{</span><span class="hl str">&quot;-bARG, --branch=ARG&quot;</span><span class="hl opt">,</span> <span class="hl str">&quot;Select branch&quot;</span><span class="hl opt">}}</span>
+    <span class="hl kwa">return</span> r
+<span class="hl kwa">end</span>
+
+<span class="hl kwa">function</span> <span class="hl kwd">run</span><span class="hl opt">(</span>self<span class="hl opt">)</span>
+    <span class="hl kwa">local</span> repository <span class="hl opt">=</span> self<span class="hl opt">:</span><span class="hl kwd">repository</span><span class="hl opt">()</span>
+    <span class="hl kwa">local</span> branch <span class="hl opt">=</span> self<span class="hl opt">:</span><span class="hl kwd">getopt</span><span class="hl opt">(</span><span class="hl str">&quot;b,branch&quot;</span><span class="hl opt">,</span> repository<span class="hl opt">:</span><span class="hl kwd">default_branch</span><span class="hl opt">())</span>
+    <span class="hl kwb">print</span><span class="hl opt">(</span><span class="hl str">&quot;Branch &quot;</span> <span class="hl opt">..</span> branch <span class="hl opt">..</span> <span class="hl str">&quot; is at &quot;</span> <span class="hl opt">..</span> repository<span class="hl opt">:</span><span class="hl kwd">head</span><span class="hl opt">(</span>branch<span class="hl opt">))</span>
+<span class="hl kwa">end</span>
+</pre></div>
+
+
+<h3><a name="index6h3"></a>Graphical reports</h3>
+
+<p>Reports can use the built-in <a href="../documentation/api/modules/pepper.gnuplot.html">GNUPlot
+interface</a>
+to produce graphical output. Furthermore, the
+<a href="../documentation/api/modules/pepper.plotutils.html">pepper.plotutils</a> Lua
+module provides support for common command-line options and plot setup.</p>
+
+<p>The following report plots a histogram of commits by week days.</p>
+
+<div class="highlight-lua"><pre class="hl"><span class="hl slc">-- Include the plotutils module</span>
+require <span class="hl str">&quot;pepper.plotutils&quot;</span>
+
+<span class="hl slc">-- Meta-data</span>
+<span class="hl kwa">function</span> <span class="hl kwd">describe</span><span class="hl opt">()</span>
+    <span class="hl kwa">local</span> r <span class="hl opt">= {}</span>
+    r<span class="hl opt">.</span>title <span class="hl opt">=</span> <span class="hl str">&quot;Commits by Week Days&quot;</span>
+
+    <span class="hl slc">-- Add common plotting options</span>
+    pepper<span class="hl opt">.</span>plotutils<span class="hl opt">.</span><span class="hl kwd">add_plot_options</span><span class="hl opt">(</span>r<span class="hl opt">)</span>
+    <span class="hl kwa">return</span> r
+<span class="hl kwa">end</span>
+
+<span class="hl slc">-- This function will be called for every revision</span>
+<span class="hl kwa">function</span> <span class="hl kwd">callback</span><span class="hl opt">(</span>revision<span class="hl opt">)</span>
+    <span class="hl slc">-- Determine week day of commit</span>
+    <span class="hl kwa">local</span> day <span class="hl opt">=</span> os<span class="hl opt">.</span><span class="hl kwb">date</span><span class="hl opt">(</span><span class="hl str">&quot;*t&quot;</span><span class="hl opt">,</span> revision<span class="hl opt">:</span><span class="hl kwb">date</span><span class="hl opt">())[</span><span class="hl str">&quot;wday&quot;</span><span class="hl opt">]</span>
+
+    <span class="hl slc">-- Update commit count</span>
+    commits<span class="hl opt">[</span>day<span class="hl opt">] =</span> commits<span class="hl opt">[</span>day<span class="hl opt">] +</span> <span class="hl num">1</span>
+<span class="hl kwa">end</span>
+
+<span class="hl slc">-- Entry point</span>
+<span class="hl kwa">function</span> <span class="hl kwd">run</span><span class="hl opt">(</span>self<span class="hl opt">)</span>
+    <span class="hl kwa">local</span> repository <span class="hl opt">=</span> self<span class="hl opt">:</span><span class="hl kwd">repository</span><span class="hl opt">()</span>
+    <span class="hl kwa">local</span> days <span class="hl opt">= {</span><span class="hl str">&quot;Sun&quot;</span><span class="hl opt">,</span> <span class="hl str">&quot;Mon&quot;</span><span class="hl opt">,</span> <span class="hl str">&quot;Tue&quot;</span><span class="hl opt">,</span> <span class="hl str">&quot;Wed&quot;</span><span class="hl opt">,</span> <span class="hl str">&quot;Thu&quot;</span><span class="hl opt">,</span> <span class="hl str">&quot;Fri&quot;</span><span class="hl opt">,</span> <span class="hl str">&quot;Sat&quot;</span><span class="hl opt">}</span>
+    <span class="hl slc">-- Global table of commit counts with an entry for each day</span>
+    commits <span class="hl opt">= {</span><span class="hl num">0</span><span class="hl opt">,</span> <span class="hl num">0</span><span class="hl opt">,</span> <span class="hl num">0</span><span class="hl opt">,</span> <span class="hl num">0</span><span class="hl opt">,</span> <span class="hl num">0</span><span class="hl opt">,</span> <span class="hl num">0</span><span class="hl opt">,</span> <span class="hl num">0</span><span class="hl opt">}</span>
+
+    <span class="hl slc">-- Gather data by iterating over the default branch</span>
+    <span class="hl kwa">local</span> branch <span class="hl opt">=</span> repository<span class="hl opt">:</span><span class="hl kwd">default_branch</span><span class="hl opt">()</span>
+    repository<span class="hl opt">:</span><span class="hl kwd">iterator</span><span class="hl opt">(</span>branch<span class="hl opt">):</span><span class="hl kwd">map</span><span class="hl opt">(</span>callback<span class="hl opt">)</span>
+
+    <span class="hl slc">-- Create a new plot with a title including the current branch</span>
+    <span class="hl kwa">local</span> plot <span class="hl opt">=</span> pepper<span class="hl opt">.</span>gnuplot<span class="hl opt">:</span><span class="hl kwd">new</span><span class="hl opt">()</span>
+    plot<span class="hl opt">:</span><span class="hl kwd">set_title</span><span class="hl opt">(</span><span class="hl str">&quot;Commits by Week Days (on &quot;</span> <span class="hl opt">..</span> branch <span class="hl opt">..</span> <span class="hl str">&quot;)&quot;</span><span class="hl opt">)</span>
+
+    <span class="hl slc">-- This will setup the plot output using to the command-line</span>
+    <span class="hl slc">-- options added in describe()</span>
+    pepper<span class="hl opt">.</span>plotutils<span class="hl opt">.</span><span class="hl kwd">setup_output</span><span class="hl opt">(</span>plot<span class="hl opt">)</span>
+
+    <span class="hl slc">-- Make sure the Y axis starts at zero</span>
+    plot<span class="hl opt">:</span><span class="hl kwd">cmd</span><span class="hl opt">(</span><span class="hl str">&quot;set yrange [0:*]&quot;</span><span class="hl opt">)</span>
+
+    <span class="hl slc">-- Run the plot</span>
+    plot<span class="hl opt">:</span><span class="hl kwd">plot_histogram</span><span class="hl opt">(</span>days<span class="hl opt">,</span> commits<span class="hl opt">)</span>
+<span class="hl kwa">end</span>
+</pre></div>
+
+
+<p>This time, the iterator's <code>map()</code> function has been used with a
+corresponding callback function. The <code>commits</code> variable is global, so
+it can be accessed from within the callback function. However, we could
+have used a closure as well and kept the variable local.</p>
+
+<p>If you pass <code>--help</code> as a main option to the program when
+you run this report, common plot options like output file
+name and image size will be shown. Those have been added by calling
+<a href="../documentation/api/modules/pepper.plotutils.html#add_plot_options"><code>add_plot_options()</code></a>.
+<code>setup_output(plot)</code> makes sure that these options are actually applied
+to the plot.</p>
+
+</div>
+
+
+
+
+
+</div>
+
+<div id="footer" class="pagefooter">
+
+<div id="pageinfo">
+
+
+
+
+<div id="backlinks">
+Links:
+
+<a href="../documentation/">documentation</a>
+
+<a href="../news/new-homepage/">news/new-homepage</a>
+
+<a href="../news/pepper-0.2/">news/pepper-0.2</a>
+
+
+</div>
+
+
+
+
+
+
+<div class="pagedate">
+Last edited <span class="date">December 09, 2015, 20:08 CET</span>
+<!-- Created <span class="date">December 09, 2015, 07:55 CET</span> -->
+</div>
+
+</div>
+
+
+<!-- from pepper -->
+</div>
+
+</div>
+
+</body>
+</html>

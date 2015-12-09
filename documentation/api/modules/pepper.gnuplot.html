@@ -1,0 +1,507 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+    <title>pepper.gnuplot: Module Index</title>
+    <link rel="stylesheet" href="../luadoc.css" type="text/css" />
+    <!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/-->
+</head>
+
+<body>
+<div id="container">
+
+<div id="product">
+    <div id="product_logo"></div>
+    <div id="product_name"><big><b></b></big></div>
+    <div id="product_description"></div>
+</div> <!-- id="product" -->
+
+<div id="main">
+
+<div id="navigation">
+
+
+<h1>LuaDoc</h1>
+<ul>
+	
+	<li><a href="../index.html">Index</a></li>
+	
+</ul>
+
+
+<!-- Module list -->
+
+<h1>Modules</h1>
+<ul>
+
+	<li>
+		<a href="../modules/pepper.html">pepper</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.datetime.html">pepper.datetime</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.diffstat.html">pepper.diffstat</a>
+	</li>
+
+	<li><strong>pepper.gnuplot</strong></li>
+	
+	<li>
+		<a href="../modules/pepper.iterator.html">pepper.iterator</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.plotutils.html">pepper.plotutils</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.report.html">pepper.report</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.repository.html">pepper.repository</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.revision.html">pepper.revision</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.tag.html">pepper.tag</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.utils.html">pepper.utils</a>
+	</li>
+
+</ul>
+
+
+
+<!-- File list -->
+
+
+
+
+
+
+</div><!-- id="navigation" -->
+
+<div id="content">
+
+<h1>Module <code>pepper.gnuplot</code></h1>
+
+<p>Gnuplot interface. This class can be used to generate graphical reports</p>
+
+
+
+
+
+<h2>Functions</h2>
+<table class="function_list">
+
+    <tr>
+    <td class="name" nowrap><a href="#cmd">cmd</a>&nbsp;(str)</td>
+    <td class="summary">Sends a command to Gnuplot </td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#flush">flush</a>&nbsp;()</td>
+    <td class="summary">Finish plotting and restart the Gnuplot process.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#plot_histogram">plot_histogram</a>&nbsp;(keys, values, titles, style, options)</td>
+    <td class="summary">Plots a histogram bar chart from data sequences.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#plot_multi_series">plot_multi_series</a>&nbsp;(keys, values, titles, style, options)</td>
+    <td class="summary">Plots multiple data series.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#plot_pie">plot_pie</a>&nbsp;(titles, values)</td>
+    <td class="summary">Plots a pie chart.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#plot_series">plot_series</a>&nbsp;(keys, values, titles, options)</td>
+    <td class="summary">Plots one or more data series.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#set_output">set_output</a>&nbsp;(filename, width, height, terminal)</td>
+    <td class="summary">Sets the output file for plotting </td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#set_title">set_title</a>&nbsp;(title)</td>
+    <td class="summary">Sets the plot title </td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#set_xrange">set_xrange</a>&nbsp;(min, max)</td>
+    <td class="summary">Sets the X and X2 axis range </td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#set_xrange_time">set_xrange_time</a>&nbsp;(min, max)</td>
+    <td class="summary">Sets the X and X2 axis range </td>
+    </tr>
+
+</table>
+
+
+
+
+
+
+<br/>
+<br/>
+
+
+
+<h2><a name="functions"></a>Functions</h2>
+<dl class="function">
+
+
+
+<dt><a name="cmd"></a><strong>cmd</strong>&nbsp;(str)</dt>
+<dd>
+Sends a command to Gnuplot
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  str: The command string
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="flush"></a><strong>flush</strong>&nbsp;()</dt>
+<dd>
+Finish plotting and restart the Gnuplot process.
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="plot_histogram"></a><strong>plot_histogram</strong>&nbsp;(keys, values, titles, style, options)</dt>
+<dd>
+Plots a histogram bar chart from data sequences. The <code>values</code> parameter may contain multiple Y values per entry, i.e. it can be a two-dimensional array.<br> The last <code>options</code> parameter can either be a dictionary or a string. Using a dictionary, the following keys can be specified: <table> <tr><th>Key</th><th>Description</th><th>Default value</th></tr> <tr><td><code>style</code></td><td>Gnuplot style</td><td></td></tr> </table><br> If <code>options</code> is a string, it will be used for the <code>sytle</code> key.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  keys: The array of X values, used as the X-axis keys
+	</li>
+	
+	<li>
+	  values: The array of Y values
+	</li>
+	
+	<li>
+	  titles: Optional titles for the series
+	</li>
+	
+	<li>
+	  style: 
+	</li>
+	
+	<li>
+	  options: Additional options (see above)
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="plot_multi_series"></a><strong>plot_multi_series</strong>&nbsp;(keys, values, titles, style, options)</dt>
+<dd>
+Plots multiple data series. The <code>keys</code> and <code>values</code> are arrays of the same size, each containing the same number of series. Each series (a pair of keys and values) will be plotted into the same graph.<br> The last <code>options</code> parameter can either be a dictionary or a string. Using a dictionary, the following keys can be specified: <table> <tr><th>Key</th><th>Description</th><th>Default value</th></tr> <tr><td><code>style</code></td><td>Gnuplot style</td><td><code>"lines"</code></td></tr> </table><br> If <code>options</code> is a string, it will be used for the <code>sytle</code> key.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  keys: The series array with X values
+	</li>
+	
+	<li>
+	  values: The series array with Y values
+	</li>
+	
+	<li>
+	  titles: Optional titles for the series
+	</li>
+	
+	<li>
+	  style: 
+	</li>
+	
+	<li>
+	  options: Additional options (see above)
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="plot_pie"></a><strong>plot_pie</strong>&nbsp;(titles, values)</dt>
+<dd>
+Plots a pie chart. <code>titles</code> is an array with titles that should be placed in the key. <code>values</code> has the same number of elements and defines percentage values for the titles. The values are expected to fall inside the interval [0,1].
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  titles: Element titles
+	</li>
+	
+	<li>
+	  values: Element percentage values from [0,1]
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="plot_series"></a><strong>plot_series</strong>&nbsp;(keys, values, titles, options)</dt>
+<dd>
+Plots one or more data series. The <code>values</code> parameter may contain multiple Y values per entry, i.e. it can be a two-dimensional array.<br> The last <code>options</code> parameter can either be a dictionary or a string. Using a dictionary, the following keys can be specified: <table> <tr><th>Key</th><th>Description</th><th>Default value</th></tr> <tr><td><code>style</code></td><td>Gnuplot style</td><td><code>"lines"</code></td></tr> <tr><td><code>command</code></td><td>Plot command string, inserted after <code>plot "$FILE"</code></td><td></td></tr> </table><br> If <code>options</code> is a string, it will be used for the <code>sytle</code> key.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  keys: The array of X values
+	</li>
+	
+	<li>
+	  values: The array of Y values
+	</li>
+	
+	<li>
+	  titles: Optional titles for the series
+	</li>
+	
+	<li>
+	  options: Additional options (see above)
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="set_output"></a><strong>set_output</strong>&nbsp;(filename, width, height, terminal)</dt>
+<dd>
+Sets the output file for plotting
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  filename: Output filename
+	</li>
+	
+	<li>
+	  width: Optional image width (defaults to 640)
+	</li>
+	
+	<li>
+	  height: Optional image height (defaults to 480)
+	</li>
+	
+	<li>
+	  terminal: Optional explicit terminal type. This is normally inferred from the filename.
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="set_title"></a><strong>set_title</strong>&nbsp;(title)</dt>
+<dd>
+Sets the plot title
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  title: The plot title
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="set_xrange"></a><strong>set_xrange</strong>&nbsp;(min, max)</dt>
+<dd>
+Sets the X and X2 axis range
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  min: Minimum X value
+	</li>
+	
+	<li>
+	  max: Maximum X value
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="set_xrange_time"></a><strong>set_xrange_time</strong>&nbsp;(min, max)</dt>
+<dd>
+Sets the X and X2 axis range
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  min: Minimum X timestamp
+	</li>
+	
+	<li>
+	  max: Maximum X timestamp
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+</dl>
+
+
+
+
+
+
+</div> <!-- id="content" -->
+
+</div> <!-- id="main" -->
+
+<div id="about">
+    <p><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0!" height="31" width="88" /></a></p>
+</div> <!-- id="about" -->
+
+</div> <!-- id="container" -->
+</body>
+</html>

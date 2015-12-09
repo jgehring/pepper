@@ -30,3 +30,7 @@ massif.out.*
 missing
 stamp-h1
 luadoc/
+sandbox/
+ikiwiki/
+shortcuts/
+.ikiwiki

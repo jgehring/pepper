@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+    <title>pepper.report: Module Index</title>
+    <link rel="stylesheet" href="../luadoc.css" type="text/css" />
+    <!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/-->
+</head>
+
+<body>
+<div id="container">
+
+<div id="product">
+    <div id="product_logo"></div>
+    <div id="product_name"><big><b></b></big></div>
+    <div id="product_description"></div>
+</div> <!-- id="product" -->
+
+<div id="main">
+
+<div id="navigation">
+
+
+<h1>LuaDoc</h1>
+<ul>
+	
+	<li><a href="../index.html">Index</a></li>
+	
+</ul>
+
+
+<!-- Module list -->
+
+<h1>Modules</h1>
+<ul>
+
+	<li>
+		<a href="../modules/pepper.html">pepper</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.datetime.html">pepper.datetime</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.diffstat.html">pepper.diffstat</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.gnuplot.html">pepper.gnuplot</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.iterator.html">pepper.iterator</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.plotutils.html">pepper.plotutils</a>
+	</li>
+
+	<li><strong>pepper.report</strong></li>
+	
+	<li>
+		<a href="../modules/pepper.repository.html">pepper.repository</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.revision.html">pepper.revision</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.tag.html">pepper.tag</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.utils.html">pepper.utils</a>
+	</li>
+
+</ul>
+
+
+
+<!-- File list -->
+
+
+
+
+
+
+</div><!-- id="navigation" -->
+
+<div id="content">
+
+<h1>Module <code>pepper.report</code></h1>
+
+<p>Report script context. This module provides functions for the current program execution environment as well as report inspection and execution facilities.</p>
+
+
+
+
+
+<h2>Functions</h2>
+<table class="function_list">
+
+    <tr>
+    <td class="name" nowrap><a href="#report:description">report:description</a>&nbsp;()</td>
+    <td class="summary">Returns the report's description.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#report:getopt">report:getopt</a>&nbsp;(option, default)</td>
+    <td class="summary">Returns a command line option for the report script.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#report:name">report:name</a>&nbsp;()</td>
+    <td class="summary">Returns the report's name.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#report:new">report:new</a>&nbsp;(path, options)</td>
+    <td class="summary">Constructor.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#report:options">report:options</a>&nbsp;()</td>
+    <td class="summary">Returns the report's accepted options.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#report:repository">report:repository</a>&nbsp;()</td>
+    <td class="summary">Returns the current repository.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#report:run">report:run</a>&nbsp;()</td>
+    <td class="summary">Runs this report.</td>
+    </tr>
+
+</table>
+
+
+
+
+
+
+<br/>
+<br/>
+
+
+
+<h2><a name="functions"></a>Functions</h2>
+<dl class="function">
+
+
+
+<dt><a name="report:description"></a><strong>report:description</strong>&nbsp;()</dt>
+<dd>
+Returns the report's description.
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="report:getopt"></a><strong>report:getopt</strong>&nbsp;(option, default)</dt>
+<dd>
+Returns a command line option for the report script.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  option: The command line flags, separated with commas
+	</li>
+	
+	<li>
+	  default: An optional default option value
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="report:name"></a><strong>report:name</strong>&nbsp;()</dt>
+<dd>
+Returns the report's name.
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="report:new"></a><strong>report:new</strong>&nbsp;(path, options)</dt>
+<dd>
+Constructor.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  path: The report script path
+	</li>
+	
+	<li>
+	  options: Optional table of report options. If not given, the options of the current report will be used.
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="report:options"></a><strong>report:options</strong>&nbsp;()</dt>
+<dd>
+Returns the report's accepted options.
+
+
+
+
+
+
+
+<h3>Return value:</h3>
+A table with 2 entries per option (synopsis and description).
+
+
+
+</dd>
+
+
+
+
+<dt><a name="report:repository"></a><strong>report:repository</strong>&nbsp;()</dt>
+<dd>
+Returns the current repository.
+
+
+
+
+
+
+
+<h3>Return value:</h3>
+A repository instance
+
+
+
+<h3>See also:</h3>
+<ul>
+	
+	<li><a href="../modules/pepper.repository.html">
+		pepper.repository
+	</a>
+	
+</ul>
+
+</dd>
+
+
+
+
+<dt><a name="report:run"></a><strong>report:run</strong>&nbsp;()</dt>
+<dd>
+Runs this report. This function is similar to pepper.run(), except that is uses this report context instead of constructing a new one
+
+
+
+
+
+
+
+
+
+<h3>See also:</h3>
+<ul>
+	
+	<li><a href="../modules/pepper.html">
+		pepper
+	</a>
+	
+</ul>
+
+</dd>
+
+
+</dl>
+
+
+
+
+
+
+</div> <!-- id="content" -->
+
+</div> <!-- id="main" -->
+
+<div id="about">
+    <p><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0!" height="31" width="88" /></a></p>
+</div> <!-- id="about" -->
+
+</div> <!-- id="container" -->
+</body>
+</html>

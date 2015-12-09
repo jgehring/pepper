@@ -1,0 +1,441 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+    <title>pepper.repository: Module Index</title>
+    <link rel="stylesheet" href="../luadoc.css" type="text/css" />
+    <!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/-->
+</head>
+
+<body>
+<div id="container">
+
+<div id="product">
+    <div id="product_logo"></div>
+    <div id="product_name"><big><b></b></big></div>
+    <div id="product_description"></div>
+</div> <!-- id="product" -->
+
+<div id="main">
+
+<div id="navigation">
+
+
+<h1>LuaDoc</h1>
+<ul>
+	
+	<li><a href="../index.html">Index</a></li>
+	
+</ul>
+
+
+<!-- Module list -->
+
+<h1>Modules</h1>
+<ul>
+
+	<li>
+		<a href="../modules/pepper.html">pepper</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.datetime.html">pepper.datetime</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.diffstat.html">pepper.diffstat</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.gnuplot.html">pepper.gnuplot</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.iterator.html">pepper.iterator</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.plotutils.html">pepper.plotutils</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.report.html">pepper.report</a>
+	</li>
+
+	<li><strong>pepper.repository</strong></li>
+	
+	<li>
+		<a href="../modules/pepper.revision.html">pepper.revision</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.tag.html">pepper.tag</a>
+	</li>
+
+	<li>
+		<a href="../modules/pepper.utils.html">pepper.utils</a>
+	</li>
+
+</ul>
+
+
+
+<!-- File list -->
+
+
+
+
+
+
+</div><!-- id="navigation" -->
+
+<div id="content">
+
+<h1>Module <code>pepper.repository</code></h1>
+
+<p>Repository interface. This class can used to examine a repository and gather statistics.</p>
+
+
+
+
+
+<h2>Functions</h2>
+<table class="function_list">
+
+    <tr>
+    <td class="name" nowrap><a href="#branches">branches</a>&nbsp;()</td>
+    <td class="summary">Determines and returns a table listing all branches.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#cat">cat</a>&nbsp;(file, id)</td>
+    <td class="summary">Returns the contents of a given file.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#default_branch">default_branch</a>&nbsp;()</td>
+    <td class="summary">Returns the standard branch of the repository.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#head">head</a>&nbsp;(branch)</td>
+    <td class="summary">Determines and returns the current HEAD revision.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#iterator">iterator</a>&nbsp;(branch, options)</td>
+    <td class="summary">Returns a revision iterator for the given branch.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#revision">revision</a>&nbsp;(id)</td>
+    <td class="summary">Fetches a specific revision.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#tags">tags</a>&nbsp;()</td>
+    <td class="summary">Determines and returns a table listing all tags as tag objects.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#tree">tree</a>&nbsp;(id)</td>
+    <td class="summary">Returns a list of all files in the repository.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#type">type</a>&nbsp;()</td>
+    <td class="summary">Returns the repository type.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#url">url</a>&nbsp;()</td>
+    <td class="summary">Returns the repository URL.</td>
+    </tr>
+
+</table>
+
+
+
+
+
+
+<br/>
+<br/>
+
+
+
+<h2><a name="functions"></a>Functions</h2>
+<dl class="function">
+
+
+
+<dt><a name="branches"></a><strong>branches</strong>&nbsp;()</dt>
+<dd>
+Determines and returns a table listing all branches.
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="cat"></a><strong>cat</strong>&nbsp;(file, id)</dt>
+<dd>
+Returns the contents of a given file.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  file: File path, relative to repository root
+	</li>
+	
+	<li>
+	  id: Optional revision ID, defaults to current (i.e., the HEAD revision)
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="default_branch"></a><strong>default_branch</strong>&nbsp;()</dt>
+<dd>
+Returns the standard branch of the repository. For working copies, this is the branch that is curently checked out.
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="head"></a><strong>head</strong>&nbsp;(branch)</dt>
+<dd>
+Determines and returns the current HEAD revision.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  branch: An optional branch name
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="iterator"></a><strong>iterator</strong>&nbsp;(branch, options)</dt>
+<dd>
+Returns a revision iterator for the given branch. The following options will be added: <table> <tr><th>Key</th><th>Description</th><th>Default value</td></tr> <tr><td>start</td><td>Minimum time stamp for commits</td><td>none</td></tr> <tr><td>stop</td><td>Maximum time stamp for commits</td><td>none</td></tr> <tr><td>prefetch</td><td>Turn pre-fetching of revisions on or off</td><td>true</td></tr> </table>
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  branch: The name of the branch
+	</li>
+	
+	<li>
+	  options: Optional table with additional parameters
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+<h3>See also:</h3>
+<ul>
+	
+	<li><a href="../modules/pepper.iterator.html">
+		pepper.iterator
+	</a>
+	
+</ul>
+
+</dd>
+
+
+
+
+<dt><a name="revision"></a><strong>revision</strong>&nbsp;(id)</dt>
+<dd>
+Fetches a specific revision.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  id: The revision ID
+	</li>
+	
+</ul>
+
+
+
+
+
+
+<h3>Return value:</h3>
+The revision object
+
+
+
+<h3>See also:</h3>
+<ul>
+	
+	<li><a href="../modules/pepper.revision.html">
+		pepper.revision
+	</a>
+	
+</ul>
+
+</dd>
+
+
+
+
+<dt><a name="tags"></a><strong>tags</strong>&nbsp;()</dt>
+<dd>
+Determines and returns a table listing all tags as tag objects.
+
+
+
+
+
+
+
+
+
+<h3>See also:</h3>
+<ul>
+	
+	<li><a href="../modules/pepper.tag.html">
+		pepper.tag
+	</a>
+	
+</ul>
+
+</dd>
+
+
+
+
+<dt><a name="tree"></a><strong>tree</strong>&nbsp;(id)</dt>
+<dd>
+Returns a list of all files in the repository.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  id: Optional revision ID, defaults to current (i.e., the HEAD revision)
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="type"></a><strong>type</strong>&nbsp;()</dt>
+<dd>
+Returns the repository type. This is actually the name of the current backend, e.g. "git", "subversion" or "mercurial".
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="url"></a><strong>url</strong>&nbsp;()</dt>
+<dd>
+Returns the repository URL.
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+</dl>
+
+
+
+
+
+
+</div> <!-- id="content" -->
+
+</div> <!-- id="main" -->
+
+<div id="about">
+    <p><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0!" height="31" width="88" /></a></p>
+</div> <!-- id="about" -->
+
+</div> <!-- id="container" -->
+</body>
+</html>

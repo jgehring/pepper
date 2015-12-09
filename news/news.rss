@@ -1,0 +1,481 @@
+<?xml version="1.0"?>
+<rss version="2.0"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:dcterms="http://purl.org/dc/terms/" >
+<channel>
+<title>news</title>
+<link>https://jgehring.github.io/pepper/news/</link>
+
+<description>pepper news</description>
+<generator>ikiwiki</generator>
+<pubDate>Wed, 09 Dec 2015 07:55:51 +0100</pubDate>
+<item>
+	<title>Debian and Ubuntu packages</title>
+
+	<guid isPermaLink="false">https://jgehring.github.io/pepper/news/new-packages-debian-ubuntu/</guid>
+
+	<link>https://jgehring.github.io/pepper/news/new-packages-debian-ubuntu/</link>
+
+
+	<pubDate>Fri, 26 Apr 2013 11:48:00 +0200</pubDate>
+	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+
+
+	<description>&lt;p&gt;I&#39;m happy to announce that source and binary packages are now
+available for both &lt;a href=&quot;http://packages.debian.org/unstable/main/pepper&quot;&gt;Debian
+Sid&lt;/a&gt; and &lt;a href=&quot;http://packages.ubuntu.com/raring/vcs/pepper&quot;&gt;Ubuntu
+13.04 &quot;Raring Ringtail&quot;&lt;/a&gt;.
+Thanks go out to the respective maintainers!&lt;/p&gt;
+</description>
+
+
+</item>
+<item>
+	<title>pepper 0.3.2 released</title>
+
+	<guid isPermaLink="false">https://jgehring.github.io/pepper/news/pepper-0.3.2/</guid>
+
+	<link>https://jgehring.github.io/pepper/news/pepper-0.3.2/</link>
+
+
+	<pubDate>Fri, 01 Jun 2012 20:56:00 +0200</pubDate>
+	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+
+
+	<description>&lt;p&gt;I&#39;m happy to announce that version 0.3.2 of pepper is now available. This
+release fixes compilation with GCC 4.7 as well as some minor memory
+leaks. As usual, you can find source tarballs the &lt;a href=&quot;https://jgehring.github.io/pepper/news/../download/&quot;&gt;Download&lt;/a&gt; section.&lt;/p&gt;
+</description>
+
+
+</item>
+<item>
+	<title>peprserv - A repository statistics server for pepper</title>
+
+	<guid isPermaLink="false">https://jgehring.github.io/pepper/news/statistics-web-server/</guid>
+
+	<link>https://jgehring.github.io/pepper/news/statistics-web-server/</link>
+
+
+	<pubDate>Tue, 20 Mar 2012 16:16:00 +0100</pubDate>
+	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+
+
+	<description>&lt;p&gt;I&#39;ve just pushed the first version of a repository statistics
+server to &lt;a href=&quot;https://github.com/jgehring/peprserv&quot;&gt;GitHub&lt;/a&gt;. peprserv
+is actually a Lua report script for pepper, utilizing the
+&lt;a href=&quot;http://keplerproject.github.com/xavante/&quot;&gt;Xavante&lt;/a&gt; HTTP web server. The
+main intention for this project is providing a backend for serving
+repository statistics to other web applications, like repository
+interfaces or bug trackers.&lt;/p&gt;
+
+&lt;p&gt;A live demo using &lt;a href=&quot;https://github.com/gitster/git&quot;&gt;the official Git
+repository&lt;/a&gt; is running at
+&lt;a href=&quot;http://jgehring.net:9000&quot;&gt;http://jgehring.net:9000&lt;/a&gt;, and the source
+code is available &lt;a href=&quot;https://github.com/jgehring/peprserv&quot;&gt;on GitHub&lt;/a&gt;.&lt;/p&gt;
+</description>
+
+
+</item>
+<item>
+	<title>pepper 0.3.1 released</title>
+
+	<guid isPermaLink="false">https://jgehring.github.io/pepper/news/pepper-0.3.1/</guid>
+
+	<link>https://jgehring.github.io/pepper/news/pepper-0.3.1/</link>
+
+
+	<pubDate>Fri, 16 Mar 2012 00:46:00 +0100</pubDate>
+	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+
+
+	<description>&lt;p&gt;I&#39;m happy to announce that version 0.3.1 of pepper is now available. This
+release brings the usual fixes as well as new features. Experimental
+support for using &lt;a href=&quot;http://code.google.com/p/leveldb/&quot;&gt;LevelDB&lt;/a&gt; as a
+backend for the revision cache has been added. The built-in Gnuplot
+interface received a function for pie charts, which is already
+used by the new &lt;code&gt;authors_pie&lt;/code&gt; report and the new &lt;code&gt;--pie&lt;/code&gt; flag for
+the &lt;code&gt;filetypes&lt;/code&gt; report. Furthermore, there&#39;s a new report called
+&lt;code&gt;volume&lt;/code&gt; which closely resembles the &lt;a href=&quot;http://www.ohloh.net/p/ohcount/analyses/latest&quot;&gt;commit volume report from
+Ohloh&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;The list of bugs that have been fixed in this release includes an issue
+that broke plotting on Mac OS X and some headless environments. Repository
+detection for working copies handled with Subversion 1.7 has been fixed, too.&lt;/p&gt;
+
+&lt;p&gt;A more detailed listing of the changes can be found in the &lt;a href=&quot;https://jgehring.github.io/pepper/news/ChangeLog&quot;&gt;change
+log&lt;/a&gt;, source tarballs are available at the &lt;a href=&quot;https://jgehring.github.io/pepper/news/../download/&quot;&gt;Download&lt;/a&gt; section.&lt;/p&gt;
+
+&lt;p&gt;The &lt;a href=&quot;https://jgehring.github.io/pepper/news/../gallery/&quot;&gt;Gallery&lt;/a&gt; has been updated with new examples, now
+using a pretty Gnuplot style based on &lt;a href=&quot;http://guidolan.blogspot.com/2010/03/how-to-create-beautiful-gnuplot-graphs.html&quot;&gt;this GuidoLabs
+article&lt;/a&gt;.&lt;/p&gt;
+</description>
+
+
+</item>
+<item>
+	<title>pepper 0.3 released</title>
+
+	<guid isPermaLink="false">https://jgehring.github.io/pepper/news/pepper-0.3/</guid>
+
+	<link>https://jgehring.github.io/pepper/news/pepper-0.3/</link>
+
+
+	<pubDate>Wed, 21 Dec 2011 02:17:00 +0100</pubDate>
+	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+
+
+	<description>&lt;p&gt;Version 0.3 of pepper is now available. This release features an improved
+report API, a new report for running other reports from a graphical user
+interface and numerous bugfixes and smaller improvements.&lt;/p&gt;
+
+&lt;p&gt;The report API has received a big update. In particular, the ability
+to access and run other reports from within the current report has been
+improved. Among other things, this enables the creation of meta-reports
+that aggregate existing reports. These features are also heavily
+used by the new GUI report.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;NOTE:&lt;/em&gt; This update breaks compatibility with existing scripts. However,
+the changes required to make old reports working have been kept small and
+are described in detail in the respective &lt;a href=&quot;https://jgehring.github.io/pepper/news/../documentation/porting-02-03/&quot;&gt;porting guide&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;A more detailed listing of the changes can be found in the &lt;a href=&quot;https://jgehring.github.io/pepper/news/ChangeLog&quot;&gt;change
+log&lt;/a&gt;. As usual, source tarballs can be found at the
+&lt;a href=&quot;https://jgehring.github.io/pepper/news/../download/&quot;&gt;Download&lt;/a&gt; section.&lt;/p&gt;
+</description>
+
+
+</item>
+<item>
+	<title>pepper 0.2.4 released</title>
+
+	<guid isPermaLink="false">https://jgehring.github.io/pepper/news/pepper-0.2.4/</guid>
+
+	<link>https://jgehring.github.io/pepper/news/pepper-0.2.4/</link>
+
+
+	<pubDate>Sat, 06 Aug 2011 22:41:00 +0200</pubDate>
+	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+
+
+	<description>&lt;p&gt;I&#39;m happy to announce that version 0.2.4 of pepper is now available. This
+is a bugfix release only, fixing a file name issue &lt;a href=&quot;http://sourceforge.net/tracker/index.php?func=detail&amp;amp;aid=3386735&amp;amp;group_id=386093&amp;amp;atid=1604684&quot;&gt;reported by Merve
+Yüzbaşıoğlu&lt;/a&gt;,
+that could cause errors when running the program against sub-directories of
+Subversion repositories. Additionally, some minor fixes have been made
+to the age report.&lt;/p&gt;
+
+&lt;p&gt;A more detailed listing of the changes can be found in the &lt;a href=&quot;https://jgehring.github.io/pepper/news/ChangeLog&quot;&gt;change
+log&lt;/a&gt;. As usual, source tarballs can be found at the
+&lt;a href=&quot;https://jgehring.github.io/pepper/news/../download/&quot;&gt;Download&lt;/a&gt; section.&lt;/p&gt;
+</description>
+
+
+</item>
+<item>
+	<title>pepper 0.2.3 released</title>
+
+	<guid isPermaLink="false">https://jgehring.github.io/pepper/news/pepper-0.2.3/</guid>
+
+	<link>https://jgehring.github.io/pepper/news/pepper-0.2.3/</link>
+
+
+	<pubDate>Wed, 22 Jun 2011 22:50:00 +0200</pubDate>
+	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+
+
+	<description>&lt;p&gt;I&#39;m happy to announce that version 0.2.3 of pepper is now
+available. This release adds the punchcard report, inspired by
+&lt;a href=&quot;https://github.com/blog/159-one-more-thing&quot;&gt;GitHub&#39;s punchcard&lt;/a&gt; and
+&lt;a href=&quot;http://dustin.github.com/2009/01/11/timecard.html&quot;&gt;Git Timecard&lt;/a&gt;.
+Additionally, a major glitch preventing the
+Subversion backend to work on empty caches has been fixed
+(&lt;a href=&quot;http://sourceforge.net/tracker/?func=detail&amp;amp;aid=3314428&amp;amp;group_id=386093&amp;amp;atid=1604684&quot;&gt;#3314428&lt;/a&gt;,
+thanks to Daniel Lynes for reporting!).&lt;/p&gt;
+
+&lt;p&gt;A more detailed listing of the changes can be found in the &lt;a href=&quot;https://jgehring.github.io/pepper/news/ChangeLog&quot;&gt;change
+log&lt;/a&gt;. As usual, source tarballs can be found at the
+&lt;a href=&quot;https://jgehring.github.io/pepper/news/../download/&quot;&gt;Download&lt;/a&gt; section.&lt;/p&gt;
+</description>
+
+
+</item>
+<item>
+	<title>pepper 0.2.2 released</title>
+
+	<guid isPermaLink="false">https://jgehring.github.io/pepper/news/pepper-0.2.2/</guid>
+
+	<link>https://jgehring.github.io/pepper/news/pepper-0.2.2/</link>
+
+
+	<pubDate>Mon, 02 May 2011 22:12:00 +0200</pubDate>
+	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+
+
+	<description>&lt;p&gt;Version 0.2.2 of pepper is now available. This release greatly improves
+the performance of the Git backend and adds two built-in report
+scripts. One of them, the participation report, is on display at the
+&lt;a href=&quot;https://jgehring.github.io/pepper/news/../gallery/&quot;&gt;Gallery&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;A more detailed listing of the changes can be found in the &lt;a href=&quot;https://jgehring.github.io/pepper/news/ChangeLog&quot;&gt;change
+log&lt;/a&gt;. As usual, source tarballs can be found at the
+&lt;a href=&quot;https://jgehring.github.io/pepper/news/../download/&quot;&gt;Download&lt;/a&gt; section.&lt;/p&gt;
+</description>
+
+
+</item>
+<item>
+	<title>pepper 0.2.1 released</title>
+
+	<guid isPermaLink="false">https://jgehring.github.io/pepper/news/pepper-0.2.1/</guid>
+
+	<link>https://jgehring.github.io/pepper/news/pepper-0.2.1/</link>
+
+
+	<pubDate>Tue, 05 Apr 2011 23:54:00 +0200</pubDate>
+	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+
+
+	<description>&lt;p&gt;Version 0.2.1 of pepper is now available. This release focuses on the
+Subversion backend implementation and contains new features as well as
+bugfixes. The revision log for Subversion repositories is now cached
+locally, resulting in a noticeable speedup for subsequent reports on
+remote repositories. Furthermore, a working copy can now be used for the
+repository URL. The bugfixes include several Subversion-related issues,
+including possibly missing diffstats for deleted files and problems with
+subdirectory handling.&lt;/p&gt;
+
+&lt;p&gt;A more detailed listing of the changes can be found in the &lt;a href=&quot;https://jgehring.github.io/pepper/news/ChangeLog&quot;&gt;change
+log&lt;/a&gt;. As usual, source tarballs can be found at the
+&lt;a href=&quot;https://jgehring.github.io/pepper/news/../download/&quot;&gt;Download&lt;/a&gt; section.&lt;/p&gt;
+</description>
+
+
+</item>
+<item>
+	<title>pepper 0.2 released</title>
+
+	<guid isPermaLink="false">https://jgehring.github.io/pepper/news/pepper-0.2/</guid>
+
+	<link>https://jgehring.github.io/pepper/news/pepper-0.2/</link>
+
+
+	<pubDate>Mon, 28 Mar 2011 01:02:00 +0200</pubDate>
+	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+
+
+	<description>&lt;p&gt;Version 0.2 of pepper is now available. This release
+brings new and improved built-in reports, an overhauled
+report API and a man page.  The &lt;a href=&quot;http://labs.freehackers.org/wiki/hgactivity&quot;&gt;Mercurial activity
+extension&lt;/a&gt; has been ported to
+pepper. The &lt;code&gt;commits_per_month&lt;/code&gt; report has been generalized and renamed to
+&lt;code&gt;commit_counts&lt;/code&gt; and a report that dumps commit data in CSV format has been
+added. The new man page is also available &lt;a href=&quot;https://jgehring.github.io/pepper/news/../documentation/manpage/&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;A more detailed listing of the changes can be found in the &lt;a href=&quot;https://jgehring.github.io/pepper/news/ChangeLog&quot;&gt;change
+log&lt;/a&gt;. As usual, source tarballs can be found at the
+&lt;a href=&quot;https://jgehring.github.io/pepper/news/../download/&quot;&gt;Download&lt;/a&gt; section.&lt;/p&gt;
+
+&lt;p&gt;The homepage has been updated as well. On the right, the latest commits
+from pepper&#39;s &lt;a href=&quot;http://github.com/jgehring/pepper&quot;&gt;GitHub repository&lt;/a&gt;
+are shown, and the &lt;a href=&quot;https://jgehring.github.io/pepper/news/../scriptingguide/&quot;&gt;scripting guide&lt;/a&gt; as well as the
+&lt;a href=&quot;https://jgehring.github.io/pepper/news/../gallery/&quot;&gt;Gallery&lt;/a&gt; page have been updated. I&#39;ve added a favicon representing
+a pepper box and changed some of the colors.&lt;/p&gt;
+</description>
+
+
+</item>
+<item>
+	<title>pepper 0.1.5 released</title>
+
+	<guid isPermaLink="false">https://jgehring.github.io/pepper/news/pepper-0.1.5/</guid>
+
+	<link>https://jgehring.github.io/pepper/news/pepper-0.1.5/</link>
+
+
+	<pubDate>Mon, 31 Jan 2011 23:48:00 +0100</pubDate>
+	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+
+
+	<description>&lt;p&gt;Version 0.1.5 of pepper is now available. This release
+adds a new report showing a histogram of file types in the
+repository. The command-line argument for the repository can
+be omitted now to use the current directory. Additionally,
+the cache check is now performed by the new built-in &lt;code&gt;check_cache&lt;/code&gt;
+report. Two bugs reported by Dominik Geyer have been fixed (see
+&lt;a href=&quot;http://sourceforge.net/tracker/?func=detail&amp;amp;aid=3162914&amp;amp;group_id=386093&amp;amp;atid=1604684&quot;&gt;#3162914&lt;/a&gt;
+and
+&lt;a href=&quot;http://sourceforge.net/tracker/?func=detail&amp;amp;aid=3162922&amp;amp;group_id=386093&amp;amp;atid=1604684&quot;&gt;#3162922&lt;/a&gt;).&lt;/p&gt;
+
+&lt;p&gt;Please refer to the &lt;a href=&quot;https://jgehring.github.io/pepper/news/ChangeLog&quot;&gt;change log&lt;/a&gt; for a more detailed
+listing. As usual, source tarballs can be found at the &lt;a href=&quot;https://jgehring.github.io/pepper/news/../download/&quot;&gt;Download&lt;/a&gt;
+section.&lt;/p&gt;
+</description>
+
+
+</item>
+<item>
+	<title>pepper 0.1.4 released</title>
+
+	<guid isPermaLink="false">https://jgehring.github.io/pepper/news/pepper-0.1.4/</guid>
+
+	<link>https://jgehring.github.io/pepper/news/pepper-0.1.4/</link>
+
+
+	<pubDate>Thu, 20 Jan 2011 12:13:00 +0100</pubDate>
+	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+
+
+	<description>&lt;p&gt;Version 0.1.4 of pepper is now available. This release adds additional
+report options for controlling the plot output, like the file name or
+the image size.  Additionally, support for custom Subversion repository
+layouts (trunk, branches and tag locations) has been added. A couple of
+bugs have been fixed as well.&lt;/p&gt;
+
+&lt;p&gt;Please refer to the &lt;a href=&quot;https://jgehring.github.io/pepper/news/ChangeLog&quot;&gt;change log&lt;/a&gt; for a more detailed
+listing. As usual, source tarballs can be found at the &lt;a href=&quot;https://jgehring.github.io/pepper/news/../download/&quot;&gt;Download&lt;/a&gt;
+section.&lt;/p&gt;
+</description>
+
+
+</item>
+<item>
+	<title>pepper 0.1.3 released</title>
+
+	<guid isPermaLink="false">https://jgehring.github.io/pepper/news/pepper-0.1.3/</guid>
+
+	<link>https://jgehring.github.io/pepper/news/pepper-0.1.3/</link>
+
+
+	<pubDate>Sat, 15 Jan 2011 01:15:00 +0100</pubDate>
+	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+
+
+	<description>&lt;p&gt;pepper 0.1.3 is now available. This release adds a new report for
+visualizing directory sizes and fixes several major bugs, including wrong
+diff calls for merged revisions in the Git and Mercurial backend. Diffstat
+data generated previously may be wrong, so old revision caches will be
+invalidated automatically.&lt;/p&gt;
+
+&lt;p&gt;Please refer to the &lt;a href=&quot;https://jgehring.github.io/pepper/news/ChangeLog&quot;&gt;change log&lt;/a&gt; for a more detailed listing.&lt;/p&gt;
+
+&lt;p&gt;As usual, source tarballs can be found at the &lt;a href=&quot;https://jgehring.github.io/pepper/news/../download/&quot;&gt;Download&lt;/a&gt; section. The
+&lt;a href=&quot;https://jgehring.github.io/pepper/news/../gallery/&quot;&gt;Gallery&lt;/a&gt; page has been updated, so you can take a look at the new
+report script.&lt;/p&gt;
+</description>
+
+
+</item>
+<item>
+	<title>AUR package</title>
+
+	<guid isPermaLink="false">https://jgehring.github.io/pepper/news/aur-package/</guid>
+
+	<link>https://jgehring.github.io/pepper/news/aur-package/</link>
+
+
+	<pubDate>Wed, 12 Jan 2011 11:16:00 +0100</pubDate>
+	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+
+
+	<description>&lt;p&gt;I&#39;ve added a &lt;a href=&quot;http://aur.archlinux.org/packages.php?ID=45324&quot;&gt;PKGBUILD for
+pepper&lt;/a&gt; to the &lt;a href=&quot;http://aur.archlinux.org/&quot;&gt;Arch User
+Repository&lt;/a&gt;. Arch users can install the program
+now using their favorite AUR package manager, e.g. &lt;code&gt;yaourt -S scm-pepper&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;In order to add support for all available repository types, the
+&lt;code&gt;subversion&lt;/code&gt; and &lt;code&gt;mercurial&lt;/code&gt; packages should be installed first.&lt;/p&gt;
+</description>
+
+
+</item>
+<item>
+	<title>pepper-0.1.2</title>
+
+	<guid isPermaLink="false">https://jgehring.github.io/pepper/news/pepper-0.1.2/</guid>
+
+	<link>https://jgehring.github.io/pepper/news/pepper-0.1.2/</link>
+
+
+	<pubDate>Wed, 12 Jan 2011 01:08:00 +0100</pubDate>
+	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+
+
+	<description>&lt;p&gt;pepper 0.1.2 is now available. This release adds tag access for
+reports scripts and fixes several bugs. The tags and branches listing
+of Subversion repositories accessed via http:// has been fixed, and the
+signal handling code for protecting cache writes has been rewritten.&lt;/p&gt;
+
+&lt;p&gt;As usual, source tarballs can be found at the &lt;a href=&quot;https://jgehring.github.io/pepper/news/../download/&quot;&gt;Download&lt;/a&gt; section.&lt;/p&gt;
+</description>
+
+
+</item>
+<item>
+	<title>New Homepage</title>
+
+	<guid isPermaLink="false">https://jgehring.github.io/pepper/news/new-homepage/</guid>
+
+	<link>https://jgehring.github.io/pepper/news/new-homepage/</link>
+
+
+	<pubDate>Mon, 10 Jan 2011 01:22:00 +0100</pubDate>
+	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+
+
+	<description>&lt;p&gt;I&#39;m happy to announce that pepper&#39;s homepage is now generated using
+&lt;a href=&quot;http://ikiwiki.info&quot;&gt;IkiWiki&lt;/a&gt;, a nifty wiki compiler. The homepage
+has been split into categories now, a navigation bar can be found on
+top of the index page. There&#39;s also a lot of new content, including
+&lt;a href=&quot;https://jgehring.github.io/pepper/news/../documentation/&quot;&gt;documentation&lt;/a&gt; and a small &lt;a href=&quot;https://jgehring.github.io/pepper/news/../scriptingguide/&quot;&gt;scripting guide&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;The source code of the website is available at
+&lt;a href=&quot;http://github.com/jgehring/pepper-hp&quot;&gt;GitHub&lt;/a&gt;.&lt;/p&gt;
+</description>
+
+
+</item>
+<item>
+	<title>pepper-0.1.1</title>
+
+	<guid isPermaLink="false">https://jgehring.github.io/pepper/news/pepper-0.1.1/</guid>
+
+	<link>https://jgehring.github.io/pepper/news/pepper-0.1.1/</link>
+
+
+	<pubDate>Tue, 28 Dec 2010 00:00:00 +0100</pubDate>
+	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+
+
+	<description>&lt;p&gt;pepper 0.1.1 is now available. This release adds a new report showing
+commit times in a scatter plot and fixes several bugs.  Among others,
+running built-in reports without specifying the full path and several
+issues related to multi-threading have been fixed. The Lua detection
+of the configure script should work automatically for most Linux
+distributions now.&lt;/p&gt;
+
+&lt;p&gt;Source tarballs can be found at the &lt;a href=&quot;https://jgehring.github.io/pepper/news/../download/&quot;&gt;Download&lt;/a&gt; section.&lt;/p&gt;
+</description>
+
+
+</item>
+<item>
+	<title>pepper-0.1</title>
+
+	<guid isPermaLink="false">https://jgehring.github.io/pepper/news/pepper-0.1/</guid>
+
+	<link>https://jgehring.github.io/pepper/news/pepper-0.1/</link>
+
+
+	<pubDate>Mon, 20 Dec 2010 00:00:00 +0100</pubDate>
+	<dcterms:modified>2015-12-09T06:55:51Z</dcterms:modified>
+
+
+	<description>&lt;p&gt;Initial release: pepper 0.1&lt;/p&gt;
+</description>
+
+
+</item>
+
+</channel>
+</rss>

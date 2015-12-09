@@ -1,0 +1,207 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>pepper - porting reports from 0.2.x to 0.3</title>
+
+<link rel="icon" href="../../favicon.ico" type="image/x-icon" />
+
+<link rel="stylesheet" href="../../style.css" type="text/css" />
+
+<link rel="stylesheet" href="../../local.css" type="text/css" />
+
+
+
+
+
+</head>
+<body>
+
+<div class="page">
+
+<div class="pageheader">
+<div class="header">
+<span>
+<span class="parentlinks">
+
+<a href="../../">pepper</a>/ 
+
+<a href="../">documentation</a>/ 
+
+</span>
+<span class="title">
+porting reports from 0.2.x to 0.3
+
+</span>
+</span>
+
+</div>
+
+
+
+
+
+</div>
+
+
+
+<div id="pagebody">
+
+<div id="content">
+
+
+<div class="toc">
+		<ol>
+			<li class="L3"><a href="#index1h3">Introduction</a>
+			</li>
+			<li class="L3"><a href="#index2h3">Necessary changes</a>
+			</li>
+			<li class="L3"><a href="#index3h3">Recommended changes</a>
+			</li>
+		</ol>
+</div>
+
+
+
+
+<div class="clear"></div>
+
+
+<hr />
+
+<h3><a name="index1h3"></a>Introduction</h3>
+
+<p>In pepper 0.3, the report API has been changed in a way that breaks reports written for version
+0.2.x or 0.1.x. This document provides instructions for porting old reports to the new API and
+lists the necessary and recommended changes for doing so.</p>
+
+<h3><a name="index2h3"></a>Necessary changes</h3>
+
+<p>The breakage with old report scripts is caused by the introduction of
+a report context class. This class replaces the former <code>pepper.report</code>
+module and enables writing reports in a more object-oriented way. Thus,
+all invocations of functions from the old module will need to replaced
+by calls to the current report context or their respective replacements.</p>
+
+<p>First, the main report function (<code>main()</code> or <code>run()</code>) should be changed to
+accept the current report context as an argument</p>
+
+<div class="highlight-lua"><pre class="hl"><span class="hl slc">-- Main report function</span>
+<span class="hl kwa">function</span> <span class="hl kwd">run</span><span class="hl opt">(</span>self<span class="hl opt">)</span>
+    <span class="hl slc">-- The report context is given by self</span>
+<span class="hl kwa">end</span>
+</pre></div>
+
+
+<p>Next, all invocations of functions from <code>pepper.report</code> need to be
+replaced.  The following table lists a replacement for every function
+of the former <code>pepper.report</code> module. <code>report</code> is the current report
+context, which corresponds to <code>self</code> in the code above.</p>
+
+<div class="listing">
+<table style="font-family: normal" width="100%" rules="cols" cellpadding="2">
+<tr><td><b>Old syntax</b<</th><td><b>Replacement</b></td></tr>
+<tr>
+    <td><code>pepper.report.getopt(option, default)</code></td>
+    <td><code><a href="../api/modules/pepper.report.html#report:getopt">report:getopt(option, value)</code></a></td>
+</tr>
+<tr>
+    <td><code>pepper.report.repository()</code></td>
+    <td><code><a href="../api/modules/pepper.report.html#report:repository">report:repository()</code></a></td>
+</tr>
+<tr>
+    <td><code>pepper.report.revision(id)</code></td>
+    <td><code><a href="../api/modules/pepper.repository.html#revision">report:repository():revision(id)</code></a></td>
+</tr>
+<tr>
+    <td><code>pepper.report.run(report, options)</code></td>
+    <td><code><a href="../api/modules/pepper.html#run">pepper.run(report, options)</code></a></td>
+</tr>
+<tr>
+    <td><code>pepper.report.walk_branch(callback, branch)</code></td>
+    <td><code><a href="../api/modules/pepper.iterator.html#map">report:repository():iterator(branch):map(callback)</code></a></td>
+</tr>
+</table>
+</div>
+
+
+<p>These changes should make your script usable with pepper
+0.3. Since you're at porting anyway, please take the time to read the
+following section about recommended changes as well.</p>
+
+<h3><a name="index3h3"></a>Recommended changes</h3>
+
+<p>It is now recommended for reports to define their meta data (e.g.,
+their name or their options) in a <code>describe()</code> function rather than
+using a global meta table. Thus, a meta table like</p>
+
+<div class="highlight-lua"><pre class="hl">meta<span class="hl opt">.</span>title <span class="hl opt">=</span> <span class="hl str">&quot;Branch HEAD&quot;</span>
+meta<span class="hl opt">.</span>description <span class="hl opt">=</span> <span class="hl str">&quot;Prints the HEAD revision of a branch&quot;</span>
+meta<span class="hl opt">.</span>options <span class="hl opt">= {{</span><span class="hl str">&quot;-bARG, --branch=ARG&quot;</span><span class="hl opt">,</span> <span class="hl str">&quot;Select branch&quot;</span><span class="hl opt">}}</span>
+</pre></div>
+
+
+<p>should be replaced with</p>
+
+<div class="highlight-lua"><pre class="hl"><span class="hl slc">-- Describes the report</span>
+<span class="hl kwa">function</span> <span class="hl kwd">describe</span><span class="hl opt">()</span>
+    <span class="hl kwa">local</span> r <span class="hl opt">= {}</span>
+    r<span class="hl opt">.</span>title <span class="hl opt">=</span> <span class="hl str">&quot;Branch HEAD&quot;</span>
+    r<span class="hl opt">.</span>description <span class="hl opt">=</span> <span class="hl str">&quot;Prints the HEAD revision of a branch&quot;</span>
+    r<span class="hl opt">.</span>options <span class="hl opt">= {{</span><span class="hl str">&quot;-bARG, --branch=ARG&quot;</span><span class="hl opt">,</span> <span class="hl str">&quot;Select branch&quot;</span><span class="hl opt">}}</span>
+    <span class="hl kwa">return</span> r
+<span class="hl kwa">end</span>
+</pre></div>
+
+
+<p>Please note that the old meta table style is still supported, although
+this may change in future versions.</p>
+
+</div>
+
+
+
+
+
+</div>
+
+<div id="footer" class="pagefooter">
+
+<div id="pageinfo">
+
+
+
+
+<div id="backlinks">
+Links:
+
+<a href="../">documentation</a>
+
+<a href="../../news/pepper-0.3/">news/pepper-0.3</a>
+
+
+</div>
+
+
+
+
+
+
+<div class="pagedate">
+Last edited <span class="date">December 09, 2015, 07:55 CET</span>
+<!-- Created <span class="date">December 09, 2015, 07:55 CET</span> -->
+</div>
+
+</div>
+
+
+<!-- from pepper -->
+</div>
+
+</div>
+
+</body>
+</html>

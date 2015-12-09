@@ -1,0 +1,238 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>pepper - manpage</title>
+
+<link rel="icon" href="../../favicon.ico" type="image/x-icon" />
+
+<link rel="stylesheet" href="../../style.css" type="text/css" />
+
+<link rel="stylesheet" href="../../local.css" type="text/css" />
+
+
+
+
+
+</head>
+<body>
+
+<div class="page">
+
+<div class="pageheader">
+<div class="header">
+<span>
+<span class="parentlinks">
+
+<a href="../../">pepper</a>/ 
+
+<a href="../">documentation</a>/ 
+
+</span>
+<span class="title">
+manpage
+
+</span>
+</span>
+
+</div>
+
+
+
+
+
+</div>
+
+
+
+<div id="pagebody">
+
+<div id="content">
+<div class="refnamediv"><h2>Name</h2><p>pepper &#8212; Repository statistics and report tool</p></div>
+
+
+<div class="refsynopsisdiv"><a name="_synopsis"></a><h2>Synopsis</h2><p><span class="strong"><strong>pepper</strong></span> [<span class="emphasis"><em>options</em></span>] <span class="emphasis"><em>report</em></span> [<span class="emphasis"><em>report options</em></span>] [<span class="emphasis"><em>repository</em></span>]</p></div>
+
+
+<div class="refsect1"><a name="_description"></a><h2>DESCRIPTION</h2><p><span class="strong"><strong>pepper</strong></span> is a command-line tool for retrieving statistics and generating
+reports from source code repositories. If invoked with valid options,it
+runs a <span class="strong"><strong>lua</strong></span>(1) script given by <span class="emphasis"><em>report</em></span> on the given <span class="emphasis"><em>repository</em></span>,
+producing textual or graphical output.</p><p>If the <span class="emphasis"><em>report</em></span> argument doesn&#8217;t point to a <span class="strong"><strong>lua</strong></span>(1) report script, a
+number of paths will be searched for a report with the given name (see
+<span class="strong"><strong>ENVIRONMENT VARIABLES</strong></span>). Thus, the built-in reports can be launched
+by specifying their name only.  Report-specific options can be passed
+as <span class="emphasis"><em>report options</em></span> following the report script name. To retrieve a
+listing of options supported by the respective report, pass <span class="strong"><strong>--help</strong></span>
+as described in <span class="strong"><strong>OPTIONS</strong></span>.</p><p>If no <span class="emphasis"><em>repository</em></span> argument is present, the current directory will be
+used. Normally, the type of the repository is automatically detected,
+and an appropriate backend implementation will be selected. Some
+backends provide additional options, e.g. user authentication for remote
+repositories. Those options will be listed if you pass the <span class="strong"><strong>--help</strong></span>
+flag as described in <span class="strong"><strong>OPTIONS</strong></span>.</p></div>
+
+
+<div class="refsect1"><a name="_options"></a><h2>OPTIONS</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term">
+<span class="strong"><strong>-?</strong></span>, <span class="strong"><strong>-h</strong></span>, <span class="strong"><strong>--help</strong></span>
+</span></dt><dd>
+Print a nice help screen. If the command line includes a report script name
+or path, report options will be shown. Additionally, backend options will
+be shown for the selected repository or backend.
+</dd><dt><span class="term">
+<span class="strong"><strong>-q</strong></span>
+, </span><span class="term">
+<span class="strong"><strong>--quiet</strong></span>
+</span></dt><dd>
+Set verbosity level to minimum. Only warnings and errors will be shown.
+</dd><dt><span class="term">
+<span class="strong"><strong>-v</strong></span>
+, </span><span class="term">
+<span class="strong"><strong>--verbose</strong></span>
+</span></dt><dd>
+Increase verbosity level. Can be specified multiple times.
+</dd><dt><span class="term">
+<span class="strong"><strong>--no-cache</strong></span>
+</span></dt><dd>
+Neither read from nor write to the local revision cache.
+</dd><dt><span class="term">
+<span class="strong"><strong>--list-reports</strong></span>
+</span></dt><dd>
+List all reports that can be found in the current report search
+directories.
+</dd><dt><span class="term">
+<span class="strong"><strong>--list-backends</strong></span>
+</span></dt><dd>
+List all built-in repository backends.
+</dd><dt><span class="term">
+<span class="strong"><strong>-bARG, --backend=ARG</strong></span>
+</span></dt><dd>
+Force usage of backend named <span class="strong"><strong>ARG</strong></span>. Use <span class="strong"><strong>--list-backends</strong></span> to retrieve a
+list of all available backends.
+</dd></dl></div></div>
+
+
+<div class="refsect1"><a name="_revision_cache"></a><h2>REVISION CACHE</h2><p><span class="strong"><strong>pepper</strong></span> uses a local revision cache, located at $HOME/.pepper/cache. It
+contains meta-data and diffstats of revisions that have been requested
+in previous invocations of the program.</p><p>If the program complains that your revision cache is invalid (probably
+because of abnormal program termination or power failure), please run
+the <span class="strong"><strong>check_cache</strong></span> report to fix it and remove faulty revisions.</p></div>
+
+
+<div class="refsect1"><a name="_environment_variables"></a><h2>ENVIRONMENT VARIABLES</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term">
+<span class="strong"><strong>PEPPER_REPORTS</strong></span>
+</span></dt><dd>
+A colon-separated list of paths used to search for report scripts.
+</dd><dt><span class="term">
+<span class="strong"><strong>PEPPER_CACHEDIR</strong></span>
+</span></dt><dd>
+A path that overrides the default cache location.
+</dd></dl></div></div>
+
+
+<div class="refsect1"><a name="_examples"></a><h2>EXAMPLES</h2><p>Let&#8217;s assume that the current directory is the repository of interest.</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">
+pepper --list-reports
+</span></dt><dd>
+This lists all reports in the current search path with their
+descriptions. The names from this listing can be used as the program&#8217;s
+<span class="emphasis"><em>report</em></span> argument.
+</dd><dt><span class="term">
+pepper loc
+</span></dt><dd>
+A classic "Lines of Code" graph will be generated, with the actual
+plotting done by <span class="strong"><strong>gnuplot</strong></span>(1).  If the user is running X11, a detached
+window containing the plot will be shown. Else, output in SVG format
+will be written to <span class="emphasis"><em>stdout</em></span>.
+All meta-data and diffstats fetched during this session will be written
+to the revision cache.
+</dd><dt><span class="term">
+pepper loc --type=png --output=loc.png
+</span></dt><dd>
+The same as above, now probably significantly faster because the revisions
+of interest are already cached. This time, a PNG image will be generated
+and written to "loc.png".
+</dd><dt><span class="term">
+pepper authors -n4 --tags="2.6.[0-9]*$"
+</span></dt><dd>
+This time, the code contribution by the 4 busiest authors will be be
+plotted. Additionally, vertical tag marks will be show for all tags
+that look like releases (of the Linux kernel).
+</dd><dt><span class="term">
+pepper --username=user commit_counts --period=14d <a class="ulink" href="http://svn.example.org" target="_top">http://svn.example.org</a>
+</span></dt><dd>
+This generates a histogram of commit frequencies for the last 14
+days. This time, a remote Subversion repository requiring authentication
+is being used. If a password is required, the program will prompt for it.
+</dd><dt><span class="term">
+pepper shortlog --branch=stable --summary
+</span></dt><dd>
+This will print a simple commit summary from the "stable" branch to
+<span class="emphasis"><em>stdout</em></span>, looking like <span class="strong"><strong>git-shortlog</strong></span>(1).
+</dd></dl></div></div>
+
+
+<div class="refsect1"><a name="_custom_reports"></a><h2>CUSTOM REPORTS</h2><p><span class="strong"><strong>pepper</strong></span> provides an API for writing custom report scripts in
+<span class="strong"><strong>lua</strong></span>(1). The <span class="strong"><strong>pepper</strong></span> homepage at <a class="ulink" href="http://scm-pepper.sourceforge.net" target="_top">http://scm-pepper.sourceforge.net</a>
+contains more information about this topic, including a scripting tutorial
+covering common tasks and an API reference manual.</p></div>
+
+
+<div class="refsect1"><a name="_exit_status"></a><h2>EXIT STATUS</h2><p>0 on success, 1 on failure. Any error messages, warnings and progress
+will be printed to <span class="emphasis"><em>stderr</em></span>.</p></div>
+
+
+<div class="refsect1"><a name="_see_also"></a><h2>SEE ALSO</h2><p><span class="strong"><strong>git</strong></span>(1), <span class="strong"><strong>svn</strong></span>(1), <span class="strong"><strong>hg</strong></span>(1), <span class="strong"><strong>lua</strong></span>(1), <span class="strong"><strong>gnuplot</strong></span>(1)</p></div>
+
+
+<div class="refsect1"><a name="_author"></a><h2>AUTHOR</h2><p>Copyright © 2010-present Jonas Gehring &lt;$<a class="ulink" href="mailto:FORENAME@jgehring.net" target="_top">FORENAME@jgehring.net</a>&gt;.
+Released under the GNU General Public License.</p></div>
+
+
+<p></div></html></p>
+
+</div>
+
+
+
+
+
+</div>
+
+<div id="footer" class="pagefooter">
+
+<div id="pageinfo">
+
+
+
+
+<div id="backlinks">
+Links:
+
+<a href="../">documentation</a>
+
+<a href="../../news/pepper-0.2/">news/pepper-0.2</a>
+
+
+</div>
+
+
+
+
+
+
+<div class="pagedate">
+Last edited <span class="date">December 09, 2015, 20:08 CET</span>
+<!-- Created <span class="date">December 09, 2015, 08:51 CET</span> -->
+</div>
+
+</div>
+
+
+<!-- from pepper -->
+</div>
+
+</div>
+
+</body>
+</html>

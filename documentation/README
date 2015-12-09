@@ -1,0 +1,93 @@
+pepper - Repository statistics and report tool
+==============================================
+
+About
+-----
+pepper is a flexible command-line tool for retrieving statistics and
+generating reports from source code repositories. It ships with several
+graphical and textual reports, and is easily extendible using the Lua
+scripting language. pepper includes support for multiple version control
+systems, including Git and Subversion. Using native language bindings,
+multi-threading and a local revision cache, it provides fast access to
+repository data.
+
+This README file contains brief configuration, installation and usage
+instructions. Additional documentation is available at the project
+homepage at <http://scm-pepper.sourceforge.net>.
+
+
+Requirements
+------------
+First, you need a working C++ compiler and standard library. Furthermore,
+pepper depends on the following third-party software:
+
+	* zlib
+	* POSIX threads
+	* Lua 5.1
+
+The following dependencies are optional:
+
+	* Python development files and the Mercurial modules (for the
+	  Mercurial backend)
+	* Subversion development files (for the Subversion backend)
+	* The standard Git command line client (for the Git backend)
+	* Gnuplot (for graphical reports)
+	* Asciidoc and xmlto (for the man page)
+	* LevelDB for the experimental LevelDB revision cache
+	* lgob bindings to GTK3 (for the GUI report)
+
+pepper has been written in a hopefully platform-independent manner,
+and should compile and run on all major Unix platforms, e.g. Linux,
+BSD and Mac OS X. I'm not planning to work too hard on a Windows port.
+
+
+Compilation
+-----------
+pepper uses the Autoconf and Automake build systems, so the standard
+way of running
+
+	$ ./configure
+	$ make
+	# make install
+
+should be fine. You can pass `--help` to the configuration script for
+a brief version of the next two sections.
+
+Additional instructions can be found in the INSTALL file included in
+the source code distribution.
+
+
+Usage
+-----
+If you've installed pepper somewhere in your $PATH, you can just cd to a
+repository of interest and invoke `pepper loc`, for example.  On Mac OS X,
+you might want to use the aqua terminal driver for Gnuplot (i.e.
+`pepper loc -taqua` or `GNUTERM=aqua pepper loc`).
+
+If you haven't installed the program yet, you'll need to set the directory
+of available reports via the $PEPPER_REPORTS environment variable, for
+example using `export PEPPER_REPORTS=$PWD/reports`.
+
+An explanation of the command line switches available as well as
+Common usage examples can be found at the man page. If you didn't
+generate it while building the software, you can access it online at
+<http://scm-pepper.sourceforge.net/documentation/manpage/>.
+
+
+License
+-------
+pepper - Repository statistics and report tool
+Copyright (C) 2010-present Jonas Gehring
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.

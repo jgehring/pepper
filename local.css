@@ -1,0 +1,221 @@
+body {
+	margin: 10px 40px 4px 40px;
+/*	background-image: url("background.png");
+	background-position: top right;
+	background-repeat: no-repeat;*/
+	background-color: #BEAAAA;
+}
+
+.header {
+	padding-bottom: 0.6em;
+}
+
+a {
+	color: #008563;
+}
+
+.header a {
+	color: #008563;
+	text-decoration: none;
+}
+
+div #pagebody {
+	padding: 10px;
+	border: 1px solid #000000;
+	background-color: #FFFFFF;
+}
+
+div.toc {
+	float: left;
+}
+
+div.clear {
+	clear: both;
+}
+
+div.toc ol {
+	padding-left: 2.5em;
+}
+
+div.toc li {
+	list-style-type: disc;
+}
+
+div.logos {
+	float: right;
+}
+
+div.logos td {
+  padding-left: 20px;
+}
+
+div.logos img {
+  height: 3em;
+}
+
+img {
+	border: none;
+}
+
+ul {
+	padding-left: 2.5em;
+}
+
+.feedlink {
+	display: none;
+}
+
+table.news {
+	padding-top: 0px;
+	margin-top: 0px;
+	border: none;
+}
+
+td.news {
+	vertical-align: top;
+	border-right: 1px solid black;
+	padding-right: 1em;
+}
+
+td.news h4 {
+	margin-top: 0px;
+}
+
+td.commits {
+	vertical-align: top;
+	padding-left: 1em;
+	width: 20%;
+}
+
+td.commits h4 {
+	margin-top: 0px;
+}
+
+div.index-thumbs {
+	float: right;
+}
+
+.thumbnail {
+	float: left;
+	width: 20em;
+	border: 1px solid #BEAAAA;
+	margin: 0 15px 15px 0;
+	padding: 5px;
+	font-size: 80%;
+}
+
+.thumbnail p.caption {
+	padding: 0px;
+	margin: 0px;
+	text-align: center;
+}
+
+.thumbnail img {
+	padding-top: 1em;
+	padding-bottom: 1em;
+}
+
+.clearboth { clear: both; }
+
+
+div.inlinepage {
+	border: none;
+	padding: 0em;
+	padding-left: 1em;
+	margin-bottom: 1.12em;
+}
+
+div.inlineheader .header {
+	padding: 0em;
+	margin: 1.12em;
+	margin-top: 0em;
+	font-weight: bolder;
+	display: list-item;
+	font-size: 100%;
+}
+
+div.inlinefooter {
+	font-size: small;
+}
+
+div.inlinefooter .pagedate {
+	margin-top: 0em;
+}
+
+.listing {
+	border: 1px solid black;
+	padding: 0.5em;
+	margin-left: 2.5em;
+	font-family: monospace;
+}
+
+/* Code with syntax highlighting */
+pre.hl {
+	border: 1px solid black;
+	padding: 0.5em;
+	margin-left: 2.5em;
+}
+.hl.kwb, .hl.kwd { color: #000000}
+/*
+.hl.slc, .hl.com { color: #1818B2; font-style: normal; }
+.hl.str, .hl.num { color: #B21818; }
+.hl.esc { color: #; }
+.hl.opt { color: #18B218; }
+.hl.kwa { color: #AF5F00; }
+.hl.kwb, .hl.kwc, .hl.kwd { color: #000000}
+*/
+
+/* libgithub style defitions */
+div #commits {
+	border: none;
+	padding: 0em;
+	padding-left: 1em;
+	margin-bottom: 1.12em;
+	font-size: 0.9em;
+}
+
+div.libgithub-badge-outline {
+	display: list-item;
+	padding-bottom: 10px;
+}
+
+div.libgithub-badge-username {
+	display: none;
+}
+
+img.libgithub-badge-gravatar {
+	display: none;
+}
+
+span.libgithub-badge-diffadded {
+	color: green;
+	background-color: transparent;
+}
+
+span.libgithub-badge-diffremoved {
+	color: red;
+	background-color: transparent;
+}
+
+span.libgithub-badge-diffmodified {
+	color: purple;
+	background-color: transparent;
+}
+
+div.libgithub-badge-filelist {
+	margin-top: 10px;
+}
+
+div.libgithub-badge-filelist ul {
+	list-style-type: square;
+	list-style-position: inside;
+	margin: 0px;
+}
+
+div.libgithub-badge-diffstat {
+	font-weight: normal;
+	font-size: 0.9em;
+}
+
+div.libgithub-badge-commitmessage {
+}

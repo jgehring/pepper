@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>pepper - popup</title>
+
+<link rel="icon" href="../../favicon.ico" type="image/x-icon" />
+
+<link rel="stylesheet" href="../../style.css" type="text/css" />
+
+<link rel="stylesheet" href="../../local.css" type="text/css" />
+
+
+
+
+
+</head>
+<body>
+
+<div class="page">
+
+<div class="pageheader">
+<div class="header">
+<span>
+<span class="parentlinks">
+
+<a href="../../">pepper</a>/ 
+
+<a href="../">templates</a>/ 
+
+</span>
+<span class="title">
+popup
+
+</span>
+</span>
+
+</div>
+
+
+
+
+
+</div>
+
+
+
+<div id="pagebody">
+
+<div id="content">
+<p><TMPL_UNLESS mouseover>
+Use this template to create a popup window that is displayed when the mouse
+is over part of the page. This template has two parameters:</p>
+
+<ul>
+<li>`mouseover` - This is the text or other content that triggers the
+popup.
+<li>`popup` - This should be the content of the popup window. It can be
+anything, even images or a whole little wiki page, but should not be too
+large for good usability.
+</ul>
+
+
+<p>Note that browsers that do not support the CSS will display the popup
+inline in the page, inside square brackets.
+</TMPL_UNLESS>
+<span class="popup"><TMPL_VAR mouseover>
+<span class="paren">[</span><span class="balloon"><TMPL_VAR popup></span><span class="paren">]</span>
+</span></p>
+
+</div>
+
+
+
+
+
+</div>
+
+<div id="footer" class="pagefooter">
+
+<div id="pageinfo">
+
+
+
+
+
+
+
+
+
+<div class="pagedate">
+Last edited <span class="date">September 05, 2013, 00:10 CEST</span>
+<!-- Created <span class="date">September 05, 2013, 00:10 CEST</span> -->
+</div>
+
+</div>
+
+
+<!-- from pepper -->
+</div>
+
+</div>
+
+</body>
+</html>
