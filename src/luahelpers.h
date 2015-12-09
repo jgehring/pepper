@@ -19,6 +19,7 @@
 
 #include <iostream>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -120,6 +121,13 @@ inline int push(lua_State *L, const std::map<T1, T2> &m) {
 		lua_settable(L, table);
 		++it;
 	}
+	return 1;
+}
+
+template <class T>
+inline int push(lua_State *L, std::shared_ptr<T> i)
+{
+	Lunar<T>::push(L, i);
 	return 1;
 }
 

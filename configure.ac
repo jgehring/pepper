@@ -18,6 +18,7 @@ AC_ARG_ENABLE([debug], [AS_HELP_STRING([--enable-debug], [Turn on debugging])], 
 AC_ARG_ENABLE([tests], [AS_HELP_STRING([--enable-tests], [Build the test suite])], [testsuite="$enableval"], [testsuite="ifdebug"])
 
 sinclude(m4/ax_check_zlib.m4)
+sinclude(m4/ax_cxx_compile_stdcxx_11.m4)
 sinclude(m4/ax_lua.m4)
 sinclude(m4/ax_pthread.m4)
 sinclude(m4/configure_backends.m4)
@@ -28,8 +29,8 @@ sinclude(m4/configure_features.m4)
 # Checks for programs
 #
 
-AC_PROG_CXX()
-AC_PROG_CC()
+AC_LANG([C++])
+AX_CXX_COMPILE_STDCXX_11()
 AC_PROG_INSTALL()
 AC_PROG_RANLIB()
 

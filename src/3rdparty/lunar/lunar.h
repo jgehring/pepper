@@ -4,12 +4,15 @@
  *
  * Changes by Jonas Gehring <jonas.gehring@boolsoft.org>:
  *   * An optional table argument has been added to Lunar::Register()
+ *   * Store instances in std::shared_ptr. This is handy for sharing object
+ *     ownership between C++ and Lua.
  */
 
 
 #ifndef LUNAR_H_
 #define LUNAR_H_
 
+#include <memory>
 
 extern "C" {
 #include <lua.h>
@@ -20,7 +23,7 @@ extern "C" {
 template <typename T> class Lunar
 {
 	typedef struct {
-		T *pT;
+		std::shared_ptr<T> pT;
 	} userdataType;
 
 	public:
@@ -116,31 +119,33 @@ template <typename T> class Lunar
 		return lua_gettop(L) - base + 1;   // number of results
 	}
 
-	// push onto the Lua stack a userdata containing a pointer to T object
+	// push onto the Lua stack a userdata containing a pointer to T object.
+	// This will wrap the pointer in a shared_ptr instance. If gc is false, the
+	// shared_ptr will not own the object pointer (this is realized by not
+	// calling the shared pointers' destructor in gc_T()).
 	static int push(lua_State *L, T *obj, bool gc=false) {
 		if (!obj) { lua_pushnil(L); return 0; }
-		luaL_getmetatable(L, T::className);  // lookup metatable in Lua registry
-		if (lua_isnil(L, -1)) luaL_error(L, "%s missing metatable", T::className);
-		int mt = lua_gettop(L);
-		subtable(L, mt, "userdata", "v");
-		userdataType *ud =
-			static_cast<userdataType*>(pushuserdata(L, obj, sizeof(userdataType)));
+		userdataType *ud = NULL;
+		int mt = preparePush(L, obj, &ud);
 		if (ud) {
-			ud->pT = obj;  // store pointer to object in userdata
-			lua_pushvalue(L, mt);
-			lua_setmetatable(L, -2);
-			if (gc == false) {
-				lua_checkstack(L, 3);
-				subtable(L, mt, "do not trash", "k");
-				lua_pushvalue(L, -2);
-				lua_pushboolean(L, 1);
-				lua_settable(L, -3);
-				lua_pop(L, 1);
-			}
+			new (&ud->pT) std::shared_ptr<T>(obj);
+			mt = doPush(L, mt, gc);
 		}
-		lua_replace(L, mt);
-		lua_settop(L, mt);
-		return mt;  // index of userdata containing pointer to T object
+		return mt;
+	}
+
+	// push onto the Lua stack a userdata containing a pointer to T object.
+	// This will create another referencing shared_ptr that will be destroyed
+	// once the userdata is garbage collected.
+	static int push(lua_State *L, std::shared_ptr<T> ptr) {
+		if (!ptr) { lua_pushnil(L); return 0; }
+		userdataType *ud = NULL;
+		int mt = preparePush(L, ptr.get(), &ud);
+		if (ud) {
+			new (&ud->pT) std::shared_ptr<T>(ptr);
+			mt = doPush(L, mt, true);
+		}
+		return mt;
 	}
 
 	// get userdata from Lua stack and return pointer to T object
@@ -151,7 +156,7 @@ template <typename T> class Lunar
 			luaL_typerror(L, narg, T::className);
 			return NULL;
 		}
-		return ud->pT;  // pointer to T object
+		return ud->pT.get();  // pointer to T object
 	}
 
 	private:
@@ -198,20 +203,45 @@ template <typename T> class Lunar
 			if (!lua_isnil(L, -1)) return 0;  // do not delete object
 		}
 		userdataType *ud = static_cast<userdataType*>(lua_touserdata(L, 1));
-		T *obj = ud->pT;
-		if (obj) delete obj;  // call destructor for T objects
+		ud->pT.reset(); // remove shared_ptr reference
 		return 0;
 	}
 
 	static int tostring_T (lua_State *L) {
 		char buff[32];
 		userdataType *ud = static_cast<userdataType*>(lua_touserdata(L, 1));
-		T *obj = ud->pT;
+		T *obj = ud->pT.get();
 		sprintf(buff, "%p", (void*)obj);
 		lua_pushfstring(L, "%s (%s)", T::className, buff);
 
 		return 1;
 	}
+
+	static int preparePush(lua_State *L, T *obj, userdataType **ud) {
+		luaL_getmetatable(L, T::className);  // lookup metatable in Lua registry
+		if (lua_isnil(L, -1)) luaL_error(L, "%s missing metatable", T::className);
+		int mt = lua_gettop(L);
+		subtable(L, mt, "userdata", "v");
+		*ud = static_cast<userdataType*>(pushuserdata(L, obj, sizeof(userdataType)));
+		return mt;
+	}
+
+	static int doPush(lua_State *L, int mt, bool gc=false) {
+		lua_pushvalue(L, mt);
+		lua_setmetatable(L, -2);
+		if (gc == false) {
+			lua_checkstack(L, 3);
+			subtable(L, mt, "do not trash", "k");
+			lua_pushvalue(L, -2);
+			lua_pushboolean(L, 1);
+			lua_settable(L, -3);
+			lua_pop(L, 1);
+		}
+		lua_replace(L, mt);
+		lua_settop(L, mt);
+		return mt;  // index of userdata containing pointer to T object
+	}
+
 
 	static void set(lua_State *L, int table_index, const char *key) {
 		lua_pushstring(L, key);
