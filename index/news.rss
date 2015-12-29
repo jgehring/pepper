@@ -8,7 +8,7 @@
 
 <description>pepper news</description>
 <generator>ikiwiki</generator>
-<pubDate>Wed, 09 Dec 2015 22:11:12 +0100</pubDate>
+<pubDate>Tue, 29 Dec 2015 23:15:23 +0100</pubDate>
 <item>
 	<title>pepper 0.3.3 released, homepage moved to GitHub</title>
 
@@ -18,7 +18,7 @@
 
 
 	<pubDate>Wed, 09 Dec 2015 22:09:00 +0100</pubDate>
-	<dcterms:modified>2015-12-09T21:11:12Z</dcterms:modified>
+	<dcterms:modified>2015-12-29T22:15:23Z</dcterms:modified>
 
 
 	<description>&lt;p&gt;pepper-0.3.3 is now available. This release includes a number of
@@ -41,7 +41,7 @@ automaticelly redirect to the new location.&lt;/p&gt;
 
 
 	<pubDate>Fri, 26 Apr 2013 11:48:00 +0200</pubDate>
-	<dcterms:modified>2015-12-09T21:08:02Z</dcterms:modified>
+	<dcterms:modified>2015-12-29T22:15:23Z</dcterms:modified>
 
 
 	<description>&lt;p&gt;I&#39;m happy to announce that source and binary packages are now
@@ -62,7 +62,7 @@ Thanks go out to the respective maintainers!&lt;/p&gt;
 
 
 	<pubDate>Fri, 01 Jun 2012 20:56:00 +0200</pubDate>
-	<dcterms:modified>2015-12-09T21:08:02Z</dcterms:modified>
+	<dcterms:modified>2015-12-29T22:15:23Z</dcterms:modified>
 
 
 	<description>&lt;p&gt;I&#39;m happy to announce that version 0.3.2 of pepper is now available. This
@@ -81,7 +81,7 @@ leaks. As usual, you can find source tarballs the &lt;a href=&quot;https://jgehr
 
 
 	<pubDate>Tue, 20 Mar 2012 16:16:00 +0100</pubDate>
-	<dcterms:modified>2015-12-09T21:08:02Z</dcterms:modified>
+	<dcterms:modified>2015-12-29T22:15:23Z</dcterms:modified>
 
 
 	<description>&lt;p&gt;I&#39;ve just pushed the first version of a repository statistics
@@ -109,7 +109,7 @@ code is available &lt;a href=&quot;https://github.com/jgehring/peprserv&quot;&gt
 
 
 	<pubDate>Fri, 16 Mar 2012 00:46:00 +0100</pubDate>
-	<dcterms:modified>2015-12-09T21:08:02Z</dcterms:modified>
+	<dcterms:modified>2015-12-29T22:15:23Z</dcterms:modified>
 
 
 	<description>&lt;p&gt;I&#39;m happy to announce that version 0.3.1 of pepper is now available. This
