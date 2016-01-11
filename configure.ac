@@ -97,7 +97,7 @@ for with_lua_suffix in $LUA_SUFFIXES; do
 	if test "x$LUA" = "x"; then
 		continue
 	fi
-	AX_LUA_VERSION([501])
+	AX_LUA_VERSION([501],[503])
 	AX_LUA_HEADERS()
 	AX_LUA_HEADERS_VERSION([501])
 	if test "x$LUA_HEADERS_IN_RANGE" != "xyes"; then
