@@ -61,7 +61,10 @@ std::vector<HashKey> getHashKeys(apr_hash_t *hash, apr_pool_t *pool)
 {
 	std::vector<HashKey> keys;
 	for (apr_hash_index_t *hi = apr_hash_first(pool, hash); hi; hi = apr_hash_next(hi)) {
-		keys.push_back(HashKey((const char *)apr_hash_this_key(hi), apr_hash_this_key_len(hi)));
+		const void *key;
+		apr_ssize_t len;
+		apr_hash_this(hi, &key, &len, NULL);
+		keys.push_back(HashKey((const char *)key, len));
 	}
 	return keys;
 }
